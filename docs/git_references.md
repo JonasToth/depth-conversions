@@ -42,7 +42,7 @@ $ git subtree add --prefix <projectname> upstream-<projectname> <REVISION> --squ
 - `fetch` the dependency to get the new code
 
 ```bash
-$ git fetch upstream-<projectname> <REVISION>
+$ git fetch upstream-<projectname>
 > Retrieving the changes
 ```
 
