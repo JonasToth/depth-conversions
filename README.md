@@ -1,6 +1,7 @@
 # master-thesis
 
 Repository containing all code and stuff for my master thesis.
+For more specific documentation check the `doc/` directory.
 
 ## What is this
 
