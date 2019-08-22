@@ -2,7 +2,7 @@ add_library(sens_loc
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/console.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/image.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/intrinsics.h"
-    "${CMAKE_CURRENT_LIST_DIR}lib/io/intrinsics.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/lib/io/intrinsics.cpp"
     )
 add_library(sens_loc::sens_loc ALIAS sens_loc)
 target_include_directories(sens_loc

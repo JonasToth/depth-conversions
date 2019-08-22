@@ -9,18 +9,19 @@
 #include <sens_loc/util/console.h>
 
 using namespace sens_loc;
+using namespace std;
 
 int main(int argc, char **argv) {
     CLI::App app{"Convert depth images to pointclouds"};
 
-    std::string calibration_file;
+    string calibration_file;
     app.add_option("-c,--calibration", calibration_file,
                    "File that contains calibration parameters for the camera")
         ->required()
         ->check(CLI::ExistingFile);
 
-    std::string input_file{"/home/jonas/owncloud/Freiberg/Masterarbeit/"
-                           "full_data_sets/lehrpfad/raw_data/data196.jpg"};
+    string input_file{"/home/jonas/owncloud/Freiberg/Masterarbeit/"
+                      "full_data_sets/lehrpfad/raw_data/data196-depth.png"};
     app.add_option("-i,--input", input_file, "Input depth map")
         ->required()
         ->check(CLI::ExistingFile);
@@ -29,29 +30,30 @@ int main(int argc, char **argv) {
 
     cv::Mat depth_image;
     {
-        std::optional<cv::Mat> image = io::load_image(input_file);
+        // Load the image unchanged, because depth images are encoded specially.
+        optional<cv::Mat> image =
+            io::load_image(input_file, cv::IMREAD_UNCHANGED);
         if (!image) {
-            std::cerr << util::err{};
-            std::cerr << "Could not load image \"" << rang::style::bold
-                      << input_file << rang::style::reset << "\"!\n";
-            std::exit(1);
+            cerr << util::err{};
+            cerr << "Could not load image \"" << rang::style::bold << input_file
+                 << rang::style::reset << "\"!\n";
+            exit(1);
         }
-        std::swap(*image, depth_image);
+        swap(*image, depth_image);
     }
 
     io::pinhole_parameters intrinsic;
     {
-        std::ifstream calibration_fstream{calibration_file};
-        std::optional<io::pinhole_parameters> calibration =
+        ifstream                         calibration_fstream{calibration_file};
+        optional<io::pinhole_parameters> calibration =
             io::load_pinhole_intrinsic(calibration_fstream);
         if (!calibration) {
-            std::cerr << util::err{};
-            std::cerr << "Could not intrinsic calibration \""
-                      << rang::style::bold << calibration_file
-                      << rang::style::reset << "\"!\n";
-            std::exit(1);
+            cerr << util::err{};
+            cerr << "Could not intrinsic calibration \"" << rang::style::bold
+                 << calibration_file << rang::style::reset << "\"!\n";
+            exit(1);
         }
-        std::swap(*calibration, intrinsic);
+        swap(*calibration, intrinsic);
     }
 
     return 0;

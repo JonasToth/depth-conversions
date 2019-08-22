@@ -1,5 +1,8 @@
 #!/bin/sh
 
+set -e
+set -pipefail
+
 # This script automatically updates a 3rd-party dependency and is a small
 # wrapper around "git subtree".
 SCRIPT_FILE=$(readlink -f "$0")
@@ -23,7 +26,7 @@ if [ $# -ne 2 ]; then
     echo
     echo "This script updates exactly ONE upstream project to a new revision"
     echo "using "git subtree pull"."
-    echo "It expects the conventions documented in ${BOLD}"docs/git_references.md"${DEFAULT}"
+    echo "It expects the conventions documented in ${BOLD}\"docs/git_references.md\"${DEFAULT}"
     exit 1
 fi
 
@@ -42,6 +45,9 @@ if [ "${upstream_exists}" -ne 0 ]; then
     exit 1
 fi
 
+print_info "Fetching from upstream repository with remote-name \"${BOLD}${upstream_name}${DEFAULT}\""
+git fetch "${upstream_name}" || (print_error "Could not fetch from upstream repository"; exit 1)
+
 commit_revision="$2"
 check_commit_exists "${commit_revision}"
 commit_exists="$?"
@@ -51,8 +57,10 @@ if [ "${commit_exists}" -ne 0 ]; then
     exit 1
 fi
 
-print_info "Fetching from upstream repository with remote-name \"${BOLD}${upstream_name}${DEFAULT}\""
-git fetch "${upstream_name}" || (print_error "Could not fetch from upstream repository"; exit 1)
-
 print_info "Integrating revison via "git subtree pull""
-git subtree pull --prefix "${project_name}" "${upstream_name}" "${commit_revision}" --squash || (print_error "Could not pull \"${BOLD}${commit_revision}${DEFAULT}\" from remote \"${BOLD}${upstream_name}${DEFAULT}\"!"; exit 1) && (print_info "Update project \"${BOLD}${upstream_name}${DEFAULT}\" to \"${BOLD}${commit_revision}${DEFAULT}\" successfully."; exit 0)
+git subtree pull \
+    --prefix "${project_name}" \
+    "${upstream_name}" \
+    "${commit_revision}" --squash \
+    || (print_error "Could not pull \"${BOLD}${commit_revision}${DEFAULT}\" from remote \"${BOLD}${upstream_name}${DEFAULT}\"!"; exit 1) \
+    && (print_info "Update project \"${BOLD}${upstream_name}${DEFAULT}\" to \"${BOLD}${commit_revision}${DEFAULT}\" successfully."; exit 0)
