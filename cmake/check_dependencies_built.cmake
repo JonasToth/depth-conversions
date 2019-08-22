@@ -1,0 +1,5 @@
+if (NOT ${opencv_built})
+    set(DEPENDENCIES_BUILT FALSE)
+else ()
+    set(DEPENDENCIES_BUILT TRUE)
+endif ()
