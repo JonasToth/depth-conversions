@@ -6,6 +6,7 @@ target_sources(depth2bearing
 target_link_libraries(depth2bearing
     PRIVATE
     ${OpenCV_LIBS}
+    CLI11::CLI11
     )
 set_target_properties(depth2bearing
     PROPERTIES

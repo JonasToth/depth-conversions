@@ -11,6 +11,8 @@ option(WITH_DEP_TESTING OFF "Enable tests in thridparty modules")
 
 # Thirdparty dependencies
 include(fetch_opencv)
+include(wrap_rang)
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/cli11")
 
 include(check_dependencies_built)
 if (${DEPENDENCIES_BUILT})
