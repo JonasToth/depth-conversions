@@ -25,7 +25,7 @@ int main(int argc, char **argv) {
 
     CLI11_PARSE(app, argc, argv);
 
-    std::optional<cv::Mat> image = image::load(input_file);
+    std::optional<cv::Mat> image = io::load_image(input_file);
     if (!image) {
         std::cerr << util::err{};
         std::cerr << "Could not load image \"" << rang::style::bold
