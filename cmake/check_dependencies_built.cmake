@@ -1,3 +1,5 @@
+add_custom_target(dependencies)
+add_dependencies(dependencies opencv)
 if (NOT ${opencv_built})
     set(DEPENDENCIES_BUILT FALSE)
 else ()

@@ -1,34 +1,37 @@
+#include <iostream>
 #include <sens_loc/io/intrinsics.h>
 #include <sstream>
 #include <string>
 
-namespace sense_loc { namespace io {
-std::optional<sens_loc::io::pinhole_parameters>
-load_pinhole_intrinsic(std::istream &in) {
-    double fx    = 0.0;
-    double fy    = 0.0;
-    double cx    = 0.0;
-    double cy    = 0.0;
-    double trash = 0.0;
+namespace sens_loc { namespace io {
+std::optional<pinhole_parameters> load_pinhole_intrinsic(std::istream &in) {
+    if (!in.good())
+        return std::nullopt;
+
+    pinhole_parameters p;
+    double             trash = 0.0;
 
     std::string line;
     {
         std::getline(in, line);
+        std::cout << line << "\n";
         std::istringstream ss{line};
         // Parsing line 1 with expected format 'fx 0.0 cx'.
-        ss >> fx >> trash >> cx;
-        if (!ss.good())
+        ss >> p.fx >> trash >> p.cx;
+        std::cout << p.fx << "\n" << trash << "\n" << p.cx << "\n";
+        if (ss.rdstate() != std::ios_base::eofbit)
             return std::nullopt;
     }
 
     {
         std::getline(in, line);
+        std::cout << line << "\n";
         std::istringstream ss{line};
         // Parsing line 2 with expected format '0.0 fy cy'.
-        ss >> trash >> fy >> cy;
-        if (!ss.good())
+        ss >> trash >> p.fy >> p.cy;
+        if (ss.rdstate() != std::ios_base::eofbit)
             return std::nullopt;
     }
-    return {{fx, fy, cx, cy}};
+    return p;
 }
-}}  // namespace sense_loc::io
+}}  // namespace sens_loc::io

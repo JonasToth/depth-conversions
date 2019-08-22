@@ -1,5 +1,6 @@
 #include <CLI/CLI.hpp>
 #include <cstdlib>
+#include <fstream>
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
 #include <rang.hpp>
@@ -40,9 +41,9 @@ int main(int argc, char **argv) {
 
     io::pinhole_parameters intrinsic;
     {
-        std::ifstream intrinsic_stream{calibration_file};
+        std::ifstream calibration_fstream{calibration_file};
         std::optional<io::pinhole_parameters> calibration =
-            io::load_pinhole_intrinsic(intrinsic_stream);
+            io::load_pinhole_intrinsic(calibration_fstream);
         if (!calibration) {
             std::cerr << util::err{};
             std::cerr << "Could not intrinsic calibration \""
