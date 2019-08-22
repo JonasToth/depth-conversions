@@ -25,11 +25,15 @@ ExternalProject_Add(opencv
   LOG_TEST 1
   LOG_INSTALL 1
 )
+set_target_properties(opencv PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
 if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/opencv-install/usr")
 	set(opencv_built TRUE)
-    set(opencv_INCLUDE_DIR "${CMAKE_CURRENT_BINARY_DIR}/opencv-install/usr/include/opencv4")
-    set(opencv_LIBRARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/opencv-install/usr/lib")
+    find_package(OpenCV REQUIRED
+                 PATHS "${CMAKE_CURRENT_BINARY_DIR}/opencv-install/usr")
+
+    # Hide this variable in cmake-gui.
+    mark_as_advanced(FORCE OpenCV_DIR)
 else ()
 	set(opencv_built FALSE)
 endif (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/opencv-install/usr")
