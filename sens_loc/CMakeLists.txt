@@ -1,5 +1,9 @@
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/apps")
 
+if (WITH_TESTING)
+    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/unittest")
+endif (WITH_TESTING)
+
 add_library(sens_loc
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/console.h"
     )

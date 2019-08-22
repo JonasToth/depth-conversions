@@ -5,3 +5,4 @@
 - `cli11` `v1.8.0` `13becaddb657eacd090537719a669d66d393b8b2` command line
   interface
 - `rang` `v3.1.0` `49505595c6941ad58788ade0ecdff26aeb5b7a9a` terminal colors
+- `doctest` `v2.3.4` `f13a00cc27ed3c1ec4f755572ab7556c4cb01716` unit testing
