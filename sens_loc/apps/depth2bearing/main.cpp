@@ -3,8 +3,9 @@
 #include <iostream>
 #include <opencv2/imgcodecs.hpp>
 #include <rang.hpp>
-#include <sens_loc/util/console.h>
 #include <sens_loc/io/image.h>
+#include <sens_loc/io/intrinsics.h>
+#include <sens_loc/util/console.h>
 
 using namespace sens_loc;
 
@@ -25,12 +26,31 @@ int main(int argc, char **argv) {
 
     CLI11_PARSE(app, argc, argv);
 
-    std::optional<cv::Mat> image = io::load_image(input_file);
-    if (!image) {
-        std::cerr << util::err{};
-        std::cerr << "Could not load image \"" << rang::style::bold
-                  << input_file << rang::style::reset << "\"!\n";
-        std::exit(1);
+    cv::Mat depth_image;
+    {
+        std::optional<cv::Mat> image = io::load_image(input_file);
+        if (!image) {
+            std::cerr << util::err{};
+            std::cerr << "Could not load image \"" << rang::style::bold
+                      << input_file << rang::style::reset << "\"!\n";
+            std::exit(1);
+        }
+        std::swap(*image, depth_image);
+    }
+
+    io::pinhole_parameters intrinsic;
+    {
+        std::ifstream intrinsic_stream{calibration_file};
+        std::optional<io::pinhole_parameters> calibration =
+            io::load_pinhole_intrinsic(intrinsic_stream);
+        if (!calibration) {
+            std::cerr << util::err{};
+            std::cerr << "Could not intrinsic calibration \""
+                      << rang::style::bold << calibration_file
+                      << rang::style::reset << "\"!\n";
+            std::exit(1);
+        }
+        std::swap(*calibration, intrinsic);
     }
 
     return 0;

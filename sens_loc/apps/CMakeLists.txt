@@ -5,7 +5,6 @@ target_sources(depth2bearing
     "${CMAKE_CURRENT_LIST_DIR}/depth2bearing/main.cpp")
 target_link_libraries(depth2bearing
     PRIVATE
-    ${OpenCV_LIBS}
     CLI11::CLI11
     sens_loc::sens_loc
     )
@@ -14,6 +13,7 @@ set_target_properties(depth2bearing
     CXX_STANDARD 17
     CXX_EXTENSIONS OFF
     CXX_STANDARD_REQUIRED ON)
+configure_file(kinect_intrinsic.txt kinect_intrinsic.txt COPYONLY)
 
 include(GNUInstallDirs)
 install(TARGETS depth2bearing
