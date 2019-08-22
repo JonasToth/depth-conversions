@@ -14,6 +14,7 @@ include(GNUInstallDirs)
 include(fetch_opencv)
 include(wrap_rang)
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/cli11")
+add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/doctest")
 
 include(check_dependencies_built)
 if (${DEPENDENCIES_BUILT})
