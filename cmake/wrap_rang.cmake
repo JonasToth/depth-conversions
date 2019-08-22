@@ -1,2 +1,2 @@
 add_library(rang INTERFACE IMPORTED)
-export(rang NAMESPACE rang)
+target_include_directories(rang INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/rang/include/")

@@ -7,6 +7,7 @@ target_link_libraries(depth2bearing
     PRIVATE
     ${OpenCV_LIBS}
     CLI11::CLI11
+    sens_loc::sens_loc
     )
 set_target_properties(depth2bearing
     PROPERTIES

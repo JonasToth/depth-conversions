@@ -9,6 +9,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 option(WITH_DEP_TESTING OFF "Enable tests in thridparty modules")
 
+include(GNUInstallDirs)
 # Thirdparty dependencies
 include(fetch_opencv)
 include(wrap_rang)
@@ -16,5 +17,5 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/cli11")
 
 include(check_dependencies_built)
 if (${DEPENDENCIES_BUILT})
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/image-pp")
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/sens_loc")
 endif (${DEPENDENCIES_BUILT})
