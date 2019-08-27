@@ -28,8 +28,7 @@ int main(int argc, char **argv) {
 
     CLI11_PARSE(app, argc, argv);
 
-    cv::Mat depth_image;
-    {
+    const cv::Mat depth_image = [&input_file]() {
         // Load the image unchanged, because depth images are encoded specially.
         optional<cv::Mat> image =
             io::load_image(input_file, cv::IMREAD_UNCHANGED);
@@ -39,12 +38,12 @@ int main(int argc, char **argv) {
                  << rang::style::reset << "\"!\n";
             exit(1);
         }
-        swap(*image, depth_image);
-    }
+        return *image;
+    }();
 
-    io::pinhole_parameters intrinsic;
-    {
-        ifstream                         calibration_fstream{calibration_file};
+    const io::pinhole_parameters intrinsic = [&calibration_file]() {
+        ifstream calibration_fstream{calibration_file};
+
         optional<io::pinhole_parameters> calibration =
             io::load_pinhole_intrinsic(calibration_fstream);
         if (!calibration) {
@@ -53,8 +52,8 @@ int main(int argc, char **argv) {
                  << calibration_file << rang::style::reset << "\"!\n";
             exit(1);
         }
-        swap(*calibration, intrinsic);
-    }
+        return *calibration;
+    }();
 
     return 0;
 }
