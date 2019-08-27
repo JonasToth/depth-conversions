@@ -7,6 +7,7 @@
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/util/console.h>
+#include <sens_loc/version.h>
 #include <taskflow/taskflow.hpp>
 
 using namespace sens_loc;
@@ -14,6 +15,13 @@ using namespace std;
 
 int main(int argc, char **argv) {
     CLI::App app{"Convert depth images to pointclouds"};
+
+    auto print_version = [argv](int /*count*/) {
+        cout << argv[0] << " " << get_version() << "\n";
+        exit(0);
+    };
+    app.add_flag_function("-v,--version", print_version,
+                          "Print version and exit");
 
     string calibration_file;
     app.add_option("-c,--calibration", calibration_file,
