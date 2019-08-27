@@ -40,8 +40,8 @@ int main(int argc, char **argv) {
     tf::Executor executor;
     tf::Taskflow taskflow;
 
-    cv::Mat                depth_image;
-    io::pinhole_parameters intrinsic;
+    cv::Mat                           depth_image;
+    camera_models::pinhole_parameters intrinsic;
 
     taskflow.emplace([&input_file]() {
         // Load the image unchanged, because depth images are encoded specially.
@@ -59,12 +59,13 @@ int main(int argc, char **argv) {
     taskflow.emplace([&calibration_file]() {
         ifstream calibration_fstream{calibration_file};
 
-        optional<io::pinhole_parameters> calibration =
+        optional<camera_models::pinhole_parameters> calibration =
             io::load_pinhole_intrinsic(calibration_fstream);
         if (!calibration) {
             cerr << util::err{};
-            cerr << "Could not intrinsic calibration \"" << rang::style::bold
-                 << calibration_file << rang::style::reset << "\"!\n";
+            cerr << "Could not load intrinsic calibration \""
+                 << rang::style::bold << calibration_file << rang::style::reset
+                 << "\"!\n";
             exit(1);
         }
         return *calibration;
