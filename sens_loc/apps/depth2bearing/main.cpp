@@ -7,6 +7,7 @@
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/util/console.h>
+#include <taskflow/taskflow.hpp>
 
 using namespace sens_loc;
 using namespace std;
@@ -28,7 +29,13 @@ int main(int argc, char **argv) {
 
     CLI11_PARSE(app, argc, argv);
 
-    const cv::Mat depth_image = [&input_file]() {
+    tf::Executor executor;
+    tf::Taskflow taskflow;
+
+    cv::Mat                depth_image;
+    io::pinhole_parameters intrinsic;
+
+    taskflow.emplace([&input_file]() {
         // Load the image unchanged, because depth images are encoded specially.
         optional<cv::Mat> image =
             io::load_image(input_file, cv::IMREAD_UNCHANGED);
@@ -39,9 +46,9 @@ int main(int argc, char **argv) {
             exit(1);
         }
         return *image;
-    }();
+    });
 
-    const io::pinhole_parameters intrinsic = [&calibration_file]() {
+    taskflow.emplace([&calibration_file]() {
         ifstream calibration_fstream{calibration_file};
 
         optional<io::pinhole_parameters> calibration =
@@ -53,7 +60,9 @@ int main(int argc, char **argv) {
             exit(1);
         }
         return *calibration;
-    }();
+    });
+
+    executor.run(taskflow).wait();
 
     return 0;
 }

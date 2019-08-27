@@ -7,6 +7,7 @@ target_sources(depth2bearing
 target_link_libraries(depth2bearing
     PRIVATE
     CLI11::CLI11
+    Cpp-Taskflow
     sens_loc::sens_loc
     )
 set_target_properties(depth2bearing
