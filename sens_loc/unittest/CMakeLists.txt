@@ -1,4 +1,6 @@
 include(unittest_macros)
+create_test(version)
+
 create_test(util)
 test_add_file(util util/test_console.cpp)
 
