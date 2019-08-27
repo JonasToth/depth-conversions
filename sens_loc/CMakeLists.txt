@@ -28,4 +28,5 @@ install(TARGETS sens_loc
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/apps")
 if (WITH_TESTING)
     add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/unittest")
+    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/test")
 endif (WITH_TESTING)
