@@ -11,6 +11,7 @@ target_include_directories(sens_loc
     )
 target_link_libraries(sens_loc
     PUBLIC
+    GSL
     rang
     ${OpenCV_LIBS}
     )

@@ -41,6 +41,7 @@ include(use_rang)
 include(use_cli11)
 include(use_doctest)
 include(use_taskflow)
+include(use_gsl)
 
 include(check_dependencies_built)
 if (${DEPENDENCIES_BUILT})
