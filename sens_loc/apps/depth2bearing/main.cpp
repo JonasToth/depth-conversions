@@ -2,13 +2,16 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <opencv2/features2d.hpp>
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/xfeatures2d/nonfree.hpp>
 #include <rang.hpp>
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/util/console.h>
 #include <sens_loc/version.h>
 #include <taskflow/taskflow.hpp>
+#include <vector>
 
 using namespace sens_loc;
 using namespace std;
@@ -43,7 +46,7 @@ int main(int argc, char **argv) {
     cv::Mat                           depth_image;
     camera_models::pinhole_parameters intrinsic;
 
-    taskflow.emplace([&input_file]() {
+    taskflow.emplace([&input_file, &depth_image]() {
         // Load the image unchanged, because depth images are encoded specially.
         optional<cv::Mat> image =
             io::load_image(input_file, cv::IMREAD_UNCHANGED);
@@ -53,10 +56,26 @@ int main(int argc, char **argv) {
                  << rang::style::reset << "\"!\n";
             exit(1);
         }
-        return *image;
+        // std::swap(*image, depth_image);
+        cv::Mat target, surf_image, sift_image;
+        (*image).convertTo(target, CV_8UC1,  1. / 256.);
+
+        const int                      minHessian = 400;
+        cv::Ptr<cv::xfeatures2d::SURF> detector =
+            cv::xfeatures2d::SURF::create(minHessian);
+        std::vector<cv::KeyPoint> keypoints;
+        detector->detect(target, keypoints);
+        cv::drawKeypoints(target, keypoints, surf_image);
+        cv::imwrite(input_file + ".surf.png", surf_image);
+
+        keypoints.clear();
+        cv::Ptr<cv::xfeatures2d::SIFT> sift = cv::xfeatures2d::SIFT::create();
+        sift->detect(target, keypoints);
+        cv::drawKeypoints(target, keypoints, sift_image);
+        cv::imwrite(input_file + ".sift.png", sift_image);
     });
 
-    taskflow.emplace([&calibration_file]() {
+    taskflow.emplace([&calibration_file, &intrinsic]() {
         ifstream calibration_fstream{calibration_file};
 
         optional<camera_models::pinhole_parameters> calibration =
@@ -68,7 +87,7 @@ int main(int argc, char **argv) {
                  << "\"!\n";
             exit(1);
         }
-        return *calibration;
+        std::swap(*calibration, intrinsic);
     });
 
     executor.run(taskflow).wait();
