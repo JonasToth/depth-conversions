@@ -2,7 +2,7 @@
 #define PINHOLE_H_I3RZULX9
 
 #include <gsl/gsl>
-// #include <sens_loc/math/constants.h>
+#include <sens_loc/math/constants.h>
 #include <cmath>
 
 namespace sens_loc { namespace camera_models {
@@ -36,7 +36,7 @@ inline double pinhole_parameters::x_resolution() const noexcept {
     Expects(cx > 0.);
     const double phi{std::atan(cx / fx) / cx};
     Ensures(phi > 0.);
-    // ENSURES(phi <= 2. * pi<double>);
+    Ensures(phi < 2. * math::pi<double>);
     return phi;
 }
 inline double pinhole_parameters::y_resolution() const noexcept {
@@ -44,7 +44,7 @@ inline double pinhole_parameters::y_resolution() const noexcept {
     Expects(cy > 0.);
     const double phi{std::atan(cy / fy) / cy};
     Ensures(phi > 0.);
-    // ENSURES(phi <= 2. * pi<double>);
+    Ensures(phi < 2. * math::pi<double>);
     return phi;
 }
 }}  // namespace sens_loc::camera_models
