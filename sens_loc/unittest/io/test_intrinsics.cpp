@@ -16,8 +16,8 @@ TEST_CASE("Loading Pinhole Intrinsics") {
     }
     SUBCASE("Proper intrinsic with 3 lines") {
         string intrinsic = "960 540\n"
-                           "10.0 0.0 5.0\n"
-                           "0.0 10.0 5.0\n";
+                           "10.0 0.0 500.0\n"
+                           "0.0 10.0 250.0\n";
         istringstream fake_file{intrinsic};
 
         optional<pinhole_parameters> p = load_pinhole_intrinsic(fake_file);
@@ -28,13 +28,13 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         REQUIRE(params.h == 540);
         REQUIRE(params.fx == 10.0);
         REQUIRE(params.fy == 10.0);
-        REQUIRE(params.cx == 5.0);
-        REQUIRE(params.cy == 5.0);
+        REQUIRE(params.cx == 500.0);
+        REQUIRE(params.cy == 250.0);
     }
     SUBCASE("Proper intrinsic with more then 2 lines") {
         string intrinsic = "960 540\n"
-                           "10.0 0.0 5.0\n"
-                           "0.0 10.0 5.0\n"
+                           "10.0 0.0 500.0\n"
+                           "0.0 10.0 250.0\n"
                            "0.0 0.0 1.0";
         istringstream fake_file{intrinsic};
 
@@ -46,7 +46,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         REQUIRE(params.h == 540);
         REQUIRE(params.fx == 10.0);
         REQUIRE(params.fy == 10.0);
-        REQUIRE(params.cx == 5.0);
-        REQUIRE(params.cy == 5.0);
+        REQUIRE(params.cx == 500.0);
+        REQUIRE(params.cy == 250.0);
     }
 }
