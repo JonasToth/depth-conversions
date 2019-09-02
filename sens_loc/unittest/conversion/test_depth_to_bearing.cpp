@@ -127,6 +127,8 @@ TEST_CASE("Convert depth image to bearing angle image") {
         io::load_image("conversion/bearing-diagonal.png", cv::IMREAD_UNCHANGED);
     optional<cv::Mat> ref_anti = io::load_image(
         "conversion/bearing-antidiagonal.png", cv::IMREAD_UNCHANGED);
+    optional<cv::Mat> ref_diff =
+        io::load_image("conversion/horizontal-diff.png", cv::IMREAD_UNCHANGED);
 
     REQUIRE(depth_image);
     REQUIRE(ref_hor_float);
@@ -134,6 +136,7 @@ TEST_CASE("Convert depth image to bearing angle image") {
     REQUIRE(ref_vert);
     REQUIRE(ref_diag);
     REQUIRE(ref_anti);
+    REQUIRE(ref_diff);
     REQUIRE((*depth_image).type() == CV_16U);
 
     cv::Mat depth_16bit = *depth_image;
@@ -143,6 +146,10 @@ TEST_CASE("Convert depth image to bearing angle image") {
 
     depth_16bit.convertTo(depth_8bit, CV_8U, 255.0 / 65536.0);
     cv::imwrite("conversion/data0-depth-8bit.png", depth_8bit);
+    depth_16bit.convertTo(depth_float, CV_32F);
+    cv::imwrite("conversion/data0-depth-float.png", depth_8bit);
+    depth_16bit.convertTo(depth_double, CV_64F);
+    cv::imwrite("conversion/data0-depth-double.png", depth_8bit);
 
     camera_models::pinhole_parameters p = {
         .w  = 960,
@@ -152,15 +159,13 @@ TEST_CASE("Convert depth image to bearing angle image") {
         .cx = 522.23,
         .cy = 272.737,
     };
-    // FIXME: Does not work with 8-bit depth image, nor does it work with
-    // floats as pixel type.
 
     auto horizontal_bearing_float =
-        depth_to_bearing<bearing_direction::horizontal, float, ushort>(
-            depth_16bit, p);
+        depth_to_bearing<bearing_direction::horizontal, float, float>(
+            depth_float, p);
     auto horizontal_bearing_double =
-        depth_to_bearing<bearing_direction::horizontal, float, ushort>(
-            depth_16bit, p);
+        depth_to_bearing<bearing_direction::horizontal, double, double>(
+            depth_double, p);
 
     auto vertical_bearing =
         depth_to_bearing<bearing_direction::vertical, double, ushort>(
@@ -171,25 +176,34 @@ TEST_CASE("Convert depth image to bearing angle image") {
             depth_16bit, p);
 
     auto antidiagonal_bearing =
-        depth_to_bearing<bearing_direction::antidiagonal, double, ushort>(
+        depth_to_bearing<bearing_direction::antidiagonal, float, ushort>(
             depth_16bit, p);
 
     cv::imwrite("conversion/test_horizontal_float.png",
-                horizontal_bearing_float);
+                convert_bearing(horizontal_bearing_float));
     cv::imwrite("conversion/test_horizontal_double.png",
-                horizontal_bearing_double);
+                convert_bearing<double>(horizontal_bearing_double));
     cv::imwrite("conversion/test_vertical.png",
-                vertical_bearing);
+                convert_bearing<double, uchar>(vertical_bearing));
     cv::imwrite("conversion/test_diagonal.png",
-                diagonal_bearing);
+                convert_bearing<double, ushort>(diagonal_bearing));
     cv::imwrite("conversion/test_antidiagonal.png",
-                antidiagonal_bearing);
-    REQUIRE(cv::norm(horizontal_bearing_float - *ref_hor_float) == Approx(0.0));
-    REQUIRE(cv::norm(horizontal_bearing_double - *ref_hor_double) ==
+                convert_bearing<float, uchar>(antidiagonal_bearing));
+
+    REQUIRE(cv::norm(convert_bearing(horizontal_bearing_float) -
+                     *ref_hor_float) == Approx(0.0));
+
+    cv::Mat diff;
+    diff = convert_bearing<double, uchar>(horizontal_bearing_double) -
+           convert_bearing<float, uchar>(horizontal_bearing_float);
+    cv::imwrite("conversion/test-horizontal-diff.png", diff);
+    /// Small Difference, but not zero.
+    REQUIRE(cv::norm(diff - *ref_diff) == Approx(0.0));
+
+    REQUIRE(cv::norm(convert_bearing<double>(vertical_bearing) - *ref_vert) ==
             Approx(0.0));
-    REQUIRE(cv::norm(horizontal_bearing_double - *ref_hor_double) ==
+    REQUIRE(cv::norm(convert_bearing<double>(diagonal_bearing) - *ref_diag) ==
             Approx(0.0));
-    REQUIRE(cv::norm(vertical_bearing - *ref_vert) == Approx(0.0));
-    REQUIRE(cv::norm(diagonal_bearing - *ref_diag) == Approx(0.0));
-    REQUIRE(cv::norm(antidiagonal_bearing - *ref_anti) == Approx(0.0));
+    REQUIRE(cv::norm(convert_bearing<float, uchar>(antidiagonal_bearing) -
+                     *ref_anti) == Approx(0.0));
 }

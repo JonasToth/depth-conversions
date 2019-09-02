@@ -28,11 +28,20 @@ enum class bearing_direction {
 /// \param depth_image but each pixel value is the corresponding bearing angle.
 ///
 /// \Expects \param depth_image to have 1 channel
-template <bearing_direction Direction>
+/// \returns cv::Mat<Real> with each pixel beeing either 0 (no value) or the
+/// bearing angle in radians (0, PI).
+/// \sa convert_bearing
+template <bearing_direction Direction, typename Real = float,
+          typename PixelType = ushort>
 cv::Mat
 depth_to_bearing(const cv::Mat &                          depth_image,
                  const camera_models::pinhole_parameters &intrinsic) noexcept;
 
+/// Convert a bearing angle image to an image with integer types.
+/// This function scales the bearing angles between
+/// [PixelType::min, PixelType::max] for the angles in range (0, PI).
+template <typename Real = float, typename PixelType = ushort>
+cv::Mat convert_bearing(const cv::Mat &bearing_image) noexcept;
 
 namespace detail {
 /// This function calculates the bearing angle between two neighbouring range
@@ -278,18 +287,35 @@ depth_to_bearing(const cv::Mat &                          depth_image,
             ba_image.at<Real>(y, x) = angle;
         }
     }
-    cv::Mat return_image(depth_image.rows, depth_image.cols,
-                         depth_image.type());
+
+    Ensures(ba_image.channels() == 1);
+    Ensures(ba_image.type() == get_f_type<Real>());
+    Ensures(!ba_image.empty());
+    Ensures(ba_image.rows == depth_image.rows);
+    Ensures(ba_image.cols == depth_image.cols);
+
+    return ba_image;
+}
+
+template <typename Real = float, typename PixelType = ushort>
+cv::Mat convert_bearing(const cv::Mat &bearing_image) noexcept {
+    using namespace detail;
+
+    Expects(bearing_image.channels() == 1);
+    Expects(bearing_image.rows > 2);
+    Expects(bearing_image.cols > 2);
+    Expects(bearing_image.type() == get_f_type<Real>());
+
+    cv::Mat img(bearing_image.rows, bearing_image.cols, get_f_type<PixelType>());
     auto [scale, offset] = scaling_factor<Real, PixelType>();
-    ba_image.convertTo(return_image, get_f_type<PixelType>(), scale, offset);
+    bearing_image.convertTo(img, get_f_type<PixelType>(), scale, offset);
 
-    Ensures(return_image.channels() == 1);
-    Ensures(return_image.type() == return_image.type());
-    Ensures(!return_image.empty());
-    Ensures(return_image.rows == return_image.rows);
-    Ensures(return_image.cols == return_image.cols);
+    Ensures(img.cols == bearing_image.cols);
+    Ensures(img.rows == bearing_image.rows);
+    Ensures(img.type() == get_f_type<PixelType>());
+    Ensures(img.channels() == 1);
 
-    return return_image;
+    return img;
 }
 }}  // namespace sens_loc::conversion
 
