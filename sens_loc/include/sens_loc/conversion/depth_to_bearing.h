@@ -26,9 +26,8 @@ namespace sens_loc { namespace conversion {
 /// \sa convert_bearing
 template <direction Direction, typename Real = float,
           typename PixelType = float>
-cv::Mat
-depth_to_bearing(const cv::Mat &                          depth_image,
-                 const camera_models::pinhole_parameters &intrinsic) noexcept;
+cv::Mat depth_to_bearing(const cv::Mat &               depth_image,
+                         const camera_models::pinhole &intrinsic) noexcept;
 
 /// Convert a bearing angle image to an image with integer types.
 /// This function scales the bearing angles between
@@ -119,8 +118,8 @@ struct range {
 template <direction Direction, typename Real, typename PixelType>
 // requires Float<Real> && CVIntegerPixelType<PixelType>
 inline cv::Mat
-depth_to_bearing(const cv::Mat &                          depth_image,
-                 const camera_models::pinhole_parameters &intrinsic) noexcept {
+depth_to_bearing(const cv::Mat &               depth_image,
+                 const camera_models::pinhole &intrinsic) noexcept {
     using namespace detail;
 
     Expects(depth_image.type() == get_cv_type<PixelType>());

@@ -7,7 +7,7 @@ using namespace sens_loc::conversion;
 using doctest::Approx;
 
 TEST_CASE("depth orthografic to euclidian") {
-    camera_models::pinhole_parameters p = {
+    camera_models::pinhole p = {
         .w  = 10,
         .h  = 10,
         .fx = 10.,

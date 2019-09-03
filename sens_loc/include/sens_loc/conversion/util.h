@@ -22,9 +22,9 @@ namespace detail {
 /// Convert the orthografic depth of a pixel into the euclidian distance
 /// suggested by the pinhole model.
 template <typename Real = float, typename PixelType = ushort>
-inline Real orthografic_to_euclidian(
-    int u, int v, PixelType d,
-    const camera_models::pinhole_parameters &intrinsic) noexcept {
+inline Real
+orthografic_to_euclidian(int u, int v, PixelType d,
+                         const camera_models::pinhole &intrinsic) noexcept {
 
     if (d == 0)
         return Real(0.);

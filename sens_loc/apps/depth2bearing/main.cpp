@@ -43,8 +43,8 @@ int main(int argc, char **argv) {
     tf::Executor executor;
     tf::Taskflow taskflow;
 
-    cv::Mat                           depth_image;
-    camera_models::pinhole_parameters intrinsic;
+    cv::Mat                depth_image;
+    camera_models::pinhole intrinsic;
 
     taskflow.emplace([&input_file, &depth_image]() {
         // Load the image unchanged, because depth images are encoded specially.
@@ -58,7 +58,7 @@ int main(int argc, char **argv) {
         }
         // std::swap(*image, depth_image);
         cv::Mat target, surf_image, sift_image;
-        (*image).convertTo(target, CV_8UC1,  1. / 256.);
+        (*image).convertTo(target, CV_8UC1, 1. / 256.);
 
         const int                      minHessian = 400;
         cv::Ptr<cv::xfeatures2d::SURF> detector =
@@ -78,7 +78,7 @@ int main(int argc, char **argv) {
     taskflow.emplace([&calibration_file, &intrinsic]() {
         ifstream calibration_fstream{calibration_file};
 
-        optional<camera_models::pinhole_parameters> calibration =
+        optional<camera_models::pinhole> calibration =
             io::load_pinhole_intrinsic(calibration_fstream);
         if (!calibration) {
             cerr << util::err{};

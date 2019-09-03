@@ -9,7 +9,7 @@
 namespace sens_loc { namespace camera_models {
 
 /// This struct is a container holding parameters for the pinhole camera model.
-struct pinhole_parameters {
+struct pinhole {
     int    w;   //< width of the image
     int    h;   //< height of the image
     double fx;  //< x-coordinate of focal length
@@ -32,7 +32,7 @@ struct pinhole_parameters {
         noexcept;
 };
 
-inline double pinhole_parameters::phi(int u0, int v0, int u1, int v1) const
+inline double pinhole::phi(int u0, int v0, int u1, int v1) const
     noexcept {
     Expects(u0 >= 0);
     Expects(v0 >= 0);
@@ -51,7 +51,7 @@ inline double pinhole_parameters::phi(int u0, int v0, int u1, int v1) const
 }
 
 inline std::tuple<double, double, double>
-pinhole_parameters::project_to_sphere(int u, int v) const noexcept {
+pinhole::project_to_sphere(int u, int v) const noexcept {
     Expects(fy > 0.);
     Expects(cy > 0.);
     Expects(p1 == 0.);

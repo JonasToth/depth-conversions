@@ -4,13 +4,12 @@
 #include <string>
 
 namespace sens_loc { namespace io {
-std::optional<camera_models::pinhole_parameters>
-load_pinhole_intrinsic(std::istream &in) {
+std::optional<camera_models::pinhole> load_pinhole_intrinsic(std::istream &in) {
     if (!in.good())
         return std::nullopt;
 
-    camera_models::pinhole_parameters p;
-    double                            trash = 0.0;
+    camera_models::pinhole p;
+    double                 trash = 0.0;
 
     std::string line;
     {

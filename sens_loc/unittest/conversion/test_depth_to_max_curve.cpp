@@ -65,7 +65,7 @@ TEST_CASE("depth image to max curve") {
         io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
 
-    const camera_models::pinhole_parameters p = {
+    const camera_models::pinhole p = {
         .w  = 960,
         .h  = 540,
         .fx = 519.226,

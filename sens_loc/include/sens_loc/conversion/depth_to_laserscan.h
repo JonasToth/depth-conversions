@@ -12,9 +12,8 @@ namespace sens_loc { namespace conversion {
 /// distance when projecting the pixel back into space.
 /// The result type is 'Real'.
 template <typename Real = float, typename PixelType = ushort>
-cv::Mat depth_to_laserscan(
-    const cv::Mat &                          depth_image,
-    const camera_models::pinhole_parameters &intrinsic) noexcept {
+cv::Mat depth_to_laserscan(const cv::Mat &               depth_image,
+                           const camera_models::pinhole &intrinsic) noexcept {
     Expects(depth_image.channels() == 1);
     Expects(!depth_image.empty());
     Expects(depth_image.cols > 2);

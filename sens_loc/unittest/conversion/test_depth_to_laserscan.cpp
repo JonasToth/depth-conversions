@@ -21,7 +21,7 @@ TEST_CASE("convert depth image to laser-scan image") {
     depth_image->convertTo(depth_float, CV_32F);
     depth_image->convertTo(depth_double, CV_64F);
 
-    camera_models::pinhole_parameters p = {
+    camera_models::pinhole p = {
         .w  = 960,
         .h  = 540,
         .fx = 519.226,

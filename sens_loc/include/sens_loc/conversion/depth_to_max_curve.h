@@ -12,9 +12,8 @@
 namespace sens_loc { namespace conversion {
 
 template <typename Real = float, typename PixelType = float>
-cv::Mat
-depth_to_max_curve(const cv::Mat &                          depth_image,
-                   const camera_models::pinhole_parameters &intrinsic) noexcept;
+cv::Mat depth_to_max_curve(const cv::Mat &               depth_image,
+                           const camera_models::pinhole &intrinsic) noexcept;
 
 /// Convert a bearing angle image to an image with integer types.
 /// This function scales the bearing angles between
@@ -53,9 +52,9 @@ inline Real angle_formula(const Real d__1, const Real d__0, const Real d_1,
 }  // namespace detail
 
 template <typename Real, typename PixelType>
-inline cv::Mat depth_to_max_curve(
-    const cv::Mat &                          depth_image,
-    const camera_models::pinhole_parameters &intrinsic) noexcept {
+inline cv::Mat
+depth_to_max_curve(const cv::Mat &               depth_image,
+                   const camera_models::pinhole &intrinsic) noexcept {
     using namespace detail;
 
     Expects(depth_image.type() == get_cv_type<PixelType>());
@@ -70,15 +69,15 @@ inline cv::Mat depth_to_max_curve(
         for (int u = 1; u < depth_image.cols - 1; ++u) {
             const Real d__1__1 = depth_image.at<PixelType>(v - 1, u - 1);
             const Real d__1__0 = depth_image.at<PixelType>(v - 1, u);
-            const Real d__1_1 = depth_image.at<PixelType>(v - 1, u + 1);
+            const Real d__1_1  = depth_image.at<PixelType>(v - 1, u + 1);
 
             const Real d__0__1 = depth_image.at<PixelType>(v, u - 1);
             const Real d__0__0 = depth_image.at<PixelType>(v, u);
-            const Real d__0_1 = depth_image.at<PixelType>(v, u + 1);
+            const Real d__0_1  = depth_image.at<PixelType>(v, u + 1);
 
             const Real d_1__1 = depth_image.at<PixelType>(v + 1, u - 1);
             const Real d_1__0 = depth_image.at<PixelType>(v + 1, u);
-            const Real d_1_1 = depth_image.at<PixelType>(v + 1, u + 1);
+            const Real d_1_1  = depth_image.at<PixelType>(v + 1, u + 1);
 
             using std::cos;
             const Real phi_hor1  = intrinsic.phi(u - 1, v, u, v);

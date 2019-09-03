@@ -11,7 +11,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
     SUBCASE("Nonexisting file") {
         ifstream unopened_file;
         unopened_file.setstate(std::ios_base::failbit);
-        optional<pinhole_parameters> p = load_pinhole_intrinsic(unopened_file);
+        optional<pinhole> p = load_pinhole_intrinsic(unopened_file);
         REQUIRE(!p);
     }
     SUBCASE("Proper intrinsic with 3 lines") {
@@ -20,7 +20,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "0.0 10.0 250.0\n";
         istringstream fake_file{intrinsic};
 
-        optional<pinhole_parameters> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
         REQUIRE(p);
         auto params = *p;
 
@@ -38,7 +38,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "0.0 0.0 1.0";
         istringstream fake_file{intrinsic};
 
-        optional<pinhole_parameters> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
         REQUIRE(p);
         auto params = *p;
 

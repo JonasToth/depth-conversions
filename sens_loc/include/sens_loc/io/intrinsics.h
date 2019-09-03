@@ -17,8 +17,7 @@ namespace sens_loc { namespace io {
 /// 0.0  0.0  1.0
 /// ```
 /// @note values in brackets are optional.
-std::optional<camera_models::pinhole_parameters>
-load_pinhole_intrinsic(std::istream &in);
+std::optional<camera_models::pinhole> load_pinhole_intrinsic(std::istream &in);
 
 }}  // namespace sens_loc::io
 

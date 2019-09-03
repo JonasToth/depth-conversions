@@ -75,7 +75,7 @@ TEST_CASE("Convert depth image to bearing angle image") {
     REQUIRE(depth_image);
     REQUIRE((*depth_image).type() == CV_16U);
 
-    camera_models::pinhole_parameters p = {
+    camera_models::pinhole p = {
         .w  = 960,
         .h  = 540,
         .fx = 519.226,

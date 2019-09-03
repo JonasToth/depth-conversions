@@ -9,7 +9,7 @@ using namespace std;
 using doctest::Approx;
 
 TEST_CASE("Calculate angular resolution") {
-    pinhole_parameters p = {
+    pinhole p = {
         .w  = 960,
         .h  = 540,
         .fx = 519.226,
@@ -34,7 +34,7 @@ TEST_CASE("Calculate angular resolution") {
 }
 
 TEST_CASE("Project pixels to sphere") {
-    pinhole_parameters p = {
+    pinhole p = {
         .w  = 960,
         .h  = 540,
         .fx = 519.226,
@@ -96,5 +96,4 @@ TEST_CASE("Project pixels to sphere") {
         MESSAGE("antidiag: acos(phi) == " << rad_to_deg(angle) << "°");
         MESSAGE("antidiag: acos(phi) == " << angle << "rad");
     }
-    // FAIL("Its probably wrong?");
 }
