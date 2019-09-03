@@ -1,9 +1,10 @@
 #ifndef PINHOLE_H_I3RZULX9
 #define PINHOLE_H_I3RZULX9
 
+#include <cmath>
 #include <gsl/gsl>
 #include <sens_loc/math/constants.h>
-#include <cmath>
+#include <utility>
 
 namespace sens_loc { namespace camera_models {
 
@@ -16,36 +17,61 @@ struct pinhole_parameters {
     double cx;  //< x-coordinate of image center
     double cy;  //< y-coordinate of image center
 
-    double p1 = 0.0; //< first order tangential distortion coefficient
-    double p2 = 0.0; //< second order tangential distortion coefficient
+    double p1 = 0.0;  //< first order tangential distortion coefficient
+    double p2 = 0.0;  //< second order tangential distortion coefficient
 
-    double k1 = 0.0; //< first order radial distortion coefficient
-    double k2 = 0.0; //< second order radial distortion coefficient
-    double k3 = 0.0; //< third order radial distortion coefficient
+    double k1 = 0.0;  //< first order radial distortion coefficient
+    double k2 = 0.0;  //< second order radial distortion coefficient
+    double k3 = 0.0;  //< third order radial distortion coefficient
 
-    /// Calculates the angular resolution of one pixel in x-direction.
-    /// \returns radians/pixel in x direction
-    double x_resolution() const noexcept;
-    /// Calculates the angular resolution of one pixel in y-direction.
-    /// \returns radians/pixel in y direction
-    double y_resolution() const noexcept;
+    /// This method calculates the angle (rad) of the rays between two pixels.
+    /// \returns radians
+    double phi(int u0, int v0, int u1, int v1) const noexcept;
+
+    std::tuple<double, double, double> project_to_sphere(int u, int v) const
+        noexcept;
 };
 
-inline double pinhole_parameters::x_resolution() const noexcept {
-    Expects(fx > 0.);
-    Expects(cx > 0.);
-    const double phi{std::atan(cx / fx) / cx};
-    Ensures(phi > 0.);
-    Ensures(phi < 2. * math::pi<double>);
-    return phi;
+inline double pinhole_parameters::phi(int u0, int v0, int u1, int v1) const
+    noexcept {
+    Expects(u0 >= 0);
+    Expects(v0 >= 0);
+    Expects(u1 >= 0);
+    Expects(v1 >= 0);
+
+    const auto [xs0, ys0, zs0] = project_to_sphere(u0, v0);
+    const auto [xs1, ys1, zs1] = project_to_sphere(u1, v1);
+    const auto cos_phi         = xs0 * xs1 + ys0 * ys1 + zs0 * zs1;
+
+    Ensures(cos_phi > -1.);
+    Ensures(cos_phi < +1.);
+
+    const auto angle = std::acos(cos_phi);
+    return angle;
 }
-inline double pinhole_parameters::y_resolution() const noexcept {
+
+inline std::tuple<double, double, double>
+pinhole_parameters::project_to_sphere(int u, int v) const noexcept {
     Expects(fy > 0.);
     Expects(cy > 0.);
-    const double phi{std::atan(cy / fy) / cy};
-    Ensures(phi > 0.);
-    Ensures(phi < 2. * math::pi<double>);
-    return phi;
+    Expects(p1 == 0.);
+    Expects(p2 == 0.);
+    Expects(k1 == 0.);
+    Expects(k2 == 0.);
+    Expects(k3 == 0.);
+
+    const double x = (double(u) - cx) / fx;
+    const double y = (double(v) - cy) / fy;
+    const double z = 1.;
+
+    const double factor = std::sqrt(1. + x * x + y * y) / (1. + x * x + y * y);
+    const double xs     = factor * x;
+    const double ys     = factor * y;
+    const double zs     = factor * z;
+
+    Ensures(std::abs(xs * xs + ys * ys + zs * zs - 1.) < 0.00000001);
+
+    return std::make_tuple(xs, ys, zs);
 }
 }}  // namespace sens_loc::camera_models
 

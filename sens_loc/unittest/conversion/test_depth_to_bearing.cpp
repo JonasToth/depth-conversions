@@ -1,7 +1,7 @@
 #include <doctest/doctest.h>
 #include <sens_loc/conversion/depth_to_bearing.h>
+#include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
-#include <sens_loc/math/angle_conversion.h>
 
 using namespace sens_loc;
 using namespace sens_loc::conversion;
@@ -9,147 +9,71 @@ using namespace sens_loc::math;
 using namespace std;
 using doctest::Approx;
 
-TEST_CASE("bearing angle formula") {
-    using namespace detail;
-    SUBCASE("regular triangle") {
-        const double phi = deg_to_rad(60.);
-        REQUIRE(ba_formula<double>(1.0, 1.0, std::cos(phi), phi) ==
-                Approx(deg_to_rad(60.)));
+TEST_CASE("Acces Prior Pixel") {
+    SUBCASE("horizontal") {
+        detail::pixel<direction::horizontal> p;
+        const auto [up, vp] = p(1, 1);
+        REQUIRE(up == 0);
+        REQUIRE(vp == 1);
     }
-
-    SUBCASE("sharp angle") {
-        const double phi = deg_to_rad(0.05);
-        const double sharper_angle =
-            ba_formula<double>(2.0, 1.0, std::cos(phi), phi);
-        REQUIRE(sharper_angle < deg_to_rad(90.));
-        INFO("Sharp angle has " << rad_to_deg(sharper_angle) << " degree");
+    SUBCASE("horizontal") {
+        detail::pixel<direction::vertical> p;
+        const auto [up, vp] = p(1, 1);
+        REQUIRE(up == 1);
+        REQUIRE(vp == 0);
     }
-
-    SUBCASE("blunt angle") {
-        const double phi = deg_to_rad(0.05);
-        const double blunt_angle =
-            ba_formula<double>(1.0, 2.0, std::cos(phi), phi);
-        REQUIRE(blunt_angle > deg_to_rad(90.));
-        INFO("Blunt angle has " << rad_to_deg(blunt_angle) << " degree");
+    SUBCASE("diagonal") {
+        detail::pixel<direction::diagonal> p;
+        const auto [up, vp] = p(1, 1);
+        REQUIRE(up == 0);
+        REQUIRE(vp == 0);
     }
-
-    SUBCASE("rectangular analytical correct") {
-        const double phi     = deg_to_rad(60.);
-        const double cos_phi = 0.5;
-        const double d_i     = 1.;
-        const double d_j     = d_i / cos_phi;
-        const double rect    = ba_formula<double>(d_i, d_j, cos_phi, phi);
-
-        REQUIRE(std::cos(phi) == Approx(cos_phi));
-        REQUIRE(phi == Approx(math::pi<double> / 3.));
-        REQUIRE(d_j == Approx(2.));
-
-        REQUIRE(rect == Approx(deg_to_rad(90.)));
-        INFO("Rectangular has " << rad_to_deg(rect) << " degree");
-    }
-
-    SUBCASE("rectangular with numerical correctness") {
-        const double phi     = deg_to_rad(0.05);
-        const double cos_phi = std::cos(phi);
-        const double d_i     = 1.;
-        const double d_j     = d_i / cos_phi;
-        const double rect    = ba_formula<double>(d_i, d_j, cos_phi, phi);
-
-        REQUIRE(d_i - d_j * cos_phi == Approx(0.));
-        REQUIRE(rect == Approx(deg_to_rad(90.)));
-        INFO("Numerical rectangular has " << rad_to_deg(rect) << " degree");
+    SUBCASE("antidiagonal") {
+        detail::pixel<direction::antidiagonal> p;
+        const auto [up, vp] = p(1, 1);
+        REQUIRE(up == 0);
+        REQUIRE(vp == 2);
     }
 }
 
-TEST_CASE("Scaling of bearing angle") {
-    using namespace detail;
-
-    SUBCASE("scale double to uchar8") {
-        const double min_angle = 0.;
-        const double max_angle = math::pi<double>;
-        const double mid_angle = math::pi<double> / 2.;
-
-        auto [scale, offset] = scaling_factor<double, uchar>();
-
-        REQUIRE(offset == 0.);
-        REQUIRE(gsl::narrow_cast<uchar>(max_angle * scale) == 254);
-        REQUIRE(gsl::narrow_cast<uchar>(min_angle * scale) == 0);
-        REQUIRE(gsl::narrow_cast<uchar>(mid_angle * scale) == 127);
+TEST_CASE("iteration range") {
+    cv::Mat img(42, 42, CV_8U);
+    SUBCASE("horizontal") {
+        detail::range<direction::horizontal> r(img);
+        REQUIRE(r.x_start == 1);
+        REQUIRE(r.x_end == 42);
+        REQUIRE(r.y_start == 0);
+        REQUIRE(r.y_end == 42);
     }
-    SUBCASE("scale double to uchar16") {
-        const double min_angle = 0.;
-        const double max_angle = math::pi<double>;
-        const double mid_angle = math::pi<double> / 2.;
-
-        auto [scale, offset] = scaling_factor<double, ushort>();
-
-        REQUIRE(offset == 0.);
-        REQUIRE(gsl::narrow_cast<ushort>(max_angle * scale) == 65'535);
-        REQUIRE(gsl::narrow_cast<ushort>(min_angle * scale) == 0);
-        REQUIRE(gsl::narrow_cast<ushort>(mid_angle * scale) == 65'535 / 2);
+    SUBCASE("vertical") {
+        detail::range<direction::vertical> r(img);
+        REQUIRE(r.x_start == 0);
+        REQUIRE(r.x_end == 42);
+        REQUIRE(r.y_start == 1);
+        REQUIRE(r.y_end == 42);
     }
-    SUBCASE("scale double to char8") {
-        const double min_angle = 0.;
-        const double max_angle = math::pi<double>;
-        const double mid_angle = math::pi<double> / 2.;
-
-        auto [scale, offset] = scaling_factor<double, schar>();
-
-        REQUIRE(offset == 128.);
-        REQUIRE(gsl::narrow_cast<schar>(max_angle * scale + offset) == 127);
-        REQUIRE(gsl::narrow_cast<schar>(min_angle * scale + offset) == -128);
-        REQUIRE(gsl::narrow_cast<schar>(mid_angle * scale + offset) == -1);
+    SUBCASE("diagonal") {
+        detail::range<direction::diagonal> r(img);
+        REQUIRE(r.x_start == 1);
+        REQUIRE(r.x_end == 42);
+        REQUIRE(r.y_start == 1);
+        REQUIRE(r.y_end == 42);
     }
-    SUBCASE("scale double to char16") {
-        const double min_angle = 0.;
-        const double max_angle = math::pi<double>;
-        const double mid_angle = math::pi<double> / 2.;
-
-        auto [scale, offset] = scaling_factor<double, short>();
-
-        REQUIRE(offset == 32768.);
-        REQUIRE(gsl::narrow_cast<short>(max_angle * scale + offset) == 32'767);
-        REQUIRE(gsl::narrow_cast<short>(min_angle * scale + offset) == -32'768);
-        REQUIRE(gsl::narrow_cast<short>(mid_angle * scale + offset) == -1);
+    SUBCASE("antidiagonal") {
+        detail::range<direction::antidiagonal> r(img);
+        REQUIRE(r.x_start == 1);
+        REQUIRE(r.x_end == 42);
+        REQUIRE(r.y_start == 0);
+        REQUIRE(r.y_end == 41);
     }
 }
 
 TEST_CASE("Convert depth image to bearing angle image") {
     optional<cv::Mat> depth_image =
         io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
-    optional<cv::Mat> ref_hor_float = io::load_image(
-        "conversion/bearing-horizontal-float.png", cv::IMREAD_UNCHANGED);
-    optional<cv::Mat> ref_hor_double = io::load_image(
-        "conversion/bearing-horizontal-double.png", cv::IMREAD_UNCHANGED);
-    optional<cv::Mat> ref_vert =
-        io::load_image("conversion/bearing-vertical.png", cv::IMREAD_UNCHANGED);
-    optional<cv::Mat> ref_diag =
-        io::load_image("conversion/bearing-diagonal.png", cv::IMREAD_UNCHANGED);
-    optional<cv::Mat> ref_anti = io::load_image(
-        "conversion/bearing-antidiagonal.png", cv::IMREAD_UNCHANGED);
-    optional<cv::Mat> ref_diff =
-        io::load_image("conversion/horizontal-diff.png", cv::IMREAD_UNCHANGED);
 
     REQUIRE(depth_image);
-    REQUIRE(ref_hor_float);
-    REQUIRE(ref_hor_double);
-    REQUIRE(ref_vert);
-    REQUIRE(ref_diag);
-    REQUIRE(ref_anti);
-    REQUIRE(ref_diff);
     REQUIRE((*depth_image).type() == CV_16U);
-
-    cv::Mat depth_16bit = *depth_image;
-    cv::Mat depth_8bit;
-    cv::Mat depth_float;
-    cv::Mat depth_double;
-
-    depth_16bit.convertTo(depth_8bit, CV_8U, 255.0 / 65536.0);
-    cv::imwrite("conversion/data0-depth-8bit.png", depth_8bit);
-    depth_16bit.convertTo(depth_float, CV_32F);
-    cv::imwrite("conversion/data0-depth-float.png", depth_8bit);
-    depth_16bit.convertTo(depth_double, CV_64F);
-    cv::imwrite("conversion/data0-depth-double.png", depth_8bit);
 
     camera_models::pinhole_parameters p = {
         .w  = 960,
@@ -159,51 +83,89 @@ TEST_CASE("Convert depth image to bearing angle image") {
         .cx = 522.23,
         .cy = 272.737,
     };
+    cv::Mat laser_double = depth_to_laserscan<double, ushort>(*depth_image, p);
+    cv::Mat laser_float  = depth_to_laserscan<float, ushort>(*depth_image, p);
 
-    auto horizontal_bearing_float =
-        depth_to_bearing<bearing_direction::horizontal, float, float>(
-            depth_float, p);
-    auto horizontal_bearing_double =
-        depth_to_bearing<bearing_direction::horizontal, double, double>(
-            depth_double, p);
+    SUBCASE("vertical") {
+        optional<cv::Mat> ref_vert = io::load_image(
+            "conversion/bearing-vertical.png", cv::IMREAD_UNCHANGED);
+        REQUIRE(ref_vert);
 
-    auto vertical_bearing =
-        depth_to_bearing<bearing_direction::vertical, double, ushort>(
-            depth_16bit, p);
+        auto vertical_bearing =
+            depth_to_bearing<direction::vertical, double, double>(laser_double,
+                                                                  p);
+        cv::imwrite("conversion/test_vertical.png",
+                    convert_bearing<double, uchar>(vertical_bearing));
 
-    auto diagonal_bearing =
-        depth_to_bearing<bearing_direction::diagonal, double, ushort>(
-            depth_16bit, p);
+        REQUIRE(cv::norm(convert_bearing<double, uchar>(vertical_bearing) -
+                         *ref_vert) == Approx(0.0));
+    }
 
-    auto antidiagonal_bearing =
-        depth_to_bearing<bearing_direction::antidiagonal, float, ushort>(
-            depth_16bit, p);
+    SUBCASE("diagonal") {
+        optional<cv::Mat> ref_diag = io::load_image(
+            "conversion/bearing-diagonal.png", cv::IMREAD_UNCHANGED);
+        REQUIRE(ref_diag);
 
-    cv::imwrite("conversion/test_horizontal_float.png",
-                convert_bearing(horizontal_bearing_float));
-    cv::imwrite("conversion/test_horizontal_double.png",
-                convert_bearing<double>(horizontal_bearing_double));
-    cv::imwrite("conversion/test_vertical.png",
-                convert_bearing<double, uchar>(vertical_bearing));
-    cv::imwrite("conversion/test_diagonal.png",
-                convert_bearing<double, ushort>(diagonal_bearing));
-    cv::imwrite("conversion/test_antidiagonal.png",
-                convert_bearing<float, uchar>(antidiagonal_bearing));
+        auto diagonal_bearing =
+            depth_to_bearing<direction::diagonal, double, double>(laser_double,
+                                                                  p);
+        cv::imwrite("conversion/test_diagonal.png",
+                    convert_bearing<double, ushort>(diagonal_bearing));
 
-    REQUIRE(cv::norm(convert_bearing(horizontal_bearing_float) -
-                     *ref_hor_float) == Approx(0.0));
+        REQUIRE(cv::norm(convert_bearing<double>(diagonal_bearing) -
+                         *ref_diag) == Approx(0.0));
+    }
 
-    cv::Mat diff;
-    diff = convert_bearing<double, uchar>(horizontal_bearing_double) -
-           convert_bearing<float, uchar>(horizontal_bearing_float);
-    cv::imwrite("conversion/test-horizontal-diff.png", diff);
-    /// Small Difference, but not zero.
-    REQUIRE(cv::norm(diff - *ref_diff) == Approx(0.0));
+    SUBCASE("antidiagonal") {
+        optional<cv::Mat> ref_anti = io::load_image(
+            "conversion/bearing-antidiagonal.png", cv::IMREAD_UNCHANGED);
+        REQUIRE(ref_anti);
 
-    REQUIRE(cv::norm(convert_bearing<double>(vertical_bearing) - *ref_vert) ==
-            Approx(0.0));
-    REQUIRE(cv::norm(convert_bearing<double>(diagonal_bearing) - *ref_diag) ==
-            Approx(0.0));
-    REQUIRE(cv::norm(convert_bearing<float, uchar>(antidiagonal_bearing) -
-                     *ref_anti) == Approx(0.0));
+        auto antidiagonal_bearing =
+            depth_to_bearing<direction::antidiagonal, float, float>(laser_float,
+                                                                    p);
+        cv::imwrite("conversion/test_antidiagonal.png",
+                    convert_bearing<float, uchar>(antidiagonal_bearing));
+
+
+        REQUIRE(cv::norm(convert_bearing<float, uchar>(antidiagonal_bearing) -
+                         *ref_anti) == Approx(0.0));
+    }
+
+    SUBCASE("horizontal") {
+        optional<cv::Mat> ref_hor_float = io::load_image(
+            "conversion/bearing-horizontal-float.png", cv::IMREAD_UNCHANGED);
+        optional<cv::Mat> ref_hor_double = io::load_image(
+            "conversion/bearing-horizontal-double.png", cv::IMREAD_UNCHANGED);
+        optional<cv::Mat> ref_diff = io::load_image(
+            "conversion/horizontal-diff.png", cv::IMREAD_UNCHANGED);
+        REQUIRE(ref_hor_float);
+        REQUIRE(ref_hor_double);
+        REQUIRE(ref_diff);
+
+        auto horizontal_bearing_float =
+            depth_to_bearing<direction::horizontal, float, double>(laser_double,
+                                                                   p);
+        cv::imwrite("conversion/test_horizontal_float.png",
+                    convert_bearing(horizontal_bearing_float));
+
+        auto horizontal_bearing_double =
+            depth_to_bearing<direction::horizontal, double, float>(laser_float,
+                                                                   p);
+        cv::imwrite("conversion/test_horizontal_double.png",
+                    convert_bearing<double>(horizontal_bearing_double));
+
+
+        REQUIRE(cv::norm(convert_bearing(horizontal_bearing_float) -
+                         *ref_hor_float) == Approx(0.0));
+        REQUIRE(cv::norm(convert_bearing<double>(horizontal_bearing_double) -
+                         *ref_hor_double) == Approx(0.0));
+
+        cv::Mat diff;
+        diff = convert_bearing<double, uchar>(horizontal_bearing_double) -
+               convert_bearing<float, uchar>(horizontal_bearing_float);
+        cv::imwrite("conversion/test-horizontal-diff.png", diff);
+        /// Small Difference, but not zero.
+        REQUIRE(cv::norm(diff - *ref_diff) == Approx(0.0));
+    }
 }
