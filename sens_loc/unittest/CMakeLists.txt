@@ -13,6 +13,15 @@ configure_file(conversion/bearing-horizontal-float.png conversion/bearing-horizo
 configure_file(conversion/bearing-vertical.png conversion/bearing-vertical.png COPYONLY)
 configure_file(conversion/horizontal-diff.png conversion/horizontal-diff.png COPYONLY)
 
+test_add_file(conversion conversion/test_depth_to_laserscan.cpp)
+configure_file(conversion/data0-depth-laser.png conversion/data0-depth-laser.png COPYONLY)
+
+test_add_file(conversion conversion/test_depth_to_max_curve.cpp)
+configure_file(conversion/max-curve-float.png conversion/max-curve-float.png COPYONLY)
+configure_file(conversion/max-curve-double.png conversion/max-curve-double.png COPYONLY)
+
+test_add_file(conversion conversion/test_util.cpp)
+
 create_test(io)
 test_add_file(io io/test_image.cpp)
 test_add_file(io io/test_intrinsics.cpp)
@@ -23,6 +32,7 @@ configure_file(io/not_an_image.txt io/not_an_image.txt COPYONLY)
 
 create_test(math)
 test_add_file(math math/test_angle_conversion.cpp)
+test_add_file(math math/test_triangles.cpp)
 
 create_test(util)
 test_add_file(util util/test_console.cpp)
