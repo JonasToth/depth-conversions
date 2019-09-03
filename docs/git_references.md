@@ -30,7 +30,7 @@ $ git remote add -f upstream-<projectname> git@github.com/projectname/repo.git
 - use a proper release and don't build directly from master if possible.
 
 ```bash
-$ git subtree add --prefix <projectname> upstream-<projectname> <REVISION> --squash
+$ git subtree add --prefix third_party/<projectname> upstream-<projectname> <REVISION> --squash
 > Squashes all source into the directory '<projectname>' from the '<REVISION>'
 > The commit-id (<REVISION>) should correspond to a proper release.
 ```
@@ -49,7 +49,7 @@ $ git fetch upstream-<projectname>
 - Then pull the changes into the appropriate directory
 
 ```
-$ git subtree pull --prefix <projectname> upstream-<projectname> <REVISION> --squash
+$ git subtree pull --prefix third_party/<projectname> upstream-<projectname> <REVISION> --squash
 > Merging the changes into the project directory
 ```
 
