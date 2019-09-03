@@ -2,7 +2,7 @@ include(opencv_options)
 include(ExternalProject)
 ExternalProject_Add(opencv
   DOWNLOAD_COMMAND ""
-  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/opencv"
+  SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencv"
   CMAKE_ARGS "${opencv_options};-DCMAKE_INSTALL_PREFIX=/usr"
 
   # Build step
