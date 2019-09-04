@@ -20,6 +20,7 @@ target_link_libraries(depth2bearing-batch
     PRIVATE
     CLI11::CLI11
     Cpp-Taskflow
+    fmt::fmt
     sens_loc::sens_loc
     )
 set_target_properties(depth2bearing-batch
