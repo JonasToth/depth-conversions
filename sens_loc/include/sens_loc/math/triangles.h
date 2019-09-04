@@ -30,6 +30,8 @@ inline Real bearing_angle(const Real b, const Real c,
 
     const Real nom = 2. * b * b - 2. * b * c * cos_alpha;
     const Real den = 2. * b * std::sqrt(b * b + c * c - 2. * b * c * cos_alpha);
+    Ensures(den != 0.);
+
     const Real ratio = nom / den;
 
     Ensures(ratio > -1.);

@@ -24,15 +24,23 @@ template <conversion::direction Direction>
 optional<tf::Task> queue_helper(tf::Taskflow                 &task_flow,
                                 const std::string            &out,
                                 const cv::Mat &               depth,
-                                const camera_models::pinhole &intrinsic) {
+                                const camera_models::pinhole &intrinsic,
+                                mutex                        &cout_mutex) {
     // clang-format on
     if (!out.empty()) {
-        return task_flow.emplace([&depth, &intrinsic, &out]() {
+        return task_flow.emplace([&depth, &intrinsic, &out, &cout_mutex]() {
             using namespace conversion;
             // Load the image unchanged, because depth images are encoded
             // specially.
-            cv::Mat bearing = depth_to_bearing<Direction>(depth, intrinsic);
-            cv::imwrite(out, convert_bearing(bearing));
+            cv::Mat    bearing = depth_to_bearing<Direction>(depth, intrinsic);
+            const bool success = cv::imwrite(out, convert_bearing(bearing));
+
+            if (!success) {
+                lock_guard l(cout_mutex);
+                cerr << util::err{};
+                cerr << "Could not write output image \"" << rang::style::bold
+                     << out << rang::style::reset << "\"!\n";
+            }
         });
     }
     return nullopt;
@@ -126,36 +134,25 @@ int main(int argc, char **argv) {
 
     {
         tf::Taskflow taskflow;
+        mutex        mutex_cout;
 
         auto sync_start = taskflow.emplace([]() {});
         auto sync_end   = taskflow.emplace([]() {});
 
         using namespace ::detail;
-        auto h = queue_helper<direction::horizontal>(taskflow, bearing_hor_name,
-                                                     euclid_depth, calib);
-        auto v = queue_helper<direction::vertical>(taskflow, bearing_ver_name,
-                                                   euclid_depth, calib);
-        auto d = queue_helper<direction::diagonal>(taskflow, bearing_dia_name,
-                                                   euclid_depth, calib);
-        auto a = queue_helper<direction::antidiagonal>(
-            taskflow, bearing_ant_name, euclid_depth, calib);
+#define BEARING_PROCESS(VAR, DIRECTION)                                        \
+    auto VAR = queue_helper<direction::DIRECTION>(                             \
+        taskflow, bearing_##VAR##_name, euclid_depth, calib, mutex_cout);      \
+    if (VAR) {                                                                 \
+        sync_start.precede(*VAR);                                              \
+        VAR->precede(sync_end);                                                \
+    }
 
-        if (h) {
-            sync_start.precede(*h);
-            h->precede(sync_end);
-        }
-        if (v) {
-            sync_start.precede(*v);
-            v->precede(sync_end);
-        }
-        if (d) {
-            sync_start.precede(*d);
-            d->precede(sync_end);
-        }
-        if (a) {
-            sync_start.precede(*a);
-            a->precede(sync_end);
-        }
+        BEARING_PROCESS(hor, horizontal)
+        BEARING_PROCESS(ver, vertical)
+        BEARING_PROCESS(dia, diagonal)
+        BEARING_PROCESS(ant, antidiagonal)
+#undef BEARING_PROCESS
         executor.run(taskflow).wait();
     }
 

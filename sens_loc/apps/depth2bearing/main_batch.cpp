@@ -1,10 +1,9 @@
 #include <CLI/CLI.hpp>
-#include <cstdlib>
+#include <fmt/core.h>
 #include <fstream>
 #include <iostream>
-#include <opencv2/features2d.hpp>
+#include <numeric>
 #include <opencv2/imgcodecs.hpp>
-#include <opencv2/xfeatures2d/nonfree.hpp>
 #include <rang.hpp>
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
@@ -12,35 +11,67 @@
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/util/console.h>
 #include <sens_loc/version.h>
+#include <string_view>
 #include <taskflow/taskflow.hpp>
 #include <vector>
 
 using namespace sens_loc;
 using namespace std;
 
-namespace detail {
-// clang-format off
-template <conversion::direction Direction>
-optional<tf::Task> queue_helper(tf::Taskflow                 &task_flow,
-                                const std::string            &out,
-                                const cv::Mat &               depth,
-                                const camera_models::pinhole &intrinsic) {
-    // clang-format on
-    if (!out.empty()) {
-        return task_flow.emplace([&depth, &intrinsic, &out]() {
-            using namespace conversion;
-            // Load the image unchanged, because depth images are encoded
-            // specially.
-            cv::Mat bearing = depth_to_bearing<Direction>(depth, intrinsic);
-            cv::imwrite(out, convert_bearing(bearing));
-        });
+namespace {
+struct file_patterns {
+    string_view input;
+    string_view horizontal;
+    string_view vertical;
+    string_view diagonal;
+    string_view antidiagonal;
+};
+
+/// This file substitues 'index' into the patterns (if existent) and calculates
+/// bearing angle images for it.
+/// If any operation fails 'false' is returned. On success 'true' is returned.
+bool process_file(const file_patterns &         p,
+                  const camera_models::pinhole &intrinsic, int index) {
+    Expects(!p.input.empty());
+    Expects(!p.horizontal.empty() || !p.vertical.empty() ||
+            !p.diagonal.empty() || !p.antidiagonal.empty());
+
+    using namespace conversion;
+
+    const std::string input_file = fmt::format(p.input, index);
+    optional<cv::Mat> depth_image =
+        io::load_image(input_file, cv::IMREAD_UNCHANGED);
+
+    if (!depth_image)
+        return false;
+
+    const cv::Mat euclid_depth = depth_to_laserscan(*depth_image, intrinsic);
+
+    bool final_result = true;
+#define BEARING_PROCESS(DIRECTION)                                             \
+    if (!p.DIRECTION.empty()) {                                                \
+        cv::Mat bearing =                                                      \
+            depth_to_bearing<direction::DIRECTION>(euclid_depth, intrinsic);   \
+        bool success = cv::imwrite(fmt::format(p.DIRECTION, index),            \
+                                   convert_bearing(bearing));                  \
+        if (!success)                                                          \
+            final_result = false;                                              \
     }
-    return nullopt;
+
+    BEARING_PROCESS(horizontal)
+    BEARING_PROCESS(vertical)
+    BEARING_PROCESS(diagonal)
+    BEARING_PROCESS(antidiagonal)
+
+#undef BEARING_PROCESS
+
+    return true;
 }
-}  // namespace detail
+
+}  // namespace
 
 int main(int argc, char **argv) {
-    CLI::App app{"Convert depth images to pointclouds"};
+    CLI::App app{"Batchconversion of depth images to bearing angle images."};
 
     auto print_version = [argv](int /*count*/) {
         cout << argv[0] << " " << get_version() << "\n";
@@ -56,110 +87,85 @@ int main(int argc, char **argv) {
         ->check(CLI::ExistingFile);
 
     string input_file;
-    app.add_option("-i,--input", input_file, "Input depth map")
-        ->required()
-        ->check(CLI::ExistingFile);
+    app.add_option("-i,--input", input_file,
+                   "Input pattern for image, e.g. \"depth-{}.png\"")
+        ->required();
+
+    int start_idx;
+    app.add_option("-s,--start", start_idx, "Start index of batch, inclusive")
+        ->required();
+    int end_idx;
+    app.add_option("-e,--end", end_idx, "End index of batch, inclusive")
+        ->required();
 
     string bearing_hor_name;
     app.add_option(
         "--horizontal", bearing_hor_name,
-        "Calculate horizontal bearing angle image and write to this path");
+        "Calculate horizontal bearing angle image and write to this pattern");
     string bearing_ver_name;
-    app.add_option("--vertical", bearing_ver_name,
-                   "Calculate vertical bearing angle and write to this path");
+    app.add_option(
+        "--vertical", bearing_ver_name,
+        "Calculate vertical bearing angle and write to this pattern");
     string bearing_dia_name;
-    app.add_option("--diagonal", bearing_dia_name,
-                   "Calculate diagonal bearing angle and write to this path");
+    app.add_option(
+        "--diagonal", bearing_dia_name,
+        "Calculate diagonal bearing angle and write to this pattern");
     string bearing_ant_name;
     app.add_option(
         "--anti-diagonal", bearing_ant_name,
-        "Calculate anti-diagonal bearing angle and write to this path");
+        "Calculate anti-diagonal bearing angle and write to this pattern");
 
     CLI11_PARSE(app, argc, argv);
 
-    tf::Executor executor;
-
-    optional<cv::Mat>                depth_image;
-    optional<camera_models::pinhole> intrinsic;
-
-    {
-        tf::Taskflow taskflow;
-        tf::Task     start_sync = taskflow.emplace([]() {});
-        tf::Task     end_sync   = taskflow.emplace([]() {});
-
-        auto load_img = taskflow.emplace([&input_file, &depth_image]() {
-            // Load the image unchanged, because depth images are encoded
-            // specially.
-            depth_image = io::load_image(input_file, cv::IMREAD_UNCHANGED);
-        });
-
-        auto load_cali = taskflow.emplace([&calibration_file, &intrinsic]() {
-            ifstream calibration_fstream{calibration_file};
-
-            intrinsic = io::load_pinhole_intrinsic(calibration_fstream);
-        });
-
-        start_sync.precede(load_img);
-        start_sync.precede(load_cali);
-        load_img.precede(end_sync);
-        load_cali.precede(end_sync);
-
-        executor.run(taskflow).wait();
-    }
-
-    if (!depth_image) {
+    if (bearing_hor_name.empty() && bearing_ver_name.empty() &&
+        bearing_dia_name.empty() && bearing_ant_name.empty()) {
         cerr << util::err{};
-        cerr << "Could not load image \"" << rang::style::bold << input_file
-             << rang::style::reset << "\"!\n";
+        cerr << "At least one output pattern required!\n";
         return 1;
     }
+
+
+    ifstream                         calibration_fstream{calibration_file};
+    optional<camera_models::pinhole> intrinsic =
+        io::load_pinhole_intrinsic(calibration_fstream);
+
     if (!intrinsic) {
         cerr << util::err{};
         cerr << "Could not load intrinsic calibration \"" << rang::style::bold
              << calibration_file << rang::style::reset << "\"!\n";
         return 1;
     }
+    file_patterns files{
+        .input        = input_file,
+        .horizontal   = bearing_hor_name,
+        .vertical     = bearing_ver_name,
+        .diagonal     = bearing_dia_name,
+        .antidiagonal = bearing_ant_name,
+    };
 
-    using namespace conversion;
-    const cv::Mat euclid_depth = depth_to_laserscan(*depth_image, *intrinsic);
-    const camera_models::pinhole calib = *intrinsic;
-
+    int return_code = 0;
     {
-        tf::Taskflow taskflow;
+        tf::Executor executor;
+        tf::Taskflow tf;
+        vector<int>  indices(end_idx - start_idx + 1);
+        iota(begin(indices), end(indices), start_idx);
+        mutex cout_mutex;
 
-        auto sync_start = taskflow.emplace([]() {});
-        auto sync_end   = taskflow.emplace([]() {});
+        tf.parallel_for(
+            begin(indices), end(indices),
+            [&files, &cout_mutex, &intrinsic, &return_code](int idx) {
+                const bool success = process_file(files, *intrinsic, idx);
+                if (!success) {
+                    lock_guard l(cout_mutex);
+                    cerr << util::err{};
+                    cerr << "Could not process index \"" << rang::style::bold
+                         << idx << "\"" << rang::style::reset << "!\n";
+                    return_code = 1;
+                }
+            });
 
-        using namespace ::detail;
-        auto h = queue_helper<direction::horizontal>(taskflow, bearing_hor_name,
-                                                     euclid_depth, calib);
-        auto v = queue_helper<direction::vertical>(taskflow, bearing_ver_name,
-                                                   euclid_depth, calib);
-        auto d = queue_helper<direction::diagonal>(taskflow, bearing_dia_name,
-                                                   euclid_depth, calib);
-        auto a = queue_helper<direction::antidiagonal>(
-            taskflow, bearing_ant_name, euclid_depth, calib);
-
-        if (h) {
-            sync_start.precede(*h);
-            h->precede(sync_end);
-        }
-        if (v) {
-            sync_start.precede(*v);
-            v->precede(sync_end);
-        }
-        if (d) {
-            sync_start.precede(*d);
-            d->precede(sync_end);
-        }
-        if (a) {
-            sync_start.precede(*a);
-            a->precede(sync_end);
-        }
-        executor.run(taskflow).wait();
+        executor.run(tf).wait();
     }
 
-    executor.wait_for_all();
-
-    return 0;
+    return return_code;
 }
