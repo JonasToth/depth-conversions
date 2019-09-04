@@ -84,7 +84,8 @@ int main(int argc, char **argv) {
 
     {
         tf::Taskflow taskflow;
-        auto         start_sync = taskflow.emplace([]() {});
+        tf::Task     start_sync = taskflow.emplace([]() {});
+        tf::Task     end_sync   = taskflow.emplace([]() {});
 
         auto load_img = taskflow.emplace([&input_file, &depth_image]() {
             // Load the image unchanged, because depth images are encoded
@@ -97,7 +98,6 @@ int main(int argc, char **argv) {
 
             intrinsic = io::load_pinhole_intrinsic(calibration_fstream);
         });
-        auto end_sync  = taskflow.emplace([]() {});
 
         start_sync.precede(load_img);
         start_sync.precede(load_cali);
@@ -156,8 +156,6 @@ int main(int argc, char **argv) {
             sync_start.precede(*a);
             a->precede(sync_end);
         }
-
-
         executor.run(taskflow).wait();
     }
 
