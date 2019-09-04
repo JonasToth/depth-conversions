@@ -1,4 +1,5 @@
 #include <CLI/CLI.hpp>
+#include <chrono>
 #include <fmt/core.h>
 #include <fstream>
 #include <iostream>
@@ -145,6 +146,7 @@ int main(int argc, char **argv) {
         .antidiagonal = bearing_ant_name,
     };
 
+    int fails       = 0;
     int return_code = 0;
     {
         tf::Executor executor;
@@ -155,10 +157,11 @@ int main(int argc, char **argv) {
 
         tf.parallel_for(
             begin(indices), end(indices),
-            [&files, &cout_mutex, &intrinsic, &return_code](int idx) {
+            [&files, &cout_mutex, &intrinsic, &return_code, &fails](int idx) {
                 const bool success = process_file(files, *intrinsic, idx);
                 if (!success) {
                     lock_guard l(cout_mutex);
+                    fails++;
                     cerr << util::err{};
                     cerr << "Could not process index \"" << rang::style::bold
                          << idx << "\"" << rang::style::reset << "!\n";
@@ -166,7 +169,20 @@ int main(int argc, char **argv) {
                 }
             });
 
+        const auto before = chrono::steady_clock::now();
         executor.run(tf).wait();
+        const auto after = chrono::steady_clock::now();
+
+        cerr << util::info{};
+        cerr << "Processing " << rang::style::bold
+             << end_idx - start_idx + 1 - fails << rang::style::reset
+             << " images took " << rang::style::bold
+             << chrono::duration_cast<chrono::seconds>(after - before).count()
+             << "" << rang::style::reset << " seconds!\n";
+
+        if (fails > 0)
+            cerr << util::warn{} << "Encountered " << rang::style::bold << fails
+                 << rang::style::reset << " problematic files!\n";
     }
 
     return return_code;
