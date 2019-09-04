@@ -9,8 +9,8 @@ ExternalProject_Add(opencv
   BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/opencv-build"
 
   # Install step
-  INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/opencv-install"
-  INSTALL_COMMAND sh -c "DESTDIR=${CMAKE_BINARY_DIR}/opencv-install ${CMAKE_MAKE_PROGRAM} install"
+  INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install"
+  INSTALL_COMMAND sh -c "DESTDIR=${CMAKE_BINARY_DIR}/third_party/opencv-install ${CMAKE_MAKE_PROGRAM} install"
 
   # Test step
   TEST_BEFORE_INSTALL 0
@@ -27,13 +27,13 @@ ExternalProject_Add(opencv
 )
 set_target_properties(opencv PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
-if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/opencv-install/usr")
+if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install/usr")
 	set(opencv_built TRUE)
     find_package(OpenCV REQUIRED
-                 PATHS "${CMAKE_CURRENT_BINARY_DIR}/opencv-install/usr")
+                 PATHS "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install/usr")
 
     # Hide this variable in cmake-gui.
     mark_as_advanced(FORCE OpenCV_DIR)
 else ()
 	set(opencv_built FALSE)
-endif (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/opencv-install/usr")
+endif (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install/usr")
