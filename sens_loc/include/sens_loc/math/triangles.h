@@ -4,6 +4,7 @@
 #include <cmath>
 #include <gsl/gsl>
 #include <iostream>
+#include <limits>
 #include <sens_loc/math/constants.h>
 
 namespace sens_loc { namespace math {
@@ -30,7 +31,19 @@ inline Real bearing_angle(const Real b, const Real c,
 
     const Real nom = 2. * b * b - 2. * b * c * cos_alpha;
     const Real den = 2. * b * std::sqrt(b * b + c * c - 2. * b * c * cos_alpha);
-    const Real ratio = nom / den;
+    Ensures(den != 0.);
+
+    Real ratio = nom / den;
+
+    /// Note: Because of inaccuracy of floating point operations it is possible
+    /// to get abs(ratio) == 1. This is not an error in the implementation
+    /// but rather an numerical artifact. To not hit the post-conditions
+    /// it is ok to subtract a tiny epsilon.
+    /// The problem only occured with 'float' but did not occur with 'double'.
+    if (ratio >= 1.)
+        ratio = 1. - Real(10.) * std::numeric_limits<Real>::epsilon();
+    if (ratio <= -1.)
+        ratio = -1. + Real(10.) * std::numeric_limits<Real>::epsilon();
 
     Ensures(ratio > -1.);
     Ensures(ratio < +1.);

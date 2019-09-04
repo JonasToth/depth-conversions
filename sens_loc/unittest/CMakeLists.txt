@@ -20,6 +20,9 @@ test_add_file(conversion conversion/test_depth_to_max_curve.cpp)
 configure_file(conversion/max-curve-float.png conversion/max-curve-float.png COPYONLY)
 configure_file(conversion/max-curve-double.png conversion/max-curve-double.png COPYONLY)
 
+test_add_file(conversion conversion/test_pathological_cases.cpp)
+configure_file(conversion/crashing-file.png conversion/crashing-file.png COPYONLY)
+
 test_add_file(conversion conversion/test_util.cpp)
 
 create_test(io)

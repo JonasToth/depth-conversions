@@ -9,3 +9,5 @@
 - `doctest` `v2.3.4` `f13a00cc27ed3c1ec4f755572ab7556c4cb01716` unit testing
 - `cpp-taskflow` `v2.2.0` `24072c59f4e2c917a62beb61397aa9c59251dcee`
   parallelization
+- `fmt-lib` `v6.0.0` `7512a55aa3ae309587ca89668ef9ec4074a51a1f` string
+  formatting
