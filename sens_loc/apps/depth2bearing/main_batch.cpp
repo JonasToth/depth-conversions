@@ -45,15 +45,17 @@ bool process_file(const file_patterns &         p,
     if (!depth_image)
         return false;
 
-    const cv::Mat euclid_depth = depth_to_laserscan(*depth_image, intrinsic);
+    const cv::Mat euclid_depth =
+        depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
 
     bool final_result = true;
 #define BEARING_PROCESS(DIRECTION)                                             \
     if (!p.DIRECTION.empty()) {                                                \
         cv::Mat bearing =                                                      \
-            depth_to_bearing<direction::DIRECTION>(euclid_depth, intrinsic);   \
+            depth_to_bearing<direction::DIRECTION, double, double>(            \
+                euclid_depth, intrinsic);                                      \
         bool success = cv::imwrite(fmt::format(p.DIRECTION, index),            \
-                                   convert_bearing(bearing));                  \
+                                   convert_bearing<double, ushort>(bearing));  \
         if (!success)                                                          \
             final_result = false;                                              \
     }

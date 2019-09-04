@@ -32,8 +32,10 @@ optional<tf::Task> queue_helper(tf::Taskflow                 &task_flow,
             using namespace conversion;
             // Load the image unchanged, because depth images are encoded
             // specially.
-            cv::Mat    bearing = depth_to_bearing<Direction>(depth, intrinsic);
-            const bool success = cv::imwrite(out, convert_bearing(bearing));
+            cv::Mat bearing =
+                depth_to_bearing<Direction, double, double>(depth, intrinsic);
+            const bool success =
+                cv::imwrite(out, convert_bearing<double, ushort>(bearing));
 
             if (!success) {
                 lock_guard l(cout_mutex);
@@ -129,7 +131,8 @@ int main(int argc, char **argv) {
     }
 
     using namespace conversion;
-    const cv::Mat euclid_depth = depth_to_laserscan(*depth_image, *intrinsic);
+    const cv::Mat euclid_depth =
+        depth_to_laserscan<double, ushort>(*depth_image, *intrinsic);
     const camera_models::pinhole calib = *intrinsic;
 
     {
