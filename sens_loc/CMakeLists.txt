@@ -9,6 +9,7 @@ add_library(sens_loc
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/intrinsics.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/angle_conversion.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/constants.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/derivatives.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/console.h"
     "${CMAKE_CURRENT_LIST_DIR}/lib/io/intrinsics.cpp"
     )
