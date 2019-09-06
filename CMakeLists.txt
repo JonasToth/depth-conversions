@@ -44,6 +44,7 @@ include(use_doctest)
 include(use_taskflow)
 include(use_gsl)
 include(use_fmtlib)
+include(use_nonius)
 
 include(check_dependencies_built)
 if (${DEPENDENCIES_BUILT})

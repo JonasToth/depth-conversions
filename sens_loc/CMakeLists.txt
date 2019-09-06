@@ -42,5 +42,5 @@ if (WITH_TESTING)
 endif (WITH_TESTING)
 
 if (WITH_BENCHMARK)
-    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/benchmark")
+    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/benchmarks")
 endif (WITH_BENCHMARK)
