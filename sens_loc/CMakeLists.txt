@@ -40,3 +40,7 @@ if (WITH_TESTING)
     add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/unittest")
     add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/test")
 endif (WITH_TESTING)
+
+if (WITH_BENCHMARK)
+    add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/benchmark")
+endif (WITH_BENCHMARK)

@@ -27,6 +27,7 @@ project(master-thesis
 message(STATUS "Version: ${MAJOR_VERSION_STRING}.${MINOR_VERSION_STRING}.${PATCH_VERSION_STRING}")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+option(WITH_BENCHMARK ON "Enable benchmarks for this project")
 option(WITH_TESTING ON "Enable unittests for this project")
 option(WITH_DEP_TESTING OFF "Enable tests in thridparty modules")
 
