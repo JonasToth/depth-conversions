@@ -31,11 +31,12 @@ option(WITH_BENCHMARK ON "Enable benchmarks for this project")
 option(WITH_TESTING ON "Enable unittests for this project")
 option(WITH_DEP_TESTING OFF "Enable tests in thridparty modules")
 
-if (WITH_TESTING)
+if (WITH_TESTING OR WITH_BENCHMARK)
     enable_testing()
 endif ()
 
 include(GNUInstallDirs)
+
 # Thirdparty dependencies
 include(use_opencv)
 include(use_rang)
@@ -46,7 +47,9 @@ include(use_gsl)
 include(use_fmtlib)
 include(use_nonius)
 
+# cmake utility code for the repository
 include(check_dependencies_built)
+include(configuration_functions)
 if (${DEPENDENCIES_BUILT})
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/sens_loc")
 endif (${DEPENDENCIES_BUILT})

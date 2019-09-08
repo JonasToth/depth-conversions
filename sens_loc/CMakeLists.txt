@@ -24,11 +24,8 @@ target_link_libraries(sens_loc
     rang
     ${OpenCV_LIBS}
     )
-set_target_properties(sens_loc
-    PROPERTIES
-    CXX_STANDARD 17
-    CXX_EXTENSIONS OFF
-    CXX_STANDARD_REQUIRED ON)
+common_target_properties(sens_loc)
+
 install(TARGETS sens_loc
         EXPORT sens_loc
         LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
