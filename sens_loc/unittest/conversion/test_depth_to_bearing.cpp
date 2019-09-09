@@ -97,6 +97,31 @@ TEST_CASE("Convert depth image to vertical bearing angle image") {
                      *ref_vert) == Approx(0.0));
 }
 
+TEST_CASE("Convert depth image to vertical bearing angle image in parallel") {
+    optional<cv::Mat> depth_image =
+        io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
+    REQUIRE(depth_image);
+    REQUIRE((*depth_image).type() == CV_16U);
+    cv::Mat laser = depth_to_laserscan<double, ushort>(*depth_image, p);
+
+    optional<cv::Mat> ref_vert =
+        io::load_image("conversion/bearing-vertical.png", cv::IMREAD_UNCHANGED);
+    REQUIRE(ref_vert);
+
+    cv::Mat out(laser.rows, laser.cols, laser.type());
+    {
+        tf::Taskflow flow;
+        par_depth_to_bearing<direction::vertical, double, double>(laser, p, out,
+                                                                  flow);
+        tf::Executor().run(flow).wait();
+    }
+    cv::imwrite("conversion/test_vertical_parallel.png",
+                convert_bearing<double, uchar>(out));
+
+    REQUIRE(cv::norm(convert_bearing<double, uchar>(out) - *ref_vert) ==
+            Approx(0.0));
+}
+
 TEST_CASE("Convert depth image to diagonal bearing angle image") {
     optional<cv::Mat> depth_image =
         io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);

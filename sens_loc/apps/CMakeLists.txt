@@ -4,7 +4,7 @@ add_dependencies(depth2bearing opencv)
 target_link_libraries(depth2bearing
     PRIVATE
     CLI11::CLI11
-    Cpp-Taskflow
+    taskflow::taskflow
     sens_loc::sens_loc
     )
 set_target_properties(depth2bearing
@@ -19,7 +19,7 @@ add_dependencies(depth2bearing-batch opencv)
 target_link_libraries(depth2bearing-batch
     PRIVATE
     CLI11::CLI11
-    Cpp-Taskflow
+    taskflow::taskflow
     fmt::fmt
     sens_loc::sens_loc
     )

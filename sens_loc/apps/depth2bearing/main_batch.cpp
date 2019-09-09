@@ -151,12 +151,10 @@ int main(int argc, char **argv) {
     {
         tf::Executor executor;
         tf::Taskflow tf;
-        vector<int>  indices(end_idx - start_idx + 1);
-        iota(begin(indices), end(indices), start_idx);
         mutex cout_mutex;
 
         tf.parallel_for(
-            begin(indices), end(indices),
+            start_idx, end_idx + 1, 1,
             [&files, &cout_mutex, &intrinsic, &return_code, &fails](int idx) {
                 const bool success = process_file(files, *intrinsic, idx);
                 if (!success) {

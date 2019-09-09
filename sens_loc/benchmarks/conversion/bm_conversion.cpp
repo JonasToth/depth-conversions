@@ -29,44 +29,50 @@ std::tuple<cv::Mat, cv::Mat, camera_models::pinhole> get_data() {
 
 NONIUS_BENCHMARK("Depth2Euclidean", [](nonius::chronometer meter) {
     const auto [depth, _, p] = get_data();
-    (void)_;
+    (void) _;
     meter.measure([&] { return depth_to_laserscan(depth, p); });
+})
+NONIUS_BENCHMARK("Depth2Euclidean parallel", [](nonius::chronometer meter) {
+    const auto [depth, euclid, p] = get_data();
+    cv::Mat      out              = euclid;
+    tf::Executor exe;
+    tf::Taskflow flow;
+    meter.measure([&] {
+        par_depth_to_laserscan(depth, p, out, flow);
+        exe.run(flow).wait();
+        flow.clear();
+    });
 })
 NONIUS_BENCHMARK("Depth2Bearing Diagonal", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
-    (void)_;
+    (void) _;
     meter.measure(
         [&] { return depth_to_bearing<direction::diagonal>(euclid, p); });
 })
-NONIUS_BENCHMARK("Depth2Bearing Antidiagonal", [](nonius::chronometer meter) {
-    const auto [_, euclid, p] = get_data();
-    (void)_;
-    meter.measure(
-        [&] { return depth_to_bearing<direction::antidiagonal>(euclid, p); });
-})
-NONIUS_BENCHMARK("Depth2Bearing vertical", [](nonius::chronometer meter) {
-    const auto [_, euclid, p] = get_data();
-    (void)_;
-    meter.measure(
-        [&] { return depth_to_bearing<direction::vertical>(euclid, p); });
-})
-NONIUS_BENCHMARK("Depth2Bearing horizontal", [](nonius::chronometer meter) {
-    const auto [_, euclid, p] = get_data();
-    (void)_;
-    meter.measure(
-        [&] { return depth_to_bearing<direction::horizontal>(euclid, p); });
-})
+
+NONIUS_BENCHMARK("Depth2Bearing Parallel Diagonal",
+                 [](nonius::chronometer meter) {
+                     const auto [_, euclid, p] = get_data();
+                     (void) _;
+                     cv::Mat      out = euclid;
+                     tf::Executor exe;
+                     tf::Taskflow flow;
+                     meter.measure([&] {
+                         par_depth_to_bearing<direction::diagonal>(euclid, p,
+                                                                   out, flow);
+                         exe.run(flow).wait();
+                         flow.clear();
+                     });
+                 })
 
 NONIUS_BENCHMARK("Depth2Curvature Gaussian", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
-    (void)_;
-    meter.measure(
-        [&] { return depth_to_gaussian_curvature(euclid, p); });
+    (void) _;
+    meter.measure([&] { return depth_to_gaussian_curvature(euclid, p); });
 })
 
 NONIUS_BENCHMARK("Depth2Curvature Mean", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
-    (void)_;
-    meter.measure(
-        [&] { return depth_to_mean_curvature(euclid, p); });
+    (void) _;
+    meter.measure([&] { return depth_to_mean_curvature(euclid, p); });
 })
