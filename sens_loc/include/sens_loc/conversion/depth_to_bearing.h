@@ -4,7 +4,7 @@
 #include <cmath>
 #include <gsl/gsl>
 #include <limits>
-#include <opencv2/imgcodecs.hpp>
+#include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/constants.h>
@@ -106,8 +106,8 @@ inline int get_dy_end(direction dir) {
 
 /// Define the start and end iterator for each bearing angle direction.
 template <direction Direction>
-struct range {
-    range(const cv::Mat &depth_image) noexcept
+struct pixel_range {
+    pixel_range(const cv::Mat &depth_image) noexcept
         : x_start{get_x_start(Direction)}
         , x_end{depth_image.cols}
         , y_start{get_y_start(Direction)}
@@ -133,8 +133,8 @@ depth_to_bearing(const cv::Mat &               depth_image,
     Expects(depth_image.cols > 2);
     Expects(depth_image.rows > 2);
 
-    const pixel<Direction> prior_accessor;
-    const range<Direction> r{depth_image};
+    const pixel<Direction>       prior_accessor;
+    const pixel_range<Direction> r{depth_image};
 
     // Image of Reals, that will be converted after the full calculation.
     cv::Mat ba_image(depth_image.rows, depth_image.cols, get_cv_type<Real>());

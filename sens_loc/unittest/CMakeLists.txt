@@ -4,6 +4,7 @@ create_test(camera_models)
 test_add_file(camera_models camera_models/test_pinhole.cpp)
 
 create_test(conversion)
+
 test_add_file(conversion conversion/test_depth_to_bearing.cpp)
 configure_file(conversion/data0-depth.png conversion/data0-depth.png COPYONLY)
 configure_file(conversion/bearing-antidiagonal.png conversion/bearing-antidiagonal.png COPYONLY)
@@ -25,6 +26,8 @@ configure_file(conversion/crashing-file.png conversion/crashing-file.png COPYONL
 
 test_add_file(conversion conversion/test_util.cpp)
 
+create_test(conversion_curvature)
+
 create_test(io)
 test_add_file(io io/test_image.cpp)
 test_add_file(io io/test_intrinsics.cpp)
@@ -35,6 +38,7 @@ configure_file(io/not_an_image.txt io/not_an_image.txt COPYONLY)
 
 create_test(math)
 test_add_file(math math/test_angle_conversion.cpp)
+test_add_file(math math/test_curvature.cpp)
 test_add_file(math math/test_derivatives.cpp)
 test_add_file(math math/test_triangles.cpp)
 

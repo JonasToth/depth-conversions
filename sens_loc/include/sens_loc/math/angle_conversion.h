@@ -6,7 +6,7 @@
 
 namespace sens_loc { namespace math {
 template <typename T>  // requires(Float(T))
-T deg_to_rad(T degree) {
+inline T deg_to_rad(T degree) {
     Expects(degree <= T(360.));
     Expects(degree >= T(0.));
     const T radians = degree / T(180.) * pi<T>;
@@ -16,7 +16,7 @@ T deg_to_rad(T degree) {
     return radians;
 }
 template <typename T>  // requires(Float(T))
-T rad_to_deg(T radians) {
+inline T rad_to_deg(T radians) {
     Expects(radians >= T(0.));
     Expects(radians <= T(2. * pi<T>));
     const T degree = radians * T(180.) / pi<T>;

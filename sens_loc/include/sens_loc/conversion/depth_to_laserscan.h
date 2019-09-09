@@ -1,7 +1,7 @@
 #ifndef DEPTH_TO_LASERSCAN_H_P8V9HAVF
 #define DEPTH_TO_LASERSCAN_H_P8V9HAVF
 
-#include <opencv2/imgcodecs.hpp>
+#include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/util.h>
 
@@ -12,8 +12,9 @@ namespace sens_loc { namespace conversion {
 /// distance when projecting the pixel back into space.
 /// The result type is 'Real'.
 template <typename Real = float, typename PixelType = ushort>
-cv::Mat depth_to_laserscan(const cv::Mat &               depth_image,
-                           const camera_models::pinhole &intrinsic) noexcept {
+inline cv::Mat
+depth_to_laserscan(const cv::Mat &               depth_image,
+                   const camera_models::pinhole &intrinsic) noexcept {
     Expects(depth_image.channels() == 1);
     Expects(!depth_image.empty());
     Expects(depth_image.cols > 2);

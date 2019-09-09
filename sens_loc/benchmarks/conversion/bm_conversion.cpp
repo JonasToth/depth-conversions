@@ -2,6 +2,7 @@
 
 #include <nonius/nonius_single.h++>
 #include <sens_loc/conversion/depth_to_bearing.h>
+#include <sens_loc/conversion/depth_to_curvature.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
 #include <tuple>
@@ -54,4 +55,18 @@ NONIUS_BENCHMARK("Depth2Bearing horizontal", [](nonius::chronometer meter) {
     (void)_;
     meter.measure(
         [&] { return depth_to_bearing<direction::horizontal>(euclid, p); });
+})
+
+NONIUS_BENCHMARK("Depth2Curvature Gaussian", [](nonius::chronometer meter) {
+    const auto [_, euclid, p] = get_data();
+    (void)_;
+    meter.measure(
+        [&] { return depth_to_gaussian_curvature(euclid, p); });
+})
+
+NONIUS_BENCHMARK("Depth2Curvature Mean", [](nonius::chronometer meter) {
+    const auto [_, euclid, p] = get_data();
+    (void)_;
+    meter.measure(
+        [&] { return depth_to_mean_curvature(euclid, p); });
 })
