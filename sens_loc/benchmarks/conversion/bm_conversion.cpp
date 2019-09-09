@@ -1,6 +1,5 @@
 #define NONIUS_RUNNER 1
 
-#include <iostream>
 #include <nonius/nonius_single.h++>
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
