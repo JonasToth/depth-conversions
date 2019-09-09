@@ -32,6 +32,17 @@ NONIUS_BENCHMARK("Depth2Euclidean", [](nonius::chronometer meter) {
     (void) _;
     meter.measure([&] { return depth_to_laserscan(depth, p); });
 })
+NONIUS_BENCHMARK("Depth2Euclidean parallel", [](nonius::chronometer meter) {
+    const auto [depth, euclid, p] = get_data();
+    cv::Mat      out              = euclid;
+    tf::Executor exe;
+    tf::Taskflow flow;
+    meter.measure([&] {
+        par_depth_to_laserscan(depth, p, out, flow);
+        exe.run(flow).wait();
+        flow.clear();
+    });
+})
 NONIUS_BENCHMARK("Depth2Bearing Diagonal", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
     (void) _;
@@ -43,12 +54,14 @@ NONIUS_BENCHMARK("Depth2Bearing Parallel Diagonal",
                  [](nonius::chronometer meter) {
                      const auto [_, euclid, p] = get_data();
                      (void) _;
-                     cv::Mat out = euclid;
+                     cv::Mat      out = euclid;
+                     tf::Executor exe;
+                     tf::Taskflow flow;
                      meter.measure([&] {
-                         tf::Taskflow flow;
                          par_depth_to_bearing<direction::diagonal>(euclid, p,
                                                                    out, flow);
-                         return tf::Executor().run(flow).wait();
+                         exe.run(flow).wait();
+                         flow.clear();
                      });
                  })
 
