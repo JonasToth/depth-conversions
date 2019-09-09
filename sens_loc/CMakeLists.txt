@@ -25,6 +25,7 @@ target_link_libraries(sens_loc
     PUBLIC
     GSL
     rang
+    taskflow::taskflow
     ${OpenCV_LIBS}
     )
 common_target_properties(sens_loc)

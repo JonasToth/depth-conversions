@@ -10,6 +10,7 @@
 #include <sens_loc/math/constants.h>
 #include <sens_loc/math/triangles.h>
 #include <sens_loc/util/correctness_util.h>
+#include <taskflow/taskflow.hpp>
 
 namespace sens_loc { namespace conversion {
 
@@ -28,6 +29,18 @@ template <direction Direction, typename Real = float,
           typename PixelType = float>
 cv::Mat depth_to_bearing(const cv::Mat &               depth_image,
                          const camera_models::pinhole &intrinsic) noexcept;
+
+/// This function provides are parallelized version of the conversion
+/// functionality.
+///
+/// The interface is different and expects different things then the normal
+/// depth_to_bearing.
+template <direction Direction, typename Real = float,
+          typename PixelType = float>
+std::pair<tf::Task, tf::Task>
+par_depth_to_bearing(const cv::Mat &               depth_image,
+                     const camera_models::pinhole &intrinsic, cv::Mat &ba_image,
+                     tf::Taskflow &flow) noexcept;
 
 /// Convert a bearing angle image to an image with integer types.
 /// This function scales the bearing angles between
@@ -186,6 +199,35 @@ depth_to_bearing(const cv::Mat &               depth_image,
     Ensures(ba_image.cols == depth_image.cols);
 
     return ba_image;
+}
+
+template <direction Direction, typename Real, typename PixelType>
+inline std::pair<tf::Task, tf::Task>
+par_depth_to_bearing(const cv::Mat &               depth_image,
+                     const camera_models::pinhole &intrinsic, cv::Mat &ba_image,
+                     tf::Taskflow &flow) noexcept {
+    using namespace detail;
+    Expects(depth_image.type() == get_cv_type<PixelType>());
+    Expects(depth_image.channels() == 1);
+    Expects(!depth_image.empty());
+    Expects(depth_image.cols > 2);
+    Expects(depth_image.rows > 2);
+    Expects(ba_image.cols == depth_image.cols);
+    Expects(ba_image.rows == depth_image.rows);
+    Expects(ba_image.channels() == depth_image.channels());
+    Expects(ba_image.type() == get_cv_type<Real>());
+
+    const pixel<Direction>       prior_accessor;
+    const pixel_range<Direction> r{depth_image};
+
+    auto sync_points = flow.parallel_for(
+        r.y_start, r.y_end, 1,
+        [prior_accessor, r, &depth_image, &intrinsic, &ba_image](int v) {
+            detail::bearing_inner<Real, PixelType>(
+                r, prior_accessor, v, depth_image, intrinsic, ba_image);
+        });
+
+    return sync_points;
 }
 
 template <typename Real, typename PixelType>
