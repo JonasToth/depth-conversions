@@ -1,10 +1,8 @@
-#include <chrono>
 #include <doctest/doctest.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
-#include <thread>
 
 using namespace sens_loc;
 using namespace sens_loc::conversion;
