@@ -11,6 +11,7 @@ add_library(sens_loc
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/constants.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/derivatives.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/console.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/correctness_util.h"
     "${CMAKE_CURRENT_LIST_DIR}/lib/io/intrinsics.cpp"
     )
 add_library(sens_loc::sens_loc ALIAS sens_loc)

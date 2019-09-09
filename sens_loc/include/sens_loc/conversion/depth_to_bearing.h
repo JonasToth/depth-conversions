@@ -3,13 +3,13 @@
 
 #include <cmath>
 #include <gsl/gsl>
-#include <iostream>
 #include <limits>
 #include <opencv2/imgcodecs.hpp>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/constants.h>
 #include <sens_loc/math/triangles.h>
+#include <sens_loc/util/correctness_util.h>
 
 namespace sens_loc { namespace conversion {
 
@@ -36,22 +36,24 @@ template <typename Real = float, typename PixelType = ushort>
 cv::Mat convert_bearing(const cv::Mat &bearing_image) noexcept;
 
 namespace detail {
-inline constexpr int get_du(direction dir) {
+inline int get_du(direction dir) {
     switch (dir) {
     case direction::antidiagonal:
     case direction::diagonal:
     case direction::horizontal: return -1;
     case direction::vertical: return 0;
     }
+    UNREACHABLE("Only 4 directions are possible");
 }
 
-inline constexpr int get_dv(direction dir) {
+inline int get_dv(direction dir) {
     switch (dir) {
     case direction::antidiagonal: return 1;
     case direction::diagonal:
     case direction::vertical: return -1;
     case direction::horizontal: return 0;
     }
+    UNREACHABLE("Only 4 directions are possible");
 }
 
 /// Provide a general accessor for the pixels that provide depth information
@@ -72,31 +74,34 @@ class pixel {
     const int _dv = 0;
 };
 
-inline constexpr int get_x_start(direction dir) {
+inline int get_x_start(direction dir) {
     switch (dir) {
     case direction::horizontal:
     case direction::antidiagonal:
     case direction::diagonal: return 1;
     case direction::vertical: return 0;
     }
+    UNREACHABLE("Only 4 directions are possible");
 }
 
-inline constexpr int get_y_start(direction dir) {
+inline int get_y_start(direction dir) {
     switch (dir) {
     case direction::horizontal:
     case direction::antidiagonal: return 0;
     case direction::diagonal:
     case direction::vertical: return 1;
     }
+    UNREACHABLE("Only 4 directions are possible");
 }
 
-inline constexpr int get_dy_end(direction dir) {
+inline int get_dy_end(direction dir) {
     switch (dir) {
     case direction::antidiagonal: return 1;
     case direction::horizontal:
     case direction::diagonal:
     case direction::vertical: return 0;
     }
+    UNREACHABLE("Only 4 directions are possible");
 }
 
 /// Define the start and end iterator for each bearing angle direction.
