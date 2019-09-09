@@ -1,5 +1,7 @@
-add_executable(bm_conversion conversion/bm_conversion.cpp)
-target_link_libraries(bm_conversion PRIVATE nonius pthread sens_loc::sens_loc)
-common_target_properties(bm_conversion)
-add_test(bm_conversion bm_conversion)
+include(benchmark_macros)
+
+create_bm(conversion_bearing conversion/bm_bearing.cpp)
+create_bm(conversion_curvature conversion/bm_curvature.cpp)
+create_bm(conversion_laser conversion/bm_laser.cpp)
+
 configure_file(conversion/data0-depth.png conversion/data0-depth.png COPYONLY)
