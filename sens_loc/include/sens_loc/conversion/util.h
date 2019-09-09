@@ -1,7 +1,7 @@
 #ifndef UTIL_H_QNW3WCZL
 #define UTIL_H_QNW3WCZL
 
-#include <opencv2/imgcodecs.hpp>
+#include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
 #include <type_traits>
 
@@ -17,8 +17,8 @@ enum class direction {
                    //< direction (bottom-left to top-right)
 };
 
-
 namespace detail {
+
 /// Convert the orthografic depth of a pixel into the euclidian distance
 /// suggested by the pinhole model.
 template <typename Real = float, typename PixelType = ushort>

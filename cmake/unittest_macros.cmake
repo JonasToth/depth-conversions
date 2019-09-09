@@ -9,5 +9,5 @@ endmacro()
 
 macro(test_add_file test_name file_name)
     target_sources(test_${test_name}
-        PRIVATE ${CMAKE_CURRENT_LIST_DIR}/${file_name})
+                   PRIVATE ${CMAKE_CURRENT_LIST_DIR}/${file_name})
 endmacro()

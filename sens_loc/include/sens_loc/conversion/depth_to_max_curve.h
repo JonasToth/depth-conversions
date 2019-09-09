@@ -2,7 +2,7 @@
 #define DEPTH_TO_MAX_CURVE_H_XO6PUN8H
 
 #include <cmath>
-#include <opencv2/imgcodecs.hpp>
+#include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/util.h>
@@ -121,7 +121,7 @@ depth_to_max_curve(const cv::Mat &               depth_image,
 }
 
 template <typename Real, typename PixelType>
-cv::Mat convert_max_curve(const cv::Mat &max_curve) noexcept {
+inline cv::Mat convert_max_curve(const cv::Mat &max_curve) noexcept {
     using namespace detail;
 
     Expects(max_curve.channels() == 1);
