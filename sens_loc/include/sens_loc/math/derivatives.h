@@ -23,7 +23,7 @@ inline Real first_derivative_central(Real y__1, Real y_1, Real dx) noexcept {
 /// \param dx*dx== dx_squared
 template <typename Real>
 inline Real second_derivative_central(Real y__1, Real y_0, Real y_1,
-                               Real dx_squared) noexcept {
+                                      Real dx_squared) noexcept {
     Expects(dx_squared > Real(0.));
     return (y_1 + y__1 - 2. * y_0) / (dx_squared);
 }
@@ -51,6 +51,11 @@ derivatives(Real d__1__1, Real d__1__0, Real d__1_1,
     Expects(d_phi > 0.);
     Expects(d_theta > 0.);
     Expects(d_phi_theta > 0.);
+
+    (void)d__1__1;
+    (void)d__1_1;
+    (void)d_1__1;
+    (void)d_1_1;
 
     // clang-format on
     const Real f_u  = math::first_derivative_central(d__0__1, d__0_1, d_phi);

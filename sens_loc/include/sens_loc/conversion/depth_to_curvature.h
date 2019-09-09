@@ -29,6 +29,48 @@ namespace sens_loc { namespace conversion {
         continue;                                                              \
     }
 
+namespace detail {
+template <typename Real, typename PixelType>
+void gaussian_inner(const int v, const cv::Mat &depth_image,
+                    const camera_models::pinhole &intrinsic,
+                    cv::Mat &                     target_img) {
+    for (int u = 1; u < depth_image.cols - 1; ++u) {
+        DIFF_STAR(depth_image, target_img)
+        const Real d_phi       = intrinsic.phi(u - 1, v, u + 1, v);
+        const Real d_theta     = intrinsic.phi(u, v - 1, u, v + 1);
+        const Real d_phi_theta = intrinsic.phi(u - 1, v - 1, u + 1, v + 1);
+
+        const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
+            d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1, d_1__0,
+            d_1_1, d_phi, d_theta, d_phi_theta);
+
+        const Real K = math::gaussian_curvature(f_u, f_v, f_uu, f_vv, f_uv);
+        target_img.at<Real>(v, u) = K;
+    }
+}
+
+template <typename Real, typename PixelType>
+void mean_inner(const int v, const cv::Mat &depth_image,
+                const camera_models::pinhole &intrinsic, cv::Mat &target_img) {
+    for (int u = 1; u < depth_image.cols - 1; ++u) {
+        DIFF_STAR(depth_image, target_img)
+
+        const Real d_phi       = intrinsic.phi(u - 1, v, u + 1, v);
+        const Real d_theta     = intrinsic.phi(u, v - 1, u, v + 1);
+        const Real d_phi_theta = intrinsic.phi(u - 1, v - 1, u + 1, v + 1);
+
+        const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
+            d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1, d_1__0,
+            d_1_1, d_phi, d_theta, d_phi_theta);
+
+        const Real K = math::mean_curvature(f_u, f_v, f_uu, f_vv, f_uv);
+        target_img.at<Real>(v, u) = K;
+    }
+}
+#undef DIFF_STAR
+
+}  // namespace detail
+
 /// Convert an euclidian depth image to a gaussian curvature image.
 template <typename Real = float, typename PixelType = float>
 inline cv::Mat
@@ -45,19 +87,8 @@ depth_to_gaussian_curvature(const cv::Mat &               depth_image,
                   detail::get_cv_type<Real>());
 
     for (int v = 1; v < depth_image.rows - 1; ++v) {
-        for (int u = 1; u < depth_image.cols - 1; ++u) {
-            DIFF_STAR(depth_image, gauss)
-            const Real d_phi       = intrinsic.phi(u - 1, v, u + 1, v);
-            const Real d_theta     = intrinsic.phi(u, v - 1, u, v + 1);
-            const Real d_phi_theta = intrinsic.phi(u - 1, v - 1, u + 1, v + 1);
-
-            const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
-                d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1,
-                d_1__0, d_1_1, d_phi, d_theta, d_phi_theta);
-
-            const Real K = math::gaussian_curvature(f_u, f_v, f_uu, f_vv, f_uv);
-            gauss.at<Real>(v, u) = K;
-        }
+        detail::gaussian_inner<Real, PixelType>(v, depth_image, intrinsic,
+                                                gauss);
     }
     Ensures(gauss.cols == depth_image.cols);
     Ensures(gauss.rows == depth_image.rows);
@@ -83,20 +114,7 @@ depth_to_mean_curvature(const cv::Mat &               depth_image,
                  detail::get_cv_type<Real>());
 
     for (int v = 1; v < depth_image.rows - 1; ++v) {
-        for (int u = 1; u < depth_image.cols - 1; ++u) {
-            DIFF_STAR(depth_image, mean)
-
-            const Real d_phi       = intrinsic.phi(u - 1, v, u + 1, v);
-            const Real d_theta     = intrinsic.phi(u, v - 1, u, v + 1);
-            const Real d_phi_theta = intrinsic.phi(u - 1, v - 1, u + 1, v + 1);
-
-            const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
-                d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1,
-                d_1__0, d_1_1, d_phi, d_theta, d_phi_theta);
-
-            const Real K = math::mean_curvature(f_u, f_v, f_uu, f_vv, f_uv);
-            mean.at<Real>(v, u) = K;
-        }
+        detail::mean_inner<Real, PixelType>(v, depth_image, intrinsic, mean);
     }
     Ensures(mean.cols == depth_image.cols);
     Ensures(mean.rows == depth_image.rows);
@@ -106,7 +124,6 @@ depth_to_mean_curvature(const cv::Mat &               depth_image,
     return mean;
 }
 
-#undef DIFF_STAR
 
 }}  // namespace sens_loc::conversion
 

@@ -118,6 +118,40 @@ struct pixel_range {
     const int y_start;
     const int y_end;
 };
+
+template <typename Real, typename PixelType, typename RangeLimits,
+          typename PriorAccess>
+inline void
+bearing_inner(const RangeLimits &r, const PriorAccess &prior_accessor,
+              const int v, const cv::Mat &depth_image,
+              const camera_models::pinhole &intrinsic, cv::Mat &ba_image) {
+    for (int u = r.x_start; u < r.x_end; ++u) {
+        const auto [u_p, v_p] = prior_accessor(u, v);
+
+        const PixelType d_i{depth_image.at<PixelType>(v, u)};
+        const PixelType d_j{depth_image.at<PixelType>(v_p, u_p)};
+
+        Expects(d_i >= 0.);
+        Expects(d_j >= 0.);
+
+        const Real d_phi{gsl::narrow_cast<Real>(intrinsic.phi(u, v, u_p, v_p))};
+
+        // A depth==0 means there is no measurement at this pixel.
+        const Real angle =
+            (d_i == 0. || d_j == 0.)
+                ? 0.
+                : math::bearing_angle(
+                      gsl::narrow_cast<Real>(depth_image.at<PixelType>(v, u)),
+                      gsl::narrow_cast<Real>(
+                          depth_image.at<PixelType>(v_p, u_p)),
+                      std::cos(d_phi));
+
+        Ensures(angle >= 0.);
+        Ensures(angle < math::pi<Real>);
+
+        ba_image.at<Real>(v, u) = angle;
+    }
+}
 }  // namespace detail
 
 template <direction Direction, typename Real, typename PixelType>
@@ -141,34 +175,8 @@ depth_to_bearing(const cv::Mat &               depth_image,
     Ensures(ba_image.channels() == 1);
 
     for (int v = r.y_start; v < r.y_end; ++v) {
-        for (int u = r.x_start; u < r.x_end; ++u) {
-            const auto [u_p, v_p] = prior_accessor(u, v);
-
-            const PixelType d_i{depth_image.at<PixelType>(v, u)};
-            const PixelType d_j{depth_image.at<PixelType>(v_p, u_p)};
-
-            Expects(d_i >= 0.);
-            Expects(d_j >= 0.);
-
-            const Real d_phi{
-                gsl::narrow_cast<Real>(intrinsic.phi(u, v, u_p, v_p))};
-
-            // A depth==0 means there is no measurement at this pixel.
-            const Real angle =
-                (d_i == 0. || d_j == 0.)
-                    ? 0.
-                    : math::bearing_angle(
-                          gsl::narrow_cast<Real>(
-                              depth_image.at<PixelType>(v, u)),
-                          gsl::narrow_cast<Real>(
-                              depth_image.at<PixelType>(v_p, u_p)),
-                          std::cos(d_phi));
-
-            Ensures(angle >= 0.);
-            Ensures(angle < math::pi<Real>);
-
-            ba_image.at<Real>(v, u) = angle;
-        }
+        detail::bearing_inner<Real, PixelType>(
+            r, prior_accessor, v, depth_image, intrinsic, ba_image);
     }
 
     Ensures(ba_image.channels() == 1);

@@ -6,6 +6,18 @@
 #include <sens_loc/conversion/util.h>
 
 namespace sens_loc { namespace conversion {
+namespace detail {
+template <typename Real, typename PixelType>
+void laserscan_inner(const int v, const cv::Mat &depth_image,
+                     const camera_models::pinhole &intrinsic, cv::Mat &euclid) {
+    for (int u = 0; u < depth_image.cols; ++u) {
+        const PixelType d_o = depth_image.at<PixelType>(v, u);
+        euclid.at<Real>(v, u) =
+            orthografic_to_euclidian<Real>(u, v, d_o, intrinsic);
+    }
+}
+}  // namespace detail
+
 /// This function converts an orthographic depth image to an laser-scan like
 /// depth image.
 /// Each pixel in the resulting laser-scan image describes the euclidean
@@ -24,11 +36,8 @@ depth_to_laserscan(const cv::Mat &               depth_image,
     cv::Mat euclid(depth_image.rows, depth_image.cols, get_cv_type<Real>());
 
     for (int v = 0; v < depth_image.rows; ++v) {
-        for (int u = 0; u < depth_image.cols; ++u) {
-            const PixelType d_o = depth_image.at<PixelType>(v, u);
-            euclid.at<Real>(v, u) =
-                orthografic_to_euclidian<Real>(u, v, d_o, intrinsic);
-        }
+        detail::laserscan_inner<Real, PixelType>(v, depth_image, intrinsic,
+                                                 euclid);
     }
 
     Ensures(euclid.rows == depth_image.rows);
