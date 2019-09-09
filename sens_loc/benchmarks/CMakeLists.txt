@@ -1,0 +1,5 @@
+add_executable(bm_conversion conversion/bm_conversion.cpp)
+target_link_libraries(bm_conversion PRIVATE nonius pthread sens_loc::sens_loc)
+common_target_properties(bm_conversion)
+add_test(bm_conversion bm_conversion)
+configure_file(conversion/data0-depth.png conversion/data0-depth.png COPYONLY)

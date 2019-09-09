@@ -11,3 +11,4 @@
   parallelization
 - `fmt-lib` `v6.0.0` `7512a55aa3ae309587ca89668ef9ec4074a51a1f` string
   formatting
+- `nonius` `v1.20.1b` `9db04b2c6eb5c3ca783c48c774300618a86729a4` benchmarks
