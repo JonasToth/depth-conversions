@@ -28,6 +28,7 @@ create_test(conversion)
 test_add_file(conversion conversion/test_util.cpp)
 
 create_test(conversion_curvature)
+create_test(conversion_triple)
 
 create_test(io)
 test_add_file(io io/test_image.cpp)
