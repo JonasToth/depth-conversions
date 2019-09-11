@@ -15,6 +15,8 @@ configure_file(conversion/bearing-vertical.png conversion/bearing-vertical.png C
 configure_file(conversion/horizontal-diff.png conversion/horizontal-diff.png COPYONLY)
 configure_file(conversion/crashing-file.png conversion/crashing-file.png COPYONLY)
 
+create_test(conversion_flexion)
+
 create_test(conversion_laser)
 test_add_file(conversion_laser conversion/test_depth_to_laserscan.cpp)
 configure_file(conversion/data0-depth-laser.png conversion/data0-depth-laser.png COPYONLY)

@@ -26,11 +26,7 @@ TEST_CASE("gaussian curvature") {
 
     const auto gauss = conversion::depth_to_gaussian_curvature<double, double>(
         laser_double, p);
-    cv::imwrite("test_gauss.png", gauss);
-
-    cv::Mat log_gauss;
-    cv::log(gauss, log_gauss);
-    cv::imwrite("test_gauss_log.png", log_gauss);
+    cv::imwrite("conversion/test_gauss.png", gauss);
 }
 
 TEST_CASE("mean curvature") {
@@ -44,11 +40,5 @@ TEST_CASE("mean curvature") {
 
     const auto mean =
         conversion::depth_to_mean_curvature<double, double>(laser_double, p);
-    cv::imwrite("test_mean.png", mean);
-
-    cv::Mat bits;
-    mean.convertTo(bits, CV_8U);
-    cv::Mat normalized_mean;
-    cv::equalizeHist(bits, normalized_mean);
-    cv::imwrite("test_mean_equalized.png", mean);
+    cv::imwrite("conversion/test_mean.png", mean);
 }
