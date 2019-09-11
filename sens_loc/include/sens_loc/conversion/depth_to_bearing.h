@@ -222,7 +222,7 @@ par_depth_to_bearing(const cv::Mat &               depth_image,
 
     auto sync_points = flow.parallel_for(
         r.y_start, r.y_end, 1,
-        [prior_accessor, r, &depth_image, &intrinsic, &ba_image](int v) {
+        [prior_accessor, r, &depth_image, &intrinsic, &ba_image](int v) noexcept {
             detail::bearing_inner<Real, PixelType>(
                 r, prior_accessor, v, depth_image, intrinsic, ba_image);
         });
