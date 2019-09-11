@@ -138,9 +138,9 @@ depth_to_triple(const cv::Mat &               depth_image,
 /// Convert an euclidian depth image to a triple-product-image.
 template <typename Real = float, typename PixelType = float>
 inline std::pair<tf::Task, tf::Task>
-depth_to_triple(const cv::Mat &               depth_image,
-                const camera_models::pinhole &intrinsic, cv::Mat &triple_image,
-                tf::Taskflow &flow) noexcept {
+par_depth_to_triple(const cv::Mat &               depth_image,
+                    const camera_models::pinhole &intrinsic,
+                    cv::Mat &triple_image, tf::Taskflow &flow) noexcept {
     Expects(depth_image.type() == detail::get_cv_type<PixelType>());
     Expects(depth_image.channels() == 1);
     Expects(!depth_image.empty());
