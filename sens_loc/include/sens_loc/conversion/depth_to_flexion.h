@@ -41,7 +41,7 @@ Real dot(V3D<Real> v0, V3D<Real> v1) noexcept {
 }
 
 template <typename Real = float>
-double len(V3D<Real> v) noexcept {
+Real len(V3D<Real> v) noexcept {
     const auto [x, y, z] = v;
     return std::sqrt(x * x + y * y + z * z);
 }
@@ -158,7 +158,6 @@ par_depth_to_flexion(const cv::Mat &               depth_image,
     Expects(triple_image.rows == depth_image.rows);
     Expects(triple_image.channels() == depth_image.channels());
     Expects(triple_image.type() == detail::get_cv_type<Real>());
-
 
     auto sync_points = flow.parallel_for(
         1, depth_image.rows - 1, 1, [&](int v) noexcept {
