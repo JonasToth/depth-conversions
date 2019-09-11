@@ -26,5 +26,5 @@ TEST_CASE("triple product normalized") {
 
     const auto triple =
         conversion::depth_to_triple<double, double>(laser_double, p);
-    cv::imwrite("test_triple_normalized.png", triple);
+    cv::imwrite("conversion/test_triple.png", triple);
 }
