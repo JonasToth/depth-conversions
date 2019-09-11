@@ -2,6 +2,8 @@
 #define DEPTH_TO_TRIPLE_H_Y021ENVZ
 
 #include <cmath>
+#include <iostream>
+#include <limits>
 #include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/util.h>
@@ -47,6 +49,9 @@ double len(V3D<Real> v) noexcept {
 template <typename Real = float>
 V3D<Real> norm(V3D<Real> v) noexcept {
     const auto l = len(v);
+    if (l == 0.)
+        return std::make_tuple(0., 0., 0.);
+
     using std::get;
     return std::make_tuple(get<0>(v) / l, get<1>(v) / l, get<2>(v) / l);
 }
@@ -59,9 +64,9 @@ V3D<Real> get_cartesian(const camera_models::pinhole &intrinsic, int u, int v,
 }
 
 template <typename Real = float, typename PixelType = float>
-inline void triple_inner(int v, const cv::Mat &depth_image,
-                         const camera_models::pinhole &intrinsic,
-                         cv::Mat &                     out) {
+inline void flexion_inner(int v, const cv::Mat &depth_image,
+                          const camera_models::pinhole &intrinsic,
+                          cv::Mat &                     out) {
     for (int u = 1; u < depth_image.cols - 1; ++u) {
         const Real d__1__0 = depth_image.at<PixelType>(v - 1, u);
         const Real d_1__0  = depth_image.at<PixelType>(v + 1, u);
@@ -101,7 +106,10 @@ inline void triple_inner(int v, const cv::Mat &depth_image,
         const auto cross0 = cross(norm(surface_dir0), norm(surface_dir1));
         const auto cross1 = cross(norm(surface_dir2), norm(surface_dir3));
 
-        const auto triple = 255. * std::abs(dot(cross0, cross1));
+        const auto triple = std::abs(dot(cross0, cross1));
+
+        Ensures(triple >= 0.);
+        Ensures(triple <= 1.);
 
         out.at<Real>(v, u) = triple;
     }
@@ -109,11 +117,11 @@ inline void triple_inner(int v, const cv::Mat &depth_image,
 
 }  // namespace detail
 
-/// Convert an euclidian depth image to a triple-product-image.
+/// Convert an euclidian depth image to a flexion-image.
 template <typename Real = float, typename PixelType = float>
 inline cv::Mat
-depth_to_triple(const cv::Mat &               depth_image,
-                const camera_models::pinhole &intrinsic) noexcept {
+depth_to_flexion(const cv::Mat &               depth_image,
+                 const camera_models::pinhole &intrinsic) noexcept {
     Expects(depth_image.type() == detail::get_cv_type<PixelType>());
     Expects(depth_image.channels() == 1);
     Expects(!depth_image.empty());
@@ -123,8 +131,8 @@ depth_to_triple(const cv::Mat &               depth_image,
     cv::Mat triple(depth_image.rows, depth_image.cols,
                    detail::get_cv_type<Real>());
     for (int v = 1; v < depth_image.rows - 1; ++v) {
-        detail::triple_inner<Real, PixelType>(v, depth_image, intrinsic,
-                                              triple);
+        detail::flexion_inner<Real, PixelType>(v, depth_image, intrinsic,
+                                               triple);
     }
 
     Ensures(triple.cols == depth_image.cols);
@@ -138,9 +146,9 @@ depth_to_triple(const cv::Mat &               depth_image,
 /// Convert an euclidian depth image to a triple-product-image.
 template <typename Real = float, typename PixelType = float>
 inline std::pair<tf::Task, tf::Task>
-par_depth_to_triple(const cv::Mat &               depth_image,
-                    const camera_models::pinhole &intrinsic,
-                    cv::Mat &triple_image, tf::Taskflow &flow) noexcept {
+par_depth_to_flexion(const cv::Mat &               depth_image,
+                     const camera_models::pinhole &intrinsic,
+                     cv::Mat &triple_image, tf::Taskflow &flow) noexcept {
     Expects(depth_image.type() == detail::get_cv_type<PixelType>());
     Expects(depth_image.channels() == 1);
     Expects(!depth_image.empty());
@@ -154,11 +162,36 @@ par_depth_to_triple(const cv::Mat &               depth_image,
 
     auto sync_points = flow.parallel_for(
         1, depth_image.rows - 1, 1, [&](int v) noexcept {
-            detail::triple_inner<Real, PixelType>(v, depth_image, intrinsic,
-                                                  triple_image);
+            detail::flexion_inner<Real, PixelType>(v, depth_image, intrinsic,
+                                                   triple_image);
         });
 
     return sync_points;
+}
+
+/// Scale the image properly for image io.
+template <typename Real, typename PixelType>
+inline cv::Mat convert_flexion(const cv::Mat &flexion_image) noexcept {
+    Expects(flexion_image.channels() == 1);
+    Expects(flexion_image.rows > 2);
+    Expects(flexion_image.cols > 2);
+    Expects(flexion_image.type() == detail::get_cv_type<Real>());
+
+    cv::Mat    img(flexion_image.rows, flexion_image.cols,
+                detail::get_cv_type<PixelType>());
+    const auto scale = std::numeric_limits<PixelType>::max() -
+                       std::numeric_limits<PixelType>::min();
+    const auto offset = std::numeric_limits<PixelType>::min();
+
+    flexion_image.convertTo(img, detail::get_cv_type<PixelType>(), scale,
+                            offset);
+
+    Ensures(img.cols == flexion_image.cols);
+    Ensures(img.rows == flexion_image.rows);
+    Ensures(img.type() == detail::get_cv_type<PixelType>());
+    Ensures(img.channels() == 1);
+
+    return img;
 }
 }}  // namespace sens_loc::conversion
 

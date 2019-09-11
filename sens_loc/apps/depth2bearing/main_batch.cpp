@@ -8,7 +8,6 @@
 #include <rang.hpp>
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
-#include <sens_loc/conversion/depth_to_triple.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/util/console.h>
@@ -54,10 +53,10 @@ bool process_file(const file_patterns &         p,
 #define BEARING_PROCESS(DIRECTION)                                             \
     if (!p.DIRECTION.empty()) {                                                \
         cv::Mat bearing =                                                      \
-            depth_to_triple<double, double>(            \
+            depth_to_bearing<direction::DIRECTION, double, double>(            \
                 euclid_depth, intrinsic);                                      \
         bool success = cv::imwrite(fmt::format(p.DIRECTION, index),            \
-                                   /*convert_bearing<double, ushort>(*/bearing/*)*/);  \
+                                   convert_bearing<double, ushort>(bearing));  \
         if (!success)                                                          \
             final_result = false;                                              \
     }
