@@ -19,15 +19,17 @@
 using namespace sens_loc;
 using namespace std;
 
-namespace bearing {
+namespace {
 struct file_patterns {
-    string_view input;
-    string_view horizontal;
-    string_view vertical;
-    string_view diagonal;
-    string_view antidiagonal;
+    string input;
+    string output;
+    string horizontal;
+    string vertical;
+    string diagonal;
+    string antidiagonal;
 };
-
+}  // namespace
+namespace bearing {
 /// This file substitues 'index' into the patterns (if existent) and calculates
 /// bearing angle images for it.
 /// If any operation fails 'false' is returned. On success 'true' is returned.
@@ -57,8 +59,7 @@ bool process_file(const file_patterns &         p,
                 euclid_depth, intrinsic);                                      \
         bool success = cv::imwrite(fmt::format(p.DIRECTION, index),            \
                                    convert_bearing<double, ushort>(bearing));  \
-        if (!success)                                                          \
-            final_result = false;                                              \
+        final_result &= success;                                               \
     }
 
     BEARING_PROCESS(horizontal)
@@ -68,7 +69,7 @@ bool process_file(const file_patterns &         p,
 
 #undef BEARING_PROCESS
 
-    return true;
+    return final_result;
 }
 
 }  // namespace bearing
@@ -88,9 +89,9 @@ int main(int argc, char **argv) {
                    "File that contains calibration parameters for the camera")
         ->required()
         ->check(CLI::ExistingFile);
+    file_patterns files;
 
-    string input_file;
-    app.add_option("-i,--input", input_file,
+    app.add_option("-i,--input", files.input,
                    "Input pattern for image, e.g. \"depth-{}.png\"")
         ->required();
 
@@ -104,52 +105,46 @@ int main(int argc, char **argv) {
     CLI::App *bearing_cmd = app.add_subcommand(
         "bearing", "Converts depth images into bearing angle images");
     // The following options only apply to bearing angle images.
-    string bearing_hor_name;
     bearing_cmd->add_option(
-        "--horizontal", bearing_hor_name,
+        "--horizontal", files.horizontal,
         "Calculate horizontal bearing angle image and write to this pattern");
-    string bearing_ver_name;
     bearing_cmd->add_option(
-        "--vertical", bearing_ver_name,
+        "--vertical", files.vertical,
         "Calculate vertical bearing angle and write to this pattern");
-    string bearing_dia_name;
     bearing_cmd->add_option(
-        "--diagonal", bearing_dia_name,
+        "--diagonal", files.diagonal,
         "Calculate diagonal bearing angle and write to this pattern");
-    string bearing_ant_name;
     bearing_cmd->add_option(
-        "--anti-diagonal", bearing_ant_name,
+        "--anti-diagonal", files.antidiagonal,
         "Calculate anti-diagonal bearing angle and write to this pattern");
 
     CLI11_PARSE(app, argc, argv);
 
+    if (files.input.empty()) {
+        cerr << util::err{}
+             << "Input pattern for files to process is required!\n";
+        return 1;
+    }
+
+    // Options that are always required are checked first.
+    ifstream                         calibration_fstream{calibration_file};
+    optional<camera_models::pinhole> intrinsic =
+        io::load_pinhole_intrinsic(calibration_fstream);
+
+    if (!intrinsic) {
+        cerr << util::err{};
+        cerr << "Could not load intrinsic calibration \"" << rang::style::bold
+             << calibration_file << rang::style::reset << "\"!\n";
+        return 1;
+    }
+
     if (*bearing_cmd) {
-        if (bearing_hor_name.empty() && bearing_ver_name.empty() &&
-            bearing_dia_name.empty() && bearing_ant_name.empty()) {
+        if (files.horizontal.empty() && files.vertical.empty() &&
+            files.diagonal.empty() && files.antidiagonal.empty()) {
             cerr << util::err{};
             cerr << "At least one output pattern required!\n";
             return 1;
         }
-
-
-        ifstream                         calibration_fstream{calibration_file};
-        optional<camera_models::pinhole> intrinsic =
-            io::load_pinhole_intrinsic(calibration_fstream);
-
-        if (!intrinsic) {
-            cerr << util::err{};
-            cerr << "Could not load intrinsic calibration \""
-                 << rang::style::bold << calibration_file << rang::style::reset
-                 << "\"!\n";
-            return 1;
-        }
-        bearing::file_patterns files{
-            .input        = input_file,
-            .horizontal   = bearing_hor_name,
-            .vertical     = bearing_ver_name,
-            .diagonal     = bearing_dia_name,
-            .antidiagonal = bearing_ant_name,
-        };
 
         int fails       = 0;
         int return_code = 0;
