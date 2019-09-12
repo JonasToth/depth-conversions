@@ -5,7 +5,7 @@
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 
-namespace sens_loc { namespace apps {
+namespace sens_loc::apps {
 
 bool bearing_converter::process_file(cv::Mat depth_image, int idx) const
     noexcept {
@@ -34,4 +34,4 @@ bool bearing_converter::process_file(cv::Mat depth_image, int idx) const
     return final_result;
 }
 
-}}  // namespace sens_loc::apps
+}  // namespace sens_loc::apps

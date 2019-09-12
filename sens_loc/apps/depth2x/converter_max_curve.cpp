@@ -5,7 +5,7 @@
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/conversion/depth_to_max_curve.h>
 
-namespace sens_loc { namespace apps {
+namespace sens_loc::apps {
 
 bool max_curve_converter::process_file(cv::Mat depth_image, int idx) const
     noexcept {
@@ -19,4 +19,4 @@ bool max_curve_converter::process_file(cv::Mat depth_image, int idx) const
 
     return success;
 }
-}}  // namespace sens_loc::apps
+}  // namespace sens_loc::apps

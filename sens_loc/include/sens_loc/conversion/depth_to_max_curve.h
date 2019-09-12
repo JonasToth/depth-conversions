@@ -19,7 +19,7 @@ cv::Mat depth_to_max_curve(const cv::Mat &               depth_image,
 /// This function scales the bearing angles between
 /// [PixelType::min, PixelType::max] for the angles in range (0, PI).
 template <typename Real = float, typename PixelType = float>
-cv::Mat convert_max_curve(const cv::Mat &bearing_image) noexcept;
+cv::Mat convert_max_curve(const cv::Mat &max_curve) noexcept;
 
 namespace detail {
 

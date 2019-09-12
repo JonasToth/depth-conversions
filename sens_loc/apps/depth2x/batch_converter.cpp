@@ -11,7 +11,7 @@
 #include <taskflow/taskflow.hpp>
 #include <thread>
 
-namespace sens_loc { namespace apps {
+namespace sens_loc::apps {
 bool batch_converter::process_index(int idx) const noexcept {
     Expects(!_files.input.empty());
 
@@ -30,8 +30,8 @@ bool batch_converter::process_index(int idx) const noexcept {
 bool batch_converter::process_batch(int start, int end) const noexcept {
     Expects(start - end != 0);
 
-    int fails       = 0;
-    int return_code = 0;
+    int  fails       = 0;
+    bool return_code = 0;
     {
         tf::Executor executor;
         tf::Taskflow tf;
@@ -47,7 +47,7 @@ bool batch_converter::process_batch(int start, int end) const noexcept {
                                 std::cerr << "Could not process index \""
                                           << rang::style::bold << idx << "\""
                                           << rang::style::reset << "!\n";
-                                return_code = 1;
+                                return_code = false;
                             }
                         });
 
@@ -87,4 +87,4 @@ cv::Mat batch_pinhole_converter::preprocess_depth(cv::Mat depth_image) const
     }
     UNREACHABLE("Switch is exhaustive");
 }
-}}  // namespace sens_loc::apps
+}  // namespace sens_loc::apps

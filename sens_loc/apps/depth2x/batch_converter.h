@@ -48,7 +48,7 @@ class batch_converter {
 
     /// Process the whole batch calling 'process_file' for each index.
     /// Returns 'false' if any of the indices fails.
-    bool process_batch(int start, int end) const noexcept;
+    [[nodiscard]] bool process_batch(int start, int end) const noexcept;
 
     virtual ~batch_converter() = default;
 
@@ -57,15 +57,15 @@ class batch_converter {
     depth_type           _input_depth_type;
 
   private:
-    bool process_index(int idx) const noexcept;
+    [[nodiscard]] bool process_index(int idx) const noexcept;
 
-    virtual cv::Mat preprocess_depth(cv::Mat depth_image) const noexcept {
+    [[nodiscard]] virtual cv::Mat preprocess_depth(cv::Mat depth_image) const noexcept {
         return depth_image;
     }
 
     /// Method to process exactly on file. This method is expected to have
     /// no sideeffects and is called in parallel.
-    virtual bool process_file(cv::Mat depth_image, int idx) const noexcept = 0;
+    [[nodiscard]] virtual bool process_file(cv::Mat depth_image, int idx) const noexcept = 0;
 };
 
 class batch_pinhole_converter : public batch_converter {
@@ -79,7 +79,7 @@ class batch_pinhole_converter : public batch_converter {
     const camera_models::pinhole &intrinsic;
 
   private:
-    cv::Mat preprocess_depth(cv::Mat depth_image) const noexcept override;
+    [[nodiscard]] cv::Mat preprocess_depth(cv::Mat depth_image) const noexcept override;
 };
 
 }}  // namespace sens_loc::apps

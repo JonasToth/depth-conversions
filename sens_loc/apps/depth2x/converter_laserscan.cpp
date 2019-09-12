@@ -5,7 +5,7 @@
 #include <sens_loc/conversion/depth_to_laserscan.h>
 
 
-namespace sens_loc { namespace apps {
+namespace sens_loc::apps {
 bool range_converter::process_file(cv::Mat depth_image, int idx) const
     noexcept {
     Expects(!_files.output.empty());
@@ -19,4 +19,4 @@ bool range_converter::process_file(cv::Mat depth_image, int idx) const
 
     return success;
 }
-}}  // namespace sens_loc::apps
+}  // namespace sens_loc::apps

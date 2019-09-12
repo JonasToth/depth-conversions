@@ -10,12 +10,12 @@ namespace sens_loc { namespace camera_models {
 
 /// This struct is a container holding parameters for the pinhole camera model.
 struct pinhole {
-    int    w;   //< width of the image
-    int    h;   //< height of the image
-    double fx;  //< x-coordinate of focal length
-    double fy;  //< y-corrdiante of focal length
-    double cx;  //< x-coordinate of image center
-    double cy;  //< y-coordinate of image center
+    int    w  = 0;    //< width of the image
+    int    h  = 0;    //< height of the image
+    double fx = 0.0;  //< x-coordinate of focal length
+    double fy = 0.0;  //< y-corrdiante of focal length
+    double cx = 0.0;  //< x-coordinate of image center
+    double cy = 0.0;  //< y-coordinate of image center
 
     double p1 = 0.0;  //< first order tangential distortion coefficient
     double p2 = 0.0;  //< second order tangential distortion coefficient
@@ -26,14 +26,13 @@ struct pinhole {
 
     /// This method calculates the angle (rad) of the rays between two pixels.
     /// \returns radians
-    double phi(int u0, int v0, int u1, int v1) const noexcept;
+    [[nodiscard]] double phi(int u0, int v0, int u1, int v1) const noexcept;
 
-    std::tuple<double, double, double> project_to_sphere(int u, int v) const
-        noexcept;
+    [[nodiscard]] std::tuple<double, double, double>
+    project_to_sphere(int u, int v) const noexcept;
 };
 
-inline double pinhole::phi(int u0, int v0, int u1, int v1) const
-    noexcept {
+inline double pinhole::phi(int u0, int v0, int u1, int v1) const noexcept {
     Expects(u0 >= 0);
     Expects(v0 >= 0);
     Expects(u1 >= 0);

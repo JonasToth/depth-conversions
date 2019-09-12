@@ -10,22 +10,22 @@
 namespace sens_loc { namespace conversion {
 
 #define DIFF_STAR(depth_image, curv_image)                                     \
-    const Real d__1__1 = depth_image.at<PixelType>(v - 1, u - 1);              \
-    const Real d__1__0 = depth_image.at<PixelType>(v - 1, u);                  \
-    const Real d__1_1  = depth_image.at<PixelType>(v - 1, u + 1);              \
+    const Real d__1__1 = (depth_image).at<PixelType>(v - 1, u - 1);              \
+    const Real d__1__0 = (depth_image).at<PixelType>(v - 1, u);                  \
+    const Real d__1_1  = (depth_image).at<PixelType>(v - 1, u + 1);              \
                                                                                \
-    const Real d__0__1 = depth_image.at<PixelType>(v, u - 1);                  \
-    const Real d__0__0 = depth_image.at<PixelType>(v, u);                      \
-    const Real d__0_1  = depth_image.at<PixelType>(v, u + 1);                  \
+    const Real d__0__1 = (depth_image).at<PixelType>(v, u - 1);                  \
+    const Real d__0__0 = (depth_image).at<PixelType>(v, u);                      \
+    const Real d__0_1  = (depth_image).at<PixelType>(v, u + 1);                  \
                                                                                \
-    const Real d_1__1 = depth_image.at<PixelType>(v + 1, u - 1);               \
-    const Real d_1__0 = depth_image.at<PixelType>(v + 1, u);                   \
-    const Real d_1_1  = depth_image.at<PixelType>(v + 1, u + 1);               \
+    const Real d_1__1 = (depth_image).at<PixelType>(v + 1, u - 1);               \
+    const Real d_1__0 = (depth_image).at<PixelType>(v + 1, u);                   \
+    const Real d_1_1  = (depth_image).at<PixelType>(v + 1, u + 1);               \
                                                                                \
     if (d__1__1 == 0. || d__1__0 == 0. || d__1_1 == 0. || d__0__1 == 0. ||     \
         d__0__0 == 0. || d__0_1 == 0. || d_1__1 == 0. || d_1__0 == 0. ||       \
         d_1_1 == 0.) {                                                         \
-        curv_image.at<Real>(v, u) = 0.;                                        \
+        (curv_image).at<Real>(v, u) = 0.;                                        \
         continue;                                                              \
     }
 

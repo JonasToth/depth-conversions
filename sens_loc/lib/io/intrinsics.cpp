@@ -3,7 +3,7 @@
 #include <sstream>
 #include <string>
 
-namespace sens_loc { namespace io {
+namespace sens_loc::io {
 std::optional<camera_models::pinhole> load_pinhole_intrinsic(std::istream &in) {
     if (!in.good())
         return std::nullopt;
@@ -50,4 +50,4 @@ std::optional<camera_models::pinhole> load_pinhole_intrinsic(std::istream &in) {
     }
     return p;
 }
-}}  // namespace sens_loc::io
+}  // namespace sens_loc::io
