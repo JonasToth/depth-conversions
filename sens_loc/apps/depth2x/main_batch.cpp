@@ -1,5 +1,6 @@
+#include "batch_converter.h"
+
 #include <CLI/CLI.hpp>
-#include <chrono>
 #include <fmt/core.h>
 #include <fstream>
 #include <iostream>
@@ -12,199 +13,123 @@
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/util/console.h>
 #include <sens_loc/version.h>
+#include <stdexcept>
 #include <string>
 #include <taskflow/taskflow.hpp>
-#include <vector>
 
-using namespace sens_loc;
-using namespace std;
 
-namespace {
-struct file_patterns {
-    string input;
-    string output;
-    string horizontal;
-    string vertical;
-    string diagonal;
-    string antidiagonal;
-};
-}  // namespace
+namespace sens_loc { namespace apps {
 
-namespace bearing {
-/// This file substitues 'index' into the patterns (if existent) and calculates
-/// bearing angle images for it.
-/// If any operation fails 'false' is returned. On success 'true' is returned.
-bool process_file(const file_patterns &         p,
-                  const camera_models::pinhole &intrinsic, int index) {
-    Expects(!p.input.empty());
-    Expects(!p.horizontal.empty() || !p.vertical.empty() ||
-            !p.diagonal.empty() || !p.antidiagonal.empty());
+class bearing_converter : public batch_converter {
+  public:
+    bearing_converter(const file_patterns &         files,
+                      const camera_models::pinhole &intrinsic)
+        : batch_converter(files)
+        , intrinsic{intrinsic} {
+        if (files.horizontal.empty() && files.vertical.empty() &&
+            files.diagonal.empty() && files.antidiagonal.empty()) {
+            std::cerr << util::err{};
+            std::cerr << "At least one output pattern required!\n";
+            throw std::invalid_argument{"Missing output pattern"};
+        }
+    }
 
-    using namespace conversion;
+    virtual ~bearing_converter() = default;
 
-    const std::string input_file = fmt::format(p.input, index);
-    optional<cv::Mat> depth_image =
-        io::load_image(input_file, cv::IMREAD_UNCHANGED);
+  private:
+    bool process_file(int idx) const noexcept override {
+        Expects(!_files.input.empty());
+        Expects(!_files.horizontal.empty() || !_files.vertical.empty() ||
+                !_files.diagonal.empty() || !_files.antidiagonal.empty());
 
-    if (!depth_image)
-        return false;
+        using namespace conversion;
 
-    const cv::Mat euclid_depth =
-        depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+        const std::string      input_file = fmt::format(_files.input, idx);
+        std::optional<cv::Mat> depth_image =
+            io::load_image(input_file, cv::IMREAD_UNCHANGED);
 
-    bool final_result = true;
+        if (!depth_image)
+            return false;
+
+        const cv::Mat euclid_depth =
+            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+
+        bool final_result = true;
 #define BEARING_PROCESS(DIRECTION)                                             \
-    if (!p.DIRECTION.empty()) {                                                \
+    if (!_files.DIRECTION.empty()) {                                           \
         cv::Mat bearing =                                                      \
             depth_to_bearing<direction::DIRECTION, double, double>(            \
                 euclid_depth, intrinsic);                                      \
-        bool success = cv::imwrite(fmt::format(p.DIRECTION, index),            \
+        bool success = cv::imwrite(fmt::format(_files.DIRECTION, idx),         \
                                    convert_bearing<double, ushort>(bearing));  \
         final_result &= success;                                               \
     }
 
-    BEARING_PROCESS(horizontal)
-    BEARING_PROCESS(vertical)
-    BEARING_PROCESS(diagonal)
-    BEARING_PROCESS(antidiagonal)
+        BEARING_PROCESS(horizontal)
+        BEARING_PROCESS(vertical)
+        BEARING_PROCESS(diagonal)
+        BEARING_PROCESS(antidiagonal)
 
 #undef BEARING_PROCESS
 
-    return final_result;
-}
-
-/// Executor for the batch conversion of depth images to bearing angle images.
-int convert_bearing_batch(const file_patterns &files, int start_idx,
-                          int                           end_idx,
-                          const camera_models::pinhole &intrinsic) {
-    if (files.horizontal.empty() && files.vertical.empty() &&
-        files.diagonal.empty() && files.antidiagonal.empty()) {
-        cerr << util::err{};
-        cerr << "At least one output pattern required!\n";
-        return 1;
+        return final_result;
     }
 
-    int fails       = 0;
-    int return_code = 0;
-    {
-        tf::Executor executor;
-        tf::Taskflow tf;
-        mutex        cout_mutex;
+    const camera_models::pinhole &intrinsic;
+};
 
-        tf.parallel_for(
-            start_idx, end_idx + 1, 1,
-            [&files, &cout_mutex, &intrinsic, &return_code, &fails](int idx) {
-                const bool success = process_file(files, intrinsic, idx);
-                if (!success) {
-                    lock_guard l(cout_mutex);
-                    fails++;
-                    cerr << util::err{};
-                    cerr << "Could not process index \"" << rang::style::bold
-                         << idx << "\"" << rang::style::reset << "!\n";
-                    return_code = 1;
-                }
-            });
+class range_converter : public batch_converter {
+  public:
+    range_converter(const file_patterns &         files,
+                    const camera_models::pinhole &intrinsic)
+        : batch_converter(files)
+        , intrinsic{intrinsic} {
 
-        const auto before = chrono::steady_clock::now();
-        executor.run(tf).wait();
-        const auto after = chrono::steady_clock::now();
-
-        cerr << util::info{};
-        cerr << "Processing " << rang::style::bold
-             << end_idx - start_idx + 1 - fails << rang::style::reset
-             << " images took " << rang::style::bold
-             << chrono::duration_cast<chrono::seconds>(after - before).count()
-             << "" << rang::style::reset << " seconds!\n";
-
-        if (fails > 0)
-            cerr << util::warn{} << "Encountered " << rang::style::bold << fails
-                 << rang::style::reset << " problematic files!\n";
+        if (files.output.empty()) {
+            std::cerr << util::err{};
+            std::cerr << "output pattern required!\n";
+            throw std::invalid_argument{"output pattern required\n"};
+        }
     }
 
-    return return_code;
-}
-}  // namespace bearing
+    virtual ~range_converter() = default;
 
-namespace range {
-bool process_file(const file_patterns &         p,
-                  const camera_models::pinhole &intrinsic, int index) {
-    Expects(!p.input.empty());
-    Expects(!p.output.empty());
+  private:
+    bool process_file(int idx) const noexcept override {
+        Expects(!_files.input.empty());
+        Expects(!_files.output.empty());
 
-    using namespace conversion;
+        using namespace conversion;
 
-    const std::string input_file = fmt::format(p.input, index);
-    optional<cv::Mat> depth_image =
-        io::load_image(input_file, cv::IMREAD_UNCHANGED);
+        const std::string      input_file = fmt::format(_files.input, idx);
+        std::optional<cv::Mat> depth_image =
+            io::load_image(input_file, cv::IMREAD_UNCHANGED);
 
-    if (!depth_image)
-        return false;
+        if (!depth_image)
+            return false;
 
-    const cv::Mat euclid_depth =
-        depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+        const cv::Mat euclid_depth =
+            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
 
-    cv::Mat depth_converted((*depth_image).rows, (*depth_image).cols,
-                            (*depth_image).type());
-    euclid_depth.convertTo(depth_converted, (*depth_image).type());
+        cv::Mat depth_converted((*depth_image).rows, (*depth_image).cols,
+                                (*depth_image).type());
+        euclid_depth.convertTo(depth_converted, (*depth_image).type());
 
-    bool success = cv::imwrite(fmt::format(p.output, index), depth_converted);
+        bool success =
+            cv::imwrite(fmt::format(_files.output, idx), depth_converted);
 
-    return success;
-}
-
-/// Executor for the batch conversion of depth images to bearing angle images.
-int convert_bearing_batch(const file_patterns &files, int start_idx,
-                          int                           end_idx,
-                          const camera_models::pinhole &intrinsic) {
-    if (files.output.empty()) {
-        cerr << util::err{};
-        cerr << "output pattern required!\n";
-        return 1;
+        return success;
     }
 
-    int fails       = 0;
-    int return_code = 0;
-    {
-        tf::Executor executor;
-        tf::Taskflow tf;
-        mutex        cout_mutex;
+    const camera_models::pinhole &intrinsic;
+};
 
-        tf.parallel_for(
-            start_idx, end_idx + 1, 1,
-            [&files, &cout_mutex, &intrinsic, &return_code, &fails](int idx) {
-                const bool success = process_file(files, intrinsic, idx);
-                if (!success) {
-                    lock_guard l(cout_mutex);
-                    fails++;
-                    cerr << util::err{};
-                    cerr << "Could not process index \"" << rang::style::bold
-                         << idx << "\"" << rang::style::reset << "!\n";
-                    return_code = 1;
-                }
-            });
-
-        const auto before = chrono::steady_clock::now();
-        executor.run(tf).wait();
-        const auto after = chrono::steady_clock::now();
-
-        cerr << util::info{};
-        cerr << "Processing " << rang::style::bold
-             << end_idx - start_idx + 1 - fails << rang::style::reset
-             << " images took " << rang::style::bold
-             << chrono::duration_cast<chrono::seconds>(after - before).count()
-             << "" << rang::style::reset << " seconds!\n";
-
-        if (fails > 0)
-            cerr << util::warn{} << "Encountered " << rang::style::bold << fails
-                 << rang::style::reset << " problematic files!\n";
-    }
-
-    return return_code;
-}
-
-}  // namespace range
+}}  // namespace sens_loc::apps
 
 int main(int argc, char **argv) {
+    using namespace sens_loc;
+    using namespace std;
+
     CLI::App app{"Batchconversion of depth images to bearing angle images."};
 
     auto print_version = [argv](int /*count*/) {
@@ -219,7 +144,7 @@ int main(int argc, char **argv) {
                    "File that contains calibration parameters for the camera")
         ->required()
         ->check(CLI::ExistingFile);
-    file_patterns files;
+    apps::file_patterns files;
 
     app.add_option("-i,--input", files.input,
                    "Input pattern for image, e.g. \"depth-{}.png\"")
@@ -277,13 +202,13 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    if (*bearing_cmd)
-        return bearing::convert_bearing_batch(files, start_idx, end_idx,
-                                              *intrinsic);
-    else if (*range_cmd)
-        return range::convert_bearing_batch(files, start_idx, end_idx,
-                                            *intrinsic);
-    else {
+    if (*bearing_cmd) {
+        apps::bearing_converter c(files, *intrinsic);
+        return c.process_batch(start_idx, end_idx);
+    } else if (*range_cmd) {
+        apps::range_converter c(files, *intrinsic);
+        return c.process_batch(start_idx, end_idx);
+    } else {
         cerr << util::err{};
         cerr << "One subcommand is required!\n";
         return 1;
