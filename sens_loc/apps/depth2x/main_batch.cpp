@@ -12,7 +12,7 @@
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/util/console.h>
 #include <sens_loc/version.h>
-#include <string_view>
+#include <string>
 #include <taskflow/taskflow.hpp>
 #include <vector>
 
@@ -29,6 +29,7 @@ struct file_patterns {
     string antidiagonal;
 };
 }  // namespace
+
 namespace bearing {
 /// This file substitues 'index' into the patterns (if existent) and calculates
 /// bearing angle images for it.
@@ -72,6 +73,56 @@ bool process_file(const file_patterns &         p,
     return final_result;
 }
 
+/// Executor for the batch conversion of depth images to bearing angle images.
+int convert_bearing_batch(const file_patterns &files, int start_idx,
+                          int                           end_idx,
+                          const camera_models::pinhole &intrinsic) {
+    if (files.horizontal.empty() && files.vertical.empty() &&
+        files.diagonal.empty() && files.antidiagonal.empty()) {
+        cerr << util::err{};
+        cerr << "At least one output pattern required!\n";
+        return 1;
+    }
+
+    int fails       = 0;
+    int return_code = 0;
+    {
+        tf::Executor executor;
+        tf::Taskflow tf;
+        mutex        cout_mutex;
+
+        tf.parallel_for(
+            start_idx, end_idx + 1, 1,
+            [&files, &cout_mutex, &intrinsic, &return_code, &fails](int idx) {
+                const bool success = process_file(files, intrinsic, idx);
+                if (!success) {
+                    lock_guard l(cout_mutex);
+                    fails++;
+                    cerr << util::err{};
+                    cerr << "Could not process index \"" << rang::style::bold
+                         << idx << "\"" << rang::style::reset << "!\n";
+                    return_code = 1;
+                }
+            });
+
+        const auto before = chrono::steady_clock::now();
+        executor.run(tf).wait();
+        const auto after = chrono::steady_clock::now();
+
+        cerr << util::info{};
+        cerr << "Processing " << rang::style::bold
+             << end_idx - start_idx + 1 - fails << rang::style::reset
+             << " images took " << rang::style::bold
+             << chrono::duration_cast<chrono::seconds>(after - before).count()
+             << "" << rang::style::reset << " seconds!\n";
+
+        if (fails > 0)
+            cerr << util::warn{} << "Encountered " << rang::style::bold << fails
+                 << rang::style::reset << " problematic files!\n";
+    }
+
+    return return_code;
+}
 }  // namespace bearing
 
 int main(int argc, char **argv) {
@@ -102,9 +153,9 @@ int main(int argc, char **argv) {
     app.add_option("-e,--end", end_idx, "End index of batch, inclusive")
         ->required();
 
+    // Bearing angle images territory
     CLI::App *bearing_cmd = app.add_subcommand(
         "bearing", "Converts depth images into bearing angle images");
-    // The following options only apply to bearing angle images.
     bearing_cmd->add_option(
         "--horizontal", files.horizontal,
         "Calculate horizontal bearing angle image and write to this pattern");
@@ -138,56 +189,9 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    if (*bearing_cmd) {
-        if (files.horizontal.empty() && files.vertical.empty() &&
-            files.diagonal.empty() && files.antidiagonal.empty()) {
-            cerr << util::err{};
-            cerr << "At least one output pattern required!\n";
-            return 1;
-        }
-
-        int fails       = 0;
-        int return_code = 0;
-        {
-            tf::Executor executor;
-            tf::Taskflow tf;
-            mutex        cout_mutex;
-
-            tf.parallel_for(start_idx, end_idx + 1, 1,
-                            [&files, &cout_mutex, &intrinsic, &return_code,
-                             &fails](int idx) {
-                                const bool success = bearing::process_file(
-                                    files, *intrinsic, idx);
-                                if (!success) {
-                                    lock_guard l(cout_mutex);
-                                    fails++;
-                                    cerr << util::err{};
-                                    cerr << "Could not process index \""
-                                         << rang::style::bold << idx << "\""
-                                         << rang::style::reset << "!\n";
-                                    return_code = 1;
-                                }
-                            });
-
-            const auto before = chrono::steady_clock::now();
-            executor.run(tf).wait();
-            const auto after = chrono::steady_clock::now();
-
-            cerr << util::info{};
-            cerr << "Processing " << rang::style::bold
-                 << end_idx - start_idx + 1 - fails << rang::style::reset
-                 << " images took " << rang::style::bold
-                 << chrono::duration_cast<chrono::seconds>(after - before)
-                        .count()
-                 << "" << rang::style::reset << " seconds!\n";
-
-            if (fails > 0)
-                cerr << util::warn{} << "Encountered " << rang::style::bold
-                     << fails << rang::style::reset << " problematic files!\n";
-        }
-
-        return return_code;
-    }
+    if (*bearing_cmd)
+        return bearing::convert_bearing_batch(files, start_idx, end_idx,
+                                              *intrinsic);
 
     else {
         cerr << util::err{};
