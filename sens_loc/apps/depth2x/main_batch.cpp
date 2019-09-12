@@ -101,89 +101,102 @@ int main(int argc, char **argv) {
     app.add_option("-e,--end", end_idx, "End index of batch, inclusive")
         ->required();
 
+    CLI::App *bearing_cmd = app.add_subcommand(
+        "bearing", "Converts depth images into bearing angle images");
     // The following options only apply to bearing angle images.
     string bearing_hor_name;
-    app.add_option(
+    bearing_cmd->add_option(
         "--horizontal", bearing_hor_name,
         "Calculate horizontal bearing angle image and write to this pattern");
     string bearing_ver_name;
-    app.add_option(
+    bearing_cmd->add_option(
         "--vertical", bearing_ver_name,
         "Calculate vertical bearing angle and write to this pattern");
     string bearing_dia_name;
-    app.add_option(
+    bearing_cmd->add_option(
         "--diagonal", bearing_dia_name,
         "Calculate diagonal bearing angle and write to this pattern");
     string bearing_ant_name;
-    app.add_option(
+    bearing_cmd->add_option(
         "--anti-diagonal", bearing_ant_name,
         "Calculate anti-diagonal bearing angle and write to this pattern");
 
     CLI11_PARSE(app, argc, argv);
 
-    if (bearing_hor_name.empty() && bearing_ver_name.empty() &&
-        bearing_dia_name.empty() && bearing_ant_name.empty()) {
+    if (*bearing_cmd) {
+        if (bearing_hor_name.empty() && bearing_ver_name.empty() &&
+            bearing_dia_name.empty() && bearing_ant_name.empty()) {
+            cerr << util::err{};
+            cerr << "At least one output pattern required!\n";
+            return 1;
+        }
+
+
+        ifstream                         calibration_fstream{calibration_file};
+        optional<camera_models::pinhole> intrinsic =
+            io::load_pinhole_intrinsic(calibration_fstream);
+
+        if (!intrinsic) {
+            cerr << util::err{};
+            cerr << "Could not load intrinsic calibration \""
+                 << rang::style::bold << calibration_file << rang::style::reset
+                 << "\"!\n";
+            return 1;
+        }
+        bearing::file_patterns files{
+            .input        = input_file,
+            .horizontal   = bearing_hor_name,
+            .vertical     = bearing_ver_name,
+            .diagonal     = bearing_dia_name,
+            .antidiagonal = bearing_ant_name,
+        };
+
+        int fails       = 0;
+        int return_code = 0;
+        {
+            tf::Executor executor;
+            tf::Taskflow tf;
+            mutex        cout_mutex;
+
+            tf.parallel_for(start_idx, end_idx + 1, 1,
+                            [&files, &cout_mutex, &intrinsic, &return_code,
+                             &fails](int idx) {
+                                const bool success = bearing::process_file(
+                                    files, *intrinsic, idx);
+                                if (!success) {
+                                    lock_guard l(cout_mutex);
+                                    fails++;
+                                    cerr << util::err{};
+                                    cerr << "Could not process index \""
+                                         << rang::style::bold << idx << "\""
+                                         << rang::style::reset << "!\n";
+                                    return_code = 1;
+                                }
+                            });
+
+            const auto before = chrono::steady_clock::now();
+            executor.run(tf).wait();
+            const auto after = chrono::steady_clock::now();
+
+            cerr << util::info{};
+            cerr << "Processing " << rang::style::bold
+                 << end_idx - start_idx + 1 - fails << rang::style::reset
+                 << " images took " << rang::style::bold
+                 << chrono::duration_cast<chrono::seconds>(after - before)
+                        .count()
+                 << "" << rang::style::reset << " seconds!\n";
+
+            if (fails > 0)
+                cerr << util::warn{} << "Encountered " << rang::style::bold
+                     << fails << rang::style::reset << " problematic files!\n";
+        }
+
+        return return_code;
+    }
+
+    else {
         cerr << util::err{};
-        cerr << "At least one output pattern required!\n";
+        cerr << "One subcommand is required!\n";
         return 1;
     }
-
-
-    ifstream                         calibration_fstream{calibration_file};
-    optional<camera_models::pinhole> intrinsic =
-        io::load_pinhole_intrinsic(calibration_fstream);
-
-    if (!intrinsic) {
-        cerr << util::err{};
-        cerr << "Could not load intrinsic calibration \"" << rang::style::bold
-             << calibration_file << rang::style::reset << "\"!\n";
-        return 1;
-    }
-    bearing::file_patterns files{
-        .input        = input_file,
-        .horizontal   = bearing_hor_name,
-        .vertical     = bearing_ver_name,
-        .diagonal     = bearing_dia_name,
-        .antidiagonal = bearing_ant_name,
-    };
-
-    int fails       = 0;
-    int return_code = 0;
-    {
-        tf::Executor executor;
-        tf::Taskflow tf;
-        mutex        cout_mutex;
-
-        tf.parallel_for(
-            start_idx, end_idx + 1, 1,
-            [&files, &cout_mutex, &intrinsic, &return_code, &fails](int idx) {
-                const bool success =
-                    bearing::process_file(files, *intrinsic, idx);
-                if (!success) {
-                    lock_guard l(cout_mutex);
-                    fails++;
-                    cerr << util::err{};
-                    cerr << "Could not process index \"" << rang::style::bold
-                         << idx << "\"" << rang::style::reset << "!\n";
-                    return_code = 1;
-                }
-            });
-
-        const auto before = chrono::steady_clock::now();
-        executor.run(tf).wait();
-        const auto after = chrono::steady_clock::now();
-
-        cerr << util::info{};
-        cerr << "Processing " << rang::style::bold
-             << end_idx - start_idx + 1 - fails << rang::style::reset
-             << " images took " << rang::style::bold
-             << chrono::duration_cast<chrono::seconds>(after - before).count()
-             << "" << rang::style::reset << " seconds!\n";
-
-        if (fails > 0)
-            cerr << util::warn{} << "Encountered " << rang::style::bold << fails
-                 << rang::style::reset << " problematic files!\n";
-    }
-
-    return return_code;
 }
