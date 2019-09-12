@@ -4,11 +4,13 @@
 #include <fmt/core.h>
 #include <fstream>
 #include <iostream>
+#include <memory>
 #include <numeric>
 #include <opencv2/imgcodecs.hpp>
 #include <rang.hpp>
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/depth_to_curvature.h>
+#include <sens_loc/conversion/depth_to_flexion.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/conversion/depth_to_max_curve.h>
 #include <sens_loc/io/image.h>
@@ -242,7 +244,49 @@ class max_curve_converter : public batch_converter {
 
     const camera_models::pinhole &intrinsic;
 };
+
+class flexion_converter : public batch_converter {
+  public:
+    flexion_converter(const file_patterns &         files,
+                      const camera_models::pinhole &intrinsic)
+        : batch_converter(files)
+        , intrinsic{intrinsic} {
+        check_output_exists(files);
+    }
+    virtual ~flexion_converter() = default;
+
+  private:
+    bool process_file(int idx) const noexcept override {
+        Expects(!_files.input.empty());
+        Expects(!_files.output.empty());
+
+        using namespace conversion;
+
+        const std::string      input_file = fmt::format(_files.input, idx);
+        std::optional<cv::Mat> depth_image =
+            io::load_image(input_file, cv::IMREAD_UNCHANGED);
+
+        if (!depth_image)
+            return false;
+
+        Expects((*depth_image).type() == CV_16U);
+        const cv::Mat euclid_depth =
+            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+
+        const cv::Mat flexion =
+            depth_to_flexion<double, double>(euclid_depth, intrinsic);
+        const cv::Mat flexion_ushort = convert_flexion<double, ushort>(flexion);
+
+        bool success =
+            cv::imwrite(fmt::format(_files.output, idx), flexion_ushort);
+
+        return success;
+    }
+
+    const camera_models::pinhole &intrinsic;
+};
 }}  // namespace sens_loc::apps
+
 
 int main(int argc, char **argv) {
     using namespace sens_loc;
@@ -319,6 +363,12 @@ int main(int argc, char **argv) {
     max_curve_cmd->add_option("-o,--output", files.output,
                               "Output pattern for the max-curve images.");
 
+    // Flexion images
+    CLI::App *flexion_cmd = app.add_subcommand(
+        "flexion", "Convert depth images into flexion images");
+    flexion_cmd->add_option("-o,--output", files.output,
+                            "Output pattern for the flexion images.");
+
     CLI11_PARSE(app, argc, argv);
 
     if (files.input.empty()) {
@@ -340,26 +390,27 @@ int main(int argc, char **argv) {
     }
 
     try {
-        if (*bearing_cmd) {
-            apps::bearing_converter c(files, *intrinsic);
-            return c.process_batch(start_idx, end_idx);
-        }
-        if (*range_cmd) {
-            apps::range_converter c(files, *intrinsic);
-            return c.process_batch(start_idx, end_idx);
-        }
-        if (*mean_curv_cmd) {
-            apps::mean_curv_converter c(files, *intrinsic);
-            return c.process_batch(start_idx, end_idx);
-        }
-        if (*gauss_curv_cmd) {
-            apps::gauss_curv_converter c(files, *intrinsic);
-            return c.process_batch(start_idx, end_idx);
-        }
-        if (*max_curve_cmd) {
-            apps::max_curve_converter c(files, *intrinsic);
-            return c.process_batch(start_idx, end_idx);
-        }
+        unique_ptr<apps::batch_converter> c =
+            [&]() -> unique_ptr<apps::batch_converter> {
+            if (*bearing_cmd)
+                return make_unique<apps::bearing_converter>(files, *intrinsic);
+            if (*range_cmd)
+                return make_unique<apps::range_converter>(files, *intrinsic);
+            if (*mean_curv_cmd)
+                return make_unique<apps::mean_curv_converter>(files,
+                                                              *intrinsic);
+            if (*gauss_curv_cmd)
+                return make_unique<apps::gauss_curv_converter>(files,
+                                                               *intrinsic);
+            if (*max_curve_cmd)
+                return make_unique<apps::max_curve_converter>(files,
+                                                              *intrinsic);
+            if (*flexion_cmd)
+                return make_unique<apps::flexion_converter>(files, *intrinsic);
+
+            throw std::invalid_argument{"target type for conversion required!"};
+        }();
+        return c->process_batch(start_idx, end_idx);
     } catch (const std::invalid_argument &e) {
         cerr << util::err{}
              << "Could not initialize the batch process. Check your "

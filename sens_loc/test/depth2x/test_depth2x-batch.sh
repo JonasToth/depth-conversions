@@ -125,7 +125,7 @@ if  [ ! -f batch-range-002.png ] || \
 fi
 
 
-# curvature images to range images.
+# depth images to curvature images.
 
 
 if ! ${exe} -c "kinect_intrinsic.txt" \
@@ -196,7 +196,7 @@ if  [ ! -f batch-mean-curv-002.png ] || \
 fi
 
 
-# curvature images to range images.
+# depth images to max-curve images.
 
 
 if ! ${exe} -c "kinect_intrinsic.txt" \
@@ -228,6 +228,43 @@ fi
 if  [ ! -f batch-max-curve-002.png ] || \
     [ ! -f batch-max-curve-003.png ] || \
     [ ! -f batch-max-curve-004.png ]; then
+    print_error "Did not create expected output files with leading 0."
+    exit 1
+fi
+
+
+# depth images to flexion images.
+
+
+if ! ${exe} -c "kinect_intrinsic.txt" \
+    -i "data{}-depth.png" \
+    -s 0 -e 1 \
+    flexion \
+    --output "batch-flexion-{}.png"
+then
+    print_error "Could not create all flexion images."
+    exit 1
+fi
+
+if  [ ! -f batch-flexion-0.png ] || \
+    [ ! -f batch-flexion-1.png ]; then
+    print_error "Did not create expected output files without leading 0."
+    exit 1
+fi
+
+if ! ${exe} -c "kinect_intrinsic.txt" \
+    -i "data{:03d}-depth.png" \
+    --start 2 --end 4 \
+    flexion \
+    --output "batch-flexion-{:03d}.png"
+then
+    print_error "Could not create all max-curve images."
+    exit 1
+fi
+
+if  [ ! -f batch-flexion-002.png ] || \
+    [ ! -f batch-flexion-003.png ] || \
+    [ ! -f batch-flexion-004.png ]; then
     print_error "Did not create expected output files with leading 0."
     exit 1
 fi
