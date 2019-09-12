@@ -31,8 +31,8 @@ bool batch_converter::process_batch(int start, int end) const noexcept {
     Expects(start - end != 0);
 
     int  fails       = 0;
-    bool return_code = 0;
-    {
+    bool return_code = true;
+    try {
         tf::Executor executor;
         tf::Taskflow tf;
         std::mutex   cout_mutex;
@@ -69,6 +69,12 @@ bool batch_converter::process_batch(int start, int end) const noexcept {
         if (fails > 0)
             std::cerr << util::warn{} << "Encountered " << rang::style::bold
                       << fails << rang::style::reset << " problematic files!\n";
+    } catch (...) {
+        std::cerr << util::err{}
+                  << "Fatal problem occured while batch-processing!\n"
+                  << "Potential exhaustion of resources or an other system "
+                     "problem!\n";
+        return_code = false;
     }
 
     return return_code;

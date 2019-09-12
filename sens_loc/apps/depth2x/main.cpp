@@ -12,13 +12,14 @@
 #include <string>
 
 
-int main(int argc, char **argv) {
+int main(int argc, char **argv) try {
     using namespace sens_loc;
     using namespace std;
 
     CLI::App app{"Batchconversion of depth images to bearing angle images."};
 
     auto print_version = [argv](int /*count*/) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
         cout << argv[0] << " " << get_version() << "\n";
         exit(0);
     };
@@ -151,5 +152,14 @@ int main(int argc, char **argv) {
     cerr << util::err{};
     cerr << "One subcommand is required!\n";
 
+    return 1;
+} catch (const std::exception &e) {
+    std::cerr << sens_loc::util::err{}
+              << "Severe problem occured while system-setup.\n"
+              << "Message:" << e.what();
+    return 1;
+} catch (...) {
+    std::cerr << sens_loc::util::err{}
+              << "Severe problem occured while system-setup.\n";
     return 1;
 }

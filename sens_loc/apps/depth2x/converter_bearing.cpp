@@ -14,6 +14,7 @@ bool bearing_converter::process_file(cv::Mat depth_image, int idx) const
     using namespace sens_loc::conversion;
 
     bool final_result = true;
+    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BEARING_PROCESS(DIRECTION)                                             \
     if (!_files.DIRECTION.empty()) {                                           \
         cv::Mat bearing =                                                      \

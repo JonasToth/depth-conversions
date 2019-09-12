@@ -18,11 +18,15 @@ class bearing_converter : public batch_pinhole_converter {
                 "Missing output pattern for at least one bearing direction"};
         }
     }
-
-    ~bearing_converter() override = default;
+    bearing_converter(const bearing_converter &) = default;
+    bearing_converter(bearing_converter &&)      = default;
+    bearing_converter &operator=(const bearing_converter &) = default;
+    bearing_converter &operator=(bearing_converter &&) = default;
+    ~bearing_converter() override                      = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const noexcept override;
+    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
+        noexcept override;
 };
 
 class range_converter : public batch_pinhole_converter {
@@ -32,11 +36,15 @@ class range_converter : public batch_pinhole_converter {
         : batch_pinhole_converter(files, t, intrinsic) {
         check_output_exists(files);
     }
-
-    ~range_converter() override = default;
+    range_converter(const range_converter &) = default;
+    range_converter(range_converter &&)      = default;
+    range_converter &operator=(const range_converter &) = default;
+    range_converter &operator=(range_converter &&) = default;
+    ~range_converter() override                    = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const noexcept override;
+    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
+        noexcept override;
 };
 
 class gauss_curv_converter : public batch_pinhole_converter {
@@ -46,10 +54,15 @@ class gauss_curv_converter : public batch_pinhole_converter {
         : batch_pinhole_converter(files, t, intrinsic) {
         check_output_exists(files);
     }
-    ~gauss_curv_converter() override = default;
+    gauss_curv_converter(const gauss_curv_converter &) = default;
+    gauss_curv_converter(gauss_curv_converter &&)      = default;
+    gauss_curv_converter &operator=(const gauss_curv_converter &) = default;
+    gauss_curv_converter &operator=(gauss_curv_converter &&) = default;
+    ~gauss_curv_converter() override                         = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const noexcept override;
+    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
+        noexcept override;
 };
 
 class mean_curv_converter : public batch_pinhole_converter {
@@ -59,10 +72,15 @@ class mean_curv_converter : public batch_pinhole_converter {
         : batch_pinhole_converter(files, t, intrinsic) {
         check_output_exists(files);
     }
-    ~mean_curv_converter() override = default;
+    mean_curv_converter(const mean_curv_converter &) = default;
+    mean_curv_converter(mean_curv_converter &&)      = default;
+    mean_curv_converter &operator=(const mean_curv_converter &) = default;
+    mean_curv_converter &operator=(mean_curv_converter &&) = default;
+    ~mean_curv_converter() override                        = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const noexcept override;
+    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
+        noexcept override;
 };
 
 class max_curve_converter : public batch_pinhole_converter {
@@ -72,10 +90,15 @@ class max_curve_converter : public batch_pinhole_converter {
         : batch_pinhole_converter(files, t, intrinsic) {
         check_output_exists(files);
     }
-    ~max_curve_converter() override = default;
+    max_curve_converter(const max_curve_converter &) = default;
+    max_curve_converter(max_curve_converter &&)      = default;
+    max_curve_converter &operator=(const max_curve_converter &) = default;
+    max_curve_converter &operator=(max_curve_converter &&) = default;
+    ~max_curve_converter() override                        = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const noexcept override;
+    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
+        noexcept override;
 };
 
 class flexion_converter : public batch_pinhole_converter {
@@ -85,10 +108,15 @@ class flexion_converter : public batch_pinhole_converter {
         : batch_pinhole_converter(files, t, intrinsic) {
         check_output_exists(files);
     }
-    ~flexion_converter() override = default;
+    flexion_converter(const flexion_converter &) = default;
+    flexion_converter(flexion_converter &&)      = default;
+    flexion_converter &operator=(const flexion_converter &) = default;
+    flexion_converter &operator=(flexion_converter &&) = default;
+    ~flexion_converter() override                      = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const noexcept override;
+    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
+        noexcept override;
 };
 }}  // namespace sens_loc::apps
 

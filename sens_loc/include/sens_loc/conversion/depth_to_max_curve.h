@@ -45,6 +45,7 @@ inline Real angle_formula(const Real d__1, const Real d__0, const Real d_1,
                        math::bearing_angle(d__0, d_1, cos_alpha2);
 
     Ensures(angle > 0.);
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     Ensures(angle < 2. * math::pi<Real>);
 
     return angle;
@@ -108,6 +109,7 @@ depth_to_max_curve(const cv::Mat &               depth_image,
                 max(angle_hor, max(angle_ver, max(angle_dia, angle_ant)));
 
             Ensures(max_angle >= 0.);
+            // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
             Ensures(max_angle < 2. * math::pi<Real>);
             max_curve.at<Real>(v, u) = max_angle;
         }
@@ -131,6 +133,7 @@ inline cv::Mat convert_max_curve(const cv::Mat &max_curve) noexcept {
 
     cv::Mat img(max_curve.rows, max_curve.cols, get_cv_type<PixelType>());
     auto [scale, offset] =
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         scaling_factor<Real, PixelType>(/*max_angle = */ 2. * math::pi<Real>);
     max_curve.convertTo(img, get_cv_type<PixelType>(), scale, offset);
 

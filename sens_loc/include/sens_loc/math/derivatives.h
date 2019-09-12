@@ -25,6 +25,7 @@ template <typename Real>
 inline Real second_derivative_central(Real y__1, Real y_0, Real y_1,
                                       Real dx_squared) noexcept {
     Expects(dx_squared > Real(0.));
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     return (y_1 + y__1 - 2. * y_0) / (dx_squared);
 }
 

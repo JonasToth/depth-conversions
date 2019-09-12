@@ -9,6 +9,7 @@
 
 namespace sens_loc { namespace conversion {
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define DIFF_STAR(depth_image, curv_image)                                     \
     const Real d__1__1 = (depth_image).at<PixelType>(v - 1, u - 1);              \
     const Real d__1__0 = (depth_image).at<PixelType>(v - 1, u);                  \

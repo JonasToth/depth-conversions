@@ -46,6 +46,11 @@ class batch_converter {
             throw std::invalid_argument{"input pattern is always required!"};
     }
 
+    batch_converter(const batch_converter &) = default;
+    batch_converter(batch_converter &&)      = default;
+    batch_converter &operator=(const batch_converter &) = default;
+    batch_converter &operator=(batch_converter &&) = default;
+
     /// Process the whole batch calling 'process_file' for each index.
     /// Returns 'false' if any of the indices fails.
     [[nodiscard]] bool process_batch(int start, int end) const noexcept;
@@ -53,19 +58,19 @@ class batch_converter {
     virtual ~batch_converter() = default;
 
   protected:
-    const file_patterns &_files;
-    depth_type           _input_depth_type;
+    file_patterns  _files;
+    depth_type     _input_depth_type;
 
   private:
-    [[nodiscard]] bool process_index(int idx) const noexcept;
-
-    [[nodiscard]] virtual cv::Mat preprocess_depth(cv::Mat depth_image) const noexcept {
+    [[nodiscard]] bool            process_index(int idx) const noexcept;
+    [[nodiscard]] virtual cv::Mat preprocess_depth(cv::Mat depth_image) const
+        noexcept {
         return depth_image;
     }
-
     /// Method to process exactly on file. This method is expected to have
     /// no sideeffects and is called in parallel.
-    [[nodiscard]] virtual bool process_file(cv::Mat depth_image, int idx) const noexcept = 0;
+    [[nodiscard]] virtual bool process_file(cv::Mat depth_image, int idx) const
+        noexcept = 0;
 };
 
 class batch_pinhole_converter : public batch_converter {
@@ -75,11 +80,19 @@ class batch_pinhole_converter : public batch_converter {
         : batch_converter(files, t)
         , intrinsic{intrinsic} {}
 
+    batch_pinhole_converter(const batch_pinhole_converter &) = default;
+    batch_pinhole_converter(batch_pinhole_converter &&)      = default;
+    batch_pinhole_converter &
+                             operator=(const batch_pinhole_converter &) = default;
+    batch_pinhole_converter &operator=(batch_pinhole_converter &&) = default;
+    ~batch_pinhole_converter() override                            = default;
+
   protected:
-    const camera_models::pinhole &intrinsic;
+    camera_models::pinhole intrinsic;
 
   private:
-    [[nodiscard]] cv::Mat preprocess_depth(cv::Mat depth_image) const noexcept override;
+    [[nodiscard]] cv::Mat preprocess_depth(cv::Mat depth_image) const
+        noexcept override;
 };
 
 }}  // namespace sens_loc::apps

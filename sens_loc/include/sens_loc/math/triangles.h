@@ -40,10 +40,14 @@ inline Real bearing_angle(const Real b, const Real c,
     /// but rather an numerical artifact. To not hit the post-conditions
     /// it is ok to subtract a tiny epsilon.
     /// The problem only occured with 'float' but did not occur with 'double'.
-    if (ratio >= 1.)
+    if (ratio >= 1.) {
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         ratio = 1. - Real(10.) * std::numeric_limits<Real>::epsilon();
-    if (ratio <= -1.)
+    }
+    if (ratio <= -1.) {
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         ratio = -1. + Real(10.) * std::numeric_limits<Real>::epsilon();
+    }
 
     Ensures(ratio > -1.);
     Ensures(ratio < +1.);

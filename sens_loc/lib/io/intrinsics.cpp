@@ -30,7 +30,9 @@ std::optional<camera_models::pinhole> load_pinhole_intrinsic(std::istream &in) {
         ss >> p.fx >> trash >> p.cx;
         Expects(p.fx > 0.);
         Expects(p.cx > 0.);
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         Expects(p.cx / static_cast<double>(p.w) < 0.75);
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         Expects(p.cx / static_cast<double>(p.w) > 0.25);
         if (ss.rdstate() != std::ios_base::eofbit)
             return std::nullopt;
@@ -43,7 +45,9 @@ std::optional<camera_models::pinhole> load_pinhole_intrinsic(std::istream &in) {
         ss >> trash >> p.fy >> p.cy;
         Expects(p.fy > 0.);
         Expects(p.cy > 0.);
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         Expects(p.cy / static_cast<double>(p.h) < 0.75);
+        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         Expects(p.cy / static_cast<double>(p.h) > 0.25);
         if (ss.rdstate() != std::ios_base::eofbit)
             return std::nullopt;

@@ -68,6 +68,7 @@ pinhole::project_to_sphere(int u, int v) const noexcept {
     const double ys     = factor * y;
     const double zs     = factor * z;
 
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     Ensures(std::abs(xs * xs + ys * ys + zs * zs - 1.) < 0.00000001);
 
     return std::make_tuple(xs, ys, zs);
