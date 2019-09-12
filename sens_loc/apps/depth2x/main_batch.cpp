@@ -10,6 +10,7 @@
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/depth_to_curvature.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
+#include <sens_loc/conversion/depth_to_max_curve.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/util/console.h>
@@ -199,6 +200,48 @@ class mean_curv_converter : public batch_converter {
 
     const camera_models::pinhole &intrinsic;
 };
+
+class max_curve_converter : public batch_converter {
+  public:
+    max_curve_converter(const file_patterns &         files,
+                        const camera_models::pinhole &intrinsic)
+        : batch_converter(files)
+        , intrinsic{intrinsic} {
+        check_output_exists(files);
+    }
+    virtual ~max_curve_converter() = default;
+
+  private:
+    bool process_file(int idx) const noexcept override {
+        Expects(!_files.input.empty());
+        Expects(!_files.output.empty());
+
+        using namespace conversion;
+
+        const std::string      input_file = fmt::format(_files.input, idx);
+        std::optional<cv::Mat> depth_image =
+            io::load_image(input_file, cv::IMREAD_UNCHANGED);
+
+        if (!depth_image)
+            return false;
+
+        Expects((*depth_image).type() == CV_16U);
+        const cv::Mat euclid_depth =
+            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+
+        const cv::Mat max_curve =
+            depth_to_max_curve<double, double>(euclid_depth, intrinsic);
+        const cv::Mat curve_ushort =
+            convert_max_curve<double, ushort>(max_curve);
+
+        bool success =
+            cv::imwrite(fmt::format(_files.output, idx), curve_ushort);
+
+        return success;
+    }
+
+    const camera_models::pinhole &intrinsic;
+};
 }}  // namespace sens_loc::apps
 
 int main(int argc, char **argv) {
@@ -270,6 +313,12 @@ int main(int argc, char **argv) {
         "-o,--output", files.output,
         "Output pattern for the gaussian-curvature images.");
 
+    // Max-Curve images
+    CLI::App *max_curve_cmd = app.add_subcommand(
+        "max-curve", "Convert depth images into max-curve images");
+    max_curve_cmd->add_option("-o,--output", files.output,
+                              "Output pattern for the max-curve images.");
+
     CLI11_PARSE(app, argc, argv);
 
     if (files.input.empty()) {
@@ -305,6 +354,10 @@ int main(int argc, char **argv) {
         }
         if (*gauss_curv_cmd) {
             apps::gauss_curv_converter c(files, *intrinsic);
+            return c.process_batch(start_idx, end_idx);
+        }
+        if (*max_curve_cmd) {
+            apps::max_curve_converter c(files, *intrinsic);
             return c.process_batch(start_idx, end_idx);
         }
     } catch (const std::invalid_argument &e) {
