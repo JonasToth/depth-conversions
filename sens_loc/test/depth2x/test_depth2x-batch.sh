@@ -124,4 +124,76 @@ if  [ ! -f batch-range-002.png ] || \
     exit 1
 fi
 
+
+
+# curvature images to range images.
+
+
+if ! ${exe} -c "kinect_intrinsic.txt" \
+    -i "data{}-depth.png" \
+    -s 0 -e 1 \
+    mean-curvature \
+    --output "batch-mean-curv-{}.png"
+then
+    print_error "Could not create all mean-curv images."
+    exit 1
+fi
+
+if  [ ! -f batch-mean-curv-0.png ] || \
+    [ ! -f batch-mean-curv-1.png ]; then
+    print_error "Did not create expected output files without leading 0."
+    exit 1
+fi
+
+if ! ${exe} -c "kinect_intrinsic.txt" \
+    -i "data{:03d}-depth.png" \
+    --start 2 --end 4 \
+    mean-curvature \
+    --output "batch-mean-curv-{:03d}.png"
+then
+    print_error "Could not create all mean-curv images."
+    exit 1
+fi
+
+if  [ ! -f batch-mean-curv-002.png ] || \
+    [ ! -f batch-mean-curv-003.png ] || \
+    [ ! -f batch-mean-curv-004.png ]; then
+    print_error "Did not create expected output files with leading 0."
+    exit 1
+fi
+
+
+if ! ${exe} -c "kinect_intrinsic.txt" \
+    -i "data{}-depth.png" \
+    -s 0 -e 1 \
+    gauss-curvature \
+    --output "batch-gauss-curv-{}.png"
+then
+    print_error "Could not create all gauss-curv images."
+    exit 1
+fi
+
+if  [ ! -f batch-gauss-curv-0.png ] || \
+    [ ! -f batch-gauss-curv-1.png ]; then
+    print_error "Did not create expected output files without leading 0."
+    exit 1
+fi
+
+if ! ${exe} -c "kinect_intrinsic.txt" \
+    -i "data{:03d}-depth.png" \
+    --start 2 --end 4 \
+    gauss-curvature \
+    --output "batch-gauss-curv-{:03d}.png"
+then
+    print_error "Could not create all gauss-curv images."
+    exit 1
+fi
+
+if  [ ! -f batch-mean-curv-002.png ] || \
+    [ ! -f batch-mean-curv-003.png ] || \
+    [ ! -f batch-mean-curv-004.png ]; then
+    print_error "Did not create expected output files with leading 0."
+    exit 1
+fi
+
 print_info "Test successful!"

@@ -22,6 +22,15 @@ struct file_patterns {
     std::string antidiagonal;
 };
 
+void check_output_exists(const file_patterns &files) {
+    if (files.output.empty()) {
+        std::cerr << util::err{};
+        std::cerr << "output pattern required!\n";
+        throw std::invalid_argument{"output pattern required\n"};
+    }
+}
+
+
 class batch_converter {
   public:
     batch_converter(const file_patterns &files)

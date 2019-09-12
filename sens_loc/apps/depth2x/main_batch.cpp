@@ -8,6 +8,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <rang.hpp>
 #include <sens_loc/conversion/depth_to_bearing.h>
+#include <sens_loc/conversion/depth_to_curvature.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/intrinsics.h>
@@ -51,6 +52,7 @@ class bearing_converter : public batch_converter {
         if (!depth_image)
             return false;
 
+        Expects((*depth_image).type() == CV_16U);
         const cv::Mat euclid_depth =
             depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
 
@@ -84,12 +86,7 @@ class range_converter : public batch_converter {
                     const camera_models::pinhole &intrinsic)
         : batch_converter(files)
         , intrinsic{intrinsic} {
-
-        if (files.output.empty()) {
-            std::cerr << util::err{};
-            std::cerr << "output pattern required!\n";
-            throw std::invalid_argument{"output pattern required\n"};
-        }
+        check_output_exists(files);
     }
 
     virtual ~range_converter() = default;
@@ -108,6 +105,7 @@ class range_converter : public batch_converter {
         if (!depth_image)
             return false;
 
+        Expects((*depth_image).type() == CV_16U);
         const cv::Mat euclid_depth =
             depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
 
@@ -124,6 +122,83 @@ class range_converter : public batch_converter {
     const camera_models::pinhole &intrinsic;
 };
 
+class gauss_curv_converter : public batch_converter {
+  public:
+    gauss_curv_converter(const file_patterns &         files,
+                         const camera_models::pinhole &intrinsic)
+        : batch_converter(files)
+        , intrinsic{intrinsic} {
+        check_output_exists(files);
+    }
+    virtual ~gauss_curv_converter() = default;
+
+  private:
+    bool process_file(int idx) const noexcept override {
+        Expects(!_files.input.empty());
+        Expects(!_files.output.empty());
+
+        using namespace conversion;
+
+        const std::string      input_file = fmt::format(_files.input, idx);
+        std::optional<cv::Mat> depth_image =
+            io::load_image(input_file, cv::IMREAD_UNCHANGED);
+
+        if (!depth_image)
+            return false;
+
+        Expects((*depth_image).type() == CV_16U);
+        const cv::Mat euclid_depth =
+            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+
+        const cv::Mat gauss = depth_to_gaussian_curvature<double, double>(
+            euclid_depth, intrinsic);
+
+        bool success = cv::imwrite(fmt::format(_files.output, idx), gauss);
+
+        return success;
+    }
+
+    const camera_models::pinhole &intrinsic;
+};
+
+class mean_curv_converter : public batch_converter {
+  public:
+    mean_curv_converter(const file_patterns &         files,
+                        const camera_models::pinhole &intrinsic)
+        : batch_converter(files)
+        , intrinsic{intrinsic} {
+        check_output_exists(files);
+    }
+    virtual ~mean_curv_converter() = default;
+
+  private:
+    bool process_file(int idx) const noexcept override {
+        Expects(!_files.input.empty());
+        Expects(!_files.output.empty());
+
+        using namespace conversion;
+
+        const std::string      input_file = fmt::format(_files.input, idx);
+        std::optional<cv::Mat> depth_image =
+            io::load_image(input_file, cv::IMREAD_UNCHANGED);
+
+        if (!depth_image)
+            return false;
+
+        Expects((*depth_image).type() == CV_16U);
+        const cv::Mat euclid_depth =
+            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+
+        const cv::Mat mean =
+            depth_to_mean_curvature<double, double>(euclid_depth, intrinsic);
+
+        bool success = cv::imwrite(fmt::format(_files.output, idx), mean);
+
+        return success;
+    }
+
+    const camera_models::pinhole &intrinsic;
+};
 }}  // namespace sens_loc::apps
 
 int main(int argc, char **argv) {
@@ -182,6 +257,19 @@ int main(int argc, char **argv) {
     range_cmd->add_option("-o,--output", files.output,
                           "Output pattern for the range images.");
 
+    // curvature images territory
+    CLI::App *mean_curv_cmd = app.add_subcommand(
+        "mean-curvature", "Convert depth images into mean-curvature images");
+    mean_curv_cmd->add_option("-o,--output", files.output,
+                              "Output pattern for the mean-curvature images.");
+
+    CLI::App *gauss_curv_cmd = app.add_subcommand(
+        "gauss-curvature",
+        "Convert depth images into gaussian-curvature images");
+    gauss_curv_cmd->add_option(
+        "-o,--output", files.output,
+        "Output pattern for the gaussian-curvature images.");
+
     CLI11_PARSE(app, argc, argv);
 
     if (files.input.empty()) {
@@ -202,15 +290,36 @@ int main(int argc, char **argv) {
         return 1;
     }
 
-    if (*bearing_cmd) {
-        apps::bearing_converter c(files, *intrinsic);
-        return c.process_batch(start_idx, end_idx);
-    } else if (*range_cmd) {
-        apps::range_converter c(files, *intrinsic);
-        return c.process_batch(start_idx, end_idx);
-    } else {
-        cerr << util::err{};
-        cerr << "One subcommand is required!\n";
+    try {
+        if (*bearing_cmd) {
+            apps::bearing_converter c(files, *intrinsic);
+            return c.process_batch(start_idx, end_idx);
+        }
+        if (*range_cmd) {
+            apps::range_converter c(files, *intrinsic);
+            return c.process_batch(start_idx, end_idx);
+        }
+        if (*mean_curv_cmd) {
+            apps::mean_curv_converter c(files, *intrinsic);
+            return c.process_batch(start_idx, end_idx);
+        }
+        if (*gauss_curv_cmd) {
+            apps::gauss_curv_converter c(files, *intrinsic);
+            return c.process_batch(start_idx, end_idx);
+        }
+    } catch (const std::invalid_argument &e) {
+        cerr << util::err{}
+             << "Could not initialize the batch process. Check your "
+                "parameters!\n";
+        return 1;
+    } catch (...) {
+        cerr << util::err{}
+             << "Unexpected error occured during batch processing.\n";
         return 1;
     }
+
+    cerr << util::err{};
+    cerr << "One subcommand is required!\n";
+
+    return 1;
 }
