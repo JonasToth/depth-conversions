@@ -16,6 +16,7 @@ configure_file(conversion/horizontal-diff.png conversion/horizontal-diff.png COP
 configure_file(conversion/crashing-file.png conversion/crashing-file.png COPYONLY)
 
 create_test(conversion_flexion)
+configure_file(conversion/flexion-reference.png conversion/flexion-reference.png COPYONLY)
 
 create_test(conversion_laser)
 test_add_file(conversion_laser conversion/test_depth_to_laserscan.cpp)
