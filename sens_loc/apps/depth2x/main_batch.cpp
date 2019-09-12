@@ -125,6 +125,85 @@ int convert_bearing_batch(const file_patterns &files, int start_idx,
 }
 }  // namespace bearing
 
+namespace range {
+bool process_file(const file_patterns &         p,
+                  const camera_models::pinhole &intrinsic, int index) {
+    Expects(!p.input.empty());
+    Expects(!p.output.empty());
+
+    using namespace conversion;
+
+    const std::string input_file = fmt::format(p.input, index);
+    optional<cv::Mat> depth_image =
+        io::load_image(input_file, cv::IMREAD_UNCHANGED);
+
+    if (!depth_image)
+        return false;
+
+    const cv::Mat euclid_depth =
+        depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+
+    cv::Mat depth_converted((*depth_image).rows, (*depth_image).cols,
+                            (*depth_image).type());
+    euclid_depth.convertTo(depth_converted, (*depth_image).type());
+
+    bool success = cv::imwrite(fmt::format(p.output, index), depth_converted);
+
+    return success;
+}
+
+/// Executor for the batch conversion of depth images to bearing angle images.
+int convert_bearing_batch(const file_patterns &files, int start_idx,
+                          int                           end_idx,
+                          const camera_models::pinhole &intrinsic) {
+    if (files.output.empty()) {
+        cerr << util::err{};
+        cerr << "output pattern required!\n";
+        return 1;
+    }
+
+    int fails       = 0;
+    int return_code = 0;
+    {
+        tf::Executor executor;
+        tf::Taskflow tf;
+        mutex        cout_mutex;
+
+        tf.parallel_for(
+            start_idx, end_idx + 1, 1,
+            [&files, &cout_mutex, &intrinsic, &return_code, &fails](int idx) {
+                const bool success = process_file(files, intrinsic, idx);
+                if (!success) {
+                    lock_guard l(cout_mutex);
+                    fails++;
+                    cerr << util::err{};
+                    cerr << "Could not process index \"" << rang::style::bold
+                         << idx << "\"" << rang::style::reset << "!\n";
+                    return_code = 1;
+                }
+            });
+
+        const auto before = chrono::steady_clock::now();
+        executor.run(tf).wait();
+        const auto after = chrono::steady_clock::now();
+
+        cerr << util::info{};
+        cerr << "Processing " << rang::style::bold
+             << end_idx - start_idx + 1 - fails << rang::style::reset
+             << " images took " << rang::style::bold
+             << chrono::duration_cast<chrono::seconds>(after - before).count()
+             << "" << rang::style::reset << " seconds!\n";
+
+        if (fails > 0)
+            cerr << util::warn{} << "Encountered " << rang::style::bold << fails
+                 << rang::style::reset << " problematic files!\n";
+    }
+
+    return return_code;
+}
+
+}  // namespace range
+
 int main(int argc, char **argv) {
     CLI::App app{"Batchconversion of depth images to bearing angle images."};
 
@@ -145,6 +224,9 @@ int main(int argc, char **argv) {
     app.add_option("-i,--input", files.input,
                    "Input pattern for image, e.g. \"depth-{}.png\"")
         ->required();
+
+    string input_type = "pinhole-depth";
+    app.add_set("-t,--type", input_type, {"pinhole-depth", "pinhole-range"});
 
     int start_idx;
     app.add_option("-s,--start", start_idx, "Start index of batch, inclusive")
@@ -169,6 +251,12 @@ int main(int argc, char **argv) {
         "--anti-diagonal", files.antidiagonal,
         "Calculate anti-diagonal bearing angle and write to this pattern");
 
+    // Range images territory
+    CLI::App *range_cmd = app.add_subcommand(
+        "range", "Convert depth images into range images (laser-scan like)");
+    range_cmd->add_option("-o,--output", files.output,
+                          "Output pattern for the range images.");
+
     CLI11_PARSE(app, argc, argv);
 
     if (files.input.empty()) {
@@ -192,7 +280,9 @@ int main(int argc, char **argv) {
     if (*bearing_cmd)
         return bearing::convert_bearing_batch(files, start_idx, end_idx,
                                               *intrinsic);
-
+    else if (*range_cmd)
+        return range::convert_bearing_batch(files, start_idx, end_idx,
+                                            *intrinsic);
     else {
         cerr << util::err{};
         cerr << "One subcommand is required!\n";
