@@ -1,7 +1,6 @@
 #include "batch_converter.h"
 
 #include <CLI/CLI.hpp>
-#include <fmt/core.h>
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -13,7 +12,6 @@
 #include <sens_loc/conversion/depth_to_flexion.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/conversion/depth_to_max_curve.h>
-#include <sens_loc/io/image.h>
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/util/console.h>
 #include <sens_loc/version.h>
@@ -32,32 +30,23 @@ class bearing_converter : public batch_converter {
         , intrinsic{intrinsic} {
         if (files.horizontal.empty() && files.vertical.empty() &&
             files.diagonal.empty() && files.antidiagonal.empty()) {
-            std::cerr << util::err{};
-            std::cerr << "At least one output pattern required!\n";
-            throw std::invalid_argument{"Missing output pattern"};
+            throw std::invalid_argument{
+                "Missing output pattern for at least one bearing direction"};
         }
     }
 
     virtual ~bearing_converter() = default;
 
   private:
-    bool process_file(int idx) const noexcept override {
-        Expects(!_files.input.empty());
+    bool process_file(const cv::Mat &depth_image, int idx) const
+        noexcept override {
         Expects(!_files.horizontal.empty() || !_files.vertical.empty() ||
                 !_files.diagonal.empty() || !_files.antidiagonal.empty());
 
         using namespace conversion;
 
-        const std::string      input_file = fmt::format(_files.input, idx);
-        std::optional<cv::Mat> depth_image =
-            io::load_image(input_file, cv::IMREAD_UNCHANGED);
-
-        if (!depth_image)
-            return false;
-
-        Expects((*depth_image).type() == CV_16U);
         const cv::Mat euclid_depth =
-            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+            depth_to_laserscan<double, ushort>(depth_image, intrinsic);
 
         bool final_result = true;
 #define BEARING_PROCESS(DIRECTION)                                             \
@@ -95,26 +84,18 @@ class range_converter : public batch_converter {
     virtual ~range_converter() = default;
 
   private:
-    bool process_file(int idx) const noexcept override {
-        Expects(!_files.input.empty());
+    bool process_file(const cv::Mat &depth_image, int idx) const
+        noexcept override {
         Expects(!_files.output.empty());
 
         using namespace conversion;
 
-        const std::string      input_file = fmt::format(_files.input, idx);
-        std::optional<cv::Mat> depth_image =
-            io::load_image(input_file, cv::IMREAD_UNCHANGED);
-
-        if (!depth_image)
-            return false;
-
-        Expects((*depth_image).type() == CV_16U);
         const cv::Mat euclid_depth =
-            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+            depth_to_laserscan<double, ushort>(depth_image, intrinsic);
 
-        cv::Mat depth_converted((*depth_image).rows, (*depth_image).cols,
-                                (*depth_image).type());
-        euclid_depth.convertTo(depth_converted, (*depth_image).type());
+        cv::Mat depth_converted(depth_image.rows, depth_image.cols,
+                                depth_image.type());
+        euclid_depth.convertTo(depth_converted, depth_image.type());
 
         bool success =
             cv::imwrite(fmt::format(_files.output, idx), depth_converted);
@@ -136,22 +117,14 @@ class gauss_curv_converter : public batch_converter {
     virtual ~gauss_curv_converter() = default;
 
   private:
-    bool process_file(int idx) const noexcept override {
-        Expects(!_files.input.empty());
+    bool process_file(const cv::Mat &depth_image, int idx) const
+        noexcept override {
         Expects(!_files.output.empty());
 
         using namespace conversion;
 
-        const std::string      input_file = fmt::format(_files.input, idx);
-        std::optional<cv::Mat> depth_image =
-            io::load_image(input_file, cv::IMREAD_UNCHANGED);
-
-        if (!depth_image)
-            return false;
-
-        Expects((*depth_image).type() == CV_16U);
         const cv::Mat euclid_depth =
-            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+            depth_to_laserscan<double, ushort>(depth_image, intrinsic);
 
         const cv::Mat gauss = depth_to_gaussian_curvature<double, double>(
             euclid_depth, intrinsic);
@@ -175,22 +148,14 @@ class mean_curv_converter : public batch_converter {
     virtual ~mean_curv_converter() = default;
 
   private:
-    bool process_file(int idx) const noexcept override {
-        Expects(!_files.input.empty());
+    bool process_file(const cv::Mat &depth_image, int idx) const
+        noexcept override {
         Expects(!_files.output.empty());
 
         using namespace conversion;
 
-        const std::string      input_file = fmt::format(_files.input, idx);
-        std::optional<cv::Mat> depth_image =
-            io::load_image(input_file, cv::IMREAD_UNCHANGED);
-
-        if (!depth_image)
-            return false;
-
-        Expects((*depth_image).type() == CV_16U);
         const cv::Mat euclid_depth =
-            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+            depth_to_laserscan<double, ushort>(depth_image, intrinsic);
 
         const cv::Mat mean =
             depth_to_mean_curvature<double, double>(euclid_depth, intrinsic);
@@ -214,22 +179,14 @@ class max_curve_converter : public batch_converter {
     virtual ~max_curve_converter() = default;
 
   private:
-    bool process_file(int idx) const noexcept override {
-        Expects(!_files.input.empty());
+    bool process_file(const cv::Mat &depth_image, int idx) const
+        noexcept override {
         Expects(!_files.output.empty());
 
         using namespace conversion;
 
-        const std::string      input_file = fmt::format(_files.input, idx);
-        std::optional<cv::Mat> depth_image =
-            io::load_image(input_file, cv::IMREAD_UNCHANGED);
-
-        if (!depth_image)
-            return false;
-
-        Expects((*depth_image).type() == CV_16U);
         const cv::Mat euclid_depth =
-            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+            depth_to_laserscan<double, ushort>(depth_image, intrinsic);
 
         const cv::Mat max_curve =
             depth_to_max_curve<double, double>(euclid_depth, intrinsic);
@@ -256,22 +213,14 @@ class flexion_converter : public batch_converter {
     virtual ~flexion_converter() = default;
 
   private:
-    bool process_file(int idx) const noexcept override {
-        Expects(!_files.input.empty());
+    bool process_file(const cv::Mat &depth_image, int idx) const
+        noexcept override {
         Expects(!_files.output.empty());
 
         using namespace conversion;
 
-        const std::string      input_file = fmt::format(_files.input, idx);
-        std::optional<cv::Mat> depth_image =
-            io::load_image(input_file, cv::IMREAD_UNCHANGED);
-
-        if (!depth_image)
-            return false;
-
-        Expects((*depth_image).type() == CV_16U);
         const cv::Mat euclid_depth =
-            depth_to_laserscan<double, ushort>(*depth_image, intrinsic);
+            depth_to_laserscan<double, ushort>(depth_image, intrinsic);
 
         const cv::Mat flexion =
             depth_to_flexion<double, double>(euclid_depth, intrinsic);
@@ -412,9 +361,8 @@ int main(int argc, char **argv) {
         }();
         return c->process_batch(start_idx, end_idx);
     } catch (const std::invalid_argument &e) {
-        cerr << util::err{}
-             << "Could not initialize the batch process. Check your "
-                "parameters!\n";
+        cerr << util::err{} << "Could not initialize the batch process.\n"
+             << util::err{} << e.what() << "\n";
         return 1;
     } catch (...) {
         cerr << util::err{}

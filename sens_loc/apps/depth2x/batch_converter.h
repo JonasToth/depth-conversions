@@ -2,8 +2,10 @@
 #define BATCH_CONVERTER_H_XDIRBPHG
 
 #include <chrono>
+#include <fmt/core.h>
 #include <gsl/gsl>
 #include <iostream>
+#include <sens_loc/io/image.h>
 #include <sens_loc/util/console.h>
 #include <string>
 #include <taskflow/taskflow.hpp>
@@ -23,18 +25,18 @@ struct file_patterns {
 };
 
 void check_output_exists(const file_patterns &files) {
-    if (files.output.empty()) {
-        std::cerr << util::err{};
-        std::cerr << "output pattern required!\n";
+    if (files.output.empty())
         throw std::invalid_argument{"output pattern required\n"};
-    }
 }
 
 
 class batch_converter {
   public:
     batch_converter(const file_patterns &files)
-        : _files{files} {}
+        : _files{files} {
+        if (files.input.empty())
+            throw std::invalid_argument{"input pattern is always required!"};
+    }
 
     /// Process the whole batch calling 'process_file' for each index.
     /// Returns 'false' if any of the indices fails.
@@ -46,10 +48,27 @@ class batch_converter {
     const file_patterns &_files;
 
   private:
+    bool process_index(int idx) const noexcept;
+
     /// Method to process exactly on file. This method is expected to have
     /// no sideeffects and is called in parallel.
-    virtual bool process_file(int idx) const noexcept = 0;
+    virtual bool process_file(const cv::Mat &depth_image, int idx) const
+        noexcept = 0;
 };
+
+inline bool batch_converter::process_index(int idx) const noexcept {
+    Expects(!_files.input.empty());
+
+    const std::string      input_file = fmt::format(_files.input, idx);
+    std::optional<cv::Mat> depth_image =
+        io::load_image(input_file, cv::IMREAD_UNCHANGED);
+
+    if (!depth_image)
+        return false;
+    Expects((*depth_image).type() == CV_16U);
+
+    return this->process_file(*depth_image, idx);
+}
 
 inline bool batch_converter::process_batch(int start, int end) const noexcept {
     Expects(start - end != 0);
@@ -63,7 +82,7 @@ inline bool batch_converter::process_batch(int start, int end) const noexcept {
 
         tf.parallel_for(start, end + 1, start < end ? 1 : -1,
                         [&cout_mutex, &return_code, &fails, this](int idx) {
-                            const bool success = this->process_file(idx);
+                            const bool success = this->process_index(idx);
                             if (!success) {
                                 std::lock_guard l(cout_mutex);
                                 fails++;
