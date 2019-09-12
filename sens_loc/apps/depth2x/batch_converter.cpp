@@ -1,11 +1,13 @@
 #include "batch_converter.h"
 
 #include <chrono>
+#include <fmt/core.h>
 #include <gsl/gsl>
 #include <iostream>
-#include <sens_loc/util/console.h>
+#include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
-#include <fmt/core.h>
+#include <sens_loc/util/console.h>
+#include <sens_loc/util/correctness_util.h>
 #include <taskflow/taskflow.hpp>
 #include <thread>
 
@@ -21,7 +23,8 @@ bool batch_converter::process_index(int idx) const noexcept {
         return false;
     Expects((*depth_image).type() == CV_16U);
 
-    return this->process_file(*depth_image, idx);
+    cv::Mat pp_image = this->preprocess_depth(std::move(*depth_image));
+    return this->process_file(std::move(pp_image), idx);
 }
 
 bool batch_converter::process_batch(int start, int end) const noexcept {
@@ -71,4 +74,17 @@ bool batch_converter::process_batch(int start, int end) const noexcept {
     return return_code;
 }
 
+cv::Mat batch_pinhole_converter::preprocess_depth(cv::Mat depth_image) const
+    noexcept {
+    switch (_input_depth_type) {
+    case depth_type::orthografic:
+        return conversion::depth_to_laserscan<double, ushort>(depth_image,
+                                                              intrinsic);
+    case depth_type::euclidean:
+        cv::Mat depth_double(depth_image.rows, depth_image.cols, CV_64F);
+        depth_image.convertTo(depth_double, CV_64F);
+        return depth_double;
+    }
+    UNREACHABLE("Switch is exhaustive");
+}
 }}  // namespace sens_loc::apps

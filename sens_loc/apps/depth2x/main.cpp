@@ -117,20 +117,23 @@ int main(int argc, char **argv) {
         unique_ptr<apps::batch_converter> c =
             [&]() -> unique_ptr<apps::batch_converter> {
             if (*bearing_cmd)
-                return make_unique<apps::bearing_converter>(files, *intrinsic);
+                return make_unique<apps::bearing_converter>(
+                    files, apps::str_to_depth_type(input_type), *intrinsic);
             if (*range_cmd)
-                return make_unique<apps::range_converter>(files, *intrinsic);
+                return make_unique<apps::range_converter>(
+                    files, apps::str_to_depth_type(input_type), *intrinsic);
             if (*mean_curv_cmd)
-                return make_unique<apps::mean_curv_converter>(files,
-                                                              *intrinsic);
+                return make_unique<apps::mean_curv_converter>(
+                    files, apps::str_to_depth_type(input_type), *intrinsic);
             if (*gauss_curv_cmd)
-                return make_unique<apps::gauss_curv_converter>(files,
-                                                               *intrinsic);
+                return make_unique<apps::gauss_curv_converter>(
+                    files, apps::str_to_depth_type(input_type), *intrinsic);
             if (*max_curve_cmd)
-                return make_unique<apps::max_curve_converter>(files,
-                                                              *intrinsic);
+                return make_unique<apps::max_curve_converter>(
+                    files, apps::str_to_depth_type(input_type), *intrinsic);
             if (*flexion_cmd)
-                return make_unique<apps::flexion_converter>(files, *intrinsic);
+                return make_unique<apps::flexion_converter>(
+                    files, apps::str_to_depth_type(input_type), *intrinsic);
 
             throw std::invalid_argument{"target type for conversion required!"};
         }();

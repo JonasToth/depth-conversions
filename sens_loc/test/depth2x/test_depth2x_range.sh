@@ -50,5 +50,25 @@ if  [ ! -f batch-range-002.png ] || \
     exit 1
 fi
 
+# Try out if the range images are useable as input for other conversions.
+
+if ! ${exe} -c "kinect_intrinsic.txt" \
+    -i "batch-range-{:03d}.png" \
+    --start 2 --end 4 \
+    --type pinhole-range \
+    flexion \
+    --output "batch-flexion-from-range-{:03d}.png"
+then
+    print_error "Could not create all flexion images from range images."
+    exit 1
+fi
+
+if  [ ! -f batch-flexion-from-range-002.png ] || \
+    [ ! -f batch-flexion-from-range-003.png ] || \
+    [ ! -f batch-flexion-from-range-004.png ]; then
+    print_error "Did not create expected output files with leading 0."
+    exit 1
+fi
+
 print_info "Test successful!"
 exit 0
