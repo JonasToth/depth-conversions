@@ -1,7 +1,7 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
-set -pipefail
+set -o pipefail
 
 # This script automatically updates a 3rd-party dependency and is a small
 # wrapper around "git subtree".
@@ -59,7 +59,7 @@ fi
 
 print_info "Integrating revison via "git subtree pull""
 git subtree pull \
-    --prefix "${project_name}" \
+    --prefix "third_party/${project_name}" \
     "${upstream_name}" \
     "${commit_revision}" --squash \
     || (print_error "Could not pull \"${BOLD}${commit_revision}${DEFAULT}\" from remote \"${BOLD}${upstream_name}${DEFAULT}\"!"; exit 1) \
