@@ -138,7 +138,7 @@ int main(int argc, char **argv) try {
 
             throw std::invalid_argument{"target type for conversion required!"};
         }();
-        return static_cast<int>(c->process_batch(start_idx, end_idx));
+        return c->process_batch(start_idx, end_idx) ? 0 : 1;
     } catch (const std::invalid_argument &e) {
         cerr << util::err{} << "Could not initialize the batch process.\n"
              << util::err{} << e.what() << "\n";

@@ -30,15 +30,15 @@ bool batch_converter::process_index(int idx) const noexcept {
 bool batch_converter::process_batch(int start, int end) const noexcept {
     Expects(start - end != 0);
 
-    int  fails       = 0;
-    bool return_code = true;
+    int  fails         = 0;
+    bool batch_success = true;
     try {
         tf::Executor executor;
         tf::Taskflow tf;
         std::mutex   cout_mutex;
 
         tf.parallel_for(start, end + 1, start < end ? 1 : -1,
-                        [&cout_mutex, &return_code, &fails, this](int idx) {
+                        [&cout_mutex, &batch_success, &fails, this](int idx) {
                             const bool success = this->process_index(idx);
                             if (!success) {
                                 std::lock_guard l(cout_mutex);
@@ -47,7 +47,7 @@ bool batch_converter::process_batch(int start, int end) const noexcept {
                                 std::cerr << "Could not process index \""
                                           << rang::style::bold << idx << "\""
                                           << rang::style::reset << "!\n";
-                                return_code = false;
+                                batch_success = false;
                             }
                         });
 
@@ -69,16 +69,20 @@ bool batch_converter::process_batch(int start, int end) const noexcept {
         if (fails > 0)
             std::cerr << util::warn{} << "Encountered " << rang::style::bold
                       << fails << rang::style::reset << " problematic files!\n";
+    } catch (const std::exception &e) {
+        std::cerr << util::err{} << "Problem occured during batch-processing!\n"
+                  << "Message: " << e.what() << "\n";
+        batch_success = false;
     } catch (...) {
         std::cerr << util::err{}
                   << "Fatal problem occured while batch-processing!\n"
                   << "Potential exhaustion of resources or an other system "
                      "problem!\n";
-        return_code = false;
+        batch_success = false;
     }
 
-    return return_code;
-}
+    return batch_success;
+}  // namespace sens_loc::apps
 
 cv::Mat batch_pinhole_converter::preprocess_depth(cv::Mat depth_image) const
     noexcept {
