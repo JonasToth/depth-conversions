@@ -7,8 +7,8 @@
   interface
 - `rang` `v3.1.0` `49505595c6941ad58788ade0ecdff26aeb5b7a9a` terminal colors
 - `doctest` `v2.3.4` `f13a00cc27ed3c1ec4f755572ab7556c4cb01716` unit testing
-- `cpp-taskflow` `v2.2.0` `24072c59f4e2c917a62beb61397aa9c59251dcee`
-  parallelization
+- `cpp-taskflow` `master as of 12.September 2019`
+  `e40c633784cb1712b04c88719dd53fc62f57e806` parallelization
 - `fmt-lib` `v6.0.0` `7512a55aa3ae309587ca89668ef9ec4074a51a1f` string
   formatting
 - `nonius` `v1.20.1b` `9db04b2c6eb5c3ca783c48c774300618a86729a4` benchmarks
