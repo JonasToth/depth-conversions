@@ -9,11 +9,11 @@ set(MINOR_VERSION_REGEX "#define SENS_LOC_MINOR[ \t]+(.+)")
 set(PATCH_VERSION_REGEX "#define SENS_LOC_PATCH[ \t]+(.+)")
 
 # Read in the line containing the version
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/sens_loc/include/sens_loc/version.h"
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/src/include/sens_loc/version.h"
              MAJOR_VERSION_STRING REGEX ${MAJOR_VERSION_REGEX})
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/sens_loc/include/sens_loc/version.h"
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/src/include/sens_loc/version.h"
              MINOR_VERSION_STRING REGEX ${MINOR_VERSION_REGEX})
-file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/sens_loc/include/sens_loc/version.h"
+file(STRINGS "${CMAKE_CURRENT_SOURCE_DIR}/src/include/sens_loc/version.h"
              PATCH_VERSION_STRING REGEX ${PATCH_VERSION_REGEX})
 # Pick out just the version
 string(REGEX REPLACE ${MAJOR_VERSION_REGEX} "\\1" MAJOR_VERSION_STRING "${MAJOR_VERSION_STRING}")
@@ -52,5 +52,5 @@ include(use_nonius)
 include(check_dependencies_built)
 include(configuration_functions)
 if (${DEPENDENCIES_BUILT})
-    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/sens_loc")
+    add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
 endif (${DEPENDENCIES_BUILT})
