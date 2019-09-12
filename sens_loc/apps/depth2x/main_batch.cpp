@@ -19,7 +19,7 @@
 using namespace sens_loc;
 using namespace std;
 
-namespace {
+namespace bearing {
 struct file_patterns {
     string_view input;
     string_view horizontal;
@@ -71,7 +71,7 @@ bool process_file(const file_patterns &         p,
     return true;
 }
 
-}  // namespace
+}  // namespace bearing
 
 int main(int argc, char **argv) {
     CLI::App app{"Batchconversion of depth images to bearing angle images."};
@@ -101,6 +101,7 @@ int main(int argc, char **argv) {
     app.add_option("-e,--end", end_idx, "End index of batch, inclusive")
         ->required();
 
+    // The following options only apply to bearing angle images.
     string bearing_hor_name;
     app.add_option(
         "--horizontal", bearing_hor_name,
@@ -138,7 +139,7 @@ int main(int argc, char **argv) {
              << calibration_file << rang::style::reset << "\"!\n";
         return 1;
     }
-    file_patterns files{
+    bearing::file_patterns files{
         .input        = input_file,
         .horizontal   = bearing_hor_name,
         .vertical     = bearing_ver_name,
@@ -151,12 +152,13 @@ int main(int argc, char **argv) {
     {
         tf::Executor executor;
         tf::Taskflow tf;
-        mutex cout_mutex;
+        mutex        cout_mutex;
 
         tf.parallel_for(
             start_idx, end_idx + 1, 1,
             [&files, &cout_mutex, &intrinsic, &return_code, &fails](int idx) {
-                const bool success = process_file(files, *intrinsic, idx);
+                const bool success =
+                    bearing::process_file(files, *intrinsic, idx);
                 if (!success) {
                     lock_guard l(cout_mutex);
                     fails++;
