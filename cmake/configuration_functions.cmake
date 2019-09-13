@@ -14,5 +14,12 @@ function(common_target_properties target_name)
     endif (WITH_CONTRACT_EXCEPTION)
     target_compile_options(${target_name}
         PRIVATE
-        "-Wall" "-Wextra")
+        "-Wall" "-Wextra" "-mavx")
+
+    if (CXX_COMPILER_ID EQUAL "GNU")
+        target_compile_options(${target_name}
+            PRIVATE
+            "-Wno-deprecated-copy"
+            )
+    endif ()
 endfunction()
