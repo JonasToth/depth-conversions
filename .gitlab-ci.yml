@@ -126,6 +126,7 @@ ubuntu-1804-release:
     - ctest -j4 --output-on-failure -R "test_" .
     - ctest --verbose -R "bm_" .
     - DEST_DIR=../install_dir/ ninja install
+  dependencies: ubuntu-1804-staging
   when: manual
   artifacts:
     name: "staging-$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
