@@ -100,7 +100,6 @@ ubuntu-1804-staging:
     - ninja
     - ctest -j4 --output-on-failure -R "test_" .
     - ctest --verbose -R "bm_" .
-
   only:
     refs:
       - master
