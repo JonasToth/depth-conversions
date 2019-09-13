@@ -1,0 +1,133 @@
+---
+stages:
+    - incremental-testing
+    - staging-build
+    - release-build
+
+ubuntu-1804-system:
+  stage: incremental-testing
+  script:
+    - mkdir -p build && cd build
+    - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DWITH_TESTING=ON -DWITH_CONTRACT_EXCEPTION=ON -DWITH_BENCHMARK=OFF
+    - ninja dependencies
+    - cmake .
+    - ninja
+    - ctest -j4 --output-on-failure -R "test_" .
+  except:
+    refs:
+      - master
+  only:
+    refs:
+      - branches
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
+  tags:
+    - ubuntu1804
+
+ubuntu-1804-clang-8:
+  stage: incremental-testing
+  script:
+    - mkdir -p build && cd build
+    - CC=clang-8 CXX=clang++-8 LD=lld-8 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DWITH_TESTING=ON -DWITH_CONTRACT_EXCEPTION=ON -DWITH_BENCHMARK=OFF
+    - ninja dependencies
+    - cmake .
+    - ninja
+    - ctest -j4 --output-on-failure -R "test_" .
+  except:
+    refs:
+      - master
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
+  tags:
+    - ubuntu1804
+
+ubuntu-1804-gcc-8:
+  stage: incremental-testing
+  script:
+    - mkdir -p build && cd build
+    - CC=gcc-8 CXX=g++-8 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DBUILD_TESTING=ON -DWITH_TESTING=ON -DWITH_CONTRACT_EXCEPTION=ON -DWITH_BENCHMARK=OFF
+    - ninja dependencies
+    - cmake .
+    - ninja
+    - ctest -j4 --output-on-failure -R "test_" .
+  except:
+    refs:
+      - master
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
+  tags:
+    - ubuntu1804
+
+clang-tidy-analysis:
+  stage: incremental-testing
+  script:
+    - mkdir -p build && cd build
+    - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=OFF -DWITH_TESTING=OFF -DWITH_CONTRACT_EXCEPTION=OFF -DWITH_BENCHMARK=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+    - cd .. && ln -s build_analyze/compile_commands.json && cd src/
+    - run-clang-tidy-8 -header-filter=sens_loc/* include/ apps/ lib/
+  except:
+    refs:
+      - master
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - .clang-tidy
+      - src/*
+  tags:
+    - ubuntu1804
+
+ubuntu-1804-staging:
+  stage: staging-build
+  script:
+    - mkdir -p build && cd build
+    - CC=gcc-8 CXX=g++-8 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DWITH_TESTING=ON -DWITH_CONTRACT_EXCEPTION=OFF -DWITH_BENCHMARK=ON
+    - cmake .
+    - ninja
+    - ctest -j4 --output-on-failure -R "test_" .
+    - ctest --verbose -R "bm_" .
+  only:
+    refs:
+      - master
+  artifacts:
+    name: "staging-$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - build/src/apps/depth2x
+    expire_in: 1 week
+  tags:
+    - ubuntu1804
+
+ubuntu-1804-release:
+  stage: release-build
+  script:
+    - mkdir -p build && cd build
+    - CC=gcc-8 CXX=g++-8 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DWITH_TESTING=ON -DWITH_CONTRACT_EXCEPTION=OFF -DWITH_BENCHMARK=ON
+    - cmake .
+    - ninja
+    - ctest -j4 --output-on-failure -R "test_" .
+    - ctest --verbose -R "bm_" .
+    - DEST_DIR=../install_dir/ ninja install
+  only:
+    refs:
+      - tags
+  artifacts:
+    name: "staging-$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - install_dir/
+  tags:
+    - ubuntu1804
