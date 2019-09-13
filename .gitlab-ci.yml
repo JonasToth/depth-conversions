@@ -100,14 +100,15 @@ ubuntu-1804-staging:
     - ninja
     - ctest -j4 --output-on-failure -R "test_" .
     - ctest --verbose -R "bm_" .
-  changes:
-    - .gitlab-ci.yml
-    - cmake/*
-    - src/*
-    - third_party/*
+
   only:
     refs:
       - master
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
   artifacts:
     name: "staging-$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
