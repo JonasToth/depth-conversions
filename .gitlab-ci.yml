@@ -83,6 +83,7 @@ clang-tidy-analysis:
     - run-clang-tidy-8 -header-filter=sens_loc/* include/ apps/ lib/
   only:
     refs:
+      - master
       - merge_requests
     changes:
       - .clang-tidy
