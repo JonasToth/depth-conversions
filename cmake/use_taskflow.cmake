@@ -5,5 +5,6 @@ add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/third_party/cpp-taskflow")
 mark_as_advanced(FORCE TF_BUILD_BENCHMARKS 
                        TF_BUILD_EXAMPLES
                        TF_BUILD_TESTS)
-add_library(taskflow::taskflow INTERFACE IMPORTED)
-target_link_libraries(taskflow::taskflow INTERFACE Cpp-Taskflow)
+add_library(taskflow INTERFACE)
+add_library(taskflow::taskflow ALIAS taskflow)
+target_link_libraries(taskflow INTERFACE Cpp-Taskflow)
