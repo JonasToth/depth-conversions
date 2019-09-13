@@ -125,7 +125,7 @@ ubuntu-1804-release:
     - ninja
     - ctest -j4 --output-on-failure -R "test_" .
     - ctest --verbose -R "bm_" .
-    - DEST_DIR=../install_dir/ ninja install
+    - DESTDIR=../install_dir/ ninja install
   dependencies:
     - ubuntu-1804-staging
   when: manual
