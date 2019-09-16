@@ -1,6 +1,7 @@
 ---
 stages:
     - incremental-testing
+    - sanitizers
     - staging-build
 
 ubuntu-1804-system:
@@ -112,5 +113,43 @@ ubuntu-1804-staging:
     paths:
       - build/src/apps/depth2x
     expire_in: 1 week
+  tags:
+    - ubuntu1804
+
+ubuntu-1804-ubsan:
+  stage: sanitizers
+  script:
+    - mkdir -p build && cd build
+    - CC=clang-8 CXX=clang++-8 LD=clang++-8 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON -DWITH_TESTING=ON -DWITH_CONTRACT_EXCEPTION=ON -DWITH_BENCHMARK=OFF -DWITH_UBSAN=ON
+    - cmake .
+    - ninja
+    - ctest -j4 --output-on-failure -R "test_" .
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
+  tags:
+    - ubuntu1804
+
+ubuntu-1804-asan:
+  stage: sanitizers
+  script:
+    - mkdir -p build && cd build
+    - CC=clang-8 CXX=clang++-8 LD=clang++-8 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=ON -DWITH_TESTING=ON -DWITH_CONTRACT_EXCEPTION=ON -DWITH_BENCHMARK=OFF -DWITH_ASAN=ON
+    - cmake .
+    - ninja
+    - ctest -j4 --output-on-failure -R "test_" .
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
   tags:
     - ubuntu1804

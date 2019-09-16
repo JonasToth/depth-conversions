@@ -1,6 +1,6 @@
 # Install the latest cmake with 'pip' if necessary
 # See https://pypi.org/project/cmake/
-cmake_minimum_required(VERSION 3.10 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 # Assuming the canonical version is listed in a single line
 # This would be in several parts if picking up from MAJOR, MINOR, etc.
@@ -31,6 +31,11 @@ option(WITH_BENCHMARK ON "Enable benchmarks for this project")
 option(WITH_TESTING ON "Enable unittests for this project")
 option(WITH_DEP_TESTING OFF "Enable tests in thridparty modules")
 option(WITH_CONTRACT_EXCEPTION ON "Enable contract throwing exceptions on contract violation")
+
+if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    option(WITH_UBSAN OFF "Enable Undefined Behaviour sanitizer")
+    option(WITH_ASAN OFF "Enable Undefined Behaviour sanitizer")
+endif ()
 
 if (WITH_TESTING OR WITH_BENCHMARK)
     enable_testing()
