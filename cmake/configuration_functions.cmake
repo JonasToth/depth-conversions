@@ -22,4 +22,14 @@ function(common_target_properties target_name)
             "-Wno-deprecated-copy"
             )
     endif ()
+
+    if (WITH_UBSAN)
+        target_compile_options(${target_name} PUBLIC "-fsanitize=undefined")
+        target_link_options(${target_name} PUBLIC "-fsanitize=undefined")
+    endif (WITH_UBSAN)
+
+    if (WITH_ASAN)
+        target_compile_options(${target_name} PUBLIC "-fsanitize=address")
+        target_link_options(${target_name} PUBLIC "-fsanitize=address")
+    endif (WITH_ASAN)
 endfunction()
