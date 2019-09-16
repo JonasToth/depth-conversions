@@ -1,4 +1,5 @@
-find_package(OpenCV)
+set(CustomOpenCV "" CACHE PATH "Custom directory for opencv install in the system")
+find_package(OpenCV HINTS ${CustomOpenCV})
 
 if (NOT OpenCV_FOUND)
     message(STATUS "Could not find OpenCV in the system. Building custom")
