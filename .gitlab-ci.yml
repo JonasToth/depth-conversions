@@ -154,6 +154,7 @@ ubuntu-1804-ubsan:
 
 ubuntu-1804-tsan:
   stage: sanitizers
+  allow_failure: true
   variables:
     CC: "clang-8"
     CXX: "clang++-8"
