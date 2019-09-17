@@ -1,9 +1,10 @@
-FROM ubuntu:16.04
+FROM ubuntu:rolling
 
 RUN apt-get update \
  && apt-get dist-upgrade -y \
  && apt-get install -y \
     build-essential \
+    g++-9 gcc-9 \
     git \
     ninja-build \
     software-properties-common \
@@ -14,10 +15,6 @@ RUN apt-get update \
     libboost-all-dev \
     libpng-dev \
     libjpeg-dev \
- && add-apt-repository ppa:ubuntu-toolchain-r/test \
- && apt-get update \
- && apt-get install -y  \
-    gcc-9 g++-9 \
  && pip3 install --upgrade pip \
  && pip install cmake \
  && mkdir -p /opencv/build_cv && cd /opencv \
@@ -35,6 +32,7 @@ RUN apt-get update \
     -DBUILD_opencv_python_bindings_generator=OFF \
     -DBUILD_opencv_python3=OFF \
     -DBUILD_SHARED_LIBS=OFF \
+    -DENABLE_PRECOMPILED_HEADERS=OFF \
     -DBUILD_TESTS=OFF \
     -DINSTALL_TESTS=OFF \
     -DENABLE_LTO=OFF \
