@@ -5,7 +5,7 @@ stages:
     - platforms
 
 ubuntu-1804-system:
-  stage: platforms
+  stage: compilers
   variables:
     WITH_TESTING: "ON"
     WITH_BENCHMARK: "OFF"
