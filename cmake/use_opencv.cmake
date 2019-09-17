@@ -5,13 +5,25 @@ if (NOT OpenCV_FOUND)
     message(STATUS "Could not find OpenCV in the system. Building custom")
     include(opencv_options)
     include(ExternalProject)
+
     ExternalProject_Add(opencv
-      DOWNLOAD_COMMAND ""
-      SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/third_party/opencv"
+      PREFIX "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv"
+      DOWNLOAD_COMMAND sh -c "wget --quiet \
+         https://github.com/opencv/opencv/archive/4.1.1.zip \
+      && unzip -o 4.1.1.zip \
+      && rsync -a opencv-4.1.1/ ./ \
+      && rm -r opencv-4.1.1 4.1.1.zip \
+      && wget --quiet \
+         https://github.com/opencv/opencv_contrib/archive/4.1.1.zip \
+      && unzip -o 4.1.1.zip \
+      && mv opencv_contrib-4.1.1 opencv_contrib \
+      && rm 4.1.1.zip"
+
+      SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv/src"
       CMAKE_ARGS "${opencv_options};-DCMAKE_INSTALL_PREFIX=/usr"
 
       # Build step
-      BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/opencv-build"
+      BINARY_DIR "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-build"
 
       # Install step
       INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install"
@@ -30,6 +42,7 @@ if (NOT OpenCV_FOUND)
       LOG_TEST 1
       LOG_INSTALL 1
     )
+
     set_target_properties(opencv PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
     if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install/usr")
