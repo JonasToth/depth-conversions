@@ -39,6 +39,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif ()
 
 if (WITH_TESTING OR WITH_BENCHMARK)
+    set(BUILD_TESTING "" OFF)
     enable_testing()
 endif ()
 

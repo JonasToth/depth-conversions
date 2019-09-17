@@ -1,10 +1,11 @@
 #!/bin/bash
 
+# This script automatically updates a 3rd-party dependency and is a small
+# wrapper around "git subtree".
+
 set -e
 set -o pipefail
 
-# This script automatically updates a 3rd-party dependency and is a small
-# wrapper around "git subtree".
 SCRIPT_FILE=$(readlink -f "$0")
 SCRIPT_PATH=$(dirname "${SCRIPT_FILE}")
 
