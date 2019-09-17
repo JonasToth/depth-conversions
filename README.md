@@ -1,3 +1,6 @@
+[![pipeline status](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/badges/master/pipeline.svg)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/commits/master)
+[![coverage report](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/badges/master/coverage.svg)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/commits/master)
+
 # master-thesis
 
 Repository containing all code and stuff for my master thesis.
