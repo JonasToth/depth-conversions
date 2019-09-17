@@ -35,6 +35,7 @@ option(WITH_CONTRACT_EXCEPTION ON "Enable contract throwing exceptions on contra
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     option(WITH_UBSAN OFF "Enable Undefined Behaviour sanitizer")
     option(WITH_ASAN OFF "Enable Undefined Behaviour sanitizer")
+    option(WITH_TSAN OFF "Enable Thread Sanitizer (data races)")
 endif ()
 
 if (WITH_TESTING OR WITH_BENCHMARK)
