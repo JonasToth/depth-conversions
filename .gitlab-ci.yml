@@ -17,7 +17,6 @@ ubuntu-1804-system:
   only:
     refs:
       - branches
-      - merge_requests
     changes:
       - .gitlab-ci.yml
       - cmake/*
