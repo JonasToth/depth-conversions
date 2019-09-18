@@ -15,13 +15,9 @@ ubuntu-1804-system:
   stage: compilers
   script:
     - ./scripts/ci/normal_build.bash
-  except:
-    refs:
-      - master
   only:
     refs:
-      - branches
-    <<: *code_change_filter_definition
+      - master
   tags:
     - ubuntu1804
     - test
@@ -36,6 +32,8 @@ coverage:
     - lcov --quiet --no-external --capture --directory ../src/apps --directory ../src/include --directory ../src/lib --directory src/ --output-file test_coverage.info
     - lcov --list test_coverage.info
   only:
+    refs:
+      - master
     <<: *code_change_filter_definition
   tags:
     - ubuntu1804
@@ -124,7 +122,6 @@ ubuntu-1804-staging:
   only:
     refs:
       - master
-      - merge_requests
     <<: *code_change_filter_definition
 
 ubuntu-1804-asan:
