@@ -1,5 +1,5 @@
-[![pipeline status](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/badges/master/pipeline.svg)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/commits/master)
-[![coverage report](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/badges/master/coverage.svg)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/commits/master)
+[![pipeline status](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/badges/master/pipeline.svg?style=flat-square)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/commits/master)
+[![coverage report](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/badges/master/coverage.svg?style=flat-square)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/commits/master)
 
 # master-thesis
 
