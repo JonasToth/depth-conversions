@@ -189,6 +189,7 @@ test-ros-image:
     - ./scripts/ci/normal_build.bash
   only:
     refs:
+      - master
       - merge_requests
     changes:
       - .gitlab-ci.yml
