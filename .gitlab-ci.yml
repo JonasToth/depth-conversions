@@ -6,9 +6,6 @@ stages:
 
 ubuntu-1804-system:
   stage: compilers
-  variables:
-    WITH_TESTING: "ON"
-    WITH_BENCHMARK: "OFF"
   script:
     - ./scripts/ci/normal_build.bash
   except:
@@ -24,6 +21,7 @@ ubuntu-1804-system:
       - third_party/*
   tags:
     - ubuntu1804
+    - test
 
 ubuntu-1804-clang-8:
   stage: compilers
@@ -46,6 +44,7 @@ ubuntu-1804-clang-8:
       - third_party/*
   tags:
     - ubuntu1804
+    - test
 
 ubuntu-1804-gcc-8:
   stage: compilers
@@ -67,6 +66,7 @@ ubuntu-1804-gcc-8:
       - third_party/*
   tags:
     - ubuntu1804
+    - test
 
 clang-tidy-analysis:
   stage: compilers
@@ -109,6 +109,8 @@ ubuntu-1804-staging:
     expire_in: 1 week
   tags:
     - ubuntu1804
+    - test
+    - benchmark
 
 ubuntu-1804-asan:
   stage: sanitizers
@@ -130,6 +132,7 @@ ubuntu-1804-asan:
       - third_party/*
   tags:
     - ubuntu1804
+    - test
 
 ubuntu-1804-ubsan:
   stage: sanitizers
@@ -151,6 +154,7 @@ ubuntu-1804-ubsan:
       - third_party/*
   tags:
     - ubuntu1804
+    - test
 
 ubuntu-1804-tsan:
   stage: sanitizers
@@ -173,3 +177,24 @@ ubuntu-1804-tsan:
       - third_party/*
   tags:
     - ubuntu1804
+    - test
+
+test-ros-image:
+  image: base-image-rosmelodic
+  stage: platforms
+  allow_failure: true
+  variables:
+    BUILD_TYPE: "RelWithDebInfo"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - merge_requests
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
+  tags:
+    - docker
+    - platform
