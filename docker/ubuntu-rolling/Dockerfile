@@ -7,7 +7,6 @@ RUN apt-get update \
     g++-9 gcc-9 \
     git \
     ninja-build \
-    software-properties-common \
     wget \
     unzip \
     python3-pip \

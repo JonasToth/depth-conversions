@@ -1,6 +1,5 @@
 #!/bin/bash
 
-echo "Starting"
 # This script executes a normal build and is configurable via environment
 # variables. These are set in '.gitlab-ci.yml'.
 
@@ -13,7 +12,6 @@ SCRIPT_PATH=$(dirname "${SCRIPT_FILE}")
 # shellcheck source=../log_helpers.sh
 . "${SCRIPT_PATH}/../log_helpers.sh"
 
-echo "Sourced"
 if [[ -z "$BUILD_TYPE" ]]; then
     BUILD_TYPE="RelWithDebInfo"
 fi

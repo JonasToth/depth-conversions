@@ -22,7 +22,7 @@ for dir in */; do
     # remove trailing slash from the variable ${dir}
     img_name="base-image-${dir%/}"
     print_info "Building image in ${dir} with name ${img_name}"
-    
+
     if ! docker build --pull -t "${img_name}" .; then
         print_warning "Failed to build ${img_name}"
         failure=1

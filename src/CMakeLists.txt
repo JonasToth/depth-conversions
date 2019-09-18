@@ -1,3 +1,6 @@
+find_package(Threads REQUIRED)
+find_package (Eigen3 3.3 NO_MODULE)
+
 add_library(sens_loc
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/version.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/pinhole.h"
@@ -26,9 +29,14 @@ target_link_libraries(sens_loc
     PUBLIC
     GSL
     rang
+    Threads::Threads
     taskflow::taskflow
     ${OpenCV_LIBS}
     )
+if (TARGET Eigen3::Eigen)
+    target_link_libraries(sens_loc PRIVATE Eigen3::Eigen)
+endif (TARGET Eigen3::Eigen)
+
 common_target_properties(sens_loc)
 
 install(TARGETS sens_loc
