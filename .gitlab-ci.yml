@@ -6,7 +6,6 @@ stages:
 
 .code_change_filter: &code_change_filter_definition
     changes:
-      - .gitlab-ci.yml
       - cmake/*
       - src/*
       - third_party/*
