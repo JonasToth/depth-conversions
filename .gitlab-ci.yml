@@ -26,6 +26,21 @@ ubuntu-1804-system:
     - ubuntu1804
     - test
 
+coverage:
+  stage: compilers
+  script:
+    - mkdir -p build && cd build
+    - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Debug -DWITH_TESTING=ON -DWITH_TEST_COVERAGE=ON -DWITH_BENCHMARK=OFF
+    - ninja
+    - ctest -j4 --output-on-failure .
+    - lcov --quiet --no-external --capture --directory ../src/apps --directory ../src/include --directory ../src/lib --directory src/ --output-file test_coverage.info
+    - lcov --list test_coverage.info
+  only:
+    <<: *code_change_filter_definition
+  tags:
+    - ubuntu1804
+    - test
+
 ubuntu-1804-clang-8:
   stage: compilers
   variables:
