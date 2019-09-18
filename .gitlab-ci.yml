@@ -4,6 +4,13 @@ stages:
     - sanitizers
     - platforms
 
+.code_change_filter: &code_change_filter_definition
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
+
 ubuntu-1804-system:
   stage: compilers
   script:
@@ -14,11 +21,7 @@ ubuntu-1804-system:
   only:
     refs:
       - branches
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+    <<: *code_change_filter_definition
   tags:
     - ubuntu1804
     - test
@@ -37,11 +40,7 @@ ubuntu-1804-clang-8:
   only:
     refs:
       - merge_requests
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+    <<: *code_change_filter_definition
   tags:
     - ubuntu1804
     - test
@@ -59,11 +58,7 @@ ubuntu-1804-gcc-8:
   only:
     refs:
       - merge_requests
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+    <<: *code_change_filter_definition
   tags:
     - ubuntu1804
     - test
@@ -97,11 +92,7 @@ ubuntu-1804-staging:
   only:
     refs:
       - master
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+    <<: *code_change_filter_definition
   artifacts:
     name: "ubuntu1804-$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
     paths:
@@ -112,6 +103,15 @@ ubuntu-1804-staging:
     - test
     - benchmark
 
+.wide_testing_filter: &wide_test_filter_definition
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - master
+      - merge_requests
+    <<: *code_change_filter_definition
+
 ubuntu-1804-asan:
   stage: sanitizers
   variables:
@@ -120,16 +120,7 @@ ubuntu-1804-asan:
     LD: "clang++-8"
     BUILD_TYPE: "RelWithDebInfo"
     WITH_ASAN: "ON"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - merge_requests
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+  <<: *wide_test_filter_definition
   tags:
     - ubuntu1804
     - test
@@ -142,16 +133,7 @@ ubuntu-1804-ubsan:
     LD: "clang++-8"
     BUILD_TYPE: "RelWithDebInfo"
     WITH_UBSAN: "ON"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - merge_requests
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+  <<: *wide_test_filter_definition
   tags:
     - ubuntu1804
     - test
@@ -165,16 +147,7 @@ ubuntu-1804-tsan:
     LD: "clang++-8"
     BUILD_TYPE: "RelWithDebInfo"
     WITH_TSAN: "ON"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - merge_requests
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+  <<: *wide_test_filter_definition
   tags:
     - ubuntu1804
     - test
@@ -187,17 +160,7 @@ roskinetic-image:
     BUILD_TYPE: "RelWithDebInfo"
     CC: "gcc-9"
     CXX: "g++-9"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - master
-      - merge_requests
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+  <<: *wide_test_filter_definition
   tags:
     - docker
     - platform
@@ -210,17 +173,7 @@ rosmelodic-image:
     BUILD_TYPE: "RelWithDebInfo"
     CC: "gcc-9"
     CXX: "g++-9"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - master
-      - merge_requests
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+  <<: *wide_test_filter_definition
   tags:
     - docker
     - platform
@@ -233,17 +186,7 @@ ubuntu1604-image:
     BUILD_TYPE: "RelWithDebInfo"
     CC: "gcc-9"
     CXX: "g++-9"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - master
-      - merge_requests
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+  <<: *wide_test_filter_definition
   tags:
     - docker
     - platform
@@ -256,17 +199,7 @@ ubuntu1804-image:
     BUILD_TYPE: "RelWithDebInfo"
     CC: "gcc-9"
     CXX: "g++-9"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - master
-      - merge_requests
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+  <<: *wide_test_filter_definition
   tags:
     - docker
     - platform
@@ -279,17 +212,7 @@ ubuntu-rolling-image:
     BUILD_TYPE: "RelWithDebInfo"
     CC: "gcc-9"
     CXX: "g++-9"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - master
-      - merge_requests
-    changes:
-      - .gitlab-ci.yml
-      - cmake/*
-      - src/*
-      - third_party/*
+  <<: *wide_test_filter_definition
   tags:
     - docker
     - platform
