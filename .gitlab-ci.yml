@@ -34,6 +34,7 @@ coverage:
   only:
     refs:
       - master
+      - merge_requests
     <<: *code_change_filter_definition
   tags:
     - ubuntu1804
