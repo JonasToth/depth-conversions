@@ -5,8 +5,7 @@
 
 BOLD=; RED=; YELLOW=; DEFAULT=;
 
-echo ${TERM}
-case ${TERM} in
+case "${TERM}" in
   '') ;;
   'dumb') ;;
   *)

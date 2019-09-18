@@ -73,7 +73,7 @@ clang-tidy-analysis:
   script:
     - mkdir -p build && cd build
     - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=OFF -DWITH_TESTING=OFF -DWITH_CONTRACT_EXCEPTION=OFF -DWITH_BENCHMARK=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-    - cd .. && ln -s build_analyze/compile_commands.json && cd src/
+    - cd .. && ln -s build/compile_commands.json && cd src/
     - run-clang-tidy-8 -header-filter=sens_loc/* include/ apps/ lib/
   only:
     refs:
@@ -179,12 +179,106 @@ ubuntu-1804-tsan:
     - ubuntu1804
     - test
 
-test-ros-image:
+roskinetic-image:
+  image: base-image-roskinetic
+  stage: platforms
+  allow_failure: true
+  variables:
+    BUILD_TYPE: "RelWithDebInfo"
+    CC: "gcc-9"
+    CXX: "g++-9"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - master
+      - merge_requests
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
+  tags:
+    - docker
+    - platform
+
+rosmelodic-image:
   image: base-image-rosmelodic
   stage: platforms
   allow_failure: true
   variables:
     BUILD_TYPE: "RelWithDebInfo"
+    CC: "gcc-9"
+    CXX: "g++-9"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - master
+      - merge_requests
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
+  tags:
+    - docker
+    - platform
+
+ubuntu1604-image:
+  image: base-image-ubuntu1604
+  stage: platforms
+  allow_failure: true
+  variables:
+    BUILD_TYPE: "RelWithDebInfo"
+    CC: "gcc-9"
+    CXX: "g++-9"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - master
+      - merge_requests
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
+  tags:
+    - docker
+    - platform
+
+ubuntu1804-image:
+  image: base-image-ubuntu1804
+  stage: platforms
+  allow_failure: true
+  variables:
+    BUILD_TYPE: "RelWithDebInfo"
+    CC: "gcc-9"
+    CXX: "g++-9"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - master
+      - merge_requests
+    changes:
+      - .gitlab-ci.yml
+      - cmake/*
+      - src/*
+      - third_party/*
+  tags:
+    - docker
+    - platform
+
+ubuntu-rolling-image:
+  image: base-image-ubuntu-rolling
+  stage: platforms
+  allow_failure: true
+  variables:
+    BUILD_TYPE: "RelWithDebInfo"
+    CC: "gcc-9"
+    CXX: "g++-9"
   script:
     - ./scripts/ci/normal_build.bash
   only:
