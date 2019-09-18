@@ -32,6 +32,18 @@ option(WITH_TESTING ON "Enable unittests for this project")
 option(WITH_DEP_TESTING OFF "Enable tests in thridparty modules")
 option(WITH_CONTRACT_EXCEPTION ON "Enable contract throwing exceptions on contract violation")
 
+if (WITH_TESTING)
+    find_program(GCOV_PATH gcov)
+    find_program(LCOV_PATH lcov)
+
+    if(NOT GCOV_PATH OR NOT LCOV_PATH)
+        message(WARNING "gcov/lcov not found! Can not collect test coverage reports...")
+    else ()
+        message(STATUS "Found coverage tools")
+        option(WITH_TEST_COVERAGE OFF "Enable the collection of test coverage")
+    endif (NOT GCOV_PATH OR NOT LCOV_PATH)
+endif (WITH_TESTING)
+
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     option(WITH_UBSAN OFF "Enable Undefined Behaviour sanitizer")
     option(WITH_ASAN OFF "Enable Undefined Behaviour sanitizer")
@@ -39,7 +51,7 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
 endif ()
 
 if (WITH_TESTING OR WITH_BENCHMARK)
-    set(BUILD_TESTING "" OFF)
+    set(BUILD_TESTING "" ON)
     enable_testing()
 endif ()
 
