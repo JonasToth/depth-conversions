@@ -31,8 +31,8 @@ int main(int argc, char **argv) try {
                    "File that contains calibration parameters for the camera")
         ->required()
         ->check(CLI::ExistingFile);
-    apps::file_patterns files;
 
+    apps::file_patterns files;
     app.add_option("-i,--input", files.input,
                    "Input pattern for image, e.g. \"depth-{}.png\"")
         ->required();
@@ -94,6 +94,20 @@ int main(int argc, char **argv) try {
     flexion_cmd->add_option("-o,--output", files.output,
                             "Output pattern for the flexion images.");
 
+    // Flexion images
+    CLI::App *scale_cmd = app.add_subcommand(
+        "scale", "Scale depth images and add an optional offset.");
+    scale_cmd->add_option("-o,--output", files.output,
+                          "Output pattern for the scaled images.");
+    double scale_factor = 1.;
+    scale_cmd->add_option(
+        "-f,--factor", scale_factor,
+        "Real number that is multipled to every depth value. Default is 1.0");
+    double scale_delta = 0.;
+    scale_cmd->add_option(
+        "-d,--delta", scale_delta,
+        "Real number that is added to every depth value. Default is 0.0");
+
     CLI11_PARSE(app, argc, argv);
 
     if (files.input.empty()) {
@@ -115,8 +129,7 @@ int main(int argc, char **argv) try {
     }
 
     try {
-        unique_ptr<apps::batch_converter> c =
-            [&]() -> unique_ptr<apps::batch_converter> {
+        auto c = [&]() -> unique_ptr<apps::batch_converter> {
             if (*bearing_cmd)
                 return make_unique<apps::bearing_converter>(
                     files, apps::str_to_depth_type(input_type), *intrinsic);
@@ -135,6 +148,10 @@ int main(int argc, char **argv) try {
             if (*flexion_cmd)
                 return make_unique<apps::flexion_converter>(
                     files, apps::str_to_depth_type(input_type), *intrinsic);
+            if (*scale_cmd)
+                return make_unique<apps::scale_converter>(
+                    files, apps::str_to_depth_type(input_type), scale_factor,
+                    scale_delta);
 
             throw std::invalid_argument{"target type for conversion required!"};
         }();

@@ -9,6 +9,7 @@ target_sources(depth2x
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_flexion.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_laserscan.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_max_curve.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_scale.cpp"
     )
 add_dependencies(depth2x opencv)
 target_link_libraries(depth2x
