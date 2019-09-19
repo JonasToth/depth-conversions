@@ -121,7 +121,10 @@ int main(int argc, char **argv) try {
     optional<camera_models::pinhole> intrinsic =
         io::load_pinhole_intrinsic(calibration_fstream);
 
-    if (!intrinsic) {
+    // FIXME: Not nice, but scale_cmd is the only command that does not require
+    // the intrinsic. Consequently if it is not given, some other command is
+    // expected. This error will then make sense.
+    if (!intrinsic && !scale_cmd) {
         cerr << util::err{};
         cerr << "Could not load intrinsic calibration \"" << rang::style::bold
              << calibration_file << rang::style::reset << "\"!\n";
