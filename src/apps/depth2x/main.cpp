@@ -17,6 +17,7 @@ int main(int argc, char **argv) try {
     using namespace std;
 
     CLI::App app{"Batchconversion of depth images to bearing angle images."};
+    app.fallthrough();
 
     auto print_version = [argv](int /*count*/) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
