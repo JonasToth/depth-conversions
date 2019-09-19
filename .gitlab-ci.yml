@@ -7,8 +7,8 @@ stages:
 .code_change_filter: &code_change_filter_definition
   changes:
     - cmake/*
-    - src/*
-    - third_party/*
+    - src/**/*
+    - third_party/**/*
 
 coverage:
   stage: compilers
@@ -76,11 +76,7 @@ clang-tidy-analysis:
   only:
     refs:
       - master
-    changes:
-      - cmake/*
-      - src/*
-      - third_party/*
-        # <<: *code_change_filter_definition
+    <<: *code_change_filter_definition
 
 ubuntu-1804-asan:
   stage: sanitizers
