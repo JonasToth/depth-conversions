@@ -30,9 +30,6 @@ ubuntu-1804-clang-8:
     LD: "lld-8"
   script:
     - ./scripts/ci/normal_build.bash
-  except:
-    refs:
-      - master
   only:
     refs:
       - merge_requests
@@ -48,9 +45,6 @@ ubuntu-1804-gcc-8:
     CXX: "g++-8"
   script:
     - ./scripts/ci/normal_build.bash
-  except:
-    refs:
-      - master
   only:
     refs:
       - merge_requests
@@ -82,7 +76,7 @@ clang-tidy-analysis:
   only:
     refs:
       - master
-    <<: *code_change_filter_definition
+        # <<: *code_change_filter_definition
 
 ubuntu-1804-asan:
   stage: sanitizers
