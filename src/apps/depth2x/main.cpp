@@ -30,7 +30,6 @@ int main(int argc, char **argv) try {
     string calibration_file;
     app.add_option("-c,--calibration", calibration_file,
                    "File that contains calibration parameters for the camera")
-        ->required()
         ->check(CLI::ExistingFile);
 
     apps::file_patterns files;
