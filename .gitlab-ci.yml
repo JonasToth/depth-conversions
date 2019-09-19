@@ -76,6 +76,10 @@ clang-tidy-analysis:
   only:
     refs:
       - master
+    changes:
+      - cmake/*
+      - src/*
+      - third_party/*
         # <<: *code_change_filter_definition
 
 ubuntu-1804-asan:
