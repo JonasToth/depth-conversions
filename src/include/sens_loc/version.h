@@ -4,6 +4,7 @@
 #include <string>
 
 namespace sens_loc {
+
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SENS_LOC_MAJOR 0
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
