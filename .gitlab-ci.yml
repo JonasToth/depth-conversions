@@ -5,10 +5,10 @@ stages:
     - platforms
 
 .code_change_filter: &code_change_filter_definition
-    changes:
-      - cmake/*
-      - src/*
-      - third_party/*
+  changes:
+    - cmake/*
+    - src/*
+    - third_party/*
 
 coverage:
   stage: compilers
