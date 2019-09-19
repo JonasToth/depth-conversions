@@ -76,29 +76,6 @@ clang-tidy-analysis:
   tags:
     - ubuntu1804
 
-ubuntu-1804-staging:
-  stage: platforms
-  variables:
-    CC: "gcc-8"
-    CXX: "g++-8"
-    BUILD_TYPE: "Release"
-    WITH_BENCHMARK: "ON"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - master
-    <<: *code_change_filter_definition
-  artifacts:
-    name: "ubuntu1804-$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
-    paths:
-      - build/src/apps/depth2x
-    expire_in: 1 week
-  tags:
-    - ubuntu1804
-    - test
-    - benchmark
-
 .wide_testing_filter: &wide_test_filter_definition
   script:
     - ./scripts/ci/normal_build.bash
@@ -146,6 +123,24 @@ ubuntu-1804-tsan:
   tags:
     - ubuntu1804
     - test
+
+ubuntu1804-release:
+  stage: platforms
+  variables:
+    CC: "gcc-8"
+    CXX: "g++-8"
+    BUILD_TYPE: "Release"
+    WITH_BENCHMARK: "ON"
+  <<: *wide_test_filter_definition
+  artifacts:
+    name: "ubuntu1804-$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
+    paths:
+      - build/src/apps/depth2x
+    expire_in: 1 week
+  tags:
+    - ubuntu1804
+    - test
+    - benchmark
 
 roskinetic-image:
   image: base-image-roskinetic
