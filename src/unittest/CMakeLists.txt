@@ -32,6 +32,10 @@ test_add_file(conversion conversion/test_util.cpp)
 
 create_test(conversion_curvature)
 
+create_test(conversion_scaling)
+configure_file(conversion/scale-offset.png conversion/scale-offset.png COPYONLY)
+configure_file(conversion/scale-up.png conversion/scale-up.png COPYONLY)
+
 create_test(io)
 test_add_file(io io/test_image.cpp)
 test_add_file(io io/test_intrinsics.cpp)
