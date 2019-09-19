@@ -29,5 +29,9 @@ if ${exe} -c "kinect_intrinsic.txt" -i "data0-depth.png" -s 0 -e 4 bearing; then
     exit 1
 fi
 
+if ${exe} bearing -c "kinect_intrinsic.txt" -i "data0-depth.png" -s 0 -e 4; then
+    print_error "One output-pattern required. Failure to enforce that"
+    exit 1
+fi
 print_info "Test successful!"
 exit 0
