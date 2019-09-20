@@ -64,9 +64,7 @@ clang-tidy-analysis:
     refs:
       - master
       - merge_requests
-    changes:
-      - .clang-tidy
-      - src/*
+    <<: *code_change_filter_definition
   tags:
     - ubuntu1804
 
