@@ -1,5 +1,5 @@
 find_package(Threads REQUIRED)
-find_package (Eigen3 NO_MODULE)
+find_package (Eigen3)
 
 add_library(sens_loc
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/version.h"
@@ -34,8 +34,12 @@ target_link_libraries(sens_loc
     taskflow::taskflow
     ${OpenCV_LIBS}
     )
+
 if (TARGET Eigen3::Eigen)
+    message(STATUS "Eigen found as target")
     target_link_libraries(sens_loc PUBLIC Eigen3::Eigen)
+else ()
+    message(STATUS "No Eigen in system found")
 endif (TARGET Eigen3::Eigen)
 
 common_target_properties(sens_loc)
