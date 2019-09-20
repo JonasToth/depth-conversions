@@ -35,7 +35,7 @@ target_link_libraries(sens_loc
     ${OpenCV_LIBS}
     )
 if (TARGET Eigen3::Eigen)
-    target_link_libraries(sens_loc PRIVATE Eigen3::Eigen)
+    target_link_libraries(sens_loc PUBLIC Eigen3::Eigen)
 endif (TARGET Eigen3::Eigen)
 
 common_target_properties(sens_loc)
