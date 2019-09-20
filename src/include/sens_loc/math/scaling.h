@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <gsl/gsl>
+#include <utility>
 
 namespace sens_loc { namespace math {
 

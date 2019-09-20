@@ -17,6 +17,8 @@ configure_file(conversion/horizontal-diff.png conversion/horizontal-diff.png COP
 configure_file(conversion/crashing-file.png conversion/crashing-file.png COPYONLY)
 
 create_test(conversion_curvature conversion/test_conversion_curvature.cpp)
+# configure_file(conversion/mean-reference.png conversion/mean-reference.png COPYONLY)
+# configure_file(conversion/gauss-reference.png conversion/gauss-reference.png COPYONLY)
 
 create_test(conversion_flexion conversion/test_conversion_flexion.cpp)
 configure_file(conversion/flexion-reference.png conversion/flexion-reference.png COPYONLY)
@@ -45,6 +47,7 @@ create_test(math math/test_math.cpp)
 test_add_file(math math/test_angle_conversion.cpp)
 test_add_file(math math/test_curvature.cpp)
 test_add_file(math math/test_derivatives.cpp)
+test_add_file(math math/test_scaling.cpp)
 test_add_file(math math/test_triangles.cpp)
 
 create_test(util util/test_util.cpp)
