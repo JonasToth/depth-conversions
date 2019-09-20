@@ -3,9 +3,11 @@ include(unittest_macros)
 create_test(camera_models camera_models/test_camera_models.cpp)
 test_add_file(camera_models camera_models/test_pinhole.cpp)
 
-create_test(conversion_bearing conversion/test_depth_to_bearing.cpp)
-test_add_file(conversion_bearing conversion/test_pathological_cases.cpp)
+# Conversion tests all require this file.
 configure_file(conversion/data0-depth.png conversion/data0-depth.png COPYONLY)
+
+create_test(conversion_bearing conversion/test_conversion_bearing.cpp)
+test_add_file(conversion_bearing conversion/test_conversion_bearing_pathological.cpp)
 configure_file(conversion/bearing-antidiagonal.png conversion/bearing-antidiagonal.png COPYONLY)
 configure_file(conversion/bearing-diagonal.png conversion/bearing-diagonal.png COPYONLY)
 configure_file(conversion/bearing-horizontal-double.png conversion/bearing-horizontal-double.png COPYONLY)
@@ -20,11 +22,9 @@ create_test(conversion_flexion conversion/test_conversion_flexion.cpp)
 configure_file(conversion/flexion-reference.png conversion/flexion-reference.png COPYONLY)
 
 create_test(conversion_laser conversion/test_conversion_laser.cpp)
-test_add_file(conversion_laser conversion/test_depth_to_laserscan.cpp)
 configure_file(conversion/data0-depth-laser.png conversion/data0-depth-laser.png COPYONLY)
 
 create_test(conversion_max_curve conversion/test_conversion_max_curve.cpp)
-test_add_file(conversion_max_curve conversion/test_depth_to_max_curve.cpp)
 configure_file(conversion/max-curve-float.png conversion/max-curve-float.png COPYONLY)
 configure_file(conversion/max-curve-double.png conversion/max-curve-double.png COPYONLY)
 
