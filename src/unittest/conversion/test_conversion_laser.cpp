@@ -45,7 +45,7 @@ TEST_CASE("convert depth image to laser-scan image") {
 
     REQUIRE(util::average_pixel_error(laser_float_16u, *ref_depth_laser_image) < 0.5);
     REQUIRE(util::average_pixel_error(laser_double_16u, laser_float_16u) < 1.0);
-    REQUIRE(util::average_pixel_error(laser_float, depth_float) > 150.);
+    REQUIRE(util::average_pixel_error(laser_float, depth_float) < 1.0);
 }
 
 TEST_CASE("convert depth image to laser-scan image parallel") {
@@ -76,6 +76,6 @@ TEST_CASE("convert depth image to laser-scan image parallel") {
     }
     cv::Mat laser_float_16u;
     laser_out.convertTo(laser_float_16u, CV_16U);
-    REQUIRE(util::average_pixel_error(laser_float_16u, *ref_depth_laser_image) >
-            1000.);
+    REQUIRE(util::average_pixel_error(laser_float_16u, *ref_depth_laser_image) <
+            5.);
 }
