@@ -138,7 +138,7 @@ TEST_CASE("Convert depth image to diagonal bearing angle image") {
     auto converted = convert_bearing<double, ushort>(diagonal_bearing);
     cv::imwrite("conversion/test_diagonal.png", converted);
 
-    REQUIRE(util::average_pixel_error(converted, *ref_diag) < 0.5);
+    REQUIRE(util::average_pixel_error(converted, *ref_diag) < 1.0);
 }
 
 TEST_CASE("Convert depth image to antidiagonal bearing angle image") {
