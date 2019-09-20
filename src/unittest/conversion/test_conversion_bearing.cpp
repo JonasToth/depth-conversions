@@ -192,8 +192,8 @@ TEST_CASE("Convert depth image to horizontal bearing angle image") {
     cv::imwrite("conversion/test_horizontal_double.png", converted_dbl);
 
 
-    REQUIRE(util::average_pixel_error(converted_flt, *ref_hor_float) < 2.0);
-    REQUIRE(util::average_pixel_error(converted_dbl, *ref_hor_double) < 2.0);
+    REQUIRE(util::average_pixel_error(converted_flt, *ref_hor_float) < 1.0);
+    REQUIRE(util::average_pixel_error(converted_dbl, *ref_hor_double) < 1.0);
 
 
     cv::Mat diff;
