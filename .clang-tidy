@@ -1,6 +1,6 @@
 ---
 Checks:          'clang-diagnostic-*,clang-analyzer-*,bugprone-*,cert-*,cppcoreguidelines-*,misc-*,modernize-*,performance-*,readability-*,portability-*,-abseil-*,-android-*,-boost-*,-fuchsia-*,-google-*,-hicpp-*,-llvm-*,-mpi-*,-obj-*,-zircon-*,-readability-braces-around-statements,-misc-non-private-member-variables-in-classes,-cppcoreguidelines-non-private-member-variables-in-classes,-readability-magic-numbers'
-WarningsAsErrors: ''
+WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
 FormatStyle:     file
