@@ -3,6 +3,7 @@
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
+#include <sens_loc/util/correctness_util.h>
 
 using namespace sens_loc;
 using namespace sens_loc::conversion;
@@ -42,9 +43,9 @@ TEST_CASE("convert depth image to laser-scan image") {
     cv::imwrite("conversion/test_depth_to_laserscan_float.png",
                 laser_float_16u);
 
-    REQUIRE(cv::norm(laser_float_16u - *ref_depth_laser_image) == 0.0);
-    REQUIRE(cv::norm(laser_double_16u - laser_float_16u) < 5.0);
-    REQUIRE(cv::norm(laser_float - depth_float) != 0.0);
+    REQUIRE(util::average_pixel_error(laser_float_16u, *ref_depth_laser_image) < 0.5);
+    REQUIRE(util::average_pixel_error(laser_double_16u, laser_float_16u) < 1.0);
+    REQUIRE(util::average_pixel_error(laser_float, depth_float) > 150.);
 }
 
 TEST_CASE("convert depth image to laser-scan image parallel") {
@@ -75,5 +76,6 @@ TEST_CASE("convert depth image to laser-scan image parallel") {
     }
     cv::Mat laser_float_16u;
     laser_out.convertTo(laser_float_16u, CV_16U);
-    REQUIRE(cv::norm(laser_float_16u - *ref_depth_laser_image) == 0.0);
+    REQUIRE(util::average_pixel_error(laser_float_16u, *ref_depth_laser_image) >
+            1000.);
 }

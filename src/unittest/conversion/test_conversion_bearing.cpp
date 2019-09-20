@@ -4,6 +4,7 @@
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
+#include <sens_loc/util/correctness_util.h>
 
 using namespace sens_loc;
 using namespace sens_loc::conversion;
@@ -91,11 +92,10 @@ TEST_CASE("Convert depth image to vertical bearing angle image") {
 
     auto vertical_bearing =
         depth_to_bearing<direction::vertical, double, double>(laser_double, p);
-    cv::imwrite("conversion/test_vertical.png",
-                convert_bearing<double, uchar>(vertical_bearing));
+    auto converted = convert_bearing<double, uchar>(vertical_bearing);
+    cv::imwrite("conversion/test_vertical.png", converted);
 
-    REQUIRE(cv::norm(convert_bearing<double, uchar>(vertical_bearing) -
-                     *ref_vert) == Approx(0.0));
+    REQUIRE(util::average_pixel_error(converted, *ref_vert) < 0.5);
 }
 
 TEST_CASE("Convert depth image to vertical bearing angle image in parallel") {
@@ -116,11 +116,10 @@ TEST_CASE("Convert depth image to vertical bearing angle image in parallel") {
                                                                   flow);
         tf::Executor().run(flow).wait();
     }
-    cv::imwrite("conversion/test_vertical_parallel.png",
-                convert_bearing<double, uchar>(out));
+    auto converted = convert_bearing<double, uchar>(out);
+    cv::imwrite("conversion/test_vertical_parallel.png", converted);
 
-    REQUIRE(cv::norm(convert_bearing<double, uchar>(out) - *ref_vert) ==
-            Approx(0.0));
+    REQUIRE(util::average_pixel_error(converted, *ref_vert) < 0.5);
 }
 
 TEST_CASE("Convert depth image to diagonal bearing angle image") {
@@ -136,11 +135,10 @@ TEST_CASE("Convert depth image to diagonal bearing angle image") {
 
     auto diagonal_bearing =
         depth_to_bearing<direction::diagonal, double, double>(laser_double, p);
-    cv::imwrite("conversion/test_diagonal.png",
-                convert_bearing<double, ushort>(diagonal_bearing));
+    auto converted = convert_bearing<double, ushort>(diagonal_bearing);
+    cv::imwrite("conversion/test_diagonal.png", converted);
 
-    REQUIRE(cv::norm(convert_bearing<double>(diagonal_bearing) - *ref_diag) ==
-            Approx(0.0));
+    REQUIRE(util::average_pixel_error(converted, *ref_diag) < 0.5);
 }
 
 TEST_CASE("Convert depth image to antidiagonal bearing angle image") {
@@ -162,8 +160,7 @@ TEST_CASE("Convert depth image to antidiagonal bearing angle image") {
         convert_bearing<float, uchar>(antidiagonal_bearing);
     cv::imwrite("conversion/test_antidiagonal.png", converted_bearing);
 
-    const cv::Mat diff = converted_bearing - *ref_anti;
-    REQUIRE(cv::norm(diff) / (diff.cols * diff.rows) < 1.);
+    REQUIRE(util::average_pixel_error(converted_bearing, *ref_anti) < 0.5);
 }
 
 TEST_CASE("Convert depth image to horizontal bearing angle image") {
@@ -186,24 +183,23 @@ TEST_CASE("Convert depth image to horizontal bearing angle image") {
 
     auto horizontal_bearing_float =
         depth_to_bearing<direction::horizontal, float, double>(laser_double, p);
-    cv::imwrite("conversion/test_horizontal_float.png",
-                convert_bearing(horizontal_bearing_float));
+    auto converted_flt = convert_bearing(horizontal_bearing_float);
+    cv::imwrite("conversion/test_horizontal_float.png", converted_flt);
 
     auto horizontal_bearing_double =
         depth_to_bearing<direction::horizontal, double, float>(laser_float, p);
-    cv::imwrite("conversion/test_horizontal_double.png",
-                convert_bearing<double>(horizontal_bearing_double));
+    auto converted_dbl = convert_bearing<double>(horizontal_bearing_double);
+    cv::imwrite("conversion/test_horizontal_double.png", converted_dbl);
 
 
-    REQUIRE(cv::norm(convert_bearing(horizontal_bearing_float) -
-                     *ref_hor_float) == Approx(0.0));
-    REQUIRE(cv::norm(convert_bearing<double>(horizontal_bearing_double) -
-                     *ref_hor_double) == Approx(0.0));
+    REQUIRE(util::average_pixel_error(converted_flt, *ref_hor_float) < 1.0);
+    REQUIRE(util::average_pixel_error(converted_dbl, *ref_hor_double) < 1.0);
+
 
     cv::Mat diff;
     diff = convert_bearing<double, uchar>(horizontal_bearing_double) -
            convert_bearing<float, uchar>(horizontal_bearing_float);
     cv::imwrite("conversion/test-horizontal-diff.png", diff);
     /// Small Difference, but not zero.
-    REQUIRE(cv::norm(diff - *ref_diff) == Approx(0.0));
+    REQUIRE(util::average_pixel_error(diff, *ref_diff) < 0.5);
 }

@@ -3,6 +3,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include <sens_loc/conversion/depth_scaling.h>
 #include <sens_loc/io/image.h>
+#include <sens_loc/util/correctness_util.h>
 
 using namespace sens_loc;
 
@@ -18,7 +19,7 @@ TEST_CASE("scale a depth image") {
     cv::Mat scaled = conversion::depth_scaling<ushort>(*depth_image, 8., 0.);
     cv::imwrite("conversion/test_scale_up.png", scaled);
 
-    REQUIRE(cv::norm(scaled - *ref) == doctest::Approx(0.0));
+    REQUIRE(util::average_pixel_error(scaled, *ref) < 0.5);
 }
 
 
@@ -34,5 +35,5 @@ TEST_CASE("Constant offset") {
     cv::Mat scaled =
         conversion::depth_scaling<ushort>(*depth_image, 1., 10000.);
     cv::imwrite("conversion/test_scale_offset.png", scaled);
-    REQUIRE(cv::norm(scaled - *ref) == doctest::Approx(0.0));
+    REQUIRE(util::average_pixel_error(scaled, *ref) < 0.5);
 }

@@ -4,6 +4,7 @@
 #include <sens_loc/conversion/depth_to_flexion.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
+#include <sens_loc/util/correctness_util.h>
 
 using namespace sens_loc;
 constexpr camera_models::pinhole p = {
@@ -34,5 +35,5 @@ TEST_CASE("flexion image") {
     const auto converted = conversion::convert_flexion<double, ushort>(triple);
     cv::imwrite("conversion/test_flexion.png", converted);
 
-    REQUIRE(cv::norm(*ref_image - converted) == 0.0);
+    REQUIRE(util::average_pixel_error(*ref_image, converted) < 0.5);
 }

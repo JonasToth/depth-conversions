@@ -4,6 +4,7 @@
 #include <sens_loc/conversion/depth_to_max_curve.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/math/angle_conversion.h>
+#include <sens_loc/util/correctness_util.h>
 
 using namespace sens_loc;
 using namespace sens_loc::conversion;
@@ -88,7 +89,7 @@ TEST_CASE("depth image to max curve") {
         const cv::Mat curve_ushort =
             convert_max_curve<float, ushort>(curve_float);
         cv::imwrite("conversion/test_max_curve_float.png", curve_ushort);
-        REQUIRE(cv::norm(*ref_float - curve_ushort) == Approx(0.0));
+        REQUIRE(util::average_pixel_error(*ref_float, curve_ushort) < 0.5);
     }
 
     SUBCASE("double accuracy") {
@@ -105,6 +106,6 @@ TEST_CASE("depth image to max curve") {
         const cv::Mat curve_ushort =
             convert_max_curve<double, ushort>(curve_double);
         cv::imwrite("conversion/test_max_curve_double.png", curve_ushort);
-        REQUIRE(cv::norm(*ref_double - curve_ushort) == Approx(0.0));
+        REQUIRE(util::average_pixel_error(*ref_double, curve_ushort) < 0.5);
     }
 }
