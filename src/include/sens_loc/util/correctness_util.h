@@ -36,7 +36,7 @@ inline double average_pixel_error(const cv::Mat &i1,
     Expects(i1.channels() == i2.channels());
 
     const size_t n_pixels = i1.cols * i1.rows * i1.channels();
-    const double result   = cv::norm(i1, i2, cv::NORM_L1);
+    const double result   = cv::norm(i1, i2, cv::NORM_L2);
 
     Ensures(result >= 0.);
     return result / double(n_pixels);
