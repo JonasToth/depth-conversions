@@ -1,5 +1,6 @@
-macro(create_test name)
-    add_executable(test_${name} ${CMAKE_CURRENT_LIST_DIR}/test_${name}.cpp)
+macro(create_test name source_file)
+    add_executable(test_${name} ${CMAKE_CURRENT_LIST_DIR}/${source_file})
+
     # NOTE: `doctest` has to come before `sens_loc`, because `cpp-taskflow`
     # has `doctest` in the repository as well, and its version of it would be
     # used, which is undesired!

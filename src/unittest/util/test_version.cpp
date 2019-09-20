@@ -1,4 +1,3 @@
-#define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include <algorithm>
 #include <doctest/doctest.h>
 #include <sens_loc/version.h>
