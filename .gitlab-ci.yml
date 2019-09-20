@@ -59,7 +59,7 @@ clang-tidy-analysis:
     - mkdir -p build && cd build
     - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=OFF -DWITH_TESTING=OFF -DWITH_CONTRACT_EXCEPTION=OFF -DWITH_BENCHMARK=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
     - cd .. && ln -s build/compile_commands.json && cd src/
-    - run-clang-tidy-8 -header-filter=sens_loc/* include/ apps/ lib/
+    - run-clang-tidy-8 -extra-arg="-warnings-as-errors" -header-filter=sens_loc/* include/ apps/ lib/
   only:
     refs:
       - master
