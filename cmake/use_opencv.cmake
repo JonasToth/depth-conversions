@@ -1,5 +1,5 @@
 set(CustomOpenCV "" CACHE PATH "Custom directory for opencv install in the system")
-find_package(OpenCV HINTS ${CustomOpenCV})
+find_package(OpenCV QUIET HINTS "${CustomOpenCV}")
 
 if (NOT OpenCV_FOUND)
     message(STATUS "Could not find OpenCV in the system. Building custom")
@@ -27,7 +27,7 @@ if (NOT OpenCV_FOUND)
 
       # Install step
       INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install"
-      INSTALL_COMMAND sh -c "DESTDIR=${CMAKE_BINARY_DIR}/third_party/opencv-install ${CMAKE_MAKE_PROGRAM} install"
+      # INSTALL_COMMAND sh -c "DESTDIR=${CMAKE_BINARY_DIR}/third_party/opencv-install ${CMAKE_MAKE_PROGRAM} install"
 
       # Test step
       TEST_BEFORE_INSTALL 0
@@ -35,14 +35,13 @@ if (NOT OpenCV_FOUND)
       # TEST_COMMAND "${CMAKE_MAKE_PROGRAM} test"
 
       # Output logging
-      LOG_DOWNLOAD 0
+      LOG_DOWNLOAD 1
       LOG_UPDATE 0
       LOG_CONFIGURE 1
       LOG_BUILD 1
       LOG_TEST 1
       LOG_INSTALL 1
     )
-
     set_target_properties(opencv PROPERTIES EXCLUDE_FROM_ALL TRUE)
 
     if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install/usr")

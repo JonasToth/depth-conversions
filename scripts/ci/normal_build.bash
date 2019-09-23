@@ -65,6 +65,8 @@ cmake .. \
  -DWITH_TSAN=${WITH_TSAN}
 
 print_info "Building project"
+ninja dependencies
+cmake .
 ninja
 
 if [ "${WITH_TESTING}" == "ON" ]; then
