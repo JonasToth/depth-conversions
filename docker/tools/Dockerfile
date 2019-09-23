@@ -27,7 +27,7 @@ RUN apt-get update \
     gcc-7 g++-7 \
     gcc-8 g++-8 \
     gcc-9 g++-9 \
-    lcov gcov \
+    lcov gcovr \
  && pip3 install --upgrade pip \
  && pip install cmake \
  && mkdir -p /opencv/build_cv && cd /opencv \
