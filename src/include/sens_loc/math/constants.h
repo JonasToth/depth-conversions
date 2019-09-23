@@ -3,8 +3,8 @@
 
 namespace sens_loc { namespace math {
 template <typename T>
-constexpr T pi =
-    T(3.141'592'653'589'793'238'462);  // NOLINT(misc-definitions-in-headers)
+constexpr T pi =  // NOLINT(misc-definitions-in-headers)
+    T(3.141'592'653'589'793'238'462);
 
 }}  // namespace sens_loc::math
 

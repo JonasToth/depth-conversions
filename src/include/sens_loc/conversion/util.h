@@ -62,9 +62,8 @@ inline constexpr std::pair<Real, Real> scaling_factor(Real max_angle) {
 
 template <typename Number>  // requires Number<Number>
 inline int get_cv_type() {
-    // NOLINTNEXTLINE(bugprone-branch-clone)
     if constexpr (std::is_same<Number, float>::value)
-        return CV_32F;
+        return CV_32F;  // NOLINT(bugprone-branch-clone)
     else if constexpr (std::is_same<Number, double>::value)
         return CV_64F;
     else if constexpr (std::is_same<Number, uchar>::value)
