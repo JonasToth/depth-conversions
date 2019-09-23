@@ -1,5 +1,5 @@
 find_package(Threads REQUIRED)
-find_package (Eigen3)
+find_package (Eigen3 NO_MODULE)
 
 add_library(sens_loc
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/version.h"
