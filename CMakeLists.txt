@@ -1,5 +1,6 @@
 # Install the latest cmake with 'pip' if necessary
 # See https://pypi.org/project/cmake/
+
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
 # Assuming the canonical version is listed in a single line
@@ -21,7 +22,7 @@ string(REGEX REPLACE ${MINOR_VERSION_REGEX} "\\1" MINOR_VERSION_STRING "${MINOR_
 string(REGEX REPLACE ${PATCH_VERSION_REGEX} "\\1" PATCH_VERSION_STRING "${PATCH_VERSION_STRING}")
 
 
-project(master-thesis
+project(sens_loc
         LANGUAGES CXX
         VERSION "${MAJOR_VERSION_STRING}.${MINOR_VERSION_STRING}.${PATCH_VERSION_STRING}")
 message(STATUS "Version: ${MAJOR_VERSION_STRING}.${MINOR_VERSION_STRING}.${PATCH_VERSION_STRING}")

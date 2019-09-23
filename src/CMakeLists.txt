@@ -1,6 +1,7 @@
 find_package(Threads REQUIRED)
 
-add_library(sens_loc
+add_library(sens_loc INTERFACE)
+target_sources(sens_loc INTERFACE
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/version.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/pinhole.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/conversion/depth_to_bearing.h"
@@ -18,15 +19,15 @@ add_library(sens_loc
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/derivatives.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/console.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/correctness_util.h"
-    "${CMAKE_CURRENT_LIST_DIR}/lib/io/intrinsics.cpp"
     )
 add_library(sens_loc::sens_loc ALIAS sens_loc)
 target_include_directories(sens_loc
-    PUBLIC
-    "${CMAKE_CURRENT_LIST_DIR}/include"
+    INTERFACE
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
+    $<INSTALL_INTERFACE:include>
     )
 target_link_libraries(sens_loc
-    PUBLIC
+    INTERFACE
     GSL
     rang
     Threads::Threads
@@ -34,13 +35,13 @@ target_link_libraries(sens_loc
     Eigen3::Eigen
     ${OpenCV_LIBS}
     )
-common_target_properties(sens_loc)
+target_compile_features(sens_loc INTERFACE cxx_std_17)
 
 install(TARGETS sens_loc
         EXPORT sens_loc
         LIBRARY DESTINATION "${CMAKE_INSTALL_LIBDIR}"
         ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}"
-        PUBLIC_HEADER DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+        )
 
 add_subdirectory("${CMAKE_CURRENT_LIST_DIR}/apps")
 if (WITH_TESTING)
