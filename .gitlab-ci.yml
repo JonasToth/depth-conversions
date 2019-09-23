@@ -20,7 +20,7 @@ coverage:
       - master
       - merge_requests
   tags:
-    - ubuntu1804
+    - docker
     - test
 
 ubuntu-1804-clang-7:
