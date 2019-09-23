@@ -22,7 +22,7 @@ RUN apt-get update \
  && apt-get update \
  && apt-get install -y  \
     clang-8 lld-8  \
-    clang-9 clang-tools-9 lld-9 \
+    clang-9 clang-tools-9 lld-9 clang-tidy-9 \
     libc++1-9 libc++-9-dev libc++abi1-9 libc++abi-9-dev \
     gcc-7 g++-7 \
     gcc-8 g++-8 \
