@@ -23,13 +23,6 @@ add_library(sens_loc
     )
 add_library(sens_loc::sens_loc ALIAS sens_loc)
 
-if (TARGET Eigen3::Eigen)
-    message(STATUS "Eigen found as target")
-    target_link_libraries(sens_loc PUBLIC Eigen3::Eigen)
-else ()
-    message(STATUS "No Eigen in system found")
-endif (TARGET Eigen3::Eigen)
-
 target_include_directories(sens_loc
     PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
