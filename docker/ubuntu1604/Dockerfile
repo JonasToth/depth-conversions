@@ -39,6 +39,14 @@ RUN apt-get update \
     -DINSTALL_TESTS=OFF \
     -DENABLE_LTO=OFF \
     -DOPENCV_PYTHON3_VERSION=OFF \
-&& ninja \
-&& ninja install \
-&& cd / && rm -rf /opencv
+ && ninja \
+ && ninja install \
+ && cd / && rm -rf /opencv
+
+RUN mkdir -p /eigen3 && cd /eigen3 \
+ && wget --quiet http://bitbucket.org/eigen/eigen/get/3.3.7.tar.gz \
+ && tar xf 3.3.7.tar.gz && cd eigen* \
+ && mkdir build && cd build \
+ && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
+ && ninja install \
+ && cd / && rm -rf /eigen3
