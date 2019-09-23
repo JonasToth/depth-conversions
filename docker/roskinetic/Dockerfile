@@ -2,11 +2,11 @@ FROM ros:kinetic-perception
 
 RUN apt-get update \
  && apt-get install -y \
-    libeigen3-dev \
     git \
     python3-pip \
     ninja-build \
     software-properties-common \
+    wget \
  && add-apt-repository ppa:ubuntu-toolchain-r/test \
  && apt-get update \
  && apt-get install -y  \
