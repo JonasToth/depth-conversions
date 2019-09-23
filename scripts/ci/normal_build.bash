@@ -42,6 +42,9 @@ fi
 if [[ -z "$LD" ]]; then
     export LD=ld
 fi
+if [[ -z "$USE_LIBCXX" ]]; then
+    USE_LIBCXX=OFF
+fi
 
 echo "Start working"
 
@@ -56,6 +59,7 @@ print_info "Configuring project"
 cmake .. \
  -G Ninja \
  -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
+ -DUSE_LIBCXX=${USE_LIBCXX} \
  -DBUILD_TESTING=${WITH_TESTING} \
  -DWITH_TESTING=${WITH_TESTING} \
  -DWITH_CONTRACT_EXCEPTION=${WITH_CONTRACT_EXCEPTION} \

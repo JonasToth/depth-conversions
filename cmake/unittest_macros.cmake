@@ -7,6 +7,7 @@ macro(create_test name source_file)
     target_link_libraries(test_${name}
                           PRIVATE doctest::doctest sens_loc::sens_loc)
     common_target_properties(test_${name})
+    common_executable_options(test_${name})
 
     add_test(test_${name} test_${name})
 endmacro()

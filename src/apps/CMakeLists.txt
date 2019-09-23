@@ -20,6 +20,7 @@ target_link_libraries(depth2x
     sens_loc::sens_loc
     )
 common_target_properties(depth2x)
+common_executable_options(depth2x)
 
 configure_file(kinect_intrinsic.txt kinect_intrinsic.txt COPYONLY)
 

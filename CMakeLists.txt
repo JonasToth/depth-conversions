@@ -45,6 +45,7 @@ if (WITH_TESTING)
 endif (WITH_TESTING)
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    option(USE_LIBCXX OFF "Use libc++ on clang builds")
     option(WITH_UBSAN OFF "Enable Undefined Behaviour sanitizer")
     option(WITH_ASAN OFF "Enable Undefined Behaviour sanitizer")
     option(WITH_TSAN OFF "Enable Thread Sanitizer (data races)")

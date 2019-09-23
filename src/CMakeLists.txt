@@ -34,7 +34,6 @@ target_link_libraries(sens_loc
     Eigen3::Eigen
     ${OpenCV_LIBS}
     )
-
 common_target_properties(sens_loc)
 
 install(TARGETS sens_loc
