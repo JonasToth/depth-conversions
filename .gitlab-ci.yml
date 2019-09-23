@@ -11,6 +11,7 @@ stages:
     - third_party/**/*
 
 coverage:
+  image: base-image-tools
   stage: compilers
   script:
     - ./scripts/ci/coverage_build.bash
@@ -22,7 +23,25 @@ coverage:
     - ubuntu1804
     - test
 
+ubuntu-1804-clang-7:
+  image: base-image-tools
+  stage: compilers
+  variables:
+    CC: "clang-7"
+    CXX: "clang++-7"
+    LD: "lld-7"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - merge_requests
+    <<: *code_change_filter_definition
+  tags:
+    - docker
+    - test
+
 ubuntu-1804-clang-8:
+  image: base-image-tools
   stage: compilers
   variables:
     CC: "clang-8"
@@ -35,10 +54,44 @@ ubuntu-1804-clang-8:
       - merge_requests
     <<: *code_change_filter_definition
   tags:
-    - ubuntu1804
+    - docker
+    - test
+
+ubuntu-1804-clang-9:
+  image: base-image-tools
+  stage: compilers
+  variables:
+    CC: "clang-9"
+    CXX: "clang++-9"
+    LD: "lld-9"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - merge_requests
+    <<: *code_change_filter_definition
+  tags:
+    - docker
+    - test
+
+ubuntu-1804-gcc-7:
+  image: base-image-tools
+  stage: compilers
+  variables:
+    CC: "gcc-7"
+    CXX: "g++-7"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - merge_requests
+    <<: *code_change_filter_definition
+  tags:
+    - docker
     - test
 
 ubuntu-1804-gcc-8:
+  image: base-image-tools
   stage: compilers
   variables:
     CC: "gcc-8"
@@ -50,23 +103,40 @@ ubuntu-1804-gcc-8:
       - merge_requests
     <<: *code_change_filter_definition
   tags:
-    - ubuntu1804
+    - docker
+    - test
+
+ubuntu-1804-gcc-9:
+  image: base-image-tools
+  stage: compilers
+  variables:
+    CC: "gcc-9"
+    CXX: "g++-9"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - merge_requests
+    <<: *code_change_filter_definition
+  tags:
+    - docker
     - test
 
 clang-tidy-analysis:
+  image: base-image-tools
   stage: compilers
   script:
     - mkdir -p build && cd build
     - cmake .. -G Ninja -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=OFF -DWITH_TESTING=OFF -DWITH_CONTRACT_EXCEPTION=OFF -DWITH_BENCHMARK=OFF -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
     - cd .. && ln -s build/compile_commands.json && cd src/
-    - run-clang-tidy-8 -header-filter=sens_loc/* include/ apps/ lib/
+    - run-clang-tidy -header-filter=sens_loc/* include/ apps/ lib/
   only:
     refs:
       - master
       - merge_requests
     <<: *code_change_filter_definition
   tags:
-    - ubuntu1804
+    - docker
 
 .wide_testing_filter: &wide_test_filter_definition
   script:
@@ -77,6 +147,7 @@ clang-tidy-analysis:
     <<: *code_change_filter_definition
 
 ubuntu-1804-asan:
+  image: base-image-tools
   stage: sanitizers
   variables:
     CC: "clang-8"
@@ -86,10 +157,11 @@ ubuntu-1804-asan:
     WITH_ASAN: "ON"
   <<: *wide_test_filter_definition
   tags:
-    - ubuntu1804
+    - docker
     - test
 
 ubuntu-1804-ubsan:
+  image: base-image-tools
   stage: sanitizers
   variables:
     CC: "clang-8"
@@ -99,10 +171,11 @@ ubuntu-1804-ubsan:
     WITH_UBSAN: "ON"
   <<: *wide_test_filter_definition
   tags:
-    - ubuntu1804
+    - docker
     - test
 
 ubuntu-1804-tsan:
+  image: base-image-tools
   stage: sanitizers
   allow_failure: true
   variables:
@@ -113,10 +186,11 @@ ubuntu-1804-tsan:
     WITH_TSAN: "ON"
   <<: *wide_test_filter_definition
   tags:
-    - ubuntu1804
+    - docker
     - test
 
 ubuntu1804-release:
+  image: base-image-tools
   stage: platforms
   variables:
     CC: "gcc-8"
@@ -130,7 +204,7 @@ ubuntu1804-release:
       - build/src/apps/depth2x
     expire_in: 1 week
   tags:
-    - ubuntu1804
+    - docker
     - test
     - benchmark
 

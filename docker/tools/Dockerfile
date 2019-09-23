@@ -21,10 +21,13 @@ RUN apt-get update \
  && add-apt-repository ppa:ubuntu-toolchain-r/test \
  && apt-get update \
  && apt-get install -y  \
-    clang-8 clang-tools-8 lld-8 libc++1-8 libc++abi1-8 \
+    clang-7 lld-7 libc++1-7 libc++abi1-7 \
+    clang-8 lld-8 libc++1-8 libc++abi1-8 \
     clang-9 clang-tools-9 lld-9 libc++1-9 libc++abi1-9 \
+    gcc-7 g++-7 \
     gcc-8 g++-8 \
     gcc-9 g++-9 \
+    lcov gcov \
  && pip3 install --upgrade pip \
  && pip install cmake \
  && mkdir -p /opencv/build_cv && cd /opencv \
