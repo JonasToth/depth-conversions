@@ -21,7 +21,7 @@ ninja
 
 print_info "Measure coverage"
 ctest -j4 --output-on-failure .
-lcov --quiet --no-external --capture --directory ../src/apps --directory ../src/include --directory ../src/lib --directory src/ --output-file test_coverage.info
+lcov --quiet --no-external --capture --directory ../src/apps --directory ../src/include --directory src/ --output-file test_coverage.info
 lcov --list test_coverage.info
 
 exit 0
