@@ -21,7 +21,6 @@ coverage:
       - merge_requests
   tags:
     - docker
-    - test
 
 ubuntu-1804-clang-7:
   image: base-image-tools
@@ -38,7 +37,6 @@ ubuntu-1804-clang-7:
     <<: *code_change_filter_definition
   tags:
     - docker
-    - test
 
 ubuntu-1804-clang-8:
   image: base-image-tools
@@ -55,7 +53,6 @@ ubuntu-1804-clang-8:
     <<: *code_change_filter_definition
   tags:
     - docker
-    - test
 
 ubuntu-1804-clang-9:
   image: base-image-tools
@@ -73,7 +70,6 @@ ubuntu-1804-clang-9:
     <<: *code_change_filter_definition
   tags:
     - docker
-    - test
 
 ubuntu-1804-gcc-7:
   image: base-image-tools
@@ -89,7 +85,6 @@ ubuntu-1804-gcc-7:
     <<: *code_change_filter_definition
   tags:
     - docker
-    - test
 
 ubuntu-1804-gcc-8:
   image: base-image-tools
@@ -105,7 +100,6 @@ ubuntu-1804-gcc-8:
     <<: *code_change_filter_definition
   tags:
     - docker
-    - test
 
 ubuntu-1804-gcc-9:
   image: base-image-tools
@@ -121,7 +115,6 @@ ubuntu-1804-gcc-9:
     <<: *code_change_filter_definition
   tags:
     - docker
-    - test
 
 clang-tidy-analysis:
   image: base-image-tools
@@ -159,7 +152,6 @@ ubuntu-1804-asan:
   <<: *wide_test_filter_definition
   tags:
     - docker
-    - test
 
 ubuntu-1804-ubsan:
   image: base-image-tools
@@ -173,7 +165,6 @@ ubuntu-1804-ubsan:
   <<: *wide_test_filter_definition
   tags:
     - docker
-    - test
 
 ubuntu-1804-tsan:
   image: base-image-tools
@@ -188,7 +179,6 @@ ubuntu-1804-tsan:
   <<: *wide_test_filter_definition
   tags:
     - docker
-    - test
 
 ubuntu1804-release:
   image: base-image-tools
@@ -206,7 +196,6 @@ ubuntu1804-release:
     expire_in: 1 week
   tags:
     - docker
-    - test
     - benchmark
 
 roskinetic-image:
