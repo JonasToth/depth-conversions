@@ -22,6 +22,14 @@ add_library(sens_loc
     "${CMAKE_CURRENT_LIST_DIR}/lib/io/intrinsics.cpp"
     )
 add_library(sens_loc::sens_loc ALIAS sens_loc)
+
+if (TARGET Eigen3::Eigen)
+    message(STATUS "Eigen found as target")
+    target_link_libraries(sens_loc PUBLIC Eigen3::Eigen)
+else ()
+    message(STATUS "No Eigen in system found")
+endif (TARGET Eigen3::Eigen)
+
 target_include_directories(sens_loc
     PUBLIC
     "${CMAKE_CURRENT_LIST_DIR}/include"
@@ -34,13 +42,6 @@ target_link_libraries(sens_loc
     taskflow::taskflow
     ${OpenCV_LIBS}
     )
-
-if (TARGET Eigen3::Eigen)
-    message(STATUS "Eigen found as target")
-    target_link_libraries(sens_loc PUBLIC Eigen3::Eigen)
-else ()
-    message(STATUS "No Eigen in system found")
-endif (TARGET Eigen3::Eigen)
 
 common_target_properties(sens_loc)
 

@@ -37,7 +37,7 @@ if (WITH_TESTING)
     find_program(LCOV_PATH lcov)
 
     if(NOT GCOV_PATH OR NOT LCOV_PATH)
-        message(WARNING "gcov/lcov not found! Can not collect test coverage reports...")
+        message(STATUS "gcov/lcov not found! Can not collect test coverage reports...")
     else ()
         message(STATUS "Found coverage tools")
         option(WITH_TEST_COVERAGE OFF "Enable the collection of test coverage")
