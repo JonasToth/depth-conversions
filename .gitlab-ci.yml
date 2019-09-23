@@ -64,6 +64,7 @@ ubuntu-1804-clang-9:
     CC: "clang-9"
     CXX: "clang++-9"
     LD: "lld-9"
+    USE_LIBCXX: "OFF"
   script:
     - ./scripts/ci/normal_build.bash
   only:

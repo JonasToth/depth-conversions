@@ -9,6 +9,7 @@
 #include <sens_loc/math/curvature.h>
 #include <sens_loc/math/derivatives.h>
 #include <sens_loc/math/scaling.h>
+#include <optional>
 
 namespace sens_loc { namespace conversion {
 

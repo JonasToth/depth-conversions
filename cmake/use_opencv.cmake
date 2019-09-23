@@ -27,7 +27,7 @@ if (NOT OpenCV_FOUND)
 
       # Install step
       INSTALL_DIR "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install"
-      # INSTALL_COMMAND sh -c "DESTDIR=${CMAKE_BINARY_DIR}/third_party/opencv-install ${CMAKE_MAKE_PROGRAM} install"
+      INSTALL_COMMAND sh -c "DESTDIR=${CMAKE_BINARY_DIR}/third_party/opencv-install ${CMAKE_MAKE_PROGRAM} install"
 
       # Test step
       TEST_BEFORE_INSTALL 0

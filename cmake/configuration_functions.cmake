@@ -21,11 +21,11 @@ function(common_target_properties target_name)
     target_compile_options(${target_name}
         PRIVATE "-Wall" "-Wextra" "-Werror" "-mavx")
 
-    if (CXX_COMPILER_ID EQUAL "GNU")
+    if (CMAKE_CXX_COMPILER_ID EQUAL "GNU")
         target_compile_options(${target_name}
             PRIVATE "-Wno-deprecated-copy"
             )
-    endif (CXX_COMPILER_ID EQUAL "GNU")
+    endif (CMAKE_CXX_COMPILER_ID EQUAL "GNU")
 
     if (WITH_UBSAN)
         target_compile_options(${target_name} PUBLIC "-fsanitize=undefined")
@@ -46,10 +46,11 @@ endfunction()
 function(common_executable_options target_name)
     set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
     if (USE_LIBCXX)
-        if (CXX_COMPILER_ID NOT MATCHES "clang")
+        if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+            message(STATUS "Choosen Compiler: ${CMAKE_CXX_COMPILER_ID}")
             message(FATAL_ERROR "libc++ can only be used with clang")
         endif ()
         target_compile_options(${target_name} PUBLIC "-stdlib=libc++")
-        target_link_options(${target_name} PUBLIC "-lc++abi")
+        target_link_options(${target_name} PUBLIC "-lc++abi" "-stdlib=libc++")
     endif (USE_LIBCXX)
 endfunction()
