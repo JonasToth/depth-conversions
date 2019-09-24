@@ -175,7 +175,7 @@ ubuntu-1804-tsan:
   variables:
     BUILD_TYPE: "RelWithDebInfo"
     WITH_IPO: "ON"
-    WITH_STATIC_STDCXXLIB: "ON"
+    WITH_STATIC_STDCXXLIB: "OFF"
     CC: "gcc-9"
     CXX: "g++-9"
 
