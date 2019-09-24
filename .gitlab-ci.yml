@@ -135,9 +135,9 @@ ubuntu-1804-asan:
   image: base-image-tools
   stage: sanitizers
   variables:
-    CC: "clang-8"
-    CXX: "clang++-8"
-    LD: "clang++-8"
+    CC: "clang-9"
+    CXX: "clang++-9"
+    LD: "clang++-9"
     BUILD_TYPE: "RelWithDebInfo"
     WITH_ASAN: "ON"
   <<: *wide_test_filter_definition
@@ -148,9 +148,9 @@ ubuntu-1804-ubsan:
   image: base-image-tools
   stage: sanitizers
   variables:
-    CC: "clang-8"
-    CXX: "clang++-8"
-    LD: "clang++-8"
+    CC: "clang-9"
+    CXX: "clang++-9"
+    LD: "clang++-9"
     BUILD_TYPE: "RelWithDebInfo"
     WITH_UBSAN: "ON"
   <<: *wide_test_filter_definition
@@ -162,9 +162,9 @@ ubuntu-1804-tsan:
   stage: sanitizers
   allow_failure: true
   variables:
-    CC: "clang-8"
-    CXX: "clang++-8"
-    LD: "clang++-8"
+    CC: "clang-9"
+    CXX: "clang++-9"
+    LD: "clang++-9"
     BUILD_TYPE: "RelWithDebInfo"
     WITH_TSAN: "ON"
   <<: *wide_test_filter_definition
