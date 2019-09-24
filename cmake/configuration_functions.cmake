@@ -44,7 +44,14 @@ function(common_target_properties target_name)
 endfunction()
 
 function(common_executable_options target_name)
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -stdlib=libc++ -lc++abi")
+    if (WITH_IPO)
+        set_target_properties(${target_name}
+                              PROPERTIES INTERPROCEDURAL_OPTIMIZATION ON)
+    else ()
+        set_target_properties(${target_name}
+                              PROPERTIES INTERPROCEDURAL_OPTIMIZATION OFF)
+    endif (WITH_IPO)
+
     if (USE_LIBCXX)
         if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             message(STATUS "Choosen Compiler: ${CMAKE_CXX_COMPILER_ID}")

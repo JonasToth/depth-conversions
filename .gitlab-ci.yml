@@ -10,6 +10,13 @@ stages:
     - src/**/*
     - third_party/**/*
 
+.binary_artifacts: &binary_artifact_paths
+  artifacts:
+    name: "$CI_BUILD_ID-$CI_JOB_NAME"
+    paths:
+      - build/src/apps/depth2x
+    expire_in: 4 week
+
 coverage:
   image: base-image-tools
   stage: compilers
@@ -173,11 +180,7 @@ ubuntu1804-release:
     BUILD_TYPE: "Release"
     WITH_BENCHMARK: "ON"
   <<: *wide_test_filter_definition
-  artifacts:
-    name: "ubuntu1804-$CI_JOB_NAME-$CI_COMMIT_REF_NAME"
-    paths:
-      - build/src/apps/depth2x
-    expire_in: 1 week
+  <<: *binary_artifact_paths
   tags:
     - docker
     - benchmark
@@ -191,6 +194,7 @@ roskinetic-image:
     CC: "gcc-9"
     CXX: "g++-9"
   <<: *wide_test_filter_definition
+  <<: *binary_artifact_paths
   tags:
     - docker
     - platform
@@ -204,6 +208,7 @@ rosmelodic-image:
     CC: "gcc-9"
     CXX: "g++-9"
   <<: *wide_test_filter_definition
+  <<: *binary_artifact_paths
   tags:
     - docker
     - platform
@@ -217,6 +222,7 @@ ubuntu1604-image:
     CC: "gcc-9"
     CXX: "g++-9"
   <<: *wide_test_filter_definition
+  <<: *binary_artifact_paths
   tags:
     - docker
     - platform
@@ -230,6 +236,7 @@ ubuntu1804-image:
     CC: "gcc-9"
     CXX: "g++-9"
   <<: *wide_test_filter_definition
+  <<: *binary_artifact_paths
   tags:
     - docker
     - platform
@@ -243,6 +250,7 @@ ubuntu-rolling-image:
     CC: "gcc-9"
     CXX: "g++-9"
   <<: *wide_test_filter_definition
+  <<: *binary_artifact_paths
   tags:
     - docker
     - platform
