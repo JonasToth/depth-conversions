@@ -37,7 +37,7 @@ if [[ -z "$WITH_IPO" ]]; then
     WITH_IPO=OFF
 fi
 if [[ -z "$WITH_STATIC_STDCXXLIB" ]]; then
-    WITH_STATIC_STDCXXLIB=ON
+    WITH_STATIC_STDCXXLIB=OFF
 fi
 if [[ -z "$CC" ]]; then
     export CC=gcc

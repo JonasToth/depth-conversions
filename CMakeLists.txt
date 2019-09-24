@@ -33,7 +33,7 @@ option(WITH_IPO OFF "Enable link-time-optimizations if possible")
 option(WITH_TESTING ON "Enable unittests for this project")
 option(WITH_DEP_TESTING OFF "Enable tests in thridparty modules")
 option(WITH_CONTRACT_EXCEPTION ON "Enable contract throwing exceptions on contract violation")
-option(WITH_STATIC_STDCXXLIB ON "Statically link the C++-standard library to prevent version conflicts due to the very new standard")
+option(WITH_STATIC_STDCXXLIB OFF "Statically link the C++-standard library to prevent version conflicts due to the very new standard")
 
 if (WITH_TESTING)
     find_program(GCOV_PATH gcov)
