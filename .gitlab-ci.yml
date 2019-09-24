@@ -171,26 +171,13 @@ ubuntu-1804-tsan:
   tags:
     - docker
 
-ubuntu1804-release:
-  image: base-image-tools
-  stage: platforms
-  variables:
-    CC: "gcc-8"
-    CXX: "g++-8"
-    BUILD_TYPE: "Release"
-    WITH_BENCHMARK: "ON"
-  <<: *wide_test_filter_definition
-  <<: *binary_artifact_paths
-  tags:
-    - docker
-    - benchmark
-
 roskinetic-image:
   image: base-image-roskinetic
   stage: platforms
   allow_failure: true
   variables:
     BUILD_TYPE: "RelWithDebInfo"
+    WITH_IPO: "ON"
     CC: "gcc-9"
     CXX: "g++-9"
   <<: *wide_test_filter_definition
@@ -205,6 +192,7 @@ rosmelodic-image:
   allow_failure: true
   variables:
     BUILD_TYPE: "RelWithDebInfo"
+    WITH_IPO: "ON"
     CC: "gcc-9"
     CXX: "g++-9"
   <<: *wide_test_filter_definition
@@ -219,6 +207,7 @@ ubuntu1604-image:
   allow_failure: true
   variables:
     BUILD_TYPE: "RelWithDebInfo"
+    WITH_IPO: "ON"
     CC: "gcc-9"
     CXX: "g++-9"
   <<: *wide_test_filter_definition
@@ -233,6 +222,7 @@ ubuntu1804-image:
   allow_failure: true
   variables:
     BUILD_TYPE: "RelWithDebInfo"
+    WITH_IPO: "ON"
     CC: "gcc-9"
     CXX: "g++-9"
   <<: *wide_test_filter_definition
@@ -247,6 +237,7 @@ ubuntu-rolling-image:
   allow_failure: true
   variables:
     BUILD_TYPE: "RelWithDebInfo"
+    WITH_IPO: "ON"
     CC: "gcc-9"
     CXX: "g++-9"
   <<: *wide_test_filter_definition

@@ -33,6 +33,9 @@ fi
 if [[ -z "$WITH_TSAN" ]]; then
     WITH_TSAN=OFF
 fi
+if [[ -z "$WITH_IPO" ]]; then
+    WITH_IPO=OFF
+fi
 if [[ -z "$CC" ]]; then
     export CC=gcc
 fi
@@ -63,6 +66,7 @@ cmake .. \
  -DBUILD_TESTING=${WITH_TESTING} \
  -DWITH_TESTING=${WITH_TESTING} \
  -DWITH_CONTRACT_EXCEPTION=${WITH_CONTRACT_EXCEPTION} \
+ -DWITH_IPO=${WITH_IPO} \
  -DWITH_BENCHMARK=${WITH_BENCHMARK} \
  -DWITH_UBSAN=${WITH_UBSAN} \
  -DWITH_ASAN=${WITH_ASAN} \
