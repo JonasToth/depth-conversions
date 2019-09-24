@@ -52,6 +52,11 @@ function(common_executable_options target_name)
                               PROPERTIES INTERPROCEDURAL_OPTIMIZATION OFF)
     endif (WITH_IPO)
 
+    if (WITH_STATIC_STDCXXLIB)
+        target_link_options(${target_name} PUBLIC "-static-libstdc++"
+                                                  "-static-libgcc")
+    endif ()
+
     if (USE_LIBCXX)
         if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             message(STATUS "Choosen Compiler: ${CMAKE_CXX_COMPILER_ID}")

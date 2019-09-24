@@ -171,15 +171,19 @@ ubuntu-1804-tsan:
   tags:
     - docker
 
+.platform_build_options: &platform_build_option_variables
+  variables:
+    BUILD_TYPE: "RelWithDebInfo"
+    WITH_IPO: "ON"
+    WITH_STATIC_STDCXXLIB: "ON"
+    CC: "gcc-9"
+    CXX: "g++-9"
+
 roskinetic-image:
   image: base-image-roskinetic
   stage: platforms
   allow_failure: true
-  variables:
-    BUILD_TYPE: "RelWithDebInfo"
-    WITH_IPO: "ON"
-    CC: "gcc-9"
-    CXX: "g++-9"
+  <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
   tags:
@@ -190,11 +194,7 @@ rosmelodic-image:
   image: base-image-rosmelodic
   stage: platforms
   allow_failure: true
-  variables:
-    BUILD_TYPE: "RelWithDebInfo"
-    WITH_IPO: "ON"
-    CC: "gcc-9"
-    CXX: "g++-9"
+  <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
   tags:
@@ -205,11 +205,7 @@ ubuntu1604-image:
   image: base-image-ubuntu1604
   stage: platforms
   allow_failure: true
-  variables:
-    BUILD_TYPE: "RelWithDebInfo"
-    WITH_IPO: "ON"
-    CC: "gcc-9"
-    CXX: "g++-9"
+  <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
   tags:
@@ -220,11 +216,7 @@ ubuntu1804-image:
   image: base-image-ubuntu1804
   stage: platforms
   allow_failure: true
-  variables:
-    BUILD_TYPE: "RelWithDebInfo"
-    WITH_IPO: "ON"
-    CC: "gcc-9"
-    CXX: "g++-9"
+  <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
   tags:
@@ -235,11 +227,7 @@ ubuntu-rolling-image:
   image: base-image-ubuntu-rolling
   stage: platforms
   allow_failure: true
-  variables:
-    BUILD_TYPE: "RelWithDebInfo"
-    WITH_IPO: "ON"
-    CC: "gcc-9"
-    CXX: "g++-9"
+  <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
   tags:
