@@ -14,13 +14,12 @@ target_sources(depth2x
 add_dependencies(depth2x opencv)
 target_link_libraries(depth2x
     PRIVATE
+    fmt::fmt
     CLI11::CLI11
     taskflow::taskflow
-    fmt::fmt
     sens_loc::sens_loc
     )
 common_target_properties(depth2x)
-common_executable_options(depth2x)
 
 configure_file(kinect_intrinsic.txt kinect_intrinsic.txt COPYONLY)
 

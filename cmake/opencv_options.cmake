@@ -1,7 +1,19 @@
 message(STATUS "Disabling OpenCV Tests due to complexity")
 set(WITH_DEP_TESTING OFF)
 
+message(STATUS "Build-Tools used for opencv build")
+message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
+message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
+message(STATUS "Linker: ${CMAKE_LINKER}")
+message(STATUS "Special flags for potential static linking and libc++ usage")
+
 list(APPEND opencv_options
+    -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
+    -DCMAKE_C_COMPILER=${CMAKE_C_COMPILER}
+    -DCMAKE_LINKER=${CMAKE_LINKER}
+    "$<$<BOOL:${USE_LIBCXX}>:-DCMAKE_CXX_FLAGS=-stdlib=libc++>"
+    "$<$<BOOL:${USE_LIBCXX}>:-DCMAKE_EXE_LINKER_FLAGS=-lc++abi -stdlib=libc++>"
+    "$<$<BOOL:${WITH_STATIC_STDCXXLIB}>:-DCMAKE_EXE_LINKER_FLAGS=-static-libstdc++ -static-libgcc>"
     -DBUILD_CUDA_STUBS:BOOL=OFF
     -DBUILD_DOCS:BOOL=OFF
     -DBUILD_EXAMPLES:BOOL=OFF
@@ -9,7 +21,7 @@ list(APPEND opencv_options
     -DBUILD_ITT:BOOL=OFF
     -DBUILD_JASPER:BOOL=OFF
     -DBUILD_JAVA:BOOL=OFF
-    -DBUILD_JPEG:BOOL=OFF
+    -DBUILD_JPEG:BOOL=ON
     -DBUILD_LIST:STRING=
     -DBUILD_OPENEXR:BOOL=OFF
     -DBUILD_PACKAGE:BOOL=OFF

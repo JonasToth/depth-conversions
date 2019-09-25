@@ -23,7 +23,7 @@ string(REGEX REPLACE ${PATCH_VERSION_REGEX} "\\1" PATCH_VERSION_STRING "${PATCH_
 
 
 project(sens_loc
-        LANGUAGES CXX
+        LANGUAGES CXX C
         VERSION "${MAJOR_VERSION_STRING}.${MINOR_VERSION_STRING}.${PATCH_VERSION_STRING}")
 message(STATUS "Version: ${MAJOR_VERSION_STRING}.${MINOR_VERSION_STRING}.${PATCH_VERSION_STRING}")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
@@ -52,6 +52,13 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     option(WITH_UBSAN OFF "Enable Undefined Behaviour sanitizer")
     option(WITH_ASAN OFF "Enable Undefined Behaviour sanitizer")
     option(WITH_TSAN OFF "Enable Thread Sanitizer (data races)")
+
+    if (USE_LIBCXX)
+        set(CMAKE_CXX_FLAGS
+            "${CMAKE_CXX_FLAGS} -stdlib=libc++")
+        set(CMAKE_EXE_LINKER_FLAGS
+            "${CMAKE_EXE_LINKER_FLAGS} -lc++abi -stdlib=libc++")
+    endif ()
 endif ()
 
 if (WITH_TESTING OR WITH_BENCHMARK)

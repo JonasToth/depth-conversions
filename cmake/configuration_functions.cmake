@@ -1,4 +1,5 @@
 function(common_target_properties target_name)
+    add_dependencies(${target_name} dependencies)
     set_target_properties(${target_name}
         PROPERTIES
         CXX_STANDARD 17
@@ -41,9 +42,7 @@ function(common_target_properties target_name)
         target_compile_options(${target_name} PUBLIC "-fsanitize=thread")
         target_link_options(${target_name} PUBLIC "-fsanitize=thread")
     endif (WITH_TSAN)
-endfunction()
 
-function(common_executable_options target_name)
     if (WITH_IPO)
         set_target_properties(${target_name}
                               PROPERTIES INTERPROCEDURAL_OPTIMIZATION ON)
