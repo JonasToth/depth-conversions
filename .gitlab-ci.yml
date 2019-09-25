@@ -83,6 +83,7 @@ ubuntu-1804-clang-9-libcxx:
     refs:
       - master
     <<: *code_change_filter_definition
+  <<: *binary_artifact_paths
   tags:
     - docker
     - test
@@ -109,6 +110,7 @@ ubuntu-1804-clang-9-libcxx-lto:
     refs:
       - master
     <<: *code_change_filter_definition
+  <<: *binary_artifact_paths
   tags:
     - docker
     - test
@@ -178,6 +180,7 @@ ubuntu-1804-gcc-9-lto:
     refs:
       - master
     <<: *code_change_filter_definition
+  <<: *binary_artifact_paths
   tags:
     - docker
     - test
