@@ -70,6 +70,7 @@ TEST_CASE("Scaling of bearing angle") {
 
         auto [scale, offset] = scaling_factor<double, schar>(max_angle);
 
+        MESSAGE("Max Angle: " << max_angle);
         MESSAGE("Scale is: " << scale);
         MESSAGE("Offset is: " << offset);
         REQUIRE(offset == 128.);
