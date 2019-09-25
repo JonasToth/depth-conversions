@@ -10,11 +10,15 @@ using namespace conversion;
 NONIUS_BENCHMARK("Depth2Curvature Gaussian", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
     (void) _;
-    meter.measure([&] { return depth_to_gaussian_curvature(euclid, p); });
+    cv::Mat                          in   = euclid;
+    sens_loc::camera_models::pinhole cali = p;
+    meter.measure([&] { return depth_to_gaussian_curvature(in, cali); });
 })
 
 NONIUS_BENCHMARK("Depth2Curvature Mean", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
     (void) _;
-    meter.measure([&] { return depth_to_mean_curvature(euclid, p); });
+    cv::Mat                          in   = euclid;
+    sens_loc::camera_models::pinhole cali = p;
+    meter.measure([&] { return depth_to_mean_curvature(in, cali); });
 })

@@ -34,6 +34,7 @@ option(WITH_TESTING ON "Enable unittests for this project")
 option(WITH_DEP_TESTING OFF "Enable tests in thridparty modules")
 option(WITH_CONTRACT_EXCEPTION ON "Enable contract throwing exceptions on contract violation")
 option(WITH_STATIC_STDCXXLIB OFF "Statically link the C++-standard library to prevent version conflicts due to the very new standard")
+option(WITH_WERROR ON "Enable -Werror")
 
 if (WITH_TESTING)
     find_program(GCOV_PATH gcov)
@@ -46,6 +47,11 @@ if (WITH_TESTING)
         option(WITH_TEST_COVERAGE OFF "Enable the collection of test coverage")
     endif (NOT GCOV_PATH OR NOT LCOV_PATH)
 endif (WITH_TESTING)
+
+if (WITH_STATIC_STDCXXLIB)
+    set(CMAKE_EXE_LINKER_FLAGS
+        "${CMAKE_EXE_LINKER_FLAGS} -static-libstdc++ -static-libgcc")
+endif ()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     option(USE_LIBCXX OFF "Use libc++ on clang builds")

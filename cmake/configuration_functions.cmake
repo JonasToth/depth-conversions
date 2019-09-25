@@ -20,7 +20,7 @@ function(common_target_properties target_name)
             PUBLIC "GSL_TERMINATE_ON_CONTRACT_VIOLATION")
     endif (WITH_CONTRACT_EXCEPTION)
     target_compile_options(${target_name}
-        PRIVATE "-Wall" "-Wextra" "-Werror" "-mavx")
+        PRIVATE "-Wall" "-Wextra" $<$<BOOL:${WITH_WERROR}>:"-Werror"> "-mavx")
 
     if (CMAKE_CXX_COMPILER_ID EQUAL "GNU")
         target_compile_options(${target_name}
@@ -50,18 +50,4 @@ function(common_target_properties target_name)
         set_target_properties(${target_name}
                               PROPERTIES INTERPROCEDURAL_OPTIMIZATION OFF)
     endif (WITH_IPO)
-
-    if (WITH_STATIC_STDCXXLIB)
-        target_link_options(${target_name} PUBLIC "-static-libstdc++"
-                                                  "-static-libgcc")
-    endif ()
-
-    if (USE_LIBCXX)
-        if (NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-            message(STATUS "Choosen Compiler: ${CMAKE_CXX_COMPILER_ID}")
-            message(FATAL_ERROR "libc++ can only be used with clang")
-        endif ()
-        target_compile_options(${target_name} PUBLIC "-stdlib=libc++")
-        target_link_options(${target_name} PUBLIC "-lc++abi" "-stdlib=libc++")
-    endif (USE_LIBCXX)
 endfunction()

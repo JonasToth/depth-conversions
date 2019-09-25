@@ -11,19 +11,23 @@ using namespace conversion;
 NONIUS_BENCHMARK("Depth2Triple", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
     (void) _;
-    meter.measure([&] { return depth_to_flexion(euclid, p); });
+    cv::Mat                          in   = euclid;
+    sens_loc::camera_models::pinhole cali = p;
+    meter.measure([&] { return depth_to_flexion(in, cali); });
 })
 
 NONIUS_BENCHMARK("Depth2Triple Parallel", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
     (void) _;
 
-    cv::Mat      out = euclid;
-    tf::Executor exe;
-    tf::Taskflow flow;
+    cv::Mat                          in   = euclid;
+    cv::Mat                          out  = euclid;
+    sens_loc::camera_models::pinhole cali = p;
+    tf::Executor                     exe;
+    tf::Taskflow                     flow;
 
     meter.measure([&] {
-        par_depth_to_flexion(euclid, p, out, flow);
+        par_depth_to_flexion(in, cali, out, flow);
         exe.run(flow).wait();
         flow.clear();
     });
