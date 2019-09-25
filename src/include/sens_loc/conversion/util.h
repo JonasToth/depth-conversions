@@ -57,7 +57,7 @@ inline constexpr std::pair<Real, Real> scaling_factor(Real max_angle) {
     const Real min = std::numeric_limits<PixelType>::min();
     const Real max = std::numeric_limits<PixelType>::max();
 
-    return std::make_pair((max - min) / max_angle, -min);
+    return std::make_pair((max - min) / max_angle, min);
 }
 
 template <typename Number>  // requires Number<Number>
