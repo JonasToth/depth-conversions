@@ -22,12 +22,6 @@ function(common_target_properties target_name)
     target_compile_options(${target_name}
         PRIVATE "-Wall" "-Wextra" $<$<BOOL:${WITH_WERROR}>:"-Werror"> "-mavx")
 
-    if (CMAKE_CXX_COMPILER_ID EQUAL "GNU")
-        target_compile_options(${target_name}
-            PRIVATE "-Wno-deprecated-copy"
-            )
-    endif (CMAKE_CXX_COMPILER_ID EQUAL "GNU")
-
     if (WITH_UBSAN)
         target_compile_options(${target_name} PUBLIC "-fsanitize=undefined")
         target_link_options(${target_name} PUBLIC "-fsanitize=undefined")
