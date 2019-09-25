@@ -74,7 +74,7 @@ TEST_CASE("Scaling of bearing angle") {
         MESSAGE("Scale is: " << scale);
         MESSAGE("Offset is: " << offset);
         REQUIRE(offset == -128);
-        REQUIRE(gsl::narrow_cast<schar>(max_angle * scale + offset) == 127);
+        REQUIRE(gsl::narrow_cast<schar>(max_angle * scale + offset) == 126);
         REQUIRE(gsl::narrow_cast<schar>(min_angle * scale + offset) == -128);
         REQUIRE(gsl::narrow_cast<schar>(mid_angle * scale + offset) == -1);
     }
