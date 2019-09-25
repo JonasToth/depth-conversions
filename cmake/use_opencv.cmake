@@ -49,7 +49,8 @@ if (NOT OpenCV_FOUND)
     if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install/usr")
         set(opencv_built TRUE)
         find_package(OpenCV REQUIRED
-                     PATHS "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install/usr")
+                     PATHS "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install/usr"
+                     NO_DEFAULT_PATH)
 
         # Hide this variable in cmake-gui.
         mark_as_advanced(FORCE OpenCV_DIR)
@@ -62,3 +63,5 @@ else ()
     add_custom_target(opencv)
     set(opencv_build TRUE)
 endif (NOT OpenCV_FOUND)
+
+message(STATUS "Using OpenCV from ${OpenCV_DIR}")

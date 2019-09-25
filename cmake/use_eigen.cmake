@@ -33,7 +33,8 @@ if (NOT Eigen3_FOUND)
     if(EXISTS "${CMAKE_CURRENT_BINARY_DIR}/third_party/eigen3-install")
         set(eigen3_built TRUE)
         find_package(Eigen3 3.3 REQUIRED
-                     PATHS "${CMAKE_CURRENT_BINARY_DIR}/third_party/eigen3-install/")
+                     PATHS "${CMAKE_CURRENT_BINARY_DIR}/third_party/eigen3-install/"
+                     NO_DEFAULT_PATH)
         # Hide this variable in cmake-gui.
         mark_as_advanced(FORCE Eigen3_DIR)
     else ()
@@ -45,3 +46,5 @@ else ()
     add_custom_target(eigen3)
     set(eigen3_built TRUE)
 endif (NOT Eigen3_FOUND)
+
+message(STATUS "Using Eigen from ${Eigen3_DIR}")
