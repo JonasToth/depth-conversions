@@ -74,7 +74,7 @@ ubuntu-1804-clang-9-libcxx:
     FORCE_BUNDLED_EIGEN: "ON"
     WITH_TESTING: "ON"
     WITH_BENCHMARK: "ON"
-    WITH_STATIC_STDCXXLIB: "ON"
+    WITH_STATIC_STDCXXLIB: "OFF"
     WITH_IPO: "OFF"
     BUILD_TYPE: "Release"
   script:
@@ -101,7 +101,7 @@ ubuntu-1804-clang-9-libcxx-lto:
     FORCE_BUNDLED_EIGEN: "ON"
     WITH_TESTING: "ON"
     WITH_BENCHMARK: "ON"
-    WITH_STATIC_STDCXXLIB: "ON"
+    WITH_STATIC_STDCXXLIB: "OFF"
     WITH_IPO: "ON"
     BUILD_TYPE: "Release"
   script:
