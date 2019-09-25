@@ -62,6 +62,44 @@ ubuntu-1804-clang-9:
   tags:
     - docker
 
+ubuntu-1804-clang-9-libcxx:
+  image: base-image-tools
+  stage: compilers
+  script:
+    - CC=clang-9 CXX=clang++-9 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_LINKER=/usr/bin/lld-9 -DUSE_LIBCXX=ON -DWITH_TESTING=ON -DWITH_BENCHMARK=ON -G Ninja -DWITH_STATIC_STDCXXLIB=ON -DWITH_IPO=OFF -DFORCE_BUNDLED_CV=ON -DFORCE_BUNDLED_EIGEN=ON
+    - ninja dependencies
+    - cmake .
+    - ninja
+    - ctest -j4 --output-on-failure -R "test_"
+    - ctest -j1 -V -R "bm_"
+  only:
+    refs:
+      - master
+    <<: *code_change_filter_definition
+  tags:
+    - docker
+    - test
+    - benchmark
+
+ubuntu-1804-clang-9-libcxx-lto:
+  image: base-image-tools
+  stage: compilers
+  script:
+    - CC=clang-9 CXX=clang++-9 cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_LINKER=/usr/bin/lld-9 -DUSE_LIBCXX=ON -DWITH_TESTING=ON -DWITH_BENCHMARK=ON -G Ninja -DWITH_STATIC_STDCXXLIB=ON -DWITH_IPO=ON -DFORCE_BUNDLED_CV=ON -DFORCE_BUNDLED_EIGEN=ON
+    - ninja dependencies
+    - cmake .
+    - ninja
+    - ctest -j4 --output-on-failure -R "test_"
+    - ctest -j1 -V -R "bm_"
+  only:
+    refs:
+      - master
+    <<: *code_change_filter_definition
+  tags:
+    - docker
+    - test
+    - benchmark
+
 ubuntu-1804-gcc-7:
   image: base-image-tools
   stage: compilers

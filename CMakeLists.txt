@@ -28,6 +28,9 @@ project(sens_loc
 message(STATUS "Version: ${MAJOR_VERSION_STRING}.${MINOR_VERSION_STRING}.${PATCH_VERSION_STRING}")
 list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
+option(FORCE_BUNDLED_CV OFF "Force the use of the opencv defined by this project and prohibit the use of a system opencv")
+option(FORCE_BUNDLED_EIGEN OFF "Force the use of the Eigen3 defined by this project and prohibit the use of a system Eigen")
+
 option(WITH_BENCHMARK ON "Enable benchmarks for this project")
 option(WITH_IPO OFF "Enable link-time-optimizations if possible")
 option(WITH_TESTING ON "Enable unittests for this project")

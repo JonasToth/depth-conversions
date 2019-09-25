@@ -1,8 +1,10 @@
-set(CustomOpenCV "" CACHE PATH "Custom directory for opencv install in the system")
-find_package(OpenCV QUIET HINTS "${CustomOpenCV}")
+if (NOT FORCE_BUNDLED_CV)
+    set(CustomOpenCV "" CACHE PATH "Custom directory for opencv install in the system")
+    find_package(OpenCV QUIET HINTS "${CustomOpenCV}")
+endif (NOT FORCE_BUNDLED_CV)
 
 if (NOT OpenCV_FOUND)
-    message(STATUS "Could not find OpenCV in the system. Building custom")
+    message(STATUS "Using bundled OpenCV Library")
     include(opencv_options)
     include(ExternalProject)
 
@@ -56,7 +58,7 @@ if (NOT OpenCV_FOUND)
     endif (EXISTS "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv-install/usr")
 # OpenCV was found from the system
 else ()
-    message(STATUS "Found existing opencv. Assuming it includes non-free features!")
+    message(STATUS "Found opencv. Assuming it includes non-free features!")
     add_custom_target(opencv)
     set(opencv_build TRUE)
 endif (NOT OpenCV_FOUND)

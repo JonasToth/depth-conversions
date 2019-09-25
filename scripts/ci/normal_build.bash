@@ -46,7 +46,7 @@ if [[ -z "$CXX" ]]; then
     export CXX=g++
 fi
 if [[ -z "$LD" ]]; then
-    export LD=ld
+    LD=ld
 fi
 if [[ -z "$USE_LIBCXX" ]]; then
     USE_LIBCXX=OFF
@@ -64,6 +64,7 @@ print_info "Configuring project"
 
 cmake .. \
  -G Ninja \
+ -DCMAKE_LINKER=${LD} \
  -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
  -DUSE_LIBCXX=${USE_LIBCXX} \
  -DBUILD_TESTING=${WITH_TESTING} \

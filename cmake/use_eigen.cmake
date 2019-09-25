@@ -1,8 +1,10 @@
-set(CustomEigen "" CACHE PATH "Custom directory for Eigen3 Install in system")
-find_package(Eigen3 3.3 QUIET HINTS "${CustomEigen}")
+if (NOT FORCE_BUNDLED_EIGEN)
+    set(CustomEigen "" CACHE PATH "Custom directory for Eigen3 Install in system")
+    find_package(Eigen3 3.3 QUIET HINTS "${CustomEigen}")
+endif (NOT FORCE_BUNDLED_EIGEN)
 
 if (NOT Eigen3_FOUND)
-    message(STATUS "Can not find Eigen3 3.3 in system - using bundled version")
+    message(STATUS "Using bundled Eigen3 Library")
     include(ExternalProject)
 
     ExternalProject_Add(eigen3
