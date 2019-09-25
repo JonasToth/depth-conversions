@@ -18,6 +18,8 @@ RUN apt-get update \
     libboost-all-dev \
     libpng-dev \
     libjpeg-dev \
+    rsync \
+    unzip \
  && add-apt-repository ppa:ubuntu-toolchain-r/test \
  && apt-get update \
  && apt-get install -y  \
