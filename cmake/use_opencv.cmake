@@ -10,12 +10,12 @@ if (NOT OpenCV_FOUND)
 
     ExternalProject_Add(opencv
       PREFIX "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv"
-      DOWNLOAD_COMMAND sh -c "wget --quiet \
+      DOWNLOAD_COMMAND sh -c "wget \
          https://github.com/opencv/opencv/archive/4.1.1.zip \
       && unzip -o 4.1.1.zip \
       && rsync -a opencv-4.1.1/ ./ \
       && rm -r opencv-4.1.1 4.1.1.zip \
-      && wget --quiet \
+      && wget \
          https://github.com/opencv/opencv_contrib/archive/4.1.1.zip \
       && unzip -o 4.1.1.zip \
       && mv opencv_contrib-4.1.1 opencv_contrib \
