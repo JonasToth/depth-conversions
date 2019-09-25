@@ -64,7 +64,7 @@ print_info "Running build with the following environment"
 env
 
 print_info "Creating build directory"
-mkdir build && cd build
+mkdir -p build && cd build
 
 print_info "Configuring project"
 

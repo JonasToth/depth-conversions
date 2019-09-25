@@ -274,6 +274,7 @@ ubuntu-1804-asan:
     BUILD_TYPE: "RelWithDebInfo"
     WITH_ASAN: "ON"
   <<: *wide_test_filter_definition
+  dependencies: []
   tags:
     - docker
 
@@ -287,6 +288,7 @@ ubuntu-1804-ubsan:
     BUILD_TYPE: "RelWithDebInfo"
     WITH_UBSAN: "ON"
   <<: *wide_test_filter_definition
+  dependencies: []
   tags:
     - docker
 
@@ -301,6 +303,7 @@ ubuntu-1804-tsan:
     BUILD_TYPE: "RelWithDebInfo"
     WITH_TSAN: "ON"
   <<: *wide_test_filter_definition
+  dependencies: []
   tags:
     - docker
 
@@ -318,6 +321,7 @@ roskinetic-image:
   <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
+  dependencies: []
   tags:
     - docker
     - platform
@@ -328,6 +332,7 @@ rosmelodic-image:
   <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
+  dependencies: []
   tags:
     - docker
     - platform
@@ -338,6 +343,7 @@ ubuntu1604-image:
   <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
+  dependencies: []
   tags:
     - docker
     - platform
@@ -348,6 +354,7 @@ ubuntu1804-image:
   <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
+  dependencies: []
   tags:
     - docker
     - platform
@@ -358,6 +365,7 @@ ubuntu-rolling-image:
   <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
+  dependencies: []
   tags:
     - docker
     - platform
