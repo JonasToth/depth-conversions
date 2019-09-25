@@ -92,6 +92,7 @@ ubuntu-1804-clang-9-libcxx:
 ubuntu-1804-clang-9-libcxx-lto:
   image: base-image-tools
   stage: compilers
+  allow_failure: true
   variables:
     CC: "clang-9"
     CXX: "clang++-9"
@@ -102,6 +103,34 @@ ubuntu-1804-clang-9-libcxx-lto:
     WITH_TESTING: "ON"
     WITH_BENCHMARK: "ON"
     WITH_STATIC_STDCXXLIB: "OFF"
+    WITH_IPO: "ON"
+    BUILD_TYPE: "Release"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - master
+    <<: *code_change_filter_definition
+  <<: *binary_artifact_paths
+  tags:
+    - docker
+    - test
+    - benchmark
+
+ubuntu-1804-clang-9-static-libcxx-lto:
+  image: base-image-tools
+  stage: compilers
+  allow_failure: true
+  variables:
+    CC: "clang-9"
+    CXX: "clang++-9"
+    LD: "lld-9"
+    USE_LIBCXX: "ON"
+    FORCE_BUNDLED_CV: "ON"
+    FORCE_BUNDLED_EIGEN: "ON"
+    WITH_TESTING: "ON"
+    WITH_BENCHMARK: "ON"
+    WITH_STATIC_STDCXXLIB: "ON"
     WITH_IPO: "ON"
     BUILD_TYPE: "Release"
   script:
@@ -161,7 +190,32 @@ ubuntu-1804-gcc-9:
   tags:
     - docker
 
-ubuntu-1804-gcc-9-lto:
+ubuntu-1804-gcc-9-static:
+  image: base-image-tools
+  stage: compilers
+  variables:
+    CC: "gcc-9"
+    CXX: "g++-9"
+    FORCE_BUNDLED_CV: "ON"
+    FORCE_BUNDLED_EIGEN: "ON"
+    WITH_TESTING: "ON"
+    WITH_BENCHMARK: "ON"
+    WITH_STATIC_STDCXXLIB: "ON"
+    WITH_IPO: "OFF"
+    BUILD_TYPE: "Release"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - master
+    <<: *code_change_filter_definition
+  <<: *binary_artifact_paths
+  tags:
+    - docker
+    - test
+    - benchmark
+
+ubuntu-1804-gcc-9-lto-static:
   image: base-image-tools
   stage: compilers
   variables:
