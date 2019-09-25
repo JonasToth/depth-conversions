@@ -74,9 +74,9 @@ TEST_CASE("Scaling of bearing angle") {
         MESSAGE("Scale is: " << scale);
         MESSAGE("Offset is: " << offset);
         REQUIRE(offset == -128);
-        REQUIRE(gsl::narrow_cast<schar>(max_angle * scale - offset) == 127);
-        REQUIRE(gsl::narrow_cast<schar>(min_angle * scale - offset) == -128);
-        REQUIRE(gsl::narrow_cast<schar>(mid_angle * scale - offset) == -1);
+        REQUIRE(gsl::narrow_cast<schar>(max_angle * scale + offset) == 127);
+        REQUIRE(gsl::narrow_cast<schar>(min_angle * scale + offset) == -128);
+        REQUIRE(gsl::narrow_cast<schar>(mid_angle * scale + offset) == -1);
     }
     SUBCASE("scale double to char16") {
         const double min_angle = 0.;
@@ -86,9 +86,9 @@ TEST_CASE("Scaling of bearing angle") {
         auto [scale, offset] = scaling_factor<double, short>(max_angle);
 
         REQUIRE(offset == -32768.);
-        REQUIRE(gsl::narrow_cast<short>(max_angle * scale - offset) == 32'767);
-        REQUIRE(gsl::narrow_cast<short>(min_angle * scale - offset) == -32'768);
-        REQUIRE(gsl::narrow_cast<short>(mid_angle * scale - offset) == -1);
+        REQUIRE(gsl::narrow_cast<short>(max_angle * scale + offset) == 32'767);
+        REQUIRE(gsl::narrow_cast<short>(min_angle * scale + offset) == -32'768);
+        REQUIRE(gsl::narrow_cast<short>(mid_angle * scale + offset) == -1);
     }
 }
 
