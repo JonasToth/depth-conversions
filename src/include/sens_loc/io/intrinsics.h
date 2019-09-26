@@ -64,10 +64,6 @@ load_pinhole_intrinsic(std::istream &in) noexcept {
         if (p.fy <= 0. || p.cy <= 0.)
             return std::nullopt;
 
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        Expects(p.cy / static_cast<double>(p.h) < 0.75);
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        Expects(p.cy / static_cast<double>(p.h) > 0.25);
         if (ss.rdstate() != std::ios_base::eofbit)
             return std::nullopt;
     }
