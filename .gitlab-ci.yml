@@ -91,7 +91,6 @@ ubuntu-1804-clang-9-libcxx:
 ubuntu-1804-clang-9-libcxx-lto:
   image: base-image-tools
   stage: compilers
-  allow_failure: true
   variables:
     CC: "clang-9"
     CXX: "clang++-9"
@@ -118,7 +117,6 @@ ubuntu-1804-clang-9-libcxx-lto:
 ubuntu-1804-clang-9-static-libcxx-lto:
   image: base-image-tools
   stage: compilers
-  allow_failure: true
   variables:
     CC: "clang-9"
     CXX: "clang++-9"
