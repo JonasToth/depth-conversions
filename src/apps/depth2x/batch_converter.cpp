@@ -29,16 +29,17 @@ bool batch_converter::process_index(int idx) const noexcept {
 }
 
 bool batch_converter::process_batch(int start, int end) const noexcept {
-    Expects(start - end != 0);
+    if (start > end)
+        std::swap(start, end);
 
-    int  fails         = 0;
     bool batch_success = true;
     try {
         tf::Executor executor;
         tf::Taskflow tf;
         std::mutex   cout_mutex;
+        int          fails = 0;
 
-        tf.parallel_for(start, end + 1, start < end ? 1 : -1,
+        tf.parallel_for(start, end + 1, 1,
                         [&cout_mutex, &batch_success, &fails, this](int idx) {
                             const bool success = this->process_index(idx);
                             if (!success) {
