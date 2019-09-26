@@ -44,12 +44,14 @@ load_pinhole_intrinsic(std::istream &in) noexcept {
         std::istringstream ss{line};
         // Parsing line 2 with expected format 'fx 0.0 cx'.
         ss >> p.fx >> trash >> p.cx;
-        Expects(p.fx > 0.);
-        Expects(p.cx > 0.);
+        if (p.fx <= 0. || p.cx <= 0.)
+            return std::nullopt;
+
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         Expects(p.cx / static_cast<double>(p.w) < 0.75);
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         Expects(p.cx / static_cast<double>(p.w) > 0.25);
+
         if (ss.rdstate() != std::ios_base::eofbit)
             return std::nullopt;
     }
