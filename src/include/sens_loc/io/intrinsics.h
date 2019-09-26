@@ -61,8 +61,9 @@ load_pinhole_intrinsic(std::istream &in) noexcept {
         std::istringstream ss{line};
         // Parsing line 3 with expected format '0.0 fy cy'.
         ss >> trash >> p.fy >> p.cy;
-        Expects(p.fy > 0.);
-        Expects(p.cy > 0.);
+        if (p.fy <= 0. || p.cy <= 0.)
+            return std::nullopt;
+
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         Expects(p.cy / static_cast<double>(p.h) < 0.75);
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
