@@ -315,6 +315,35 @@ ubuntu-1804-tsan:
     CC: "gcc-9"
     CXX: "g++-9"
 
+old-linux-most-portable:
+  image: ubuntu:14.04
+  stage: platforms
+  allow_failure: true
+  variables:
+    CC: "gcc-9"
+    CXX: "g++-9"
+    FORCE_BUNDLED_CV: "ON"
+    FORCE_BUNDLED_EIGEN: "ON"
+    WITH_TESTING: "ON"
+    WITH_BENCHMARK: "ON"
+    WITH_STATIC_STDCXXLIB: "ON"
+    WITH_IPO: "ON"
+    BUILD_TYPE: "Release"
+  before_script:
+    - apt-get update
+    - apt-get install wget software-properties-common
+    - wget --quiet https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3-Linux-x86_64.sh
+    - sh cmake-3.15.3-Linux-x86_64.sh --prefix=/usr/local
+    - add-apt-repository -y ppa:ubuntu-toolchain-r/test
+    - apt-get update
+    - apt-get install -y g++-9 gcc-9 ninja-build
+  script:
+    - ./scripts/ci/normal_build.bash
+  tags:
+    - docker
+  <<: *wide_test_filter_definition
+  <<: *binary_artifact_paths
+
 roskinetic-image:
   image: base-image-roskinetic
   stage: platforms
