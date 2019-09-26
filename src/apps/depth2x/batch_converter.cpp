@@ -21,7 +21,8 @@ bool batch_converter::process_index(int idx) const noexcept {
 
     if (!depth_image)
         return false;
-    Expects((*depth_image).type() == CV_16U);
+    if (!(*depth_image).type() == CV_16U)
+        return false;
 
     cv::Mat pp_image = this->preprocess_depth(std::move(*depth_image));
     return this->process_file(std::move(pp_image), idx);
