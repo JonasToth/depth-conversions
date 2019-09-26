@@ -32,8 +32,9 @@ load_pinhole_intrinsic(std::istream &in) noexcept {
         std::istringstream ss{line};
         // Parsing line 1 with expected format 'w h'.
         ss >> p.w >> p.h;
-        Expects(p.w > 0);
-        Expects(p.h > 0);
+        if (p.w <= 0 || p.h <= 0)
+            return std::nullopt;
+
         if (ss.rdstate() != std::ios_base::eofbit)
             return std::nullopt;
     }
