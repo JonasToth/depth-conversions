@@ -17,6 +17,36 @@ pointcloud.
 
 All the science for that will be written in my master thesis.
 
+## Examples
+
+For in-depth usage examples of the provided tools check `docs/examples.md`.
+
+```bash
+$ ls
+> .. a bunch of orthographic depth maps AND and intrinsic file ..
+> depth_0000.png depth_0001.png depth_0002.png ...
+> intrinsic.txt
+
+$ cat intrinsic.txt  # example intrinsic for a kinect pinhole image
+> 960 540                       # == <width> <height>
+> 519.226 0.000000 479.462      # == <fx> ignored <cx>
+> 0.000000 522.23 272.737       # == ignored <fy> <cy>
+> 0.000000 0.000000 1.000000    # this line is ignored
+
+$ depth2x flexion \
+    --calibration intrinsic.txt \
+    --input depth_{:04d}.png \
+    --type pinhole-depth \
+    --start 0 \
+    --end 100 \
+    --output flexion_{:04d}.png
+
+$ ls
+> .. still a bunch of orthographic depth maps and the intrinsic file ..
+> .. with additional a bunch of flexion images ..
+> flexion_0000.png flexion_0001.png flexion_0002.png ...
+```
+
 ## Getting the software
 
 You can download the source code and compile it on your own system. This allows
