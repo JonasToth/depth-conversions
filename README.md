@@ -49,16 +49,22 @@ $ ls
 
 ## Getting the software
 
+It is possible to download artifacts from the CI setup.
+
+The `old-linux-most-portable` build in the stage `platforms` is your best bet.
+It is a ubuntu 14.04 based build but only requires the default linux system
+libraries as dynamic dependencies. It should e.g. work on CentOS 7.
+
+See the
+[Pipelines Page](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/pipelines?scope=branches&page=1)
+that provides a download link for the artifacts. If there is no artifact that
+works on your system you need to fall back to compiling on your own.
+
 You can download the source code and compile it on your own system. This allows
 for the most customization and most control over the final executable. This
 project tries to support many compilers and environment but is very Linux
 oriented. For more information on building see the
 [Compilation Reference](docs/compilation.md).
-
-It is possible to download artifacts from the CI setup. See the
-[Pipelines Page](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/pipelines?scope=branches&page=1)
-that provides a download link for the artifacts. If there is no artifact that
-works on your system you need to fall back to compiling on your own.
 
 Please note, that artifacts from the `platform` stage require `libjpeg-dev` and
 `libpng-dev` libraries as they are dynamically linked.
