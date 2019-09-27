@@ -144,3 +144,12 @@ $ ninja
 > dependencies were not resolved.
 > In this case do 'ninja dependencies && cmake . && ninja'
 ```
+
+## Miscelaneous
+
+The build configuration supports enabling vector instructions for various
+X86 extensions. For a build that just resides on your own machine we recommend
+`WITH_MARCH_NATIVE=ON`, as the compiler will figure out the right options.
+
+Other options are `WITH_SSE42`, `WITH_AVX`, `WITH_AVX2`.
+By default `WITH_SSE42` is enabled.

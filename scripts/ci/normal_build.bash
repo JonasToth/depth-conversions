@@ -57,6 +57,12 @@ fi
 if [[ -z "$USE_LIBCXX" ]]; then
     USE_LIBCXX=OFF
 fi
+if [[ -z "$WITH_AVX2" ]]; then
+    WITH_AVX2=ON
+fi
+if [[ -z "$WITH_SSE42" ]]; then
+    WITH_SSE42=OFF
+fi
 
 echo "Start working"
 
@@ -80,6 +86,8 @@ cmake .. \
  -DWITH_CONTRACT_EXCEPTION=${WITH_CONTRACT_EXCEPTION} \
  -DWITH_STATIC_STDCXXLIB=${WITH_STATIC_STDCXXLIB} \
  -DWITH_IPO=${WITH_IPO} \
+ -DWITH_SSE42=${WITH_SSE42} \
+ -DWITH_AVX2=${WITH_AVX2} \
  -DWITH_BENCHMARK=${WITH_BENCHMARK} \
  -DWITH_UBSAN=${WITH_UBSAN} \
  -DWITH_ASAN=${WITH_ASAN} \

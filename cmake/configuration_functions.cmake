@@ -20,7 +20,15 @@ function(common_target_properties target_name)
             PUBLIC "GSL_TERMINATE_ON_CONTRACT_VIOLATION")
     endif (WITH_CONTRACT_EXCEPTION)
     target_compile_options(${target_name}
-        PRIVATE "-Wall" "-Wextra" $<$<BOOL:${WITH_WERROR}>:"-Werror"> "-mavx")
+        PRIVATE
+            "-Wall"
+            "-Wextra"
+            $<$<BOOL:${WITH_WERROR}>:"-Werror">
+            $<$<BOOL:${WITH_MARCH_NATIVE}>:"-march=native">
+            $<$<BOOL:${WITH_SSE42}>:"-msse42">
+            $<$<BOOL:${WITH_AVX}>:"-mavx">
+            $<$<BOOL:${WITH_AVX2}>:"-mavx2">
+            )
 
     if (WITH_UBSAN)
         target_compile_options(${target_name} PUBLIC "-fsanitize=undefined")
