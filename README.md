@@ -52,8 +52,9 @@ $ ls
 It is possible to download artifacts from the CI setup.
 
 The `old-linux-most-portable` build in the stage `platforms` is your best bet.
-It is a ubuntu 14.04 based build but only requires the default linux system
-libraries as dynamic dependencies. It should e.g. work on CentOS 7.
+It is a ubuntu 12.04 based build but only requires the default linux system
+libraries as dynamic dependencies. It should e.g. work on CentOS 7 and other
+non-ubuntu systems as well. The only requirement is an glibc>2.15.
 
 See the
 [Pipelines Page](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/pipelines?scope=branches&page=1)
