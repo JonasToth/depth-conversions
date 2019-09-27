@@ -23,11 +23,11 @@ function(common_target_properties target_name)
         PRIVATE
             "-Wall"
             "-Wextra"
-            $<$<BOOL:${WITH_WERROR}>:"-Werror">
-            $<$<BOOL:${WITH_MARCH_NATIVE}>:"-march=native">
-            $<$<BOOL:${WITH_SSE42}>:"-msse42">
-            $<$<BOOL:${WITH_AVX}>:"-mavx">
-            $<$<BOOL:${WITH_AVX2}>:"-mavx2">
+            "$<$<BOOL:${WITH_WERROR}>:-Werror>"
+            "$<$<BOOL:${WITH_MARCH_NATIVE}>:-march=native>"
+            "$<$<BOOL:${WITH_SSE42}>:-msse42>"
+            "$<$<BOOL:${WITH_AVX}>:-mavx>"
+            "$<$<BOOL:${WITH_AVX2}>:-mavx2>"
             )
 
     if (WITH_UBSAN)
