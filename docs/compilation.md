@@ -8,10 +8,10 @@ green with all of these.
 
 Given this good coverage changes are, that you can compile the code on your
 system with a modern toolchain. The project relies on **C++17** and does not
-attempt to backward compatible.
+attempt to be backwards compatible.
 
-You can try `./scripts/ci/normal_build.bash` for building (it will create the
-directory `build` inside the root of you repository and build there).
+You can try `./scripts/ci/normal_build.bash` for building, it will create the
+directory `build` inside the root of you repository and build there.
 This script is controlled via environment variables and fairly easy to
 understand (if you are familiar with bash scripts).
 It is the workhorse for the CI of this project.
