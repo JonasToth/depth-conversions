@@ -286,7 +286,6 @@ old-linux-most-portable:
     WITH_SSE42: "ON"
     WITH_AVX2: "OFF"
     BUILD_TYPE: "Release"
-    WITH_BENCHMARK_JUNIT_REPORT: "ON"
   before_script:
     - apt-get update
     - apt-get install -y wget python-software-properties rsync unzip
