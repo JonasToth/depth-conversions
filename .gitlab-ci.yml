@@ -13,9 +13,9 @@ stages:
 .binary_artifacts: &binary_artifact_paths
   artifacts:
     name: "$CI_BUILD_ID-$CI_JOB_NAME"
+    expire_in: 1 week
     paths:
       - build/src/apps/depth2x
-    expire_in: 1 week
 
 coverage:
   image: base-image-tools
@@ -82,33 +82,6 @@ ubuntu-1804-clang-9-libcxx:
     refs:
       - master
     <<: *code_change_filter_definition
-  <<: *binary_artifact_paths
-  tags:
-    - docker
-    - test
-    - benchmark
-
-ubuntu-1804-clang-9-libcxx-lto:
-  image: base-image-tools
-  stage: compilers
-  variables:
-    CC: "clang-9"
-    CXX: "clang++-9"
-    LD: "lld-9"
-    USE_LIBCXX: "ON"
-    FORCE_BUNDLED_CV: "ON"
-    FORCE_BUNDLED_EIGEN: "ON"
-    WITH_TESTING: "ON"
-    WITH_STATIC_STDCXXLIB: "OFF"
-    WITH_IPO: "ON"
-    BUILD_TYPE: "Release"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - master
-    <<: *code_change_filter_definition
-  <<: *binary_artifact_paths
   tags:
     - docker
     - test
@@ -129,6 +102,7 @@ ubuntu-1804-clang-9-static-libcxx-lto:
     WITH_STATIC_STDCXXLIB: "ON"
     WITH_IPO: "ON"
     BUILD_TYPE: "Release"
+    WITH_BENCHMARK_JUNIT_REPORT: "ON"
   script:
     - ./scripts/ci/normal_build.bash
   only:
@@ -136,6 +110,9 @@ ubuntu-1804-clang-9-static-libcxx-lto:
       - master
     <<: *code_change_filter_definition
   <<: *binary_artifact_paths
+    reports:
+      junit:
+        - build/src/benchmarks/bm_*.xml
   tags:
     - docker
     - test
@@ -186,30 +163,6 @@ ubuntu-1804-gcc-9:
   tags:
     - docker
 
-ubuntu-1804-gcc-9-static:
-  image: base-image-tools
-  stage: compilers
-  variables:
-    CC: "gcc-9"
-    CXX: "g++-9"
-    FORCE_BUNDLED_CV: "ON"
-    FORCE_BUNDLED_EIGEN: "ON"
-    WITH_TESTING: "ON"
-    WITH_STATIC_STDCXXLIB: "ON"
-    WITH_IPO: "OFF"
-    BUILD_TYPE: "Release"
-  script:
-    - ./scripts/ci/normal_build.bash
-  only:
-    refs:
-      - master
-    <<: *code_change_filter_definition
-  <<: *binary_artifact_paths
-  tags:
-    - docker
-    - test
-    - benchmark
-
 ubuntu-1804-gcc-9-lto-static:
   image: base-image-tools
   stage: compilers
@@ -223,6 +176,7 @@ ubuntu-1804-gcc-9-lto-static:
     WITH_STATIC_STDCXXLIB: "ON"
     WITH_IPO: "ON"
     BUILD_TYPE: "Release"
+    WITH_BENCHMARK_JUNIT_REPORT: "ON"
   script:
     - ./scripts/ci/normal_build.bash
   only:
@@ -230,6 +184,9 @@ ubuntu-1804-gcc-9-lto-static:
       - master
     <<: *code_change_filter_definition
   <<: *binary_artifact_paths
+    reports:
+      junit:
+        - build/src/benchmarks/bm_*.xml
   tags:
     - docker
     - test
@@ -327,6 +284,7 @@ old-linux-most-portable:
     WITH_SSE42: "ON"
     WITH_AVX2: "OFF"
     BUILD_TYPE: "Release"
+    WITH_BENCHMARK_JUNIT_REPORT: "ON"
   before_script:
     - apt-get update
     - apt-get install -y wget python-software-properties rsync unzip
@@ -342,6 +300,9 @@ old-linux-most-portable:
     - docker
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
+    reports:
+      junit:
+        - build/src/benchmarks/bm_*.xml
 
 roskinetic-image:
   image: base-image-roskinetic

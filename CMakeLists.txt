@@ -44,6 +44,8 @@ option(WITH_SSE42 ON "Enable code generation with SSE42 instructions")
 option(WITH_AVX OFF "Enable code generation with AVX instructions")
 option(WITH_AVX2 OFF "Enable code generation with AVX2 instructions")
 
+option(WITH_BENCHMARK_JUNIT_REPORT OFF "Export a JUnit report for the benchmarks, useful for CI")
+
 if (WITH_TESTING)
     find_program(GCOV_PATH gcov)
     find_program(LCOV_PATH lcov)
