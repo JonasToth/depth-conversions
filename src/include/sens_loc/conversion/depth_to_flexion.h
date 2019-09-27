@@ -1,66 +1,26 @@
 #ifndef DEPTH_TO_TRIPLE_H_Y021ENVZ
 #define DEPTH_TO_TRIPLE_H_Y021ENVZ
 
+#include <Eigen/Dense>
 #include <cmath>
 #include <iostream>
 #include <limits>
 #include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/util.h>
+#include <sens_loc/math/eigen_types.h>
 #include <taskflow/taskflow.hpp>
 
 namespace sens_loc { namespace conversion {
 namespace detail {
-template <typename Real>
-using V3D = std::tuple<Real, Real, Real>;
+
+using ::sens_loc::math::vec;
 
 template <typename Real = float>
-V3D<Real> add(V3D<Real> v0, V3D<Real> v1) noexcept {
-    using std::get;
-    return std::make_tuple(get<0>(v0) + get<0>(v1), get<1>(v0) + get<1>(v1),
-                           get<2>(v0) + get<2>(v1));
-}
-template <typename Real = float>
-V3D<Real> minus(V3D<Real> v0, V3D<Real> v1) noexcept {
-    using std::get;
-    return std::make_tuple(get<0>(v0) - get<0>(v1), get<1>(v0) - get<1>(v1),
-                           get<2>(v0) - get<2>(v1));
-}
-template <typename Real = float>
-V3D<Real> cross(V3D<Real> v0, V3D<Real> v1) noexcept {
-    using std::get;
-    return std::make_tuple(get<1>(v0) * get<2>(v1) - get<2>(v0) * get<1>(v1),
-                           get<2>(v0) * get<0>(v1) - get<0>(v0) * get<2>(v1),
-                           get<0>(v0) * get<1>(v1) - get<1>(v0) * get<0>(v1));
-}
-template <typename Real = float>
-Real dot(V3D<Real> v0, V3D<Real> v1) noexcept {
-    using std::get;
-    return get<0>(v0) * get<0>(v1) + get<1>(v0) * get<1>(v1) +
-           get<2>(v0) * get<2>(v1);
-}
-
-template <typename Real = float>
-Real len(V3D<Real> v) noexcept {
-    const auto [x, y, z] = v;
-    return std::sqrt(x * x + y * y + z * z);
-}
-
-template <typename Real = float>
-V3D<Real> norm(V3D<Real> v) noexcept {
-    const auto l = len(v);
-    if (l == 0.)
-        return std::make_tuple(0., 0., 0.);
-
-    using std::get;
-    return std::make_tuple(get<0>(v) / l, get<1>(v) / l, get<2>(v) / l);
-}
-
-template <typename Real = float>
-V3D<Real> get_cartesian(const camera_models::pinhole &intrinsic, int u, int v,
-                        Real d) noexcept {
+vec<Real, 3> get_cartesian(const camera_models::pinhole &intrinsic, int u,
+                           int v, Real d) noexcept {
     const auto [xs, ys, zs] = intrinsic.project_to_sphere(u, v);
-    return std::make_tuple(d * xs, d * ys, d * zs);
+    return d * vec<Real, 3>(xs, ys, zs);
 }
 
 template <typename Real = float, typename PixelType = float>
@@ -88,25 +48,27 @@ inline void flexion_inner(int v, const cv::Mat &depth_image,
 
         const auto surface_pt0  = get_cartesian(intrinsic, v - 1, u, d__1__0);
         const auto surface_pt1  = get_cartesian(intrinsic, v + 1, u, d_1__0);
-        const auto surface_dir0 = minus(surface_pt1, surface_pt0);
+        const auto surface_dir0 = surface_pt1 - surface_pt0;
 
         const auto surface_pt2  = get_cartesian(intrinsic, v, u - 1, d__0__1);
         const auto surface_pt3  = get_cartesian(intrinsic, v, u + 1, d__0_1);
-        const auto surface_dir1 = minus(surface_pt3, surface_pt2);
+        const auto surface_dir1 = surface_pt3 - surface_pt2;
 
         const auto surface_pt4 = get_cartesian(intrinsic, v - 1, u + 1, d__1_1);
         const auto surface_pt5 = get_cartesian(intrinsic, v + 1, u - 1, d_1__1);
-        const auto surface_dir2 = minus(surface_pt5, surface_pt4);
+        const auto surface_dir2 = surface_pt5 - surface_pt4;
 
         const auto surface_pt6 =
             get_cartesian(intrinsic, v - 1, u - 1, d__1__1);
         const auto surface_pt7  = get_cartesian(intrinsic, v + 1, u + 1, d_1_1);
-        const auto surface_dir3 = minus(surface_pt7, surface_pt6);
+        const auto surface_dir3 = surface_pt7 - surface_pt6;
 
-        const auto cross0 = cross(norm(surface_dir0), norm(surface_dir1));
-        const auto cross1 = cross(norm(surface_dir2), norm(surface_dir3));
+        const auto cross0 =
+            surface_dir0.normalized().cross(surface_dir1.normalized());
+        const auto cross1 =
+            surface_dir2.normalized().cross(surface_dir3.normalized());
 
-        const auto triple = std::abs(dot(cross0, cross1));
+        const auto triple = std::abs(cross0.dot(cross1));
 
         Ensures(triple >= 0.);
         Ensures(triple <= 1.);
