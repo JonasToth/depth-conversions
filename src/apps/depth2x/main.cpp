@@ -70,17 +70,37 @@ int main(int argc, char **argv) try {
                           "Output pattern for the range images.");
 
     // curvature images territory
+    double upper_bound = +20.;
+    double lower_bound = -20.;
+
     CLI::App *mean_curv_cmd = app.add_subcommand(
         "mean-curvature", "Convert depth images into mean-curvature images");
     mean_curv_cmd->add_option("-o,--output", files.output,
                               "Output pattern for the mean-curvature images.");
+    mean_curv_cmd->add_option(
+        "-u,--upper-bound", upper_bound,
+        "Define an upper bound that curvature values are clamped to.",
+        /*defaulted=*/true);
+    mean_curv_cmd->add_option(
+        "-l,--lower-bound", lower_bound,
+        "Define an lower bound that curvature values are clamped to.",
+        /*defaulted=*/true);
 
     CLI::App *gauss_curv_cmd = app.add_subcommand(
         "gauss-curvature",
         "Convert depth images into gaussian-curvature images");
+
     gauss_curv_cmd->add_option(
         "-o,--output", files.output,
         "Output pattern for the gaussian-curvature images.");
+    gauss_curv_cmd->add_option(
+        "-u,--upper-bound", upper_bound,
+        "Define an upper bound that curvature values are clamped to.",
+        /*defaulted=*/true);
+    gauss_curv_cmd->add_option(
+        "-l,--lower-bound", lower_bound,
+        "Define an lower bound that curvature values are clamped to.",
+        /*defaulted=*/true);
 
     // Max-Curve images
     CLI::App *max_curve_cmd = app.add_subcommand(
@@ -100,13 +120,13 @@ int main(int argc, char **argv) try {
     scale_cmd->add_option("-o,--output", files.output,
                           "Output pattern for the scaled images.");
     double scale_factor = 1.;
-    scale_cmd->add_option(
-        "-f,--factor", scale_factor,
-        "Real number that is multipled to every depth value. Default is 1.0");
+    scale_cmd->add_option("-f,--factor", scale_factor,
+                          "Real number that is multipled to every depth value.",
+                          /*defaulted=*/true);
     double scale_delta = 0.;
-    scale_cmd->add_option(
-        "-d,--delta", scale_delta,
-        "Real number that is added to every depth value. Default is 0.0");
+    scale_cmd->add_option("-d,--delta", scale_delta,
+                          "Real number that is added to every depth value.",
+                          /*defaulted=*/true);
 
     CLI11_PARSE(app, argc, argv);
 
