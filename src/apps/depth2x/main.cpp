@@ -136,12 +136,6 @@ int main(int argc, char **argv) try {
 
     CLI11_PARSE(app, argc, argv);
 
-    if (files.input.empty()) {
-        cerr << util::err{}
-             << "Input pattern for files to process is required!\n";
-        return 1;
-    }
-
     // Options that are always required are checked first.
     ifstream                         calibration_fstream{calibration_file};
     optional<camera_models::pinhole> intrinsic =

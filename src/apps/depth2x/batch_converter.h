@@ -31,19 +31,12 @@ struct file_patterns {
     std::string antidiagonal;
 };
 
-inline void check_output_exists(const file_patterns &files) {
-    if (files.output.empty())
-        throw std::invalid_argument{"output pattern required\n"};
-}
-
-
 class batch_converter {
   public:
     batch_converter(const file_patterns &files, depth_type t)
         : _files{files}
         , _input_depth_type{t} {
-        if (files.input.empty())
-            throw std::invalid_argument{"input pattern is always required!"};
+        Expects("input pattern is always required!");
     }
 
     batch_converter(const batch_converter &) = default;

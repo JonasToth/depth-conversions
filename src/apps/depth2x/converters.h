@@ -34,7 +34,6 @@ class range_converter : public batch_pinhole_converter {
     range_converter(const file_patterns &files, depth_type t,
                     const camera_models::pinhole &intrinsic)
         : batch_pinhole_converter(files, t, intrinsic) {
-        check_output_exists(files);
     }
     range_converter(const range_converter &) = default;
     range_converter(range_converter &&)      = default;
@@ -55,7 +54,6 @@ class gauss_curv_converter : public batch_pinhole_converter {
         : batch_pinhole_converter(files, t, intrinsic)
         , lower_bound{lower_bound}
         , upper_bound{upper_bound} {
-        check_output_exists(files);
     }
     gauss_curv_converter(const gauss_curv_converter &) = default;
     gauss_curv_converter(gauss_curv_converter &&)      = default;
@@ -79,7 +77,6 @@ class mean_curv_converter : public batch_pinhole_converter {
         : batch_pinhole_converter(files, t, intrinsic)
         , lower_bound{lower_bound}
         , upper_bound{upper_bound} {
-        check_output_exists(files);
     }
     mean_curv_converter(const mean_curv_converter &) = default;
     mean_curv_converter(mean_curv_converter &&)      = default;
@@ -100,7 +97,6 @@ class max_curve_converter : public batch_pinhole_converter {
     max_curve_converter(const file_patterns &files, depth_type t,
                         const camera_models::pinhole &intrinsic)
         : batch_pinhole_converter(files, t, intrinsic) {
-        check_output_exists(files);
     }
     max_curve_converter(const max_curve_converter &) = default;
     max_curve_converter(max_curve_converter &&)      = default;
@@ -118,7 +114,6 @@ class flexion_converter : public batch_pinhole_converter {
     flexion_converter(const file_patterns &files, depth_type t,
                       const camera_models::pinhole &intrinsic)
         : batch_pinhole_converter(files, t, intrinsic) {
-        check_output_exists(files);
     }
     flexion_converter(const flexion_converter &) = default;
     flexion_converter(flexion_converter &&)      = default;
@@ -138,7 +133,6 @@ class scale_converter : public batch_converter {
         : batch_converter(files, t)
         , _scale{scale}
         , _offset{offset} {
-        check_output_exists(files);
     }
     scale_converter(const scale_converter &) = default;
     scale_converter(scale_converter &&)      = default;

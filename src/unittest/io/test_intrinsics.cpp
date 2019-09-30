@@ -49,4 +49,48 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         REQUIRE(params.cx == 500.0);
         REQUIRE(params.cy == 250.0);
     }
+    SUBCASE("Negative value for dimension") {
+        string intrinsic = "-960 540\n";
+        istringstream fake_file{intrinsic};
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        REQUIRE(!p);
+    }
+    SUBCASE("Zero value for dimension") {
+        string intrinsic = "960 0\n";
+        istringstream fake_file{intrinsic};
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        REQUIRE(!p);
+    }
+
+    SUBCASE("Negative value for fx") {
+        string intrinsic = "960 540\n"
+                           "-10.0 0.0 500.0\n";
+        istringstream fake_file{intrinsic};
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        REQUIRE(!p);
+    }
+    SUBCASE("Zero value for cx") {
+        string intrinsic = "-960 540\n"
+                           "10.0 0.0 0.0\n";
+        istringstream fake_file{intrinsic};
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        REQUIRE(!p);
+    }
+
+    SUBCASE("Negative value for fy") {
+        string intrinsic = "960 540\n"
+                           "10.0 0.0 500.0\n"
+                           "0.0 -10.0 250.0\n";
+        istringstream fake_file{intrinsic};
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        REQUIRE(!p);
+    }
+    SUBCASE("Zero value for cy") {
+        string intrinsic = "960 540\n"
+                           "10.0 0.0 0.0\n"
+                           "0.0 10.0 0.0\n";
+        istringstream fake_file{intrinsic};
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        REQUIRE(!p);
+    }
 }

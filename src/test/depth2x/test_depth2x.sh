@@ -29,6 +29,11 @@ if ${exe} -c "kinect_intrinsic.txt" -i "data0-depth.png" -s 0 -e 4 ; then
     exit 1
 fi
 
+if ${exe} bearing -i "data0-depth.png" -s 0 -e 4; then
+    print_error "Subcommand that requires intrinsic, but is not provided needs to fail"
+    exit 1
+fi
+
 # Subcommand comes quiet late, as common arguments are added to the exe itself,
 # not the subcommands.
 if ${exe} -c "kinect_intrinsic.txt" -i "data0-depth.png" -s 0 -e 4 bearing; then
