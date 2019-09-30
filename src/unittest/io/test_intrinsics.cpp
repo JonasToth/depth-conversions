@@ -93,4 +93,27 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         optional<pinhole> p = load_pinhole_intrinsic(fake_file);
         REQUIRE(!p);
     }
+
+
+    SUBCASE("Line ends to early in dimensions") {
+        string intrinsic = "960\n";
+        istringstream fake_file{intrinsic};
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        REQUIRE(!p);
+    }
+    SUBCASE("Line ends too early for x-row") {
+        string intrinsic = "960 540\n"
+                           "10.0\n";
+        istringstream fake_file{intrinsic};
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        REQUIRE(!p);
+    }
+    SUBCASE("Line ends too early in y row") {
+        string intrinsic = "960 540\n"
+                           "10.0 0.0 500.0\n"
+                           "0.0 10.0\n";
+        istringstream fake_file{intrinsic};
+        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        REQUIRE(!p);
+    }
 }
