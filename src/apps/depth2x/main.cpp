@@ -70,8 +70,8 @@ int main(int argc, char **argv) try {
                           "Output pattern for the range images.");
 
     // curvature images territory
-    double upper_bound = +20.;
-    double lower_bound = -20.;
+    double upper_bound = +20.;  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+    double lower_bound = -20.;  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 
     CLI::App *mean_curv_cmd = app.add_subcommand(
         "mean-curvature", "Convert depth images into mean-curvature images");
