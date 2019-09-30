@@ -52,5 +52,17 @@ if  [ ! -f batch-scale-002.png ] || \
     exit 1
 fi
 
+# Deliberatly convert more then existing files to cover this error path
+# as well.
+if ${exe} -c "kinect_intrinsic.txt" \
+    -i "data{:03d}-depth.png" \
+    --start 2 --end 10 \
+    scale \
+    --output "batch-scale-{:03d}.png" \
+    --delta "5000.0"
+then
+    print_error "Batch process needed to fail because the index range was invalid"
+    exit 1
+fi
 print_info "Test successful!"
 exit 0
