@@ -21,7 +21,7 @@ namespace sens_loc { namespace util {
               << ": Program ran into an unreachable!\n"
               << info{} << message << "\n"
               << "Terminating!\n";
-    std::terminate();
+    std::exit(1);
 }
 
 /// Calculate the average pixel error of the two images.

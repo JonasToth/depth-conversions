@@ -53,3 +53,6 @@ test_add_file(math math/test_triangles.cpp)
 create_test(util util/test_util.cpp)
 test_add_file(util util/test_console.cpp)
 test_add_file(util util/test_version.cpp)
+
+create_test(util_terminate util/test_terminate.cpp)
+set_tests_properties(test_util_terminate PROPERTIES WILL_FAIL TRUE)
