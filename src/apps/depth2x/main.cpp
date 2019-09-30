@@ -16,12 +16,13 @@ int main(int argc, char **argv) try {
     using namespace sens_loc;
     using namespace std;
 
+    gsl::span<gsl::zstring<>> arguments(argv, argc);
+
     CLI::App app{"Batchconversion of depth images to bearing angle images."};
     app.fallthrough();
 
-    auto print_version = [argv](int /*count*/) {
-        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-        cout << argv[0] << " " << get_version() << "\n";
+    auto print_version = [arguments](int /*count*/) {
+        cout << arguments.at(0) << " " << get_version() << "\n";
         exit(0);
     };
     app.add_flag_function("-v,--version", print_version,
