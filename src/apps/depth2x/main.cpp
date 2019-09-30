@@ -161,10 +161,12 @@ int main(int argc, char **argv) try {
                     files, apps::str_to_depth_type(input_type), *intrinsic);
             if (*mean_curv_cmd)
                 return make_unique<apps::mean_curv_converter>(
-                    files, apps::str_to_depth_type(input_type), *intrinsic);
+                    files, apps::str_to_depth_type(input_type), *intrinsic,
+                    lower_bound, upper_bound);
             if (*gauss_curv_cmd)
                 return make_unique<apps::gauss_curv_converter>(
-                    files, apps::str_to_depth_type(input_type), *intrinsic);
+                    files, apps::str_to_depth_type(input_type), *intrinsic,
+                    lower_bound, upper_bound);
             if (*max_curve_cmd)
                 return make_unique<apps::max_curve_converter>(
                     files, apps::str_to_depth_type(input_type), *intrinsic);

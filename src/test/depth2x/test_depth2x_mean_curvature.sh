@@ -50,5 +50,17 @@ if  [ ! -f batch-mean-curv-002.png ] || \
     exit 1
 fi
 
+if ! ${exe} -c "kinect_intrinsic.txt" \
+    -i "data{}-depth.png" \
+    -s 0 -e 1 \
+    mean-curvature \
+    --output "batch-mean-curv-{}.png" \
+    --lower-bound "-10.0" \
+    --upper-bound "+10.0"
+then
+    print_error "Could not create all mean-curv images with clamping"
+    exit 1
+fi
+
 print_info "Test successful!"
 exit 0

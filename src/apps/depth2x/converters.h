@@ -50,8 +50,11 @@ class range_converter : public batch_pinhole_converter {
 class gauss_curv_converter : public batch_pinhole_converter {
   public:
     gauss_curv_converter(const file_patterns &files, depth_type t,
-                         const camera_models::pinhole &intrinsic)
-        : batch_pinhole_converter(files, t, intrinsic) {
+                         const camera_models::pinhole &intrinsic,
+                         double lower_bound, double upper_bound)
+        : batch_pinhole_converter(files, t, intrinsic)
+        , lower_bound{lower_bound}
+        , upper_bound{upper_bound} {
         check_output_exists(files);
     }
     gauss_curv_converter(const gauss_curv_converter &) = default;
@@ -63,13 +66,19 @@ class gauss_curv_converter : public batch_pinhole_converter {
   private:
     [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
         noexcept override;
+
+    double lower_bound;
+    double upper_bound;
 };
 
 class mean_curv_converter : public batch_pinhole_converter {
   public:
     mean_curv_converter(const file_patterns &files, depth_type t,
-                        const camera_models::pinhole &intrinsic)
-        : batch_pinhole_converter(files, t, intrinsic) {
+                        const camera_models::pinhole &intrinsic,
+                        double lower_bound, double upper_bound)
+        : batch_pinhole_converter(files, t, intrinsic)
+        , lower_bound{lower_bound}
+        , upper_bound{upper_bound} {
         check_output_exists(files);
     }
     mean_curv_converter(const mean_curv_converter &) = default;
@@ -81,6 +90,9 @@ class mean_curv_converter : public batch_pinhole_converter {
   private:
     [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
         noexcept override;
+
+    double lower_bound;
+    double upper_bound;
 };
 
 class max_curve_converter : public batch_pinhole_converter {
