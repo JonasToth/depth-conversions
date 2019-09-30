@@ -19,6 +19,11 @@ if ${exe} ; then
     exit 1
 fi
 
+if ! ${exe} --version ; then
+    print_error "Printing the version is required to work"
+    exit 1
+fi
+
 if ${exe} -c "kinect_intrinsic.txt" -i "data0-depth.png" -s 0 -e 4 ; then
     print_error "Subcommand is required"
     exit 1
