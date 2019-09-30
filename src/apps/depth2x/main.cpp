@@ -16,11 +16,24 @@ int main(int argc, char **argv) try {
     using namespace sens_loc;
     using namespace std;
 
-    gsl::span<gsl::zstring<>> arguments(argv, argc);
-
-    CLI::App app{"Batchconversion of depth images to bearing angle images."};
+    CLI::App app{
+        "Batch-conversion of depth images to various derived image-types."};
+    app.require_subcommand(1);
     app.fallthrough();
+    app.footer("\n\n"
+               "An example invocation of the tool is:\n"
+               "\n"
+               "depth2x bearing --calibration intrinsic.txt \\\n"
+               "                --input depth_{:04d}.png \\\n"
+               "                --start 0 \\\n"
+               "                --end 100 \\\n"
+               "                --horizontal horizontal_{:04d}.png\n"
+               "\n"
+               "This will read 'depth_0000.png ...' and create "
+               "'horizontal_0000.png ...' \n"
+               "in the working directory");
 
+    gsl::span<gsl::zstring<>> arguments(argv, argc);
     auto print_version = [arguments](int /*count*/) {
         cout << arguments.at(0) << " " << get_version() << "\n";
         exit(0);
@@ -39,7 +52,10 @@ int main(int argc, char **argv) try {
         ->required();
 
     string input_type = "pinhole-depth";
-    app.add_set("-t,--type", input_type, {"pinhole-depth", "pinhole-range"});
+    app.add_set("-t,--type", input_type, {"pinhole-depth", "pinhole-range"},
+                "Type of input depth images, either euclidean depths "
+                "(pinhole-range) or orthografic depths (pinhole-depth)",
+                /*defaulted=*/true);
 
     int start_idx;
     app.add_option("-s,--start", start_idx, "Start index of batch, inclusive")
@@ -50,7 +66,21 @@ int main(int argc, char **argv) try {
 
     // Bearing angle images territory
     CLI::App *bearing_cmd = app.add_subcommand(
-        "bearing", "Converts depth images into bearing angle images");
+        "bearing", "Convert depth images into bearing angle images");
+    bearing_cmd->footer("\n\n"
+                        "An example invocation of the tool is:\n"
+                        "\n"
+                        "depth2x bearing --calibration intrinsic.txt \\\n"
+                        "                --input depth_{:04d}.png \\\n"
+                        "                --start 0 \\\n"
+                        "                --end 100 \\\n"
+                        "                --horizontal horizontal_{:04d}.png\n"
+                        "                --vertical vertical_{:04d}.png\n"
+                        "\n"
+                        "This will read 'depth_0000.png ...' and create "
+                        "'horizontal_0000.png vertical_0000.png ...' \n"
+                        "in the working directory");
+
     bearing_cmd->add_option(
         "--horizontal", files.horizontal,
         "Calculate horizontal bearing angle image and write to this pattern");
@@ -67,8 +97,20 @@ int main(int argc, char **argv) try {
     // Range images territory
     CLI::App *range_cmd = app.add_subcommand(
         "range", "Convert depth images into range images (laser-scan like)");
-    range_cmd->add_option("-o,--output", files.output,
-                          "Output pattern for the range images.")
+    range_cmd->footer("\n\n"
+                      "An example invocation of the tool is:\n"
+                      "\n"
+                      "depth2x range --calibration intrinsic.txt \\\n"
+                      "              --input depth_{:04d}.png \\\n"
+                      "              --start 0 \\\n"
+                      "              --end 100 \\\n"
+                      "              --output range_{:04d}.png"
+                      "\n"
+                      "This will read 'depth_0000.png ...' and create "
+                      "'range_0000.png ...' in the working directory.");
+    range_cmd
+        ->add_option("-o,--output", files.output,
+                     "Output pattern for the range images.")
         ->required();
 
     // curvature images territory
@@ -77,8 +119,23 @@ int main(int argc, char **argv) try {
 
     CLI::App *mean_curv_cmd = app.add_subcommand(
         "mean-curvature", "Convert depth images into mean-curvature images");
-    mean_curv_cmd->add_option("-o,--output", files.output,
-                              "Output pattern for the mean-curvature images.")
+    mean_curv_cmd->footer(
+        "\n\n"
+        "An example invocation of the tool is:\n"
+        "\n"
+        "depth2x mean-curvature --calibration intrinsic.txt \\\n"
+        "                       --input depth_{:04d}.png \\\n"
+        "                       --start 0 \\\n"
+        "                       --end 100 \\\n"
+        "                       --output mean_{:04d}.png \\\n"
+        "                       --lower-bound -20.0 \\\n"
+        "                       --upper-bound 20.0"
+        "\n"
+        "This will read 'depth_0000.png ...' and create "
+        "'mean_0000.png ...' in the working directory.");
+    mean_curv_cmd
+        ->add_option("-o,--output", files.output,
+                     "Output pattern for the mean-curvature images.")
         ->required();
     mean_curv_cmd->add_option(
         "-u,--upper-bound", upper_bound,
@@ -92,9 +149,23 @@ int main(int argc, char **argv) try {
     CLI::App *gauss_curv_cmd = app.add_subcommand(
         "gauss-curvature",
         "Convert depth images into gaussian-curvature images");
-    gauss_curv_cmd->add_option(
-        "-o,--output", files.output,
-        "Output pattern for the gaussian-curvature images.")
+    gauss_curv_cmd->footer(
+        "\n\n"
+        "An example invocation of the tool is:\n"
+        "\n"
+        "depth2x gauss-curvature --calibration intrinsic.txt \\\n"
+        "                        --input depth_{:04d}.png \\\n"
+        "                        --start 0 \\\n"
+        "                        --end 100 \\\n"
+        "                        --output gauss_{:04d}.png \\\n"
+        "                        --lower-bound -1.0 \\\n"
+        "                        --upper-bound 1.0"
+        "\n"
+        "This will read 'depth_0000.png ...' and create "
+        "'gauss_0000.png ...' in the working directory.");
+    gauss_curv_cmd
+        ->add_option("-o,--output", files.output,
+                     "Output pattern for the gaussian-curvature images.")
         ->required();
     gauss_curv_cmd->add_option(
         "-u,--upper-bound", upper_bound,
@@ -108,22 +179,58 @@ int main(int argc, char **argv) try {
     // Max-Curve images
     CLI::App *max_curve_cmd = app.add_subcommand(
         "max-curve", "Convert depth images into max-curve images");
-    max_curve_cmd->add_option("-o,--output", files.output,
-                              "Output pattern for the max-curve images.")
+    max_curve_cmd->footer("\n\n"
+                          "An example invocation of the tool is:\n"
+                          "\n"
+                          "depth2x max-curve --calibration intrinsic.txt \\\n"
+                          "                  --input depth_{:04d}.png \\\n"
+                          "                  --start 0 \\\n"
+                          "                  --end 100 \\\n"
+                          "                  --output max_curve_{:04d}.png"
+                          "\n"
+                          "This will read 'depth_0000.png ...' and create "
+                          "'max_curve_0000.png ...' in the working directory.");
+    max_curve_cmd
+        ->add_option("-o,--output", files.output,
+                     "Output pattern for the max-curve images.")
         ->required();
 
     // Flexion images
     CLI::App *flexion_cmd = app.add_subcommand(
         "flexion", "Convert depth images into flexion images");
-    flexion_cmd->add_option("-o,--output", files.output,
-                            "Output pattern for the flexion images.")
+    flexion_cmd->footer("\n\n"
+                        "An example invocation of the tool is:\n"
+                        "\n"
+                        "depth2x flexion --calibration intrinsic.txt \\\n"
+                        "                --input depth_{:04d}.png \\\n"
+                        "                --start 0 \\\n"
+                        "                --end 100 \\\n"
+                        "                --output flexion_{:04d}.png"
+                        "\n"
+                        "This will read 'depth_0000.png ...' and create "
+                        "'flexion_0000.png ...' in the working directory.");
+    flexion_cmd
+        ->add_option("-o,--output", files.output,
+                     "Output pattern for the flexion images.")
         ->required();
 
     // Flexion images
     CLI::App *scale_cmd = app.add_subcommand(
         "scale", "Scale depth images and add an optional offset.");
-    scale_cmd->add_option("-o,--output", files.output,
-                          "Output pattern for the scaled images.")
+    scale_cmd->footer("\n\n"
+                      "An example invocation of the tool is:\n"
+                      "\n"
+                      "depth2x scale --input depth_{:04d}.png \\\n"
+                      "              --start 0 \\\n"
+                      "              --end 100 \\\n"
+                      "              --output scale_{:04d}.png \\\n"
+                      "              --factor 8.0"
+                      "\n"
+                      "This will read 'depth_0000.png ...' and create "
+                      "'scale_0000.png ...' in the working directory.");
+    scale_cmd
+        ->add_option("-o,--output", files.output,
+                     "Output pattern for the scaled images.")
         ->required();
     double scale_factor = 1.;
     scale_cmd->add_option("-f,--factor", scale_factor,
