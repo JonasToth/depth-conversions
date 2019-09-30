@@ -298,10 +298,7 @@ int main(int argc, char **argv) try {
         return 1;
     }
 
-    cerr << util::err{};
-    cerr << "One subcommand is required!\n";
-
-    return 1;
+    UNREACHABLE("All possible options should have terminated already");
 } catch (const std::exception &e) {
     std::cerr << sens_loc::util::err{}
               << "Severe problem occured while system-setup.\n"
