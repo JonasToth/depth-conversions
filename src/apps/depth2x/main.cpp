@@ -67,7 +67,8 @@ int main(int argc, char **argv) try {
     CLI::App *range_cmd = app.add_subcommand(
         "range", "Convert depth images into range images (laser-scan like)");
     range_cmd->add_option("-o,--output", files.output,
-                          "Output pattern for the range images.");
+                          "Output pattern for the range images.")
+        ->required();
 
     // curvature images territory
     double upper_bound = +20.;  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
@@ -76,7 +77,8 @@ int main(int argc, char **argv) try {
     CLI::App *mean_curv_cmd = app.add_subcommand(
         "mean-curvature", "Convert depth images into mean-curvature images");
     mean_curv_cmd->add_option("-o,--output", files.output,
-                              "Output pattern for the mean-curvature images.");
+                              "Output pattern for the mean-curvature images.")
+        ->required();
     mean_curv_cmd->add_option(
         "-u,--upper-bound", upper_bound,
         "Define an upper bound that curvature values are clamped to.",
@@ -89,10 +91,10 @@ int main(int argc, char **argv) try {
     CLI::App *gauss_curv_cmd = app.add_subcommand(
         "gauss-curvature",
         "Convert depth images into gaussian-curvature images");
-
     gauss_curv_cmd->add_option(
         "-o,--output", files.output,
-        "Output pattern for the gaussian-curvature images.");
+        "Output pattern for the gaussian-curvature images.")
+        ->required();
     gauss_curv_cmd->add_option(
         "-u,--upper-bound", upper_bound,
         "Define an upper bound that curvature values are clamped to.",
@@ -106,19 +108,22 @@ int main(int argc, char **argv) try {
     CLI::App *max_curve_cmd = app.add_subcommand(
         "max-curve", "Convert depth images into max-curve images");
     max_curve_cmd->add_option("-o,--output", files.output,
-                              "Output pattern for the max-curve images.");
+                              "Output pattern for the max-curve images.")
+        ->required();
 
     // Flexion images
     CLI::App *flexion_cmd = app.add_subcommand(
         "flexion", "Convert depth images into flexion images");
     flexion_cmd->add_option("-o,--output", files.output,
-                            "Output pattern for the flexion images.");
+                            "Output pattern for the flexion images.")
+        ->required();
 
     // Flexion images
     CLI::App *scale_cmd = app.add_subcommand(
         "scale", "Scale depth images and add an optional offset.");
     scale_cmd->add_option("-o,--output", files.output,
-                          "Output pattern for the scaled images.");
+                          "Output pattern for the scaled images.")
+        ->required();
     double scale_factor = 1.;
     scale_cmd->add_option("-f,--factor", scale_factor,
                           "Real number that is multipled to every depth value.",
