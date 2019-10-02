@@ -18,6 +18,11 @@ stages:
     paths:
       - build/src/apps/depth2x
 
+.cache_third_party: &cache_third_party_build
+  cache:
+    paths:
+      - build/third_party
+
 coverage:
   image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
@@ -89,6 +94,7 @@ ubuntu-1804-clang-9-libcxx:
     refs:
       - master
     <<: *code_change_filter_definition
+  <<: *cache_third_party_build
   tags:
     - docker
     - test
@@ -115,6 +121,7 @@ ubuntu-1804-clang-9-static-libcxx-lto:
       - master
     <<: *code_change_filter_definition
   <<: *binary_artifact_paths
+  <<: *cache_third_party_build
   tags:
     - docker
     - test
@@ -190,6 +197,7 @@ ubuntu-1804-gcc-9-lto-static:
       - master
     <<: *code_change_filter_definition
   <<: *binary_artifact_paths
+  <<: *cache_third_party_build
   tags:
     - docker
     - test
