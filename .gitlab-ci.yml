@@ -3,6 +3,7 @@ stages:
     - compilers
     - sanitizers
     - platforms
+    - images
 
 .code_change_filter: &code_change_filter_definition
   changes:
@@ -356,3 +357,23 @@ ubuntu-rolling-image:
   tags:
     - docker
     - platform
+
+alpine-image:
+  stage: images
+  image: docker:git
+  services:
+    - docker:dind
+  dependencies: ["old-linux-most-portable"]
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
+  script:
+    - ls -lah
+    - cd docker/production
+    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    #refs:
+      #- master
+    <<: *code_change_filter_definition
+  tags:
+    - docker-in-docker
