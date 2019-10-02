@@ -1,4 +1,5 @@
 FROM ubuntu:12.04
+LABEL maintainer="jonas.toth@student.tu-freiberg.de"
 
 RUN apt-get update \
  && apt-get install -y wget python-software-properties rsync unzip \

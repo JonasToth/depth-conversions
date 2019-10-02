@@ -1,4 +1,5 @@
 FROM ubuntu:rolling
+LABEL maintainer="jonas.toth@student.tu-freiberg.de"
 
 RUN apt-get update \
  && apt-get dist-upgrade -y \
