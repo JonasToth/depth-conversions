@@ -368,7 +368,6 @@ alpine-edge-image:
     - platform
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
-  <<: *platform_build_option_variables
 
 create-production-image:
   stage: images
