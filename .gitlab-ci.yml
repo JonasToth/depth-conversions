@@ -19,7 +19,7 @@ stages:
       - build/src/apps/depth2x
 
 coverage:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   script:
     - ./scripts/ci/coverage_build.bash
@@ -31,7 +31,7 @@ coverage:
     - docker
 
 ubuntu-1804-clang-8:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   variables:
     CC: "clang-8"
@@ -47,7 +47,7 @@ ubuntu-1804-clang-8:
     - docker
 
 ubuntu-1804-clang-9:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   variables:
     CC: "clang-9"
@@ -70,7 +70,7 @@ ubuntu-1804-clang-9:
     - docker
 
 ubuntu-1804-clang-9-libcxx:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   variables:
     CC: "clang-9"
@@ -95,7 +95,7 @@ ubuntu-1804-clang-9-libcxx:
     - benchmark
 
 ubuntu-1804-clang-9-static-libcxx-lto:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   variables:
     CC: "clang-9"
@@ -121,7 +121,7 @@ ubuntu-1804-clang-9-static-libcxx-lto:
     - benchmark
 
 ubuntu-1804-gcc-7:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   variables:
     CC: "gcc-7"
@@ -136,7 +136,7 @@ ubuntu-1804-gcc-7:
     - docker
 
 ubuntu-1804-gcc-8:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   variables:
     CC: "gcc-8"
@@ -151,7 +151,7 @@ ubuntu-1804-gcc-8:
     - docker
 
 ubuntu-1804-gcc-9:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   variables:
     CC: "gcc-9"
@@ -172,7 +172,7 @@ ubuntu-1804-gcc-9:
     - docker
 
 ubuntu-1804-gcc-9-lto-static:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   variables:
     CC: "gcc-9"
@@ -196,7 +196,7 @@ ubuntu-1804-gcc-9-lto-static:
     - benchmark
 
 clang-tidy-analysis:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   script:
     - mkdir -p build && cd build
@@ -220,7 +220,7 @@ clang-tidy-analysis:
     <<: *code_change_filter_definition
 
 ubuntu-1804-asan:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: sanitizers
   variables:
     CC: "clang-9"
@@ -234,7 +234,7 @@ ubuntu-1804-asan:
     - docker
 
 ubuntu-1804-ubsan:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: sanitizers
   variables:
     CC: "clang-9"
@@ -248,7 +248,7 @@ ubuntu-1804-ubsan:
     - docker
 
 ubuntu-1804-tsan:
-  image: $CI_REGISTRY_IMAGE:base-image-tools
+  image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: sanitizers
   allow_failure: true
   variables:
@@ -271,7 +271,7 @@ ubuntu-1804-tsan:
     CXX: "g++-9"
 
 old-linux-most-portable:
-  image: $CI_REGISTRY_IMAGE:base-image-old-linux
+  image: $CI_REGISTRY_IMAGE/base-image-old-linux
   stage: platforms
   dependencies: []
   variables:
@@ -296,7 +296,7 @@ old-linux-most-portable:
   <<: *binary_artifact_paths
 
 roskinetic-image:
-  image: $CI_REGISTRY_IMAGE:base-image-roskinetic
+  image: $CI_REGISTRY_IMAGE/base-image-roskinetic
   stage: platforms
   <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
@@ -307,7 +307,7 @@ roskinetic-image:
     - platform
 
 rosmelodic-image:
-  image: $CI_REGISTRY_IMAGE:base-image-rosmelodic
+  image: $CI_REGISTRY_IMAGE/base-image-rosmelodic
   stage: platforms
   <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
@@ -318,7 +318,7 @@ rosmelodic-image:
     - platform
 
 ubuntu-rolling-image:
-  image: $CI_REGISTRY_IMAGE:base-image-ubuntu-rolling
+  image: $CI_REGISTRY_IMAGE/base-image-ubuntu-rolling
   stage: platforms
   <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
