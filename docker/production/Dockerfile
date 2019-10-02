@@ -1,3 +1,3 @@
-FROM ubuntu:18.04
+FROM bitnami/minideb:latest
 
 COPY depth2x /usr/bin/depth2x
