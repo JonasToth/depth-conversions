@@ -5,6 +5,9 @@ stages:
     - platforms
     - images
 
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
+
 .code_change_filter: &code_change_filter_definition
   changes:
     - cmake/*
@@ -17,6 +20,22 @@ stages:
     expire_in: 1 week
     paths:
       - build/src/apps/depth2x
+
+base-images:
+  stage: compilers
+  image: docker:git
+  services:
+    - docker:dind
+  script:
+    - ./scripts/build_all_images.bash push
+  only:
+    refs:
+      - master
+      - schedules
+    changes:
+      - docker/**/*
+  tags:
+    - docker-in-docker
 
 coverage:
   image: base-image-tools
@@ -271,7 +290,7 @@ ubuntu-1804-tsan:
     CXX: "g++-9"
 
 old-linux-most-portable:
-  image: old-linux:latest
+  image: base-image-old-linux
   stage: platforms
   dependencies: []
   variables:
@@ -350,18 +369,15 @@ ubuntu-rolling-image:
     - docker
     - platform
 
-alpine-image:
+create-production-image:
   stage: images
   image: docker:git
   services:
     - docker:dind
   dependencies: ["old-linux-most-portable"]
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
-    - ls -lah
     - mv build/src/apps/* docker/production/
-    - cd docker/production
+    - cd docker/.production
     - docker build -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
