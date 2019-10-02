@@ -21,7 +21,20 @@ before_script:
     paths:
       - build/src/apps/depth2x
 
-base-images:
+base-images:on_schedule:
+  stage: compilers
+  image: docker:git
+  services:
+    - docker:dind
+  script:
+    - ./scripts/build_all_images.bash push
+  only:
+    refs:
+      - schedules
+  tags:
+    - docker-in-docker
+
+base-images:on_change:
   stage: compilers
   image: docker:git
   services:
@@ -31,7 +44,6 @@ base-images:
   only:
     refs:
       - master
-      - schedules
     changes:
       - docker/**/*
   tags:
