@@ -18,11 +18,6 @@ stages:
     paths:
       - build/src/apps/depth2x
 
-.cache_third_party: &cache_third_party_build
-  cache:
-    paths:
-      - build/third_party
-
 coverage:
   image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
@@ -305,6 +300,7 @@ old-linux-most-portable:
   script:
     - ./scripts/ci/normal_build.bash
   cache:
+    key: normal-third-party
     paths:
       - build/third_party
   tags:
