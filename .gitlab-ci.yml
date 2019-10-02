@@ -26,28 +26,13 @@ base-images:on_schedule:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
-    - ./scripts/build_all_images.bash push
+    - ls -lah . scripts
+    - cd scripts/
+    - ls -lah
+    - ./build_all_images.bash push
   only:
     refs:
       - schedules
-  tags:
-    - docker-in-docker
-
-base-images:on_change:
-  stage: compilers
-  image: docker:git
-  services:
-    - docker:dind
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
-  script:
-    ls -lah . scripts
-    - ./scripts/build_all_images.bash push
-  only:
-    refs:
-      - master
-    changes:
-      - docker/**/*
   tags:
     - docker-in-docker
 
