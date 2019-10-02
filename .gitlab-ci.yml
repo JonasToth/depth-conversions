@@ -347,6 +347,8 @@ alpine-edge-image:
   stage: platforms
   dependencies: []
   variables:
+    CC: "gcc"
+    CXX: "g++"
     FORCE_BUNDLED_CV: "ON"
     FORCE_BUNDLED_EIGEN: "ON"
     WITH_TESTING: "ON"
@@ -377,7 +379,7 @@ create-production-image:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
-    - mv build/src/apps/* docker/production/
+    - mv build/src/apps/* docker/production
     - cd docker/.production
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:latest
@@ -398,7 +400,7 @@ create-alpine-image:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
-    - mv build/src/apps/* docker/production/
+    - mv build/src/apps/* docker/production
     - cd docker/.alpine-edge
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:alpine-edge
