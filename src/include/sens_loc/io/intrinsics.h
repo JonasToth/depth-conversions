@@ -47,9 +47,6 @@ load_pinhole_intrinsic(std::istream &in) noexcept {
         if (p.fx <= 0. || p.cx <= 0.)
             return std::nullopt;
 
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        // Expects(p.cx / static_cast<double>(p.w) < 0.75);
-
         if (ss.rdstate() != std::ios_base::eofbit)
             return std::nullopt;
     }
