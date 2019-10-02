@@ -1,6 +1,7 @@
 ---
 stages:
     - compilers
+    - images
     - sanitizers
     - platforms
     - images
@@ -18,36 +19,9 @@ stages:
     paths:
       - build/src/apps/depth2x
 
-base-images:on_schedule:
-  stage: compilers
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
-  script:
-    - ./scripts/build_all_images.bash push
-  only:
-    refs:
-      - schedules
-  tags:
-    - image-builder
-
-base-images:on_change:
-  stage: compilers
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
-  script:
-    - ./scripts/build_all_images.bash push
-  only:
-    refs:
-      - master
-    changes:
-      - docker/**/*
-  tags:
-    - image-builder
-
 coverage:
   image: base-image-tools
   stage: compilers
-  dependencies: base-images:on_change
   script:
     - ./scripts/ci/coverage_build.bash
   only:
@@ -237,6 +211,32 @@ clang-tidy-analysis:
     <<: *code_change_filter_definition
   tags:
     - docker
+
+base-images:on_schedule:
+  stage: images
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
+  script:
+    - ./scripts/build_all_images.bash push
+  only:
+    refs:
+      - schedules
+  tags:
+    - image-builder
+
+base-images:on_change:
+  stage: images
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
+  script:
+    - ./scripts/build_all_images.bash push
+  only:
+    refs:
+      - master
+    changes:
+      - docker/**/*
+  tags:
+    - image-builder
 
 .wide_testing_filter: &wide_test_filter_definition
   script:
