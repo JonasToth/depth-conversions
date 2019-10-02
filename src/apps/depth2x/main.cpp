@@ -33,6 +33,7 @@ int main(int argc, char **argv) try {
                "in the working directory");
 
     gsl::span<gsl::zstring<>> arguments(argv, argc);
+
     auto print_version = [arguments](int /*count*/) {
         cout << arguments.at(0) << " " << get_version() << "\n";
         exit(0);
