@@ -1,7 +1,7 @@
 ---
 stages:
     - compilers
-    - images
+    - base-images
     - sanitizers
     - platforms
     - images
@@ -213,7 +213,7 @@ clang-tidy-analysis:
     - docker
 
 base-images:on_schedule:
-  stage: images
+  stage: base-images
   before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
@@ -225,7 +225,7 @@ base-images:on_schedule:
     - image-builder
 
 base-images:on_change:
-  stage: images
+  stage: base-images
   before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
