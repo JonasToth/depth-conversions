@@ -1,7 +1,6 @@
 ---
 stages:
     - compilers
-    - base-images
     - sanitizers
     - platforms
     - images
@@ -212,32 +211,6 @@ clang-tidy-analysis:
   tags:
     - docker
 
-base-images:on_schedule:
-  stage: base-images
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
-  script:
-    - ./scripts/build_all_images.bash push
-  only:
-    refs:
-      - schedules
-  tags:
-    - image-builder
-
-base-images:on_change:
-  stage: base-images
-  before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
-  script:
-    - ./scripts/build_all_images.bash push
-  only:
-    refs:
-      - master
-    changes:
-      - docker/**/*
-  tags:
-    - image-builder
-
 .wide_testing_filter: &wide_test_filter_definition
   script:
     - ./scripts/ci/normal_build.bash
@@ -366,7 +339,7 @@ create-production-image:
   script:
     - mv build/src/apps/* docker/production/
     - cd docker/.production
-    - docker build -t $CI_REGISTRY_IMAGE .
+    - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
     refs:
