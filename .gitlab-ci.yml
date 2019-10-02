@@ -341,6 +341,33 @@ ubuntu-rolling-image:
     - docker
     - platform
 
+alpine-edge-image:
+  image: $CI_REGISTRY_IMAGE/base-image-alpine-edge
+  allow_failure: true
+  stage: platforms
+  dependencies: []
+  variables:
+    FORCE_BUNDLED_CV: "ON"
+    FORCE_BUNDLED_EIGEN: "ON"
+    WITH_TESTING: "ON"
+    WITH_STATIC_STDCXXLIB: "ON"
+    WITH_IPO: "ON"
+    WITH_SSE42: "ON"
+    WITH_AVX2: "OFF"
+    BUILD_TYPE: "Release"
+  script:
+    - ./scripts/ci/normal_build.bash
+  cache:
+    key: alpine-third-party
+    paths:
+      - build/third_party
+  tags:
+    - docker
+    - platform
+  <<: *wide_test_filter_definition
+  <<: *binary_artifact_paths
+  <<: *platform_build_option_variables
+
 create-production-image:
   stage: images
   image: docker:git
@@ -354,6 +381,27 @@ create-production-image:
     - cd docker/.production
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    refs:
+      - master
+    <<: *code_change_filter_definition
+  tags:
+    - docker-in-docker
+
+create-alpine-image:
+  stage: images
+  image: docker:git
+  allow_failure: true
+  services:
+    - docker:dind
+  dependencies: ["alpine-edge-image"]
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
+  script:
+    - mv build/src/apps/* docker/production/
+    - cd docker/.alpine-edge
+    - docker build --pull -t $CI_REGISTRY_IMAGE .
+    - docker push $CI_REGISTRY_IMAGE:alpine-edge
   only:
     refs:
       - master
