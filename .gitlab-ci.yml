@@ -378,8 +378,8 @@ create-production-image:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
-    - mv build/src/apps/* docker/production
     - cd docker/.production
+    - mv ../../src/apps/* .
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
@@ -399,8 +399,8 @@ create-alpine-image:
   before_script:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
-    - mv build/src/apps/* docker/production
     - cd docker/.alpine-edge
+    - mv ../../src/apps/* .
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:alpine-edge
   only:
