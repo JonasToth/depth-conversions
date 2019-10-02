@@ -372,8 +372,8 @@ alpine-image:
     - docker build -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
-    #refs:
-      #- master
+    refs:
+      - master
     <<: *code_change_filter_definition
   tags:
     - docker-in-docker
