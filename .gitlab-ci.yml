@@ -5,9 +5,6 @@ stages:
     - platforms
     - images
 
-before_script:
-  - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
-
 .code_change_filter: &code_change_filter_definition
   changes:
     - cmake/*
@@ -26,6 +23,8 @@ base-images:on_schedule:
   image: docker:git
   services:
     - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
     - ./scripts/build_all_images.bash push
   only:
@@ -39,7 +38,10 @@ base-images:on_change:
   image: docker:git
   services:
     - docker:dind
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
+    ls -lah . scripts
     - ./scripts/build_all_images.bash push
   only:
     refs:
@@ -387,6 +389,8 @@ create-production-image:
   services:
     - docker:dind
   dependencies: ["old-linux-most-portable"]
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
     - mv build/src/apps/* docker/production/
     - cd docker/.production
