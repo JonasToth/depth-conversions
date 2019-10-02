@@ -18,27 +18,36 @@ stages:
     paths:
       - build/src/apps/depth2x
 
-# base-images:on_schedule:
-# stage: compilers
-# image: docker:git
-# services:
-# - docker:dind
-# before_script:
-# - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
-# script:
-# - ls -lah . scripts
-# - cd scripts/
-# - ls -lah
-# - sh build_all_images.bash push
-# only:
-# refs:
-# - schedules
-# tags:
-# - docker-in-docker
+base-images:on_schedule:
+  stage: compilers
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
+  script:
+    - ./scripts/build_all_images.bash push
+  only:
+    refs:
+      - schedules
+  tags:
+    - image-builder
+
+base-images:on_change:
+  stage: compilers
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
+  script:
+    - ./scripts/build_all_images.bash push
+  only:
+    refs:
+      - master
+    changes:
+      - docker/**/*
+  tags:
+    - image-builder
 
 coverage:
   image: base-image-tools
   stage: compilers
+  dependencies: base-images:on_change
   script:
     - ./scripts/ci/coverage_build.bash
   only:
@@ -326,28 +335,6 @@ roskinetic-image:
 
 rosmelodic-image:
   image: base-image-rosmelodic
-  stage: platforms
-  <<: *platform_build_option_variables
-  <<: *wide_test_filter_definition
-  <<: *binary_artifact_paths
-  dependencies: []
-  tags:
-    - docker
-    - platform
-
-ubuntu1604-image:
-  image: base-image-ubuntu1604
-  stage: platforms
-  <<: *platform_build_option_variables
-  <<: *wide_test_filter_definition
-  <<: *binary_artifact_paths
-  dependencies: []
-  tags:
-    - docker
-    - platform
-
-ubuntu1804-image:
-  image: base-image-ubuntu1804
   stage: platforms
   <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
