@@ -298,6 +298,9 @@ old-linux-most-portable:
     - apt-get install -y g++-9 gcc-9 ninja-build libboost-all-dev
   script:
     - ./scripts/ci/normal_build.bash
+  cache:
+    paths:
+      - build/third_party
   tags:
     - docker
   <<: *wide_test_filter_definition
@@ -368,6 +371,7 @@ alpine-image:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
     - ls -lah
+    - mv build/src/apps/* docker/production/
     - cd docker/production
     - docker build -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:latest
