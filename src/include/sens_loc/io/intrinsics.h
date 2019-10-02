@@ -48,7 +48,7 @@ load_pinhole_intrinsic(std::istream &in) noexcept {
             return std::nullopt;
 
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        Expects(p.cx / static_cast<double>(p.w) < 0.75);
+        // Expects(p.cx / static_cast<double>(p.w) < 0.75);
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         Expects(p.cx / static_cast<double>(p.w) > 0.25);
 
