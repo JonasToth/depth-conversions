@@ -271,9 +271,8 @@ ubuntu-1804-tsan:
     CXX: "g++-9"
 
 old-linux-most-portable:
-  image: ubuntu:12.04
+  image: old-linux:latest
   stage: platforms
-  allow_failure: false
   dependencies: []
   variables:
     CC: "gcc-9"
@@ -281,21 +280,11 @@ old-linux-most-portable:
     FORCE_BUNDLED_CV: "ON"
     FORCE_BUNDLED_EIGEN: "ON"
     WITH_TESTING: "ON"
-    WITH_BENCHMARK: "ON"
     WITH_STATIC_STDCXXLIB: "ON"
     WITH_IPO: "ON"
     WITH_SSE42: "ON"
     WITH_AVX2: "OFF"
     BUILD_TYPE: "Release"
-  before_script:
-    - apt-get update
-    - apt-get install -y wget python-software-properties rsync unzip
-    - wget --quiet https://github.com/Kitware/CMake/releases/download/v3.15.3/cmake-3.15.3-Linux-x86_64.sh
-    - sh cmake-3.15.3-Linux-x86_64.sh --prefix=/usr/local --skip-license
-    - rm cmake-3.*
-    - add-apt-repository -y ppa:ubuntu-toolchain-r/test
-    - apt-get update
-    - apt-get install -y g++-9 gcc-9 ninja-build libboost-all-dev
   script:
     - ./scripts/ci/normal_build.bash
   cache:
