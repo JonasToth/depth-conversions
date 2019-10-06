@@ -11,7 +11,6 @@
 #include <stdexcept>
 #include <string>
 
-
 int main(int argc, char **argv) try {
     using namespace sens_loc;
     using namespace std;
