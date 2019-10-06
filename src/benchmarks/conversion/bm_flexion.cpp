@@ -8,7 +8,7 @@ using namespace sens_loc;
 using namespace conversion;
 
 
-NONIUS_BENCHMARK("Depth2Triple", [](nonius::chronometer meter) {
+NONIUS_BENCHMARK("Depth2Flexion", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
     (void) _;
     cv::Mat                          in   = euclid;
@@ -16,7 +16,7 @@ NONIUS_BENCHMARK("Depth2Triple", [](nonius::chronometer meter) {
     meter.measure([&] { return depth_to_flexion(in, cali); });
 })
 
-NONIUS_BENCHMARK("Depth2Triple Parallel", [](nonius::chronometer meter) {
+NONIUS_BENCHMARK("Depth2Flexion Parallel", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
     (void) _;
 

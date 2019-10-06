@@ -40,6 +40,8 @@ option(WITH_STATIC_STDCXXLIB OFF "Statically link the C++-standard library to pr
 option(WITH_WERROR ON "Enable -Werror")
 
 option(WITH_MARCH_NATIVE OFF "Enable code generation for the local processor")
+option(WITH_PIC OFF "Enable Position Independent Code")
+option(WITH_FAST_MATH OFF "Enable Fast-Math optimization")
 option(WITH_SSE42 ON "Enable code generation with SSE42 instructions")
 option(WITH_AVX OFF "Enable code generation with AVX instructions")
 option(WITH_AVX2 OFF "Enable code generation with AVX2 instructions")

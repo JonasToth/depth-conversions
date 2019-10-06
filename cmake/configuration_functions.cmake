@@ -5,6 +5,7 @@ function(common_target_properties target_name)
         CXX_STANDARD 17
         CXX_EXTENSIONS OFF
         CXX_STANDARD_REQUIRED ON
+        POSITION_INDEPENDENT_CODE ${WITH_PIC}
         )
     if (WITH_TEST_COVERAGE)
         target_compile_options(${target_name} 
@@ -23,6 +24,7 @@ function(common_target_properties target_name)
         PRIVATE
             "-Wall"
             "-Wextra"
+            "$<$<BOOL:{WITH_FAST_MATH}>:-ffast-math>"
             "$<$<BOOL:${WITH_WERROR}>:-Werror>"
             "$<$<BOOL:${WITH_MARCH_NATIVE}>:-march=native>"
             "$<$<BOOL:${WITH_SSE42}>:-msse4.2>"

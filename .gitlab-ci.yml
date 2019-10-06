@@ -379,7 +379,7 @@ create-production-image:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
     - cd docker/.production
-    - mv ../../src/apps/* .
+    - mv ../../src/apps/depth2x .
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
@@ -400,7 +400,7 @@ create-alpine-image:
     - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
   script:
     - cd docker/.alpine-edge
-    - mv ../../src/apps/* .
+    - mv ../../src/apps/depth2x .
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:alpine-edge
   only:
