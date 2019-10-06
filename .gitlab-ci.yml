@@ -381,7 +381,7 @@ create-production-image:
     - cd docker/.production
     - mv ../../build/src/apps/* .
     - docker build --pull -t $CI_REGISTRY_IMAGE .
-    - docker run --rm -it $CI_REGISTRY_IMAGE:latest depth2x -h
+    - docker run --rm $CI_REGISTRY_IMAGE:latest depth2x -h
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
     refs:
@@ -393,7 +393,7 @@ create-production-image:
 create-alpine-image:
   stage: images
   image: docker:git
-  allow_failure: true
+  allow_failure: false
   services:
     - docker:dind
   dependencies: ["alpine-edge-image"]
@@ -403,7 +403,7 @@ create-alpine-image:
     - cd docker/.alpine-edge
     - mv ../../build/src/apps/* .
     - docker build --pull -t $CI_REGISTRY_IMAGE:alpina-edge .
-    - docker run --rm -it $CI_REGISTRY_IMAGE:alpine-edge depth2x -h
+    - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge depth2x -h
     - docker push $CI_REGISTRY_IMAGE:alpine-edge
   only:
     refs:
