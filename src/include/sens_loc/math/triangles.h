@@ -29,8 +29,8 @@ inline Real bearing_angle(const Real b, const Real c,
     // => alpha is bigger 0°
     Expects(cos_alpha < 1.);
 
-    const Real nom = 2. * b * b - 2. * b * c * cos_alpha;
-    const Real den = 2. * b * std::sqrt(b * b + c * c - 2. * b * c * cos_alpha);
+    const Real nom = b - c * cos_alpha;
+    const Real den = std::sqrt(b * b + c * c - 2. * b * c * cos_alpha);
     Ensures(den != 0.);
 
     Real ratio = nom / den;

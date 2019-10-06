@@ -287,8 +287,6 @@ old-linux-most-portable:
   variables:
     CC: "gcc-9"
     CXX: "g++-9"
-    FORCE_BUNDLED_CV: "ON"
-    FORCE_BUNDLED_EIGEN: "ON"
     WITH_TESTING: "ON"
     WITH_STATIC_STDCXXLIB: "ON"
     WITH_IPO: "ON"
@@ -297,7 +295,6 @@ old-linux-most-portable:
     BUILD_TYPE: "Release"
   script:
     - ./scripts/ci/normal_build.bash
-  <<: *cache_download_third_party_definition
   tags:
     - docker
   <<: *wide_test_filter_definition
@@ -338,14 +335,11 @@ ubuntu-rolling-image:
 
 alpine-edge-image:
   image: $CI_REGISTRY_IMAGE/base-image-alpine-edge
-  allow_failure: false
   stage: platforms
   dependencies: []
   variables:
     CC: "gcc"
     CXX: "g++"
-    FORCE_BUNDLED_CV: "ON"
-    FORCE_BUNDLED_EIGEN: "ON"
     WITH_TESTING: "ON"
     WITH_STATIC_STDCXXLIB: "ON"
     WITH_IPO: "OFF"
@@ -354,7 +348,6 @@ alpine-edge-image:
     BUILD_TYPE: "Release"
   script:
     - ./scripts/ci/normal_build.bash
-  <<: *cache_download_third_party_definition
   tags:
     - docker
     - platform
@@ -385,7 +378,6 @@ create-production-image:
 create-alpine-image:
   stage: images
   image: docker:git
-  allow_failure: false
   services:
     - docker:dind
   dependencies: ["alpine-edge-image"]
