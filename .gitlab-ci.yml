@@ -386,7 +386,7 @@ create-alpine-image:
   script:
     - cd docker/.alpine-edge
     - mv ../../build/src/apps/* .
-    - docker build --pull -t $CI_REGISTRY_IMAGE:alpina-edge .
+    - docker build --pull -t $CI_REGISTRY_IMAGE:alpine-edge .
     - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge depth2x -h
     - docker push $CI_REGISTRY_IMAGE:alpine-edge
   only:
