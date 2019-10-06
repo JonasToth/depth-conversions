@@ -376,10 +376,10 @@ create-production-image:
     - docker:dind
   dependencies: ["old-linux-most-portable"]
   before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - cd docker/.production
-    - mv ../../src/apps/depth2x .
+    - mv ../../build/src/apps/* .
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
@@ -397,12 +397,12 @@ create-alpine-image:
     - docker:dind
   dependencies: ["alpine-edge-image"]
   before_script:
-    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN git.informatik.tu-freiberg.de:5050
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - cd docker/.alpine-edge
-    - mv ../../src/apps/depth2x .
+    - mv ../../build/src/apps/* .
     - docker build --pull -t $CI_REGISTRY_IMAGE .
-    - docker push $CI_REGISTRY_IMAGE:alpine-edge
+    - docker push $CI_REGISTRY_IMAGE/alpine-edge
   only:
     refs:
       - master
