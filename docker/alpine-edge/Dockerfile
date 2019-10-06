@@ -7,6 +7,7 @@ RUN apk update \
             ninja \
             cmake \
             gcc g++ \
+            linux-headers \
             wget \
             unzip \
             rsync
