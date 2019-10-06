@@ -49,6 +49,25 @@ $ ls
 
 ## Getting the software
 
+### Docker
+
+It is always possible to get the latest and greatest version as docker image.
+
+```bash
+$ docker login git.informatik.tu-freiberg.de:5050
+# Pulling Debian Based Image
+$ docker pull git.informatik.tu-freiberg.de:5050/jtoth/master-thesis
+> Download log
+# Alternative: Alpine Linux based image (musl and other hardened software)
+$ docker pull git.informatik.tu-freiberg.de:5050/jtoth/master-thesis/alpine-edge
+> Download log
+```
+
+Running the command requires mounting of software or creating a container
+based on that one.
+
+### Binaries
+
 It is possible to download artifacts from the CI setup.
 
 The `old-linux-most-portable` build in the stage `platforms` is your best bet.
@@ -67,8 +86,8 @@ project tries to support many compilers and environment but is very Linux
 oriented. For more information on building see the
 [Compilation Reference](docs/compilation.md).
 
-Please note, that artifacts from the `platform` stage require `libjpeg-dev` and
-`libpng-dev` libraries as they are dynamically linked.
+Please note, that artifacts from the `platform` might stage require
+`libjpeg-dev` and `libpng-dev` libraries as they are dynamically linked.
 On Linux system you can check `ldd <binary-executable>` if all dynamic
 dependencies are resolved. If yes, the binary should work, given the `libc` is
 new enough ;)
