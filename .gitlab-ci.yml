@@ -5,6 +5,12 @@ stages:
     - platforms
     - images
 
+.cache_download_third_party: &cache_download_third_party_definition
+  key: source-third-party
+  cache:
+    - build/third_party/opencv/**/*
+    - build/third_party/eigen3/**/*
+
 .code_change_filter: &code_change_filter_definition
   changes:
     - cmake/*
@@ -89,10 +95,7 @@ ubuntu-1804-clang-9-libcxx:
     refs:
       - master
     <<: *code_change_filter_definition
-  cache:
-    key: libcxx
-    paths:
-      - build/third_party
+  <<: *cache_download_third_party_definition
   tags:
     - docker
     - test
@@ -119,10 +122,7 @@ ubuntu-1804-clang-9-static-libcxx-lto:
       - master
     <<: *code_change_filter_definition
   <<: *binary_artifact_paths
-  cache:
-    key: libcxx-static
-    paths:
-      - build/third_party
+  <<: *cache_download_third_party_definition
   tags:
     - docker
     - test
@@ -198,10 +198,7 @@ ubuntu-1804-gcc-9-lto-static:
       - master
     <<: *code_change_filter_definition
   <<: *binary_artifact_paths
-  cache:
-    key: libstdcxx-static
-    paths:
-      - build/third_party
+  <<: *cache_download_third_party_definition
   tags:
     - docker
     - test
@@ -299,10 +296,7 @@ old-linux-most-portable:
     BUILD_TYPE: "Release"
   script:
     - ./scripts/ci/normal_build.bash
-  cache:
-    key: normal-third-party
-    paths:
-      - build/third_party
+  <<: *cache_download_third_party_definition
   tags:
     - docker
   <<: *wide_test_filter_definition
@@ -343,7 +337,7 @@ ubuntu-rolling-image:
 
 alpine-edge-image:
   image: $CI_REGISTRY_IMAGE/base-image-alpine-edge
-  allow_failure: true
+  allow_failure: false
   stage: platforms
   dependencies: []
   variables:
@@ -359,10 +353,7 @@ alpine-edge-image:
     BUILD_TYPE: "Release"
   script:
     - ./scripts/ci/normal_build.bash
-  cache:
-    key: alpine-third-party
-    paths:
-      - build/third_party
+  <<: *cache_download_third_party_definition
   tags:
     - docker
     - platform
