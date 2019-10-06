@@ -6,10 +6,11 @@ stages:
     - images
 
 .cache_download_third_party: &cache_download_third_party_definition
-  key: source-third-party
   cache:
-    - build/third_party/opencv/**/*
-    - build/third_party/eigen3/**/*
+    key: source-third-party
+    paths:
+      - build/third_party/opencv/**/*
+      - build/third_party/eigen3/**/*
 
 .code_change_filter: &code_change_filter_definition
   changes:
