@@ -55,7 +55,7 @@ int main(int argc, char **argv) try {
     string input_type = "pinhole-depth";
     app.add_set("-t,--type", input_type, {"pinhole-depth", "pinhole-range"},
                 "Type of input depth images, either euclidean depths "
-                "(pinhole-range) or orthografic depths (pinhole-depth)",
+                "(pinhole-range) or orthographic depths (pinhole-depth)",
                 /*defaulted=*/true);
 
     int start_idx;
