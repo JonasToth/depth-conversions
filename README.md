@@ -56,10 +56,10 @@ It is always possible to get the latest and greatest version as docker image.
 ```bash
 $ docker login git.informatik.tu-freiberg.de:5050
 # Pulling Debian Based Image
-$ docker pull git.informatik.tu-freiberg.de:5050/jtoth/master-thesis
+$ docker pull git.informatik.tu-freiberg.de:5050/jtoth/master-thesis:latest
 > Download log
 # Alternative: Alpine Linux based image (musl and other hardened software)
-$ docker pull git.informatik.tu-freiberg.de:5050/jtoth/master-thesis/alpine-edge
+$ docker pull git.informatik.tu-freiberg.de:5050/jtoth/master-thesis:alpine-edge
 > Download log
 ```
 
