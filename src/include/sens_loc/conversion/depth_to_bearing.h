@@ -61,10 +61,10 @@ inline int get_du(direction dir) {
 
 inline int get_dv(direction dir) {
     switch (dir) {
-    case direction::antidiagonal: return 1;
     case direction::diagonal:
     case direction::vertical: return -1;
     case direction::horizontal: return 0;
+    case direction::antidiagonal: return 1;
     }
     UNREACHABLE("Only 4 directions are possible");
 }

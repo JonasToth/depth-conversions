@@ -27,8 +27,8 @@ inline constexpr Real scale(numeric_range<Real> source_range,
 
     const Real clamped = std::clamp(value, source_range.min, source_range.max);
 
-    Expects(clamped <= source_range.max);
-    Expects(clamped >= source_range.min);
+    Ensures(clamped <= source_range.max);
+    Ensures(clamped >= source_range.min);
 
     const Real scaled =
         ((target_range.max - target_range.min) * (value - source_range.min)) /

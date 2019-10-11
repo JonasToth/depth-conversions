@@ -25,7 +25,6 @@ template <typename Real = float, typename PixelType = ushort>
 inline Real
 orthografic_to_euclidian(int u, int v, PixelType d,
                          const camera_models::pinhole &intrinsic) noexcept {
-
     if (d == 0)
         return Real(0.);
 
