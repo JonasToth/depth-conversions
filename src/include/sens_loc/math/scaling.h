@@ -16,8 +16,8 @@ struct numeric_range {
     Real max;
 };
 
-/// This function scales \par value from the range \par source_range to the
-/// new range \par target_range.
+/// This function scales \c value from the range \c source_range to the
+/// new range \c target_range.
 template <typename Real>
 inline constexpr Real scale(numeric_range<Real> source_range,
                             numeric_range<Real> target_range,

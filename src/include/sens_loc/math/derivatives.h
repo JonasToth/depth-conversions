@@ -20,7 +20,7 @@ inline Real first_derivative_central(Real y__1, Real y_1, Real dx) noexcept {
 /// \param y__1 == y_{i-1}
 /// \param y_0  == y_{i}
 /// \param y_1  == y_{i+1}
-/// \param dx*dx== dx_squared
+/// \param dx_squared == dx*dx 
 template <typename Real>
 inline Real second_derivative_central(Real y__1, Real y_0, Real y_1,
                                       Real dx_squared) noexcept {

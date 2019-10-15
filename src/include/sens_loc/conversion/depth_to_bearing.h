@@ -15,16 +15,20 @@
 namespace sens_loc { namespace conversion {
 
 /// Convert the image \param depth_image to an bearing angle image.
-/// This function returns a new image with the same dimension as
-/// \param depth_image but each pixel value is the corresponding bearing angle.
+/// This function returns a new image with the same dimension as \c depth_image
+///
+/// \param[in] depth_image but each pixel value is the corresponding bearing
+/// angle
+///
+/// \param[in] intrinsic pinhole camera model to calculate the angle
+/// between pixels
+///
+/// \returns cv::Mat<Real> with each pixel the bearing angle in \c Direction
 //
 /// \note Depth images are orthografic and require conversion first!
 ///
-/// \Expects \param depth_image to have 1 channel
-/// \Expects \param depth_image == laser-scan like image!
-/// \returns cv::Mat<Real> with each pixel beeing either 0 (no value) or the
-/// bearing angle in radians (0, PI).
-/// \sa convert_bearing
+/// \pre \c depth_image to have 1 channel
+/// \pre \c depth_image == laser-scan like image!
 template <direction Direction, typename Real = float,
           typename PixelType = float>
 cv::Mat depth_to_bearing(const cv::Mat &               depth_image,
