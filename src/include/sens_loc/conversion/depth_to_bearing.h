@@ -14,7 +14,7 @@
 
 namespace sens_loc { namespace conversion {
 
-/// Convert the image \param depth_image to an bearing angle image.
+/// Convert the image \p depth_image to an bearing angle image.
 /// This function returns a new image with the same dimension as \c depth_image
 ///
 /// \param depth_image but each pixel value is the corresponding bearing
