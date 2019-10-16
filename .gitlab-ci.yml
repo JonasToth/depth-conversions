@@ -33,6 +33,10 @@ api-documentation:
   only:
     refs:
       - master
+  cache:
+    key: doxygen-output
+    paths:
+      - public/**/*
   artifacts:
     paths:
       - public
