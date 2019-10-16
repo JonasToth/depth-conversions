@@ -15,9 +15,14 @@ namespace sens_loc { namespace io {
 /// w h
 /// <fx> 0.0  <cx>
 /// 0.0  <fy> <cy>
-/// 0.0  0.0  1.0
+/// [0.0  0.0  1.0]
 /// ```
-/// @note values in brackets are optional.
+/// \note Each value is expected to be positive and negative values are treated
+/// as failure.
+/// \note Values in brackets are optional.
+/// \warning The function is sensitive to UNIX-vs-MS line-endings.
+/// \returns \c std::optional<> with proper parameters on success, otherwise
+/// it contains \c None.
 inline std::optional<camera_models::pinhole>
 load_pinhole_intrinsic(std::istream &in) noexcept {
     if (!in.good())

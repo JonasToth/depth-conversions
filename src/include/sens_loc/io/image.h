@@ -6,9 +6,11 @@
 #include <utility>
 
 namespace sens_loc { namespace io {
-/// Perfect forward loading call to opencv.
-/// Transform the result into a `std::optional<cv::Mat>` for better error
-/// handling.
+/// Perfect forward loading call to opencv's \c cv::imread.
+///
+/// \returns \c std::optional<cv::Mat> for better error handling.
+/// If the optional contains a value, the load was successful, otherwise it is
+/// \c None.
 template <typename... Arg>
 std::optional<cv::Mat> load_image(Arg &&... args) {
     cv::Mat result = cv::imread(std::forward<Arg>(args)...);

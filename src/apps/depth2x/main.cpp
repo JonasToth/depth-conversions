@@ -11,7 +11,15 @@
 #include <stdexcept>
 #include <string>
 
+/// \defgroup conversion-driver depth-image converter
+///
+/// All code that is written to use the library and implement a program
+/// that converts depth-maps/laser-scan into derived image types.
 
+/// Parallelized driver for depth-image conversion-tool
+/// \sa sens_loc::conversion
+/// \ingroup conversion-driver
+/// \returns 0 if all images could be converted, 1 if any image fails
 int main(int argc, char **argv) try {
     using namespace sens_loc;
     using namespace std;

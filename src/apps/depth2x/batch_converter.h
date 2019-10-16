@@ -8,11 +8,27 @@
 #include <string>
 #include <string_view>
 
-/// Just local helper for batch conversion tasks over a given index range.
-
 namespace sens_loc { namespace apps {
 
-enum class depth_type { orthografic, euclidean };
+/// \addtogroup conversion-driver
+/// @{
+
+/// Discriminate the input data semantic between depth-maps and laserscans.
+enum class depth_type {
+    orthografic,  ///< The \c orthographic distance measure the distance to the
+                  ///< image plan. Original Kinect images use this as depth
+                  ///< value.
+    euclidean,    ///< The \c euclidean distance is the L2-Norm from the point
+                  ///< in camera coordinates to the camera center.
+};
+
+/// Helper function for the conversion from command-line argument to typesafe
+/// enumeration type.
+/// \sa depth_type
+/// \pre \p option is one of "pinhole-depth" or "pinhole-range"
+/// \note The precondition of the function should be established by the command
+/// line parser configuration.
+/// \returns the matching enumerator for the given option.
 inline depth_type str_to_depth_type(std::string_view option) {
     if (option == "pinhole-depth")
         return depth_type::orthografic;
@@ -22,15 +38,25 @@ inline depth_type str_to_depth_type(std::string_view option) {
     UNREACHABLE("no other options are allowed as input depth type");
 }
 
+/// Helper struct to contain path specification for input and output files.
+/// The paths can be patterns like \c "depth-{}.png" where curly braces are
+/// substituted with an index.
 struct file_patterns {
-    std::string input;
-    std::string output;
-    std::string horizontal;
-    std::string vertical;
-    std::string diagonal;
-    std::string antidiagonal;
+    std::string input;         ///< Input file pattern specification.
+    std::string output;        ///< Output file pattern specification.
+    std::string horizontal;    ///< Only relevant for bearing angles, output for
+                               ///< horizontal images.
+    std::string vertical;      ///< Only relevant for bearing angles, output for
+                               ///< vertical images.
+    std::string diagonal;      ///< Only relevant for bearing angles, output for
+                               ///< diagonal images.
+    std::string antidiagonal;  ///< Only relevant for bearing angles, output for
+                               ///< antidiagonal images.
 };
 
+/// Just local helper for batch conversion tasks over a given index range.
+/// Provides abstract interface for batch processing depth images for different
+/// tasks.
 class batch_converter {
   public:
     batch_converter(const file_patterns &files, depth_type t)
@@ -45,27 +71,49 @@ class batch_converter {
     batch_converter &operator=(batch_converter &&) = default;
 
     /// Process the whole batch calling 'process_file' for each index.
-    /// Returns 'false' if any of the indices fails.
+    /// \note This function does parallel batch processing.
+    /// \note As a high level function it catches all exceptions and provides
+    /// human readable error message to std-out.
+    /// \returns 'false' if any of the indices fails.
     [[nodiscard]] bool process_batch(int start, int end) const noexcept;
 
     virtual ~batch_converter() = default;
 
   protected:
-    file_patterns  _files;
-    depth_type     _input_depth_type;
+    file_patterns _files;          ///< File patterns that shall be processed.
+    depth_type _input_depth_type;  ///< Discriminate input type of the images.
 
   private:
-    [[nodiscard]] bool            process_index(int idx) const noexcept;
+    /// Function that does the management-tasks for the conversion job, like
+    /// file-io and error handling.
+    ///
+    /// The function opens the \c _files.input file after index substitution
+    /// and reads it as an 16-bit, single channel grayscale image.
+    /// If it does not succeed, it returns \c false.
+    ///
+    /// On success it calls \p process_file which implements the actual
+    /// conversion in each subclass.
+    ///
+    /// \sa process_file
+    /// \pre \p _files.input is not empty
+    /// \returns \c true on success, otherwise \c false.
+    [[nodiscard]] bool process_index(int idx) const noexcept;
+
+    /// Function to potentially convert orthographic images into range images.
+    /// \returns \c cv::Mat with proper input data for the conversion process.
     [[nodiscard]] virtual cv::Mat preprocess_depth(cv::Mat depth_image) const
         noexcept {
         return depth_image;
     }
     /// Method to process exactly on file. This method is expected to have
     /// no sideeffects and is called in parallel.
+    /// \returns \c true on success, otherwise \c false.
     [[nodiscard]] virtual bool process_file(cv::Mat depth_image, int idx) const
         noexcept = 0;
 };
 
+/// This class provides common data and depth-image conversion for all
+/// pinhole-camera based input images.
 class batch_pinhole_converter : public batch_converter {
   public:
     batch_pinhole_converter(const file_patterns &files, depth_type t,
@@ -81,12 +129,19 @@ class batch_pinhole_converter : public batch_converter {
     ~batch_pinhole_converter() override                            = default;
 
   protected:
-    camera_models::pinhole intrinsic;
+    camera_models::pinhole intrinsic;  ///< pinhole-camera-model parameters used
+                                       ///< in the whole conversion.
 
   private:
+    /// Convert orthographic depth-images to range images using the pinhole
+    /// model.
+    /// \sa conversion::depth_to_laserscan
+    /// \returns \c cv::Mat with one channel and double as data type.
     [[nodiscard]] cv::Mat preprocess_depth(cv::Mat depth_image) const
         noexcept override;
 };
+
+/// @}
 
 }}  // namespace sens_loc::apps
 

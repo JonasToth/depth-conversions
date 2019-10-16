@@ -8,35 +8,64 @@
 
 namespace sens_loc { namespace camera_models {
 
-/// This struct is a container holding parameters for the pinhole camera model.
+/// This struct contains all parameters for the general pinhole camera model.
+/// For more information you can check the
+/// <a href="https://docs.opencv.org/master/d9/d0c/group__calib3d.html"
+/// target="_blank">OpenCV documentation (Section 'Detailed Description')</a>.
+///
+/// The struct itself provides some helper functions useful in the code but is
+/// not smart itself.
+/// \warning Each value can be modified by everyone, as its just as list of
+/// numbers. Use \c const in your code to prevent bugs!
 struct pinhole {
-    int    w  = 0;    //< width of the image
-    int    h  = 0;    //< height of the image
-    double fx = 0.0;  //< x-coordinate of focal length
-    double fy = 0.0;  //< y-corrdiante of focal length
-    double cx = 0.0;  //< x-coordinate of image center
-    double cy = 0.0;  //< y-coordinate of image center
+    int    w  = 0;    ///< width of the image
+    int    h  = 0;    ///< height of the image
+    double fx = 0.0;  ///< x-coordinate of focal length
+    double fy = 0.0;  ///< y-corrdiante of focal length
+    double cx = 0.0;  ///< x-coordinate of image center
+    double cy = 0.0;  ///< y-coordinate of image center
 
-    double p1 = 0.0;  //< first order tangential distortion coefficient
-    double p2 = 0.0;  //< second order tangential distortion coefficient
+    double p1 = 0.0;  ///< first order tangential distortion coefficient
+    double p2 = 0.0;  ///< second order tangential distortion coefficient
 
-    double k1 = 0.0;  //< first order radial distortion coefficient
-    double k2 = 0.0;  //< second order radial distortion coefficient
-    double k3 = 0.0;  //< third order radial distortion coefficient
+    double k1 = 0.0;  ///< first order radial distortion coefficient
+    double k2 = 0.0;  ///< second order radial distortion coefficient
+    double k3 = 0.0;  ///< third order radial distortion coefficient
 
-    /// This method calculates the angle (rad) of the rays between two pixels.
-    /// \returns radians
+    /// This method calculates the angle of the rays between two pixels.
+    /// \param u0,v0,u1,v1 non-negative pixel coordinates smaller \c w and \c h.
+    /// \note This uses \p project_to_sphere internally.
+    /// \sa project_to_sphere
+    /// \returns radians of the angle between the two lightrays.
     [[nodiscard]] double phi(int u0, int v0, int u1, int v1) const noexcept;
 
+    /// This methods calculates the inverse projection of the camera model
+    /// to get the direction of the lightray for the pixel at \p u \p v.
+    ///
+    /// \warning This does not respect a distortion model at all!
+    /// \pre \p fx > 0
+    /// \pre \p fy > 0
+    /// \pre \p cx > 0
+    /// \pre \p cy > 0
+    /// \pre \p p1 == \p p2 == \p k1 == \p k2 == \p k3 == 0!!
+    /// \post \f$\lVert result \rVert_2 = 1.\f$
+    /// \returns normalized vector in camera coordinates
     [[nodiscard]] std::tuple<double, double, double>
     project_to_sphere(int u, int v) const noexcept;
 };
 
 inline double pinhole::phi(int u0, int v0, int u1, int v1) const noexcept {
     Expects(u0 >= 0);
+    Expects(u0 < w);
+
     Expects(v0 >= 0);
+    Expects(v0 < h);
+
     Expects(u1 >= 0);
+    Expects(u1 < w);
+
     Expects(v1 >= 0);
+    Expects(v1 < h);
 
     const auto [xs0, ys0, zs0] = project_to_sphere(u0, v0);
     const auto [xs1, ys1, zs1] = project_to_sphere(u1, v1);
@@ -51,7 +80,9 @@ inline double pinhole::phi(int u0, int v0, int u1, int v1) const noexcept {
 
 inline std::tuple<double, double, double>
 pinhole::project_to_sphere(int u, int v) const noexcept {
+    Expects(fx > 0.);
     Expects(fy > 0.);
+    Expects(cx > 0.);
     Expects(cy > 0.);
     Expects(p1 == 0.);
     Expects(p2 == 0.);

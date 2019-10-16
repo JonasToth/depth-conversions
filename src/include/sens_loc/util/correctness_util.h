@@ -13,7 +13,22 @@ namespace sens_loc { namespace util {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREACHABLE(msg) ::sens_loc::util::unreachable(msg, __FILE__, __LINE__)
 
-/// 'unreachable' is inspired by 'llvm_unreachable'.
+/// This function is used with the \c UNREACHABLE macro to symbol unreachable
+/// code paths.
+///
+/// If such a code-path is reached on execution and error message will be
+/// printed, that includes the location of the \c unreachable and the program
+/// terminates with \c std::exit(1)
+///
+/// \code
+/// switch(my_value) {
+///   case 1: // FOO
+///   case 2: // BAR
+/// }
+/// UNREACHABLE("Switch was exhaustive, invalid argument passed");
+/// \endcode
+///
+/// \note \c unreachable is inspired by \c llvm_unreachable
 [[noreturn]] inline void unreachable(const std::string_view message = {},
                                      const std::string_view file    = {},
                                      int                    line    = -1) {
@@ -25,9 +40,14 @@ namespace sens_loc { namespace util {
 }
 
 /// Calculate the average pixel error of the two images.
-/// Expects that both images are of same type and dimension.
-/// This function uses the L1-Norm as error measure and divides it by the
+/// This function uses the L2-Norm as error measure and divides it by the
 /// number of pixels.
+///
+/// \pre Expects that both images are of same underlying type and dimension.
+/// \post The results is bigger or equal to 0.
+///
+/// \returns
+/// \f[\frac{\lVert i_1 - i_2 \rVert_2}{\#Pixel \cdot \#Channels}\f]
 inline double average_pixel_error(const cv::Mat &i1,
                                   const cv::Mat &i2) noexcept {
     Expects(i1.cols == i2.cols);

@@ -17,10 +17,9 @@ namespace sens_loc { namespace conversion {
 /// Convert the image \param depth_image to an bearing angle image.
 /// This function returns a new image with the same dimension as \c depth_image
 ///
-/// \param[in] depth_image but each pixel value is the corresponding bearing
+/// \param depth_image but each pixel value is the corresponding bearing
 /// angle
-///
-/// \param[in] intrinsic pinhole camera model to calculate the angle
+/// \param intrinsic pinhole camera model to calculate the angle
 /// between pixels
 ///
 /// \returns cv::Mat<Real> with each pixel the bearing angle in \c Direction
@@ -38,7 +37,7 @@ cv::Mat depth_to_bearing(const cv::Mat &               depth_image,
 /// functionality.
 ///
 /// The interface is different and expects different things then the normal
-/// depth_to_bearing.
+/// \p depth_to_bearing.
 template <direction Direction, typename Real = float,
           typename PixelType = float>
 std::pair<tf::Task, tf::Task>
