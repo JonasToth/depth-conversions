@@ -36,7 +36,7 @@ class batch_converter {
     batch_converter(const file_patterns &files, depth_type t)
         : _files{files}
         , _input_depth_type{t} {
-        Expects("input pattern is always required!");
+        Expects(!_files.input.empty());
     }
 
     batch_converter(const batch_converter &) = default;
