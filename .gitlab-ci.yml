@@ -25,6 +25,18 @@ stages:
     paths:
       - build/src/apps/depth2x
 
+api-documentation:
+  image: $CI_REGISTRY_IMAGE/base-image-documentation
+  stage: compilers
+  script:
+    - ./scripts/ci/generate_doc.bash
+  only:
+    refs:
+      - master
+  artifacts:
+    paths:
+      - public
+
 coverage:
   image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
