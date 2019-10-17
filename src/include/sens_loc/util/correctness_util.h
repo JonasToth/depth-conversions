@@ -8,7 +8,10 @@
 #include <sens_loc/util/console.h>
 #include <string_view>
 
-namespace sens_loc { namespace util {
+namespace sens_loc {
+
+/// This namespace is purely for programming utility.
+namespace util {
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define UNREACHABLE(msg) ::sens_loc::util::unreachable(msg, __FILE__, __LINE__)

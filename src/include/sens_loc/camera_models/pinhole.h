@@ -6,7 +6,11 @@
 #include <sens_loc/math/constants.h>
 #include <utility>
 
-namespace sens_loc { namespace camera_models {
+namespace sens_loc {
+
+/// This namespace contains all camera and projection models and implements
+/// them as necessary.
+namespace camera_models {
 
 /// This struct contains all parameters for the general pinhole camera model.
 /// For more information you can check the

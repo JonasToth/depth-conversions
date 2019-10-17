@@ -8,7 +8,11 @@
 #include <string>
 #include <string_view>
 
-namespace sens_loc { namespace apps {
+namespace sens_loc {
+
+/// This namespace includes all code that is only relevant to executables
+/// but does not provide library functionality.
+namespace apps {
 
 /// \addtogroup conversion-driver
 /// @{

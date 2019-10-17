@@ -5,7 +5,11 @@
 #include <optional>
 #include <utility>
 
-namespace sens_loc { namespace io {
+namespace sens_loc {
+
+/// This namespace contains all functions for file io and helper for data
+/// loading and storing.
+namespace io {
 /// Perfect forward loading call to opencv's \c cv::imread.
 ///
 /// \returns \c std::optional<cv::Mat> for better error handling.

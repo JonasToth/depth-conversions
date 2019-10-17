@@ -4,7 +4,11 @@
 #include <gsl/gsl>
 #include <sens_loc/math/constants.h>
 
-namespace sens_loc { namespace math {
+namespace sens_loc {
+
+/// Implement necessary math functionality in this namespace, which is mostly
+/// used by conversions.
+namespace math {
 
 /// This function converts degree into radians
 /// \tparam T precision of the type (e.g. \c float or \c double)
