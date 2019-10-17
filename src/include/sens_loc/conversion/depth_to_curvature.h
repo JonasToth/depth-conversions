@@ -4,14 +4,86 @@
 #include <algorithm>
 #include <limits>
 #include <opencv2/core/mat.hpp>
+#include <optional>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/curvature.h>
 #include <sens_loc/math/derivatives.h>
 #include <sens_loc/math/scaling.h>
-#include <optional>
 
 namespace sens_loc { namespace conversion {
+
+/// Convert the range image \p depth_image to a gaussian curvature image.
+///
+/// The gaussian curvature is a measure of curvature of surfaces and intrinsic
+/// to the inner geometry. See https://en.wikipedia.org/wiki/Gaussian_curvature
+/// for more information.
+///
+/// \tparam Real precision of the calculation
+/// \tparam PixelType underlying type of \p depth_image
+/// \param depth_image range image that will be converted
+/// \param intrinsic calibration of the sensor that took the image.
+/// \returns estimated gaussian curvature for each pixel as \p Real
+/// \pre \p depth_image is not empty
+/// \pre \p PixelType matches the underlying type of \p depth_image
+/// \note invalid depth values result in 0 for that pixel.
+/// \sa depth_to_laserscan
+template <typename Real = float, typename PixelType = float>
+cv::Mat
+depth_to_gaussian_curvature(const cv::Mat &               depth_image,
+                            const camera_models::pinhole &intrinsic) noexcept;
+
+/// Convert the range image \p depth_image to a mean curvature image.
+///
+/// Mean curvature is the second most used quantity for curvature in
+/// differential geometry. See https://en.wikipedia.org/wiki/Mean_curvature
+/// for more information.
+///
+/// \tparam Real precision of the calculation
+/// \tparam PixelType underlying type of \p depth_image
+/// \param depth_image range image that will be converted
+/// \param intrinsic calibration of the sensor that took the image.
+/// \returns estimated mean curvature for each pixel as \p Real
+/// \pre \p depth_image is not empty
+/// \pre \p PixelType matches the underlying type of \p depth_image
+/// \note invalid depth values result in 0 for that pixel.
+/// \sa depth_to_laserscan
+template <typename Real = float, typename PixelType = float>
+cv::Mat
+depth_to_mean_curvature(const cv::Mat &               depth_image,
+                        const camera_models::pinhole &intrinsic) noexcept;
+
+/// Convert the curvature images to presentable images.
+/// 
+/// The issue with the curvature images is that the result can be any real
+/// number. Together with the noisy input this result in gray images, because
+/// the classical integer types can not represent them well.
+/// This function can clamp the values to \f$[clamp_{min}, clamp_{max}]\f$ and
+/// create images that still contain information.
+/// If the clamping is off, the final images are probably not well suited for
+/// classical computer vision tasks like feature matching.
+///
+/// \tparam Real underlying type of \p curvature_img
+/// \tparam PixelType underlying type of the final converted image
+/// \param curvature_img curvature image to convert
+/// \param depth_image_as_mask invalid values are a 0 in the original
+/// depth image. Because the curvature can not reflect this well the mask
+/// is there to identify invalid depth values and therefore invalid curvatures
+/// \param clamp_min,clamp_max target range of the values to scale to.
+/// \returns converted image of some integertype (\p PixelType) that can be
+/// used for feature matching.
+/// \sa conversion::depth_to_mean_curvature
+/// \sa conversion::depth_to_gaussian_curvature
+/// \note both boundaries dont need to be provided!
+/// \post range of each pixel is either
+/// \f$[min(curvature_img), max(curvature_img)\f$ or
+/// \f$[clamp_{min}, clamp_{max}]\f$ or any combination of the range limits.
+template <typename Real = double, typename PixelType = ushort>
+cv::Mat
+curvature_to_image(const cv::Mat &     curvature_img,
+                   const cv::Mat &     depth_image_as_mask,
+                   std::optional<Real> clamp_min = std::nullopt,
+                   std::optional<Real> clamp_max = std::nullopt) noexcept;
 
 namespace detail {
 
@@ -78,7 +150,7 @@ void mean_inner(const int v, const cv::Mat &depth_image,
 }  // namespace detail
 
 /// Convert an euclidian depth image to a gaussian curvature image.
-template <typename Real = float, typename PixelType = float>
+template <typename Real, typename PixelType>
 inline cv::Mat
 depth_to_gaussian_curvature(const cv::Mat &               depth_image,
                             const camera_models::pinhole &intrinsic) noexcept {
@@ -105,7 +177,7 @@ depth_to_gaussian_curvature(const cv::Mat &               depth_image,
 }
 
 /// Convert an euclidian depth image to a gaussian curvature image.
-template <typename Real = float, typename PixelType = float>
+template <typename Real, typename PixelType>
 inline cv::Mat
 depth_to_mean_curvature(const cv::Mat &               depth_image,
                         const camera_models::pinhole &intrinsic) noexcept {
@@ -177,12 +249,11 @@ reals_to_image(const cv::Mat &     real_image,
 
 }  // namespace detail
 
-template <typename Real = double, typename PixelType = ushort>
-inline cv::Mat
-curvature_to_image(const cv::Mat &     curvature_img,
-                   const cv::Mat &     depth_image_as_mask,
-                   std::optional<Real> clamp_min = std::nullopt,
-                   std::optional<Real> clamp_max = std::nullopt) noexcept {
+template <typename Real, typename PixelType>
+inline cv::Mat curvature_to_image(const cv::Mat &     curvature_img,
+                                  const cv::Mat &     depth_image_as_mask,
+                                  std::optional<Real> clamp_min,
+                                  std::optional<Real> clamp_max) noexcept {
     Expects(curvature_img.type() == detail::get_cv_type<float>() ||
             curvature_img.type() == detail::get_cv_type<double>());
     Expects(curvature_img.cols == depth_image_as_mask.cols);

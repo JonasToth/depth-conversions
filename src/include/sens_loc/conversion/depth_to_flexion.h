@@ -12,10 +12,59 @@
 #include <taskflow/taskflow.hpp>
 
 namespace sens_loc { namespace conversion {
+
+/// Convert range image to a flexion-image.
+///
+/// The flexion image is a derived image type that describes the angle between
+/// the normals of the surface patch at pixel (u,v). The normals are estimated
+/// with the direct neighbours and and the diagonal neighbours.
+/// This is a measure of curvature as well.
+///
+/// \tparam Real precision of the calculation
+/// \tparam PixelType underlying type of \p depth_image
+/// \param depth_image range image
+/// \param intrinsic calibration of the sensor that took the image
+/// \returns flexion image, each pixel in the range \f$[0,1]\f$
+/// \sa conversion::depth_to_laserscan
+/// \pre \p depth_image is not empty
+/// \pre intrinsic matches the sensor that took the image
+template <typename Real = float, typename PixelType = float>
+cv::Mat depth_to_flexion(const cv::Mat &               depth_image,
+                         const camera_models::pinhole &intrinsic) noexcept;
+
+/// Convert range image to a flexion image in parallel
+//
+/// This function implements the same functionality but with row-parallelism.
+//
+/// \sa depth_to_flexion
+/// \param[in] depth_image,intrinsic same as in \p depth_to_flexion
+/// \param[out] triple_image output image
+/// \param[inout] flow taskgraph the calculations will be registered in
+/// \returns synchronization task before and after the calculation
+/// \note the calculation does not happen instantly but first a taskgraph is
+/// \pre \p triple_image has the same dimension as \p depth_image
+/// \pre the underlying types match the defined template parameters
+/// built. This graph will then execute all the tasks on request.
+template <typename Real = float, typename PixelType = float>
+std::pair<tf::Task, tf::Task>
+par_depth_to_flexion(const cv::Mat &               depth_image,
+                     const camera_models::pinhole &intrinsic,
+                     cv::Mat &triple_image, tf::Taskflow &flow) noexcept;
+
+/// Scale the flexion image to \p PixelType for normal image visualization.
+///
+/// This function simply scales the image to the full possible range of
+/// \p PixelType.
+/// \sa cv::Mat::convertTo
+/// \pre underlying types match
+/// \pre range of each pixel is \f$[0, 1]\f$
+/// \post range of result pixels is \f$[PixelType_{min}, PixelType_{max}]\f$
+template <typename Real, typename PixelType>
+cv::Mat convert_flexion(const cv::Mat &flexion_image) noexcept;
+
+
 namespace detail {
-
 using ::sens_loc::math::vec;
-
 template <typename Real = float>
 vec<Real, 3> get_cartesian(const camera_models::pinhole &intrinsic, int u,
                            int v, Real d) noexcept {
@@ -79,8 +128,7 @@ inline void flexion_inner(int v, const cv::Mat &depth_image,
 
 }  // namespace detail
 
-/// Convert an euclidian depth image to a flexion-image.
-template <typename Real = float, typename PixelType = float>
+template <typename Real, typename PixelType>
 inline cv::Mat
 depth_to_flexion(const cv::Mat &               depth_image,
                  const camera_models::pinhole &intrinsic) noexcept {
@@ -106,7 +154,7 @@ depth_to_flexion(const cv::Mat &               depth_image,
 }
 
 /// Convert an euclidian depth image to a triple-product-image.
-template <typename Real = float, typename PixelType = float>
+template <typename Real, typename PixelType>
 inline std::pair<tf::Task, tf::Task>
 par_depth_to_flexion(const cv::Mat &               depth_image,
                      const camera_models::pinhole &intrinsic,
@@ -130,7 +178,6 @@ par_depth_to_flexion(const cv::Mat &               depth_image,
     return sync_points;
 }
 
-/// Scale the image properly for image io.
 template <typename Real, typename PixelType>
 inline cv::Mat convert_flexion(const cv::Mat &flexion_image) noexcept {
     Expects(flexion_image.channels() == 1);

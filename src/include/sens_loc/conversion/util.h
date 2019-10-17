@@ -7,14 +7,16 @@
 
 namespace sens_loc { namespace conversion {
 
+/// Helper type for bearing-angle calculations to specify the desired
+/// neighbourhood relationship.
 enum class direction {
-    horizontal,  //< calculate the angle from left to right in horizontal
-                 //< direction
-    vertical,  //< calculate the angle from top to bottom in vertical direction
-    diagonal,  //< calculate the bearing angle in main diagnoal direction
-               //< (top-left to bottom-right)
-    antidiagonal,  //< calculate the bearing angle in the anti-diagnoal
-                   //< direction (bottom-left to top-right)
+    horizontal,  ///< calculate the angle from left to right in horizontal
+                 ///< direction
+    vertical,  ///< calculate the angle from top to bottom in vertical direction
+    diagonal,  ///< calculate the bearing angle in main diagnoal direction
+               ///< (top-left to bottom-right)
+    antidiagonal,  ///< calculate the bearing angle in the anti-diagnoal
+                   ///< direction (bottom-left to top-right)
 };
 
 namespace detail {

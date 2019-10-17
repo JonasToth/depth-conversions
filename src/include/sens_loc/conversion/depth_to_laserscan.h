@@ -7,6 +7,36 @@
 #include <taskflow/taskflow.hpp>
 
 namespace sens_loc { namespace conversion {
+
+/// This function converts an orthographic depth image to an laser-scan like
+/// depth image, aka. range-image.
+///
+/// Each pixel in the resulting laser-scan image describes the euclidean
+/// distance from the camera center to the point in space.
+/// The result type is 'Real'.
+/// \tparam Real precision of the calculation
+/// \tparam PixelType underlying type of the input image
+/// \param depth_image orthgraphic depth image, e.g. from a kinect
+/// \param intrinsic matching calibration of the sensor
+/// \returns matrix with each value converted to the euclidean distance
+/// \note invalid values (where the depth is zero) will be zero as well
+/// \post each value is bigger or equal to the original pixel value
+template <typename Real = float, typename PixelType = ushort>
+cv::Mat depth_to_laserscan(const cv::Mat &               depth_image,
+                           const camera_models::pinhole &intrinsic) noexcept;
+
+/// This function is the parallel implementation for the conversions.
+/// \sa conversion::depth_to_laserscan
+/// \param[in] depth_image,intrinsic same as in serial case
+/// \param[out] out resulting converted image
+/// \param[inout] flow taskgraph that will be used for the parallel jobs
+/// \returns synchronization tasks before and after the conversion.
+template <typename Real = float, typename PixelType = ushort>
+std::pair<tf::Task, tf::Task>
+par_depth_to_laserscan(const cv::Mat &               depth_image,
+                       const camera_models::pinhole &intrinsic, cv::Mat &out,
+                       tf::Taskflow &flow) noexcept;
+
 namespace detail {
 template <typename Real, typename PixelType>
 void laserscan_inner(const int v, const cv::Mat &depth_image,
@@ -19,12 +49,7 @@ void laserscan_inner(const int v, const cv::Mat &depth_image,
 }
 }  // namespace detail
 
-/// This function converts an orthographic depth image to an laser-scan like
-/// depth image.
-/// Each pixel in the resulting laser-scan image describes the euclidean
-/// distance when projecting the pixel back into space.
-/// The result type is 'Real'.
-template <typename Real = float, typename PixelType = ushort>
+template <typename Real, typename PixelType>
 inline cv::Mat
 depth_to_laserscan(const cv::Mat &               depth_image,
                    const camera_models::pinhole &intrinsic) noexcept {
@@ -50,7 +75,7 @@ depth_to_laserscan(const cv::Mat &               depth_image,
 }
 
 
-template <typename Real = float, typename PixelType = ushort>
+template <typename Real, typename PixelType>
 inline std::pair<tf::Task, tf::Task>
 par_depth_to_laserscan(const cv::Mat &               depth_image,
                        const camera_models::pinhole &intrinsic, cv::Mat &out,

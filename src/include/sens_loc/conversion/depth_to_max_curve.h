@@ -11,14 +11,39 @@
 
 namespace sens_loc { namespace conversion {
 
+/// Convert a range image to an image derived from bearing angles.
+///
+/// Instead of calculating the bearing angle only in one direction, both
+/// neighbours are considered for a certain direction and the full angle is
+/// calculated. This is done for all directions (vertical, horziontal,
+/// diagonals) and the maximum angle is then used as value.
+///
+/// \sa conversion::depth_to_laserscan
+/// \sa conversion::depth_to_bearing
+/// \tparam Real precision of the calculation
+/// \tparam PixelType underlying type of \p depth_image
+/// \param depth_image range image the calculations are made with
+/// \param intrinsic matching calibration for the sensor
+/// \returns the max-curve image with each pixel in the range \f$[0, 2\pi)\f$
+/// \pre \p depth_image is not empty
+/// \pre the calibration matches the sensor that took the picture
+/// \pre the underlying types match
+/// \post each pixel has a value in the range \f$[0, 2\pi)\f$
+/// \post the values are provided in radians
 template <typename Real = float, typename PixelType = float>
 cv::Mat depth_to_max_curve(const cv::Mat &               depth_image,
                            const camera_models::pinhole &intrinsic) noexcept;
 
-/// Convert a bearing angle image to an image with integer types.
-/// This function scales the bearing angles between
-/// [PixelType::min, PixelType::max] for the angles in range (0, PI).
-template <typename Real = float, typename PixelType = float>
+/// The max-curve picture is not a normal image and needs to be converted to
+/// the classical integer range.
+///
+/// \tparam Real underlying type of \p max_curve
+/// \tparam PixelType underlying type of the result
+/// \param max_curve max-curve image
+/// \returns scaled image with underlying type \p PixelType
+/// \pre each pixel of \p max_curve is in range \f$[0, 2\pi)\f$
+/// \post each pixel is in range \f$[PixelType_{min}, PixelType_{max}]\f$
+template <typename Real = float, typename PixelType = ushort>
 cv::Mat convert_max_curve(const cv::Mat &max_curve) noexcept;
 
 namespace detail {

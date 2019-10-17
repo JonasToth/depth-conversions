@@ -15,19 +15,29 @@
 namespace sens_loc { namespace conversion {
 
 /// Convert the image \p depth_image to an bearing angle image.
-/// This function returns a new image with the same dimension as \c depth_image
+/// This function returns a new image with the same dimension as \p depth_image.
 ///
-/// \param depth_image but each pixel value is the corresponding bearing
-/// angle
-/// \param intrinsic pinhole camera model to calculate the angle
-/// between pixels
-///
-/// \returns cv::Mat<Real> with each pixel the bearing angle in \c Direction
+/// \tparam Direction the direction for neighbourhood-relationship between
+/// pixels that form the bearing angle
+/// \tparam Real precision to calculate in.
+/// \tparam PixelType underlying datatype of \p depth_image
+/// \param depth_image range image that was taken by a sensor with the
+/// calibration from \p intrinsic
+/// \param intrinsic pinhole camera model to calculate the angle between light
+/// rays that correspond to pixels
+/// \returns cv::Mat<Real> with each pixel the bearing angle (radians) in
+/// \p Direction. Invalid depth values result in 0 as result.
 //
 /// \note Depth images are orthografic and require conversion first!
+/// \sa conversion::depth_to_laserscan
 ///
-/// \pre \c depth_image to have 1 channel
-/// \pre \c depth_image == laser-scan like image!
+/// \pre \p depth_image to have 1 channel
+/// \pre \p depth_image == laser-scan like image!
+/// \pre \p depth_image is not empty
+/// \pre \p the underlying type of \p depth_image matches \p PixelType
+/// \pre \p intrinsic matches sensor that took the image, prior preprocessing
+/// \post each bearing angle is in the range \f$[0, \pi)\f$
+/// is of course possible with matching changes in the \p depth_image.
 template <direction Direction, typename Real = float,
           typename PixelType = float>
 cv::Mat depth_to_bearing(const cv::Mat &               depth_image,
@@ -36,8 +46,17 @@ cv::Mat depth_to_bearing(const cv::Mat &               depth_image,
 /// This function provides are parallelized version of the conversion
 /// functionality.
 ///
-/// The interface is different and expects different things then the normal
-/// \p depth_to_bearing.
+/// This function creates a taskflow for the row-wise parallel calculation
+/// of the bearing angle image.
+/// Only differences are documented here.
+/// \param[in] depth_image,intrinsic the same
+/// \param[out] ba_image result image that will be created with parallel
+/// processing
+/// \param[inout] flow parallel flow type that is used to parallelize the outer
+/// for loop over all rows.
+/// \returns synchronization points before and after the calculation of the
+/// bearing angle image.
+/// \sa depth_to_bearing
 template <direction Direction, typename Real = float,
           typename PixelType = float>
 std::pair<tf::Task, tf::Task>
@@ -48,6 +67,17 @@ par_depth_to_bearing(const cv::Mat &               depth_image,
 /// Convert a bearing angle image to an image with integer types.
 /// This function scales the bearing angles between
 /// [PixelType::min, PixelType::max] for the angles in range (0, PI).
+///
+/// \tparam Real underyling type of the \p bearing_image
+/// \tparam PixelType target type for the converted image that is returned
+/// \param bearing_image calculated bearing angle image
+/// \returns the bearing angle image is converted to a "normal" image that can
+/// be displayed and stored with normal image visualization tools.
+/// \pre the underlying type of \p bearing_image is \p Real
+/// \pre range of pixel is in \p bearinge_image \f$[0, \pi)\f$
+/// \post the underlying type of the result is \p PixelType
+/// \post range of pixel in result is \f$[PixelType_{min}, PixelType_{max}]\f$
+/// \sa conversion::depth_to_bearing
 template <typename Real = float, typename PixelType = ushort>
 cv::Mat convert_bearing(const cv::Mat &bearing_image) noexcept;
 
