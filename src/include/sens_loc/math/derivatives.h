@@ -15,6 +15,7 @@ namespace sens_loc { namespace math {
 template <typename Real>
 inline Real first_derivative_central(Real y__1, Real y_1, Real dx) noexcept {
     Expects(dx > Real(0.));
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     return (y_1 - y__1) / (Real(2.) * dx);
 }
 
