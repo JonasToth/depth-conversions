@@ -24,7 +24,7 @@ inline Real first_derivative_central(Real y__1, Real y_1, Real dx) noexcept {
 /// \param y__1 \f$y_{i-1}\f$
 /// \param y_0 \f$y_{i}\f$
 /// \param y_1 \f$y_{i+1}\f$
-/// \param dx_squared \f$dx*dx\f$ 
+/// \param dx \f$dx\f$ 
 /// \returns second derivative at this point of order \f$\mathcal{O}(dx^2)\f$
 template <typename Real>
 inline Real second_derivative_central(Real y__1, Real y_0, Real y_1,
