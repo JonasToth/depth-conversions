@@ -15,7 +15,7 @@ namespace sens_loc { namespace math {
 template <typename Real>
 inline Real first_derivative_central(Real y__1, Real y_1, Real dx) noexcept {
     Expects(dx > Real(0.));
-    return (y_1 - y__1) / dx;
+    return (y_1 - y__1) / (Real(2.) * dx);
 }
 
 /// Calculate the second derivate with the central differential quotient.
@@ -27,10 +27,10 @@ inline Real first_derivative_central(Real y__1, Real y_1, Real dx) noexcept {
 /// \returns second derivative at this point of order \f$\mathcal{O}(dx^2)\f$
 template <typename Real>
 inline Real second_derivative_central(Real y__1, Real y_0, Real y_1,
-                                      Real dx_squared) noexcept {
-    Expects(dx_squared > Real(0.));
+                                      Real dx) noexcept {
+    Expects(dx > Real(0.));
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-    return (y_1 + y__1 - 2. * y_0) / (dx_squared);
+    return (y_1 + y__1 - Real(2.) * y_0) / (dx * dx);
 }
 
 /// Calculate the derivatives for a surface patch.
@@ -71,14 +71,14 @@ derivatives(Real d__1__1, Real d__1__0, Real d__1_1,
     (void)d_1_1;
 
     // clang-format on
-    const Real f_u  = math::first_derivative_central(d__0__1, d__0_1, d_phi);
-    const Real f_v  = math::first_derivative_central(d__1__0, d_1__0, d_theta);
-    const Real f_uu = math::second_derivative_central(d__0__1, d__0__0, d__0_1,
-                                                      d_phi * d_phi);
-    const Real f_vv = math::second_derivative_central(d__1__0, d__0__0, d_1__0,
-                                                      d_theta * d_theta);
-    const Real f_uv = math::second_derivative_central(
-        d__1__0, d__0__0, d_1__0, d_phi_theta * d_phi_theta);
+    const Real f_u = math::first_derivative_central(d__0__1, d__0_1, d_phi);
+    const Real f_v = math::first_derivative_central(d__1__0, d_1__0, d_theta);
+    const Real f_uu =
+        math::second_derivative_central(d__0__1, d__0__0, d__0_1, d_phi);
+    const Real f_vv =
+        math::second_derivative_central(d__1__0, d__0__0, d_1__0, d_theta);
+    const Real f_uv =
+        math::second_derivative_central(d__1__0, d__0__0, d_1__0, d_phi_theta);
 
     return std::make_tuple(f_u, f_v, f_uu, f_vv, f_uv);
 };
