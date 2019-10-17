@@ -5,6 +5,15 @@
 #include <sens_loc/math/constants.h>
 
 namespace sens_loc { namespace math {
+
+/// This function converts degree into radians
+/// \tparam T precision of the type (e.g. \c float or \c double)
+/// \param degree angle in degree
+/// \returns the same angle in radians
+/// \sa rad_to_deg
+/// \pre \f$0. <= degree <= 360.\f$
+/// \post \f$0. <= result <= 2\pi\f$
+/// \post \c rad_to_deg(result) == \p degree
 template <typename T>  // requires(Float(T))
 inline T deg_to_rad(T degree) {
     Expects(degree <= T(360.));
@@ -15,6 +24,15 @@ inline T deg_to_rad(T degree) {
 
     return radians;
 }
+
+/// This function converts radians into degrees
+/// \tparam T precision of the type (e.g. \c float or \c double)
+/// \param radians angle in radians
+/// \returns the same angle in degree
+/// \sa deg_to_rad
+/// \pre \f$0. <= radians <= 2\pi\f$
+/// \post \f$0. <= result <= 360.\f$
+/// \post \c deg_to_rad(result) == \p radians
 template <typename T>  // requires(Float(T))
 inline T rad_to_deg(T radians) {
     Expects(radians >= T(0.));

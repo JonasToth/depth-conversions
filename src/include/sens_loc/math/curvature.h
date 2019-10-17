@@ -8,7 +8,11 @@ namespace sens_loc { namespace math {
 
 /// This function calculates the gaussian curvature for a function given its
 /// derivatives.
-/// https://de.wikipedia.org/wiki/Gau%C3%9Fsche_Kr%C3%BCmmung
+/// \tparam Real precision of the calculation
+/// \param f_u,f_v,f_uu,f_vv,f_uv partial derivatives of the depth values
+/// \returns gaussian curvature for these derivatives
+/// \sa conversion::depth_to_gaussian_curvature
+/// \note check https://en.wikipedia.org/wiki/Gaussian_curvature for more info
 template <typename Real>
 inline Real gaussian_curvature(Real f_u, Real f_v, Real f_uu, Real f_vv,
                                Real f_uv) noexcept {
@@ -17,7 +21,11 @@ inline Real gaussian_curvature(Real f_u, Real f_v, Real f_uu, Real f_vv,
 
 /// This function calculates the mean curvature for a function given its
 /// derivatives.
-/// https://de.wikipedia.org/wiki/Mittlere_Kr%C3%BCmmung
+/// \tparam Real precicions of the calculation
+/// \param f_u,f_v,f_uu,f_vv,f_uv partial derivatives of the depth values
+/// \returns the mean curvature for these derivatives
+/// \sa conversion::depth_to_mean_curvature
+/// \note check https://en.wikipedia.org/wiki/Mean_curvature for more info
 template <typename Real>
 inline Real mean_curvature(Real f_u, Real f_v, Real f_uu, Real f_vv,
                            Real f_uv) noexcept {

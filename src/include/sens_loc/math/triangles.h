@@ -8,12 +8,16 @@
 #include <sens_loc/math/constants.h>
 
 namespace sens_loc { namespace math {
+ 
 /// This function calculates the bearing angle between two neighbouring range
 /// measurements.
 /// \param b reference depth and > 0
 /// \param c prior depth and > 0
-/// \param cos_alpha == std::cos(alpha) because the cosine can be calculated
-/// only once.
+/// \param cos_alpha == std::cos(alpha) of the angle between two measurements
+/// \returns bearing angle in radians
+/// \pre b and c and positive values
+/// \pre \f$0 < \cos \alpha < 1\f$
+/// \post \f$0 < result < \pi\f$
 ///
 /// The bearing angle is angle between the ray to 'b' and the connecting line
 /// from 'c' to 'b'.
@@ -59,6 +63,10 @@ inline Real bearing_angle(const Real b, const Real c,
     return result;
 }
 
+/// This function implements the bearing angle with formula from Lin, which is
+/// incorrect.
+/// This implementation is here to verify the difference in the results
+/// and testing covers that as well.
 template <typename Real = float>
 inline Real reference_lin_bearing_angle(const Real b, const Real c,
                                         const Real cos_alpha) noexcept {

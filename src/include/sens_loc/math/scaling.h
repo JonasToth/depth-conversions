@@ -8,16 +8,21 @@
 namespace sens_loc { namespace math {
 
 /// This class is a small wrapper to clarify the mathematical notation
-/// of ranges. It does NOT distinguish between [min, max), [min, max], (min,
-/// max).
+/// of ranges. It does NOT distinguish between \f$[min, max)\f$,
+/// \f$[min, max]\f$, \f$(min, max)\f$.
+/// \tparam Real underlying type of the range, integer type for example
+/// \warning this struct does not ensure that \p min is always smaller \p max.
 template <typename Real>
 struct numeric_range {
-    Real min;
-    Real max;
+    Real min;  ///< lower bound of the range
+    Real max;  ///< uppoer bound of the range
 };
 
-/// This function scales \c value from the range \c source_range to the
-/// new range \c target_range.
+/// This function scales \p value from the range \p source_range to the
+/// new range \p target_range.
+/// \note \p value is clamped to \p source_range
+/// \pre the ranges are well formed (\p min is smaller \p max)
+/// \returns the scaled value that is clamped to \p target_range.
 template <typename Real>
 inline constexpr Real scale(numeric_range<Real> source_range,
                             numeric_range<Real> target_range,

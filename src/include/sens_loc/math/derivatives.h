@@ -7,9 +7,11 @@
 namespace sens_loc { namespace math {
 
 /// Calculate the first derivate with the central differential quotient.
-/// \param y__1 == y_{i-1}
-/// \param y_1  == y_{i+1}
-/// \param dx   == 2. * dx
+/// \tparam Real precision of the calculation
+/// \param y__1 \f$y_{i-1}\f$
+/// \param y_1 \f$y_{i+1}\f$
+/// \param dx \f$2. * dx\f$
+/// \returns first derivative at this point of order \f$\mathcal{O}(dx^2)\f$
 template <typename Real>
 inline Real first_derivative_central(Real y__1, Real y_1, Real dx) noexcept {
     Expects(dx > Real(0.));
@@ -17,10 +19,12 @@ inline Real first_derivative_central(Real y__1, Real y_1, Real dx) noexcept {
 }
 
 /// Calculate the second derivate with the central differential quotient.
-/// \param y__1 == y_{i-1}
-/// \param y_0  == y_{i}
-/// \param y_1  == y_{i+1}
-/// \param dx_squared == dx*dx 
+/// \tparam Real precision of the calculation
+/// \param y__1 \f$y_{i-1}\f$
+/// \param y_0 \f$y_{i}\f$
+/// \param y_1 \f$y_{i+1}\f$
+/// \param dx_squared \f$dx*dx\f$ 
+/// \returns second derivative at this point of order \f$\mathcal{O}(dx^2)\f$
 template <typename Real>
 inline Real second_derivative_central(Real y__1, Real y_0, Real y_1,
                                       Real dx_squared) noexcept {
@@ -32,16 +36,24 @@ inline Real second_derivative_central(Real y__1, Real y_0, Real y_1,
 /// Calculate the derivatives for a surface patch.
 ///
 /// Index convention:
-/// __1 == _{-1}
-/// __0 == _{0}
-/// _1  == _{1}
+/// \f$d\_\_1 == d_{-1}\f$
+/// \f$d\_\_0 == d_{0}\f$
+/// \f$d\_1   == d_{1}\f$
 ///
 /// Angle convention:
-/// phi -> u direction
-/// theta -> v direction
-/// The delta is the full angle from the outer points.
+/// \f$\varphi\f$ -> u direction
+/// \f$\theta\f$ -> v direction
 ///
-/// \returns (f_u, f_v, f_uu, f_vv, f_uv)
+/// \tparam Real precision of the calculation
+/// \param d__1__1,d__1__0,d__1_1 neighbours "above" central pixel
+/// \param d__0__1,d__0__0,d__0_1 same row as the central pixel
+/// \param d_1__1,d_1__0,d_1_1 row "after" the central pixel
+/// \param d_phi angle between rays in x direction \f$(u - 1, u + 1)\f$
+/// \param d_theta angle between rays in y direction \f$(v - 1, v + 1)\f$
+/// \param d_phi_theta angle between rays in diagonal direction \f$(u - 1, v + 1)\f$
+/// \returns partial derivatives \f$(f_u, f_v, f_uu, f_vv, f_uv)\f$
+/// \pre the depth values shuold be positive, as they encode depth values
+/// \pre \p d_phi, \p d_theta, \p d_phi_theta are all positive angles
 // clang-format off
 template <typename Real = float>
 inline std::tuple<Real, Real, Real, Real, Real>
