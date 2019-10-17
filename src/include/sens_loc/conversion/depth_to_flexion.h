@@ -66,8 +66,8 @@ cv::Mat convert_flexion(const cv::Mat &flexion_image) noexcept;
 namespace detail {
 using ::sens_loc::math::vec;
 template <typename Real = float>
-vec<Real, 3> get_cartesian(const camera_models::pinhole &intrinsic, int u,
-                           int v, Real d) noexcept {
+vec<Real, 3> get_cartesian(const camera_models::pinhole &intrinsic, int v,
+                           int u, Real d) noexcept {
     const auto [xs, ys, zs] = intrinsic.project_to_sphere(u, v);
     return d * vec<Real, 3>(xs, ys, zs);
 }
