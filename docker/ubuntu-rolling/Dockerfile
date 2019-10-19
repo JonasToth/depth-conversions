@@ -21,14 +21,14 @@ RUN apt-get update \
 ARG cv_version="4.1.1"
 RUN mkdir -p /opencv/build_cv && cd /opencv \
  && wget --quiet https://github.com/opencv/opencv/archive/$cv_version.zip \
- && unzip $cv_version.zip && rm $cv_version.zip \
+ && unzip $cv_version.zip && mv opencv-$cv_version opencv && rm $cv_version.zip \
  && wget --quiet https://github.com/opencv/opencv_contrib/archive/$cv_version.zip \
- && unzip $cv_version.zip && rm $cv_version.zip \
+ && unzip $cv_version.zip && mv opencv_contrib-$cv_version opencv_contrib && rm $cv_version.zip \
  && cd /opencv/build_cv \
- && CC=gcc-9 CXX=g++-9 cmake /opencv/opencv-$cv_version/ \
+ && CC=gcc-9 CXX=g++-9 cmake /opencv/opencv \
     -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
-    -DOPENCV_EXTRA_MODULES_PATH="/opencv/opencv_contrib-$cv_version/modules/" \
+    -DOPENCV_EXTRA_MODULES_PATH="/opencv/opencv_contrib/modules/" \
     -DBUILD_opencv_java_bindings_generator=OFF \
     -DBUILD_opencv_js=OFF \
     -DBUILD_opencv_python_bindings_generator=OFF \
