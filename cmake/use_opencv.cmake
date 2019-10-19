@@ -26,6 +26,10 @@ if (NOT OpenCV_FOUND)
             && unzip -o ${CV_VERSION}.zip \
             && mv opencv_contrib-${CV_VERSION} opencv_contrib \
             && rm ${CV_VERSION}.zip")
+
+        set(OPENCV_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv/src")
+        set(OPENCV_CONTRIB_MODULES
+            "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv/src/opencv_contrib/modules")
     endif (CUSTOM_OPENCV_SOURCE)
 
     include(opencv_options)
