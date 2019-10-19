@@ -1,18 +1,30 @@
 if (NOT FORCE_BUNDLED_EIGEN)
-    set(CustomEigen "" CACHE PATH "Custom directory for Eigen3 Install in system")
-    find_package(Eigen3 3.3 QUIET HINTS "${CustomEigen}")
+    find_package(Eigen3 3.3 QUIET)
 endif (NOT FORCE_BUNDLED_EIGEN)
 
 if (NOT Eigen3_FOUND)
-    message(STATUS "Using bundled Eigen3 Library")
+    set(CUSTOM_EIGEN_SOURCE "" CACHE PATH
+        "Custom directory for Eigen3 source code in system")
+
+    if (CUSTOM_EIGEN_SOURCE)
+        set(EIGEN_SOURCE ${CUSTOM_EIGEN_SOURCE})
+        set(EIGEN_URL "")
+    else ()
+        set(EIGEN_VERSION "3.3.7")
+        message(STATUS "Using bundled Eigen3 - Version ${EIGEN_VERSION}")
+        set(EIGEN_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/third_party/eigen3/src")
+        set(EIGEN_URL
+            "http://bitbucket.org/eigen/eigen/get/${EIGEN_VERSION}.tar.gz")
+    endif (CUSTOM_EIGEN_SOURCE)
+
     include(ExternalProject)
 
     ExternalProject_Add(eigen3
       PREFIX "${CMAKE_CURRENT_BINARY_DIR}/third_party/eigen3"
       STAMP_DIR "${CMAKE_CURRENT_BINARY_DIR}/third_party/eigen3/stamp"
-      URL "http://bitbucket.org/eigen/eigen/get/3.3.7.tar.gz"
+      URL ${EIGEN_URL}
 
-      SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/third_party/eigen3/src"
+      SOURCE_DIR ${EIGEN_SOURCE}
       CMAKE_ARGS "-DCMAKE_INSTALL_PREFIX=${CMAKE_CURRENT_BINARY_DIR}/third_party/eigen3-install"
 
       BUILD_COMMAND ""
