@@ -45,6 +45,7 @@ configure_file(io/not_an_image.txt io/not_an_image.txt COPYONLY)
 
 create_test(math math/test_math.cpp)
 test_add_file(math math/test_angle_conversion.cpp)
+test_add_file(math math/test_coordinate.cpp)
 test_add_file(math math/test_curvature.cpp)
 test_add_file(math math/test_derivatives.cpp)
 test_add_file(math math/test_scaling.cpp)

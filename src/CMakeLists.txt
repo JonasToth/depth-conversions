@@ -15,6 +15,7 @@ target_sources(sens_loc INTERFACE
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/intrinsics.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/angle_conversion.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/constants.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/coordinate.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/curvature.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/derivatives.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/console.h"
