@@ -5,13 +5,6 @@ stages:
     - platforms
     - images
 
-.cache_download_third_party: &cache_download_third_party_definition
-  cache:
-    key: source-third-party
-    paths:
-      - build/third_party/opencv/**/*
-      - build/third_party/eigen3/**/*
-
 .code_change_filter: &code_change_filter_definition
   changes:
     - cmake/*
@@ -104,6 +97,7 @@ ubuntu-1804-clang-9-libcxx:
     CUSTOM_OPENCV_SOURCE: "/opencv/opencv"
     CUSTOM_OPENCV_CONTRIB_SOURCE: "/opencv/opencv_contrib/modules"
     FORCE_BUNDLED_EIGEN: "ON"
+    CUSTOM_EIGEN_SOURCE: "/eigen3/eigen"
     WITH_TESTING: "ON"
     WITH_STATIC_STDCXXLIB: "OFF"
     WITH_IPO: "OFF"
@@ -114,7 +108,6 @@ ubuntu-1804-clang-9-libcxx:
     refs:
       - master
     <<: *code_change_filter_definition
-  <<: *cache_download_third_party_definition
   tags:
     - docker
     - test
@@ -132,6 +125,7 @@ ubuntu-1804-clang-9-static-libcxx-lto:
     CUSTOM_OPENCV_SOURCE: "/opencv/opencv"
     CUSTOM_OPENCV_CONTRIB_SOURCE: "/opencv/opencv_contrib/modules"
     FORCE_BUNDLED_EIGEN: "ON"
+    CUSTOM_EIGEN_SOURCE: "/eigen3/eigen"
     WITH_TESTING: "ON"
     WITH_STATIC_STDCXXLIB: "ON"
     WITH_IPO: "ON"
@@ -143,7 +137,6 @@ ubuntu-1804-clang-9-static-libcxx-lto:
       - master
     <<: *code_change_filter_definition
   <<: *binary_artifact_paths
-  <<: *cache_download_third_party_definition
   tags:
     - docker
     - test
@@ -210,6 +203,7 @@ ubuntu-1804-gcc-9-lto-static:
     CUSTOM_OPENCV_SOURCE: "/opencv/opencv"
     CUSTOM_OPENCV_CONTRIB_SOURCE: "/opencv/opencv_contrib/modules"
     FORCE_BUNDLED_EIGEN: "ON"
+    CUSTOM_EIGEN_SOURCE: "/eigen3/eigen"
     WITH_TESTING: "ON"
     WITH_STATIC_STDCXXLIB: "ON"
     WITH_IPO: "ON"
@@ -221,7 +215,6 @@ ubuntu-1804-gcc-9-lto-static:
       - master
     <<: *code_change_filter_definition
   <<: *binary_artifact_paths
-  <<: *cache_download_third_party_definition
   tags:
     - docker
     - test
