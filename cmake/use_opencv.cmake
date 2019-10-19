@@ -14,7 +14,7 @@ if (NOT OpenCV_FOUND)
         set(OPENCV_SOURCE ${CUSTOM_OPENCV_SOURCE})
         set(OPENCV_CONTRIB_MODULES ${CUSTOM_OPENCV_CONTRIB_SOURCE})
     else ()
-        set(CV_VERSION "4.1.1")
+        set(CV_VERSION "4.1.2")
         message(STATUS "Using bundled OpenCV Library - Version ${CV_VERSION}")
         set(DOWNLOAD_SEQUENCE sh -c "wget \
             https://github.com/opencv/opencv/archive/${CV_VERSION}.zip \

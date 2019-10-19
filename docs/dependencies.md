@@ -1,7 +1,7 @@
 # Project Dependencies
 
-- `opencv` `v4.1.1` (via ExternalProject_Add, if not present in system) opencv
-- `opencv-contrib` `v4.1.1` (via ExternalProject_Add, if not present in system)
+- `opencv` `v4.1.2` (via ExternalProject_Add, if not present in system) opencv
+- `opencv-contrib` `v4.1.2` (via ExternalProject_Add, if not present in system)
   opencv nonfree-features like SIFT
 - `cli11` `v1.8.0` `13becaddb657eacd090537719a669d66d393b8b2` command line
   interface

@@ -10,7 +10,7 @@ RUN apt-get update \
  && apt-get update \
  && apt-get install -y g++-9 gcc-9 ninja-build
 
-ARG cv_version="4.1.1"
+ARG cv_version="4.1.2"
 RUN mkdir -p /opencv/build_cv && cd /opencv \
  && wget --quiet https://github.com/opencv/opencv/archive/$cv_version.zip \
  && unzip $cv_version.zip && rm $cv_version.zip \
