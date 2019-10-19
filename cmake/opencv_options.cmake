@@ -69,7 +69,6 @@ list(APPEND opencv_options
     -DBUILD_opencv_plot:BOOL=OFF
     -DBUILD_opencv_python3:BOOL=OFF
     -DBUILD_opencv_python_bindings_generator:BOOL=OFF
-    # -DBUILD_opencv_python_tests:BOOL=$<IF:$<BOOL:${WITH_DEP_TESTING}>,ON,OFF>
     -DBUILD_opencv_python_tests:BOOL=OFF
     -DBUILD_opencv_quality:BOOL=OFF
     -DBUILD_opencv_reg:BOOL=OFF
@@ -94,7 +93,7 @@ list(APPEND opencv_options
     -DBUILD_opencv_xphoto:BOOL=OFF
     -DCMAKE_BUILD_TYPE:STRING=Release
     -DCPU_BASELINE:STRING=SSE3
-    -DCPU_DISPATCH:STRING=SSE4_1\;SSE4_2\;AVX\;FP16\;AVX2\;AVX512_SKX
+    -DCPU_DISPATCH:STRING=SSE4_1;SSE4_2;AVX;FP16;AVX2;AVX512_SKX
     -DCV_DISABLE_OPTIMIZATION:BOOL=OFF
     -DCV_ENABLE_INTRINSICS:BOOL=ON
     -DCV_TRACE:BOOL=OFF
