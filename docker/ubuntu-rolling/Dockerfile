@@ -40,6 +40,14 @@ RUN mkdir -p /opencv/build_cv && cd /opencv \
     -DENABLE_LTO=OFF \
     -DOPENCV_PYTHON3_VERSION=OFF \
     -DOPENCV_ENABLE_MEMALIGN=OFF \
-&& ninja \
-&& ninja install \
-&& cd /opencv && rm -rf build_cv
+ && ninja \
+ && ninja install \
+ && cd /opencv && rm -rf build_cv
+
+ARG eigen_version="3.3.7"
+RUN mkdir -p /eigen3 && cd /eigen3 \
+ && wget --quiet http://bitbucket.org/eigen/eigen/get/$eigen_version.tar.gz \
+ && tar xf $eigen_version.tar.gz && mv eigen* eigen-$eigen_version && cd eigen-$eigen_version \
+ && mkdir build && cd build \
+ && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
+ && ninja install

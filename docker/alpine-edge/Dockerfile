@@ -40,3 +40,11 @@ RUN mkdir -p /opencv/build_cv && cd /opencv \
 && ninja \
 && ninja install \
 && cd / && rm -rf /opencv
+
+ARG eigen_version="3.3.7"
+RUN mkdir -p /eigen3 && cd /eigen3 \
+ && wget --quiet http://bitbucket.org/eigen/eigen/get/$eigen_version.tar.gz \
+ && tar xf $eigen_version.tar.gz && mv eigen* eigen-$eigen_version && cd eigen-$eigen_version \
+ && mkdir build && cd build \
+ && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
+ && ninja install
