@@ -11,8 +11,8 @@ if (NOT OpenCV_FOUND)
 
     if (CUSTOM_OPENCV_SOURCE)
         set(DOWNLOAD_SEQUENCE sh -c "echo Not downloading!")
-        set(OPENCV_SOURCE CUSTOM_OPENCV_SOURCE)
-        set(OPENCV_CONTRIB_MODULES CUSTOM_OPENCV_CONTRIB_SOURCE)
+        set(OPENCV_SOURCE ${CUSTOM_OPENCV_SOURCE})
+        set(OPENCV_CONTRIB_MODULES ${CUSTOM_OPENCV_CONTRIB_SOURCE})
     else ()
         set(CV_VERSION "4.1.1")
         message(STATUS "Using bundled OpenCV Library - Version ${CV_VERSION}")
@@ -26,10 +26,6 @@ if (NOT OpenCV_FOUND)
             && unzip -o ${CV_VERSION}.zip \
             && mv opencv_contrib-${CV_VERSION} opencv_contrib \
             && rm ${CV_VERSION}.zip")
-        set(CUSTOM_OPENCV_SOURCE
-            "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv/src")
-        set(CUSTOM_OPENCV_CONTRIB_SOURCE
-            "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv/src/opencv_contrib/modules")
     endif (CUSTOM_OPENCV_SOURCE)
 
     include(opencv_options)
