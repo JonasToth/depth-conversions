@@ -1,27 +1,44 @@
 if (NOT FORCE_BUNDLED_CV)
-    set(CustomOpenCV "" CACHE PATH "Custom directory for opencv install in the system")
-    find_package(OpenCV QUIET HINTS "${CustomOpenCV}")
+    find_package(OpenCV QUIET)
 endif (NOT FORCE_BUNDLED_CV)
 
 if (NOT OpenCV_FOUND)
-    message(STATUS "Using bundled OpenCV Library")
+
+    set(CUSTOM_OPENCV_SOURCE "" CACHE PATH
+        "Custom directory for downloaded opencv source code")
+    set(CUSTOM_OPENCV_CONTRIB_SOURCE "" CACHE PATH
+        "Custom directory for downloaded opencv contrib modules source code")
+
+    if (CUSTOM_OPENCV_SOURCE)
+        set(DOWNLOAD_SEQUENCE sh -c "echo Not downloading!")
+        set(OPENCV_SOURCE CUSTOM_OPENCV_SOURCE)
+        set(OPENCV_CONTRIB_MODULES CUSTOM_OPENCV_CONTRIB_SOURCE)
+    else ()
+        set(CV_VERSION "4.1.1")
+        message(STATUS "Using bundled OpenCV Library - Version ${CV_VERSION}")
+        set(DOWNLOAD_SEQUENCE sh -c "wget \
+            https://github.com/opencv/opencv/archive/${CV_VERSION}.zip \
+            && unzip -o ${CV_VERSION}.zip \
+            && rsync -a opencv-${CV_VERSION}/ ./ \
+            && rm -r opencv-${CV_VERSION} ${CV_VERSION}.zip \
+            && wget \
+            https://github.com/opencv/opencv_contrib/archive/${CV_VERSION}.zip \
+            && unzip -o ${CV_VERSION}.zip \
+            && mv opencv_contrib-${CV_VERSION} opencv_contrib \
+            && rm ${CV_VERSION}.zip")
+        set(CUSTOM_OPENCV_SOURCE
+            "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv/src")
+        set(CUSTOM_OPENCV_CONTRIB_SOURCE
+            "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv/src/opencv_contrib/modules")
+    endif (CUSTOM_OPENCV_SOURCE)
+
     include(opencv_options)
     include(ExternalProject)
 
     ExternalProject_Add(opencv
       PREFIX "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv"
-      DOWNLOAD_COMMAND sh -c "wget \
-         https://github.com/opencv/opencv/archive/4.1.1.zip \
-      && unzip -o 4.1.1.zip \
-      && rsync -a opencv-4.1.1/ ./ \
-      && rm -r opencv-4.1.1 4.1.1.zip \
-      && wget \
-         https://github.com/opencv/opencv_contrib/archive/4.1.1.zip \
-      && unzip -o 4.1.1.zip \
-      && mv opencv_contrib-4.1.1 opencv_contrib \
-      && rm 4.1.1.zip"
-
-      SOURCE_DIR "${CMAKE_CURRENT_BINARY_DIR}/third_party/opencv/src"
+      DOWNLOAD_COMMAND ${DOWNLOAD_SEQUENCE}
+      SOURCE_DIR ${OPENCV_SOURCE}
       CMAKE_ARGS "${opencv_options};-DCMAKE_INSTALL_PREFIX=/usr"
 
       # Build step
