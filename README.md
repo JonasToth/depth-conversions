@@ -54,11 +54,14 @@ $ ls
 It is always possible to get the latest and greatest version as docker image.
 
 ```bash
+$ # Getting access to the container registry
 $ docker login git.informatik.tu-freiberg.de:5050
-# Pulling Debian Based Image
+
+$ # Pulling Debian Based Image
 $ docker pull git.informatik.tu-freiberg.de:5050/jtoth/master-thesis:latest
 > Download log
-# Alternative: Alpine Linux based image (musl and other hardened software)
+
+$ # Alternative: Alpine Linux based image (musl and other hardened software)
 $ docker pull git.informatik.tu-freiberg.de:5050/jtoth/master-thesis:alpine-edge
 > Download log
 ```
@@ -68,8 +71,7 @@ based on that one.
 
 ### Binaries
 
-It is possible to download artifacts from the CI setup.
-
+You can download binaries from the CI setup.
 The `old-linux-most-portable` build in the stage `platforms` is your best bet.
 It is a ubuntu 12.04 based build but only requires the default linux system
 libraries as dynamic dependencies. It should e.g. work on CentOS 7 and other
@@ -80,10 +82,9 @@ See the
 that provides a download link for the artifacts. If there is no artifact that
 works on your system you need to fall back to compiling on your own.
 
-You can download the source code and compile it on your own system. This allows
-for the most customization and most control over the final executable. This
-project tries to support many compilers and environment but is very Linux
-oriented. For more information on building see the
+This allows for the most customization and most control over the final
+executable. This project tries to support many compilers and environment but is
+very Linux oriented. For more information on building see the
 [Compilation Reference](docs/compilation.md).
 
 Please note, that artifacts from the `platform` might stage require

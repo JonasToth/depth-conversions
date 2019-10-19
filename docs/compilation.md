@@ -1,8 +1,8 @@
 # How to build the software
 
 The project itself tests various `clang` and `gcc` toolchains, versions,
-`libc++`, `stdlibc++` and optimization options to get better coverage and find
-more bugs.
+`libc++`, `stdlibc++`, `libc`, `musl` and optimization options to get better
+coverage and find more bugs.
 It utilizes the `clang` static analysis tools as well. It is expected to be
 green with all of these.
 
