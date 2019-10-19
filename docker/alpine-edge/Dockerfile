@@ -10,18 +10,20 @@ RUN apk update \
             linux-headers \
             wget \
             unzip \
-            rsync \
- && mkdir -p /opencv/build_cv && cd /opencv \
- && wget --quiet https://github.com/opencv/opencv/archive/4.1.1.zip \
- && unzip 4.1.1.zip && rm 4.1.1.zip \
- && wget --quiet https://github.com/opencv/opencv_contrib/archive/4.1.1.zip \
- && unzip 4.1.1.zip && rm 4.1.1.zip \
+            rsync
+
+ARG cv_version="4.1.1"
+RUN mkdir -p /opencv/build_cv && cd /opencv \
+ && wget --quiet https://github.com/opencv/opencv/archive/$cv_version.zip \
+ && unzip $cv_version.zip && rm $cv_version.zip \
+ && wget --quiet https://github.com/opencv/opencv_contrib/archive/$cv_version.zip \
+ && unzip $cv_version.zip && rm $cv_version.zip \
  && cd /opencv/build_cv \
- && CC=gcc CXX=g++ cmake /opencv/opencv-4.1.1/ \
+ && CC=gcc CXX=g++ cmake /opencv/opencv-$cv_version/ \
     -G Ninja \
     -DCMAKE_EXE_LINKER_FLAGS="-static-libstdc++ -static-libgcc" \
     -DCMAKE_BUILD_TYPE=Release \
-    -DOPENCV_EXTRA_MODULES_PATH="/opencv/opencv_contrib-4.1.1/modules/" \
+    -DOPENCV_EXTRA_MODULES_PATH="/opencv/opencv_contrib-$cv_version/modules/" \
     -DBUILD_opencv_java_bindings_generator=OFF \
     -DBUILD_opencv_js=OFF \
     -DBUILD_opencv_python_bindings_generator=OFF \

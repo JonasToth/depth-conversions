@@ -15,9 +15,10 @@ RUN apt-get update \
  && pip3 install --upgrade pip \
  && pip install cmake
 
+ARG eigen_version="3.3.7"
 RUN mkdir -p /eigen3 && cd /eigen3 \
- && wget --quiet http://bitbucket.org/eigen/eigen/get/3.3.7.tar.gz \
- && tar xf 3.3.7.tar.gz && cd eigen* \
+ && wget --quiet http://bitbucket.org/eigen/eigen/get/$eigen_version.tar.gz \
+ && tar xf $eigen_version.tar.gz && cd eigen* \
  && mkdir build && cd build \
  && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
  && ninja install \
