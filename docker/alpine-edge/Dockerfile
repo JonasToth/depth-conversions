@@ -36,6 +36,7 @@ RUN mkdir -p /opencv/build_cv && cd /opencv \
     -DINSTALL_TESTS=OFF \
     -DENABLE_LTO=OFF \
     -DOPENCV_PYTHON3_VERSION=OFF \
+    -DOPENCV_ENABLE_MEMALIGN=OFF \
 && ninja \
 && ninja install \
 && cd / && rm -rf /opencv
