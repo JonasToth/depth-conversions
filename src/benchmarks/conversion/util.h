@@ -4,9 +4,9 @@
 #include <stdexcept>
 #include <tuple>
 
-inline std::tuple<cv::Mat, cv::Mat, sens_loc::camera_models::pinhole>
+inline std::tuple<cv::Mat, cv::Mat, sens_loc::camera_models::pinhole<float>>
 get_data() {
-    const sens_loc::camera_models::pinhole p = {
+    const sens_loc::camera_models::pinhole<float> p = {
         .w  = 960,
         .h  = 540,
         .fx = 519.226,
