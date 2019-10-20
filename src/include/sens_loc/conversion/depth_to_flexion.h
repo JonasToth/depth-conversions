@@ -147,7 +147,7 @@ inline math::image<Real>
 depth_to_flexion(const math::image<PixelType> &      depth_image,
                  const camera_models::pinhole<Real> &intrinsic) noexcept {
     cv::Mat flexion(depth_image.data().rows, depth_image.data().cols,
-                    detail::get_cv_type<Real>());
+                    math::detail::get_opencv_type<Real>());
     flexion = Real(0.);
     math::image<Real> flexion_image(std::move(flexion));
     for (int v = 1; v < depth_image.data().rows - 1; ++v)
@@ -183,18 +183,18 @@ template <typename Real, typename PixelType>
 inline math::image<PixelType>
 convert_flexion(const math::image<Real> &flexion_image) noexcept {
     cv::Mat img(flexion_image.data().rows, flexion_image.data().cols,
-                detail::get_cv_type<PixelType>());
+                math::detail::get_opencv_type<PixelType>());
 
     const Real scale = Real(std::numeric_limits<PixelType>::max()) -
                        Real(std::numeric_limits<PixelType>::min());
     const Real offset = std::numeric_limits<PixelType>::min();
 
-    flexion_image.data().convertTo(img, detail::get_cv_type<PixelType>(), scale,
-                                   offset);
+    flexion_image.data().convertTo(
+        img, math::detail::get_opencv_type<PixelType>(), scale, offset);
 
     Ensures(img.cols == flexion_image.data().cols);
     Ensures(img.rows == flexion_image.data().rows);
-    Ensures(img.type() == detail::get_cv_type<PixelType>());
+    Ensures(img.type() == math::detail::get_opencv_type<PixelType>());
     Ensures(img.channels() == 1);
 
     return math::image<PixelType>(std::move(img));

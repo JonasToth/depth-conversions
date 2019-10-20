@@ -91,14 +91,3 @@ TEST_CASE("Scaling of bearing angle") {
         REQUIRE(gsl::narrow_cast<short>(mid_angle * scale + offset) == 0);
     }
 }
-
-TEST_CASE("get_cv_type") {
-    using namespace detail;
-    REQUIRE(get_cv_type<uchar>() == CV_8U);
-    REQUIRE(get_cv_type<ushort>() == CV_16U);
-    REQUIRE(get_cv_type<schar>() == CV_8S);
-    REQUIRE(get_cv_type<short>() == CV_16S);
-    REQUIRE(get_cv_type<float>() == CV_32F);
-    REQUIRE(get_cv_type<double>() == CV_64F);
-    REQUIRE(get_cv_type<long long>() == -1);
-}

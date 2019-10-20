@@ -83,9 +83,8 @@ template <typename Real, typename PixelType>
 inline math::image<Real>
 depth_to_max_curve(const math::image<PixelType> &      depth_image,
                    const camera_models::pinhole<Real> &intrinsic) noexcept {
-    using namespace detail;
     cv::Mat max_curve(depth_image.data().rows, depth_image.data().cols,
-                      get_cv_type<Real>());
+                      math::detail::get_opencv_type<Real>());
     max_curve = Real(0.);
     math::image<Real> max_curve_image(std::move(max_curve));
 
@@ -103,6 +102,7 @@ depth_to_max_curve(const math::image<PixelType> &      depth_image,
             const Real d_1__0 = depth_image.at({u, v + 1});
             const Real d_1_1  = depth_image.at({u + 1, v + 1});
 
+            using detail::angle_formula;
             using math::pixel_coord;
             using std::cos;
             const Real phi_hor1  = intrinsic.phi({u - 1, v}, {u, v});
@@ -145,18 +145,18 @@ depth_to_max_curve(const math::image<PixelType> &      depth_image,
 template <typename Real, typename PixelType>
 inline math::image<PixelType>
 convert_max_curve(const math::image<Real> &max_curve) noexcept {
-    using namespace detail;
-
+    using detail::scaling_factor;
     cv::Mat img(max_curve.data().rows, max_curve.data().cols,
-                get_cv_type<PixelType>());
+                math::detail::get_opencv_type<PixelType>());
     const auto [scale, offset] =
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         scaling_factor<Real, PixelType>(/*max_angle = */ 2. * math::pi<Real>);
-    max_curve.data().convertTo(img, get_cv_type<PixelType>(), scale, offset);
+    max_curve.data().convertTo(img, math::detail::get_opencv_type<PixelType>(),
+                               scale, offset);
 
     Ensures(img.cols == max_curve.data().cols);
     Ensures(img.rows == max_curve.data().rows);
-    Ensures(img.type() == get_cv_type<PixelType>());
+    Ensures(img.type() == math::detail::get_opencv_type<PixelType>());
     Ensures(img.channels() == 1);
 
     return math::image<PixelType>(std::move(img));

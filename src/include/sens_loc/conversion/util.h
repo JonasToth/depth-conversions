@@ -67,24 +67,6 @@ inline constexpr std::pair<Real, Real> scaling_factor(Real max_angle) {
 
     return std::make_pair((max - min) / max_angle, min);
 }
-
-template <typename Number>  // requires Number<Number>
-inline int get_cv_type() {
-    if constexpr (std::is_same<Number, float>::value)
-        return CV_32F;  // NOLINT(bugprone-branch-clone)
-    else if constexpr (std::is_same<Number, double>::value)
-        return CV_64F;
-    else if constexpr (std::is_same<Number, uchar>::value)
-        return CV_8U;
-    else if constexpr (std::is_same<Number, schar>::value)
-        return CV_8S;
-    else if constexpr (std::is_same<Number, ushort>::value)
-        return CV_16U;
-    else if constexpr (std::is_same<Number, short>::value)
-        return CV_16S;
-    else
-        return -1;
-}
 }  // namespace detail
 }  // namespace conversion
 }  // namespace sens_loc

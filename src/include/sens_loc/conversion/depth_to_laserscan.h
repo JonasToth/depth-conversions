@@ -55,11 +55,9 @@ template <typename Real, typename PixelType>
 inline math::image<Real>
 depth_to_laserscan(const math::image<PixelType> &      depth_image,
                    const camera_models::pinhole<Real> &intrinsic) noexcept {
-    using namespace detail;
     cv::Mat euclid(depth_image.data().rows, depth_image.data().cols,
-                   get_cv_type<Real>());
+                   math::detail::get_opencv_type<Real>());
     euclid = Real(0.);
-
     math::image<Real> euclid_image(std::move(euclid));
 
     for (int v = 0; v < depth_image.data().rows; ++v)

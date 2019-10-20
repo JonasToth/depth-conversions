@@ -160,7 +160,7 @@ inline math::image<Real> depth_to_gaussian_curvature(
     const camera_models::pinhole<Real> &intrinsic) noexcept {
 
     cv::Mat gauss(depth_image.data().rows, depth_image.data().cols,
-                  detail::get_cv_type<Real>());
+                  math::detail::get_opencv_type<Real>());
     gauss = Real(0.);
     math::image<Real> gauss_image(std::move(gauss));
 
@@ -178,7 +178,7 @@ inline math::image<Real> depth_to_mean_curvature(
     const camera_models::pinhole<Real> &intrinsic) noexcept {
 
     cv::Mat mean(depth_image.data().rows, depth_image.data().cols,
-                 detail::get_cv_type<Real>());
+                 math::detail::get_opencv_type<Real>());
     mean = Real(0.);
     math::image<Real> mean_image(std::move(mean));
 
@@ -214,7 +214,7 @@ reals_to_image(const math::image<Real> &real_image,
     const Real target_max = std::numeric_limits<PixelType>::max();
 
     cv::Mat target_image(real_image.data().rows, real_image.data().cols,
-                         detail::get_cv_type<PixelType>());
+                         math::detail::get_opencv_type<PixelType>());
 
     std::transform(real_image.data().template begin<Real>(),
                    real_image.data().template end<Real>(),
@@ -247,15 +247,15 @@ curvature_to_image(const math::image<Real> &    curvature_img,
     cv::Mat intermediate;
     detail::reals_to_image<Real>(curvature_img, clamp_min, clamp_max)
         .data()
-        .convertTo(intermediate, detail::get_cv_type<PixelType>());
+        .convertTo(intermediate, math::detail::get_opencv_type<PixelType>());
 
     cv::Mat result(curvature_img.data().rows, curvature_img.data().cols,
-                   detail::get_cv_type<PixelType>());
+                   math::detail::get_opencv_type<PixelType>());
     intermediate.copyTo(result, mask_from_depth);
 
     Ensures(result.cols == curvature_img.data().cols);
     Ensures(result.rows == curvature_img.data().rows);
-    Ensures(result.type() == detail::get_cv_type<PixelType>());
+    Ensures(result.type() == math::detail::get_opencv_type<PixelType>());
     Ensures(result.channels() == 1);
 
     return math::image<PixelType>(std::move(result));

@@ -79,3 +79,14 @@ TEST_CASE("image access") {
         REQUIRE(i.data().at<ushort>(10, 10) == 0);
     }
 }
+
+TEST_CASE("get_cv_type") {
+    using namespace detail;
+    REQUIRE(get_opencv_type<uchar>() == CV_8U);
+    REQUIRE(get_opencv_type<ushort>() == CV_16U);
+    REQUIRE(get_opencv_type<schar>() == CV_8S);
+    REQUIRE(get_opencv_type<short>() == CV_16S);
+    REQUIRE(get_opencv_type<float>() == CV_32F);
+    REQUIRE(get_opencv_type<double>() == CV_64F);
+    REQUIRE(get_opencv_type<long long>() == -1);
+}
