@@ -2,11 +2,11 @@
 #define DEPTH_TO_MAX_CURVE_H_XO6PUN8H
 
 #include <cmath>
-#include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/constants.h>
+#include <sens_loc/math/image.h>
 #include <sens_loc/math/triangles.h>
 
 namespace sens_loc { namespace conversion {
@@ -31,8 +31,8 @@ namespace sens_loc { namespace conversion {
 /// \post each pixel has a value in the range \f$[0, 2\pi)\f$
 /// \post the values are provided in radians
 template <typename Real = float, typename PixelType = float>
-cv::Mat
-depth_to_max_curve(const cv::Mat &                     depth_image,
+math::image<Real>
+depth_to_max_curve(const math::image<PixelType> &      depth_image,
                    const camera_models::pinhole<Real> &intrinsic) noexcept;
 
 /// The max-curve picture is not a normal image and needs to be converted to
@@ -45,7 +45,8 @@ depth_to_max_curve(const cv::Mat &                     depth_image,
 /// \pre each pixel of \p max_curve is in range \f$[0, 2\pi)\f$
 /// \post each pixel is in range \f$[PixelType_{min}, PixelType_{max}]\f$
 template <typename Real = float, typename PixelType = ushort>
-cv::Mat convert_max_curve(const cv::Mat &max_curve) noexcept;
+math::image<PixelType>
+convert_max_curve(const math::image<Real> &max_curve) noexcept;
 
 namespace detail {
 
@@ -79,32 +80,28 @@ inline Real angle_formula(const Real d__1, const Real d__0, const Real d_1,
 }  // namespace detail
 
 template <typename Real, typename PixelType>
-inline cv::Mat
-depth_to_max_curve(const cv::Mat &                     depth_image,
+inline math::image<Real>
+depth_to_max_curve(const math::image<PixelType> &      depth_image,
                    const camera_models::pinhole<Real> &intrinsic) noexcept {
     using namespace detail;
+    cv::Mat max_curve(depth_image.data().rows, depth_image.data().cols,
+                      get_cv_type<Real>());
+    max_curve = Real(0.);
+    math::image<Real> max_curve_image(std::move(max_curve));
 
-    Expects(depth_image.type() == get_cv_type<PixelType>());
-    Expects(depth_image.channels() == 1);
-    Expects(!depth_image.empty());
-    Expects(depth_image.cols > 2);
-    Expects(depth_image.rows > 2);
+    for (int v = 1; v < depth_image.data().rows - 1; ++v) {
+        for (int u = 1; u < depth_image.data().cols - 1; ++u) {
+            const Real d__1__1 = depth_image.at({u - 1, v - 1});
+            const Real d__1__0 = depth_image.at({u, v - 1});
+            const Real d__1_1  = depth_image.at({u + 1, v - 1});
 
-    cv::Mat max_curve(depth_image.rows, depth_image.cols, get_cv_type<Real>());
+            const Real d__0__1 = depth_image.at({u - 1, v});
+            const Real d__0__0 = depth_image.at({u, v});
+            const Real d__0_1  = depth_image.at({u + 1, v});
 
-    for (int v = 1; v < depth_image.rows - 1; ++v) {
-        for (int u = 1; u < depth_image.cols - 1; ++u) {
-            const Real d__1__1 = depth_image.at<PixelType>(v - 1, u - 1);
-            const Real d__1__0 = depth_image.at<PixelType>(v - 1, u);
-            const Real d__1_1  = depth_image.at<PixelType>(v - 1, u + 1);
-
-            const Real d__0__1 = depth_image.at<PixelType>(v, u - 1);
-            const Real d__0__0 = depth_image.at<PixelType>(v, u);
-            const Real d__0_1  = depth_image.at<PixelType>(v, u + 1);
-
-            const Real d_1__1 = depth_image.at<PixelType>(v + 1, u - 1);
-            const Real d_1__0 = depth_image.at<PixelType>(v + 1, u);
-            const Real d_1_1  = depth_image.at<PixelType>(v + 1, u + 1);
+            const Real d_1__1 = depth_image.at({u - 1, v + 1});
+            const Real d_1__0 = depth_image.at({u, v + 1});
+            const Real d_1_1  = depth_image.at({u + 1, v + 1});
 
             using math::pixel_coord;
             using std::cos;
@@ -138,38 +135,31 @@ depth_to_max_curve(const cv::Mat &                     depth_image,
             Ensures(max_angle >= 0.);
             // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
             Ensures(max_angle < 2. * math::pi<Real>);
-            max_curve.at<Real>(v, u) = max_angle;
+            max_curve_image.at({u, v}) = max_angle;
         }
     }
-    Ensures(max_curve.cols == depth_image.cols);
-    Ensures(max_curve.rows == depth_image.rows);
-    Ensures(max_curve.type() == get_cv_type<Real>());
-    Ensures(max_curve.channels() == 1);
 
-    return max_curve;
+    return max_curve_image;
 }
 
 template <typename Real, typename PixelType>
-inline cv::Mat convert_max_curve(const cv::Mat &max_curve) noexcept {
+inline math::image<PixelType>
+convert_max_curve(const math::image<Real> &max_curve) noexcept {
     using namespace detail;
 
-    Expects(max_curve.channels() == 1);
-    Expects(max_curve.rows > 2);
-    Expects(max_curve.cols > 2);
-    Expects(max_curve.type() == get_cv_type<Real>());
-
-    cv::Mat img(max_curve.rows, max_curve.cols, get_cv_type<PixelType>());
-    auto [scale, offset] =
+    cv::Mat img(max_curve.data().rows, max_curve.data().cols,
+                get_cv_type<PixelType>());
+    const auto [scale, offset] =
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
         scaling_factor<Real, PixelType>(/*max_angle = */ 2. * math::pi<Real>);
-    max_curve.convertTo(img, get_cv_type<PixelType>(), scale, offset);
+    max_curve.data().convertTo(img, get_cv_type<PixelType>(), scale, offset);
 
-    Ensures(img.cols == max_curve.cols);
-    Ensures(img.rows == max_curve.rows);
+    Ensures(img.cols == max_curve.data().cols);
+    Ensures(img.rows == max_curve.data().rows);
     Ensures(img.type() == get_cv_type<PixelType>());
     Ensures(img.channels() == 1);
 
-    return img;
+    return math::image<PixelType>(std::move(img));
 }
 }}  // namespace sens_loc::conversion
 

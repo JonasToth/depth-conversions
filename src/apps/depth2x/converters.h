@@ -30,8 +30,8 @@ class bearing_converter : public batch_pinhole_converter {
     ~bearing_converter() override                      = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
-        noexcept override;
+    [[nodiscard]] bool process_file(math::image<double> depth_image,
+                                    int idx) const noexcept override;
 };
 
 /// Convert orthographic depth-images to range (laserscan-like) images.
@@ -48,8 +48,8 @@ class range_converter : public batch_pinhole_converter {
     ~range_converter() override                    = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
-        noexcept override;
+    [[nodiscard]] bool process_file(math::image<double> depth_image,
+                                    int idx) const noexcept override;
 };
 
 /// Convert range-images to gaussian curvature images.
@@ -72,8 +72,8 @@ class gauss_curv_converter : public batch_pinhole_converter {
     ~gauss_curv_converter() override                         = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
-        noexcept override;
+    [[nodiscard]] bool process_file(math::image<double> depth_image,
+                                    int idx) const noexcept override;
 
     double lower_bound;
     double upper_bound;
@@ -99,8 +99,8 @@ class mean_curv_converter : public batch_pinhole_converter {
     ~mean_curv_converter() override                        = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
-        noexcept override;
+    [[nodiscard]] bool process_file(math::image<double> depth_image,
+                                    int idx) const noexcept override;
 
     double lower_bound;
     double upper_bound;
@@ -120,8 +120,8 @@ class max_curve_converter : public batch_pinhole_converter {
     ~max_curve_converter() override                        = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
-        noexcept override;
+    [[nodiscard]] bool process_file(math::image<double> depth_image,
+                                    int idx) const noexcept override;
 };
 
 /// Convert range-images to flexion images.
@@ -138,8 +138,8 @@ class flexion_converter : public batch_pinhole_converter {
     ~flexion_converter() override                      = default;
 
   private:
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
-        noexcept override;
+    [[nodiscard]] bool process_file(math::image<double> depth_image,
+                                    int idx) const noexcept override;
 };
 
 /// Scale depth images and add a constant value to each pixel.
@@ -161,8 +161,8 @@ class scale_converter : public batch_converter {
     double _scale  = 1.0;
     double _offset = 0.0;
 
-    [[nodiscard]] bool process_file(cv::Mat depth_image, int idx) const
-        noexcept override;
+    [[nodiscard]] bool process_file(math::image<double> depth_image,
+                                    int idx) const noexcept override;
 };
 
 /// @}

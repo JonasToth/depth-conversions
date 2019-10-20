@@ -4,11 +4,11 @@
 #include <cmath>
 #include <gsl/gsl>
 #include <limits>
-#include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/constants.h>
 #include <sens_loc/math/coordinate.h>
+#include <sens_loc/math/image.h>
 #include <sens_loc/math/triangles.h>
 #include <sens_loc/util/correctness_util.h>
 #include <taskflow/taskflow.hpp>
@@ -41,8 +41,8 @@ namespace sens_loc { namespace conversion {
 /// is of course possible with matching changes in the \p depth_image.
 template <direction Direction, typename Real = float,
           typename PixelType = float>
-cv::Mat
-depth_to_bearing(const cv::Mat &                     depth_image,
+math::image<Real>
+depth_to_bearing(const math::image<PixelType> &      depth_image,
                  const camera_models::pinhole<Real> &intrinsic) noexcept;
 
 /// This function provides are parallelized version of the conversion
@@ -62,9 +62,9 @@ depth_to_bearing(const cv::Mat &                     depth_image,
 template <direction Direction, typename Real = float,
           typename PixelType = float>
 std::pair<tf::Task, tf::Task>
-par_depth_to_bearing(const cv::Mat &                     depth_image,
+par_depth_to_bearing(const math::image<PixelType> &      depth_image,
                      const camera_models::pinhole<Real> &intrinsic,
-                     cv::Mat &ba_image, tf::Taskflow &flow) noexcept;
+                     math::image<Real> &ba_image, tf::Taskflow &flow) noexcept;
 
 /// Convert a bearing angle image to an image with integer types.
 /// This function scales the bearing angles between
@@ -81,7 +81,8 @@ par_depth_to_bearing(const cv::Mat &                     depth_image,
 /// \post range of pixel in result is \f$[PixelType_{min}, PixelType_{max}]\f$
 /// \sa conversion::depth_to_bearing
 template <typename Real = float, typename PixelType = ushort>
-cv::Mat convert_bearing(const cv::Mat &bearing_image) noexcept;
+math::image<PixelType>
+convert_bearing(const math::image<Real> &bearing_image) noexcept;
 
 namespace detail {
 inline int get_du(direction dir) {
@@ -172,93 +173,74 @@ template <typename Real, typename PixelType, typename RangeLimits,
           typename PriorAccess>
 inline void bearing_inner(const RangeLimits &r,
                           const PriorAccess &prior_accessor, const int v,
-                          const cv::Mat &                     depth_image,
+                          const math::image<PixelType> &      depth_image,
                           const camera_models::pinhole<Real> &intrinsic,
-                          cv::Mat &                           ba_image) {
+                          math::image<Real> &                 ba_image) {
     for (int u = r.x_start; u < r.x_end; ++u) {
         const math::pixel_coord<int> central(u, v);
         const math::pixel_coord<int> prior = prior_accessor(central);
-        const int                    u_p   = prior.u();
-        const int                    v_p   = prior.v();
 
-        const PixelType d_i{depth_image.at<PixelType>(v, u)};
-        const PixelType d_j{depth_image.at<PixelType>(v_p, u_p)};
+        const auto d_i = depth_image.at(central);
+        const auto d_j = depth_image.at(prior);
 
-        Expects(d_i >= 0.);
-        Expects(d_j >= 0.);
+        Expects(d_i >= Real(0.));
+        Expects(d_j >= Real(0.));
 
-        const Real d_phi{gsl::narrow_cast<Real>(intrinsic.phi(central, prior))};
+        const Real d_phi = intrinsic.phi(central, prior);
 
         // A depth==0 means there is no measurement at this pixel.
-        const Real angle =
-            (d_i == 0. || d_j == 0.)
-                ? 0.
-                : math::bearing_angle(
-                      gsl::narrow_cast<Real>(depth_image.at<PixelType>(v, u)),
-                      gsl::narrow_cast<Real>(
-                          depth_image.at<PixelType>(v_p, u_p)),
-                      std::cos(d_phi));
+        const Real angle = (d_i == Real(0.) || d_j == Real(0.))
+                               ? Real(0.)
+                               : math::bearing_angle<Real>(
+                                     depth_image.at(central),
+                                     depth_image.at(prior), std::cos(d_phi));
 
-        Ensures(angle >= 0.);
+        Ensures(angle >= Real(0.));
         Ensures(angle < math::pi<Real>);
 
-        ba_image.at<Real>(v, u) = angle;
+        ba_image.at(central) = angle;
     }
 }
 }  // namespace detail
 
 template <direction Direction, typename Real, typename PixelType>
 // requires Float<Real> && CVIntegerPixelType<PixelType>
-inline cv::Mat
-depth_to_bearing(const cv::Mat &                     depth_image,
+inline math::image<Real>
+depth_to_bearing(const math::image<PixelType> &      depth_image,
                  const camera_models::pinhole<Real> &intrinsic) noexcept {
     using namespace detail;
 
-    Expects(depth_image.type() == get_cv_type<PixelType>());
-    Expects(depth_image.channels() == 1);
-    Expects(!depth_image.empty());
-    Expects(depth_image.cols > 2);
-    Expects(depth_image.rows > 2);
-
     const pixel<Real, Direction> prior_accessor;
-    const pixel_range<Direction> r{depth_image};
+    const pixel_range<Direction> r{depth_image.data()};
 
     // Image of Reals, that will be converted after the full calculation.
-    cv::Mat ba_image(depth_image.rows, depth_image.cols, get_cv_type<Real>());
-    Ensures(ba_image.channels() == 1);
+    cv::Mat ba(depth_image.data().rows, depth_image.data().cols,
+               get_cv_type<Real>());
+    ba = Real(0.);
+    math::image<Real> ba_image(std::move(ba));
 
-    for (int v = r.y_start; v < r.y_end; ++v) {
+    for (int v = r.y_start; v < r.y_end; ++v)
         detail::bearing_inner<Real, PixelType>(
             r, prior_accessor, v, depth_image, intrinsic, ba_image);
-    }
 
-    Ensures(ba_image.channels() == 1);
-    Ensures(ba_image.type() == get_cv_type<Real>());
-    Ensures(!ba_image.empty());
-    Ensures(ba_image.rows == depth_image.rows);
-    Ensures(ba_image.cols == depth_image.cols);
+    Ensures(ba_image.data().rows == depth_image.data().rows);
+    Ensures(ba_image.data().cols == depth_image.data().cols);
 
     return ba_image;
 }
 
 template <direction Direction, typename Real, typename PixelType>
 inline std::pair<tf::Task, tf::Task>
-par_depth_to_bearing(const cv::Mat &                     depth_image,
+par_depth_to_bearing(const math::image<PixelType> &      depth_image,
                      const camera_models::pinhole<Real> &intrinsic,
-                     cv::Mat &ba_image, tf::Taskflow &flow) noexcept {
+                     math::image<Real> &ba_image, tf::Taskflow &flow) noexcept {
     using namespace detail;
-    Expects(depth_image.type() == get_cv_type<PixelType>());
-    Expects(depth_image.channels() == 1);
-    Expects(!depth_image.empty());
-    Expects(depth_image.cols > 2);
-    Expects(depth_image.rows > 2);
-    Expects(ba_image.cols == depth_image.cols);
-    Expects(ba_image.rows == depth_image.rows);
-    Expects(ba_image.channels() == depth_image.channels());
-    Expects(ba_image.type() == get_cv_type<Real>());
+
+    Expects(ba_image.data().cols == depth_image.data().cols);
+    Expects(ba_image.data().rows == depth_image.data().rows);
 
     const pixel<Real, Direction> prior_accessor;
-    const pixel_range<Direction> r{depth_image};
+    const pixel_range<Direction> r{depth_image.data()};
 
     auto sync_points = flow.parallel_for(
         r.y_start, r.y_end, 1,
@@ -271,26 +253,23 @@ par_depth_to_bearing(const cv::Mat &                     depth_image,
 }
 
 template <typename Real, typename PixelType>
-inline cv::Mat convert_bearing(const cv::Mat &bearing_image) noexcept {
+inline math::image<PixelType>
+convert_bearing(const math::image<Real> &bearing_image) noexcept {
     using namespace detail;
 
-    Expects(bearing_image.channels() == 1);
-    Expects(bearing_image.rows > 2);
-    Expects(bearing_image.cols > 2);
-    Expects(bearing_image.type() == get_cv_type<Real>());
-
-    cv::Mat img(bearing_image.rows, bearing_image.cols,
+    cv::Mat img(bearing_image.data().rows, bearing_image.data().cols,
                 get_cv_type<PixelType>());
     auto [scale, offset] =
         scaling_factor<Real, PixelType>(/*max_angle = */ math::pi<Real>);
-    bearing_image.convertTo(img, get_cv_type<PixelType>(), scale, offset);
+    bearing_image.data().convertTo(img, get_cv_type<PixelType>(), scale,
+                                   offset);
 
-    Ensures(img.cols == bearing_image.cols);
-    Ensures(img.rows == bearing_image.rows);
+    Ensures(img.cols == bearing_image.data().cols);
+    Ensures(img.rows == bearing_image.data().rows);
     Ensures(img.type() == get_cv_type<PixelType>());
     Ensures(img.channels() == 1);
 
-    return img;
+    return math::image<PixelType>(std::move(img));
 }
 }}  // namespace sens_loc::conversion
 

@@ -10,11 +10,9 @@ using namespace std;
 using doctest::Approx;
 
 TEST_CASE("Real world case found crashing") {
-    optional<cv::Mat> depth_image =
-        io::load_image("conversion/crashing-file.png", cv::IMREAD_UNCHANGED);
-
+    optional<math::image<ushort>> depth_image = io::load_image<ushort>(
+        "conversion/crashing-file.png", cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
-    REQUIRE((*depth_image).type() == CV_16U);
 
     camera_models::pinhole<double> p = {
         .w  = 960,
@@ -25,8 +23,7 @@ TEST_CASE("Real world case found crashing") {
         .cy = 272.737,
     };
 
-    cv::Mat laser = depth_to_laserscan<double, ushort>(*depth_image, p);
-
+    auto laser = depth_to_laserscan<double, ushort>(*depth_image, p);
     auto vert =
         depth_to_bearing<direction::horizontal, double, double>(laser, p);
 }

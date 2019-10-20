@@ -7,8 +7,8 @@
 
 namespace sens_loc::apps {
 
-bool bearing_converter::process_file(cv::Mat depth_image, int idx) const
-    noexcept {
+bool bearing_converter::process_file(math::image<double> depth_image,
+                                     int                 idx) const noexcept {
     Expects(!_files.horizontal.empty() || !_files.vertical.empty() ||
             !_files.diagonal.empty() || !_files.antidiagonal.empty());
     using namespace sens_loc::conversion;
@@ -17,11 +17,12 @@ bool bearing_converter::process_file(cv::Mat depth_image, int idx) const
     // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BEARING_PROCESS(DIRECTION)                                             \
     if (!_files.DIRECTION.empty()) {                                           \
-        cv::Mat bearing =                                                      \
+        math::image<double> bearing =                                          \
             depth_to_bearing<direction::DIRECTION, double, double>(            \
                 depth_image, intrinsic);                                       \
-        bool success = cv::imwrite(fmt::format(_files.DIRECTION, idx),         \
-                                   convert_bearing<double, ushort>(bearing));  \
+        bool success =                                                         \
+            cv::imwrite(fmt::format(_files.DIRECTION, idx),                    \
+                        convert_bearing<double, ushort>(bearing).data());      \
         final_result &= success;                                               \
     }
 

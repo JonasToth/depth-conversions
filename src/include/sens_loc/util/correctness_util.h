@@ -5,6 +5,7 @@
 #include <gsl/gsl>
 #include <iostream>
 #include <opencv2/core.hpp>
+#include <sens_loc/math/image.h>
 #include <sens_loc/util/console.h>
 #include <string_view>
 
@@ -64,6 +65,11 @@ inline double average_pixel_error(const cv::Mat &i1,
     Ensures(result >= 0.);
     return result / double(n_pixels);
 }
-}}  // namespace sens_loc::util
+template <typename Image>
+double average_pixel_error(const Image &i1, const Image &i2) noexcept {
+    return average_pixel_error(i1.data(), i2.data());
+}
+}  // namespace util
+}  // namespace sens_loc
 
 #endif /* end of include guard: CORRECTNESS_UTIL_H_BJPG9UMQ */

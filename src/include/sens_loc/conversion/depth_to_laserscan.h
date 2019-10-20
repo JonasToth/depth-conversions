@@ -1,9 +1,9 @@
 #ifndef DEPTH_TO_LASERSCAN_H_P8V9HAVF
 #define DEPTH_TO_LASERSCAN_H_P8V9HAVF
 
-#include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/util.h>
+#include <sens_loc/math/image.h>
 #include <taskflow/taskflow.hpp>
 
 namespace sens_loc { namespace conversion {
@@ -22,8 +22,8 @@ namespace sens_loc { namespace conversion {
 /// \note invalid values (where the depth is zero) will be zero as well
 /// \post each value is bigger or equal to the original pixel value
 template <typename Real = float, typename PixelType = ushort>
-cv::Mat
-depth_to_laserscan(const cv::Mat &                     depth_image,
+math::image<Real>
+depth_to_laserscan(const math::image<PixelType> &      depth_image,
                    const camera_models::pinhole<Real> &intrinsic) noexcept;
 
 /// This function is the parallel implementation for the conversions.
@@ -34,67 +34,58 @@ depth_to_laserscan(const cv::Mat &                     depth_image,
 /// \returns synchronization tasks before and after the conversion.
 template <typename Real = float, typename PixelType = ushort>
 std::pair<tf::Task, tf::Task>
-par_depth_to_laserscan(const cv::Mat &                     depth_image,
+par_depth_to_laserscan(const math::image<PixelType> &      depth_image,
                        const camera_models::pinhole<Real> &intrinsic,
-                       cv::Mat &out, tf::Taskflow &flow) noexcept;
+                       math::image<Real> &out, tf::Taskflow &flow) noexcept;
 
 namespace detail {
 template <typename Real, typename PixelType>
-void laserscan_inner(const int v, const cv::Mat &depth_image,
+void laserscan_inner(const int v, const math::image<PixelType> &depth_image,
                      const camera_models::pinhole<Real> &intrinsic,
-                     cv::Mat &                           euclid) {
-    for (int u = 0; u < depth_image.cols; ++u) {
-        const PixelType d_o   = depth_image.at<PixelType>(v, u);
-        euclid.at<Real>(v, u) = orthografic_to_euclidian<Real>(
-            math::pixel_coord<int>(u, v), d_o, intrinsic);
+                     math::image<Real> &                 euclid) {
+    for (int u = 0; u < depth_image.data().cols; ++u) {
+        const PixelType d_o = depth_image.at({u, v});
+        euclid.at({u, v}) =
+            orthografic_to_euclidian<Real>({u, v}, d_o, intrinsic);
     }
 }
 }  // namespace detail
 
 template <typename Real, typename PixelType>
-inline cv::Mat
-depth_to_laserscan(const cv::Mat &                     depth_image,
+inline math::image<Real>
+depth_to_laserscan(const math::image<PixelType> &      depth_image,
                    const camera_models::pinhole<Real> &intrinsic) noexcept {
-    Expects(depth_image.channels() == 1);
-    Expects(!depth_image.empty());
-    Expects(depth_image.cols > 2);
-    Expects(depth_image.rows > 2);
-
     using namespace detail;
-    cv::Mat euclid(depth_image.rows, depth_image.cols, get_cv_type<Real>());
+    cv::Mat euclid(depth_image.data().rows, depth_image.data().cols,
+                   get_cv_type<Real>());
+    euclid = Real(0.);
 
-    for (int v = 0; v < depth_image.rows; ++v) {
+    math::image<Real> euclid_image(std::move(euclid));
+
+    for (int v = 0; v < depth_image.data().rows; ++v)
         detail::laserscan_inner<Real, PixelType>(v, depth_image, intrinsic,
-                                                 euclid);
-    }
+                                                 euclid_image);
 
-    Ensures(euclid.rows == depth_image.rows);
-    Ensures(euclid.cols == depth_image.cols);
-    Expects(euclid.channels() == 1);
-    Expects(euclid.type() == get_cv_type<Real>());
+    Ensures(euclid_image.data().rows == depth_image.data().rows);
+    Ensures(euclid_image.data().cols == depth_image.data().cols);
 
-    return euclid;
+    return euclid_image;
 }
 
 
 template <typename Real, typename PixelType>
 inline std::pair<tf::Task, tf::Task>
-par_depth_to_laserscan(const cv::Mat &                     depth_image,
+par_depth_to_laserscan(const math::image<PixelType> &      depth_image,
                        const camera_models::pinhole<Real> &intrinsic,
-                       cv::Mat &out, tf::Taskflow &flow) noexcept {
-    Expects(depth_image.channels() == 1);
-    Expects(!depth_image.empty());
-    Expects(depth_image.cols > 2);
-    Expects(depth_image.rows > 2);
-    Expects(out.rows == depth_image.rows);
-    Expects(out.cols == depth_image.cols);
-    Expects(out.channels() == depth_image.channels());
-    Expects(out.type() == detail::get_cv_type<Real>());
+                       math::image<Real> &out, tf::Taskflow &flow) noexcept {
+    Expects(out.data().rows == depth_image.data().rows);
+    Expects(out.data().cols == depth_image.data().cols);
 
-    auto sync_points = flow.parallel_for(0, depth_image.rows, 1, [&](int v) {
-        detail::laserscan_inner<Real, PixelType>(v, depth_image, intrinsic,
-                                                 out);
-    });
+    auto sync_points =
+        flow.parallel_for(0, depth_image.data().rows, 1, [&](int v) {
+            detail::laserscan_inner<Real, PixelType>(v, depth_image, intrinsic,
+                                                     out);
+        });
 
     return sync_points;
 }

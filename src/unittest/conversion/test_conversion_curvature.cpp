@@ -7,6 +7,7 @@
 #include <sens_loc/util/correctness_util.h>
 
 using namespace sens_loc;
+
 constexpr camera_models::pinhole<double> p = {
     .w  = 960,
     .h  = 540,
@@ -17,45 +18,43 @@ constexpr camera_models::pinhole<double> p = {
 };
 
 TEST_CASE("gaussian curvature") {
-    std::optional<cv::Mat> depth_image =
-        io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
+    auto depth_image = io::load_image<ushort>("conversion/data0-depth.png",
+                                              cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
-    REQUIRE((*depth_image).type() == CV_16U);
 
-    std::optional<cv::Mat> ref_image =
-        io::load_image("conversion/gauss-reference.png", cv::IMREAD_UNCHANGED);
+    auto ref_image = io::load_image<ushort>("conversion/gauss-reference.png",
+                                            cv::IMREAD_UNCHANGED);
     // REQUIRE(ref_image);
 
-    cv::Mat laser_double =
+    auto laser_double =
         conversion::depth_to_laserscan<double, ushort>(*depth_image, p);
 
     const auto gauss = conversion::depth_to_gaussian_curvature<double, double>(
         laser_double, p);
     const auto converted = conversion::curvature_to_image<double, ushort>(
         gauss, *depth_image, -20., 20.);
-    cv::imwrite("conversion/test_gauss.png", converted);
+    cv::imwrite("conversion/test_gauss.png", converted.data());
 
     // REQUIRE(util::average_pixel_error(gauss, *ref_image) < 0.5);
 }
 
 TEST_CASE("mean curvature") {
-    std::optional<cv::Mat> depth_image =
-        io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
+    auto depth_image = io::load_image<ushort>("conversion/data0-depth.png",
+                                              cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
-    REQUIRE((*depth_image).type() == CV_16U);
 
-    std::optional<cv::Mat> ref_image =
-        io::load_image("conversion/mean-reference.png", cv::IMREAD_UNCHANGED);
+    auto ref_image = io::load_image<ushort>("conversion/mean-reference.png",
+                                            cv::IMREAD_UNCHANGED);
     // REQUIRE(ref_image);
 
-    cv::Mat laser_double =
+    auto laser_double =
         conversion::depth_to_laserscan<double, ushort>(*depth_image, p);
 
     const auto mean =
         conversion::depth_to_mean_curvature<double, double>(laser_double, p);
     const auto converted = conversion::curvature_to_image<double, ushort>(
         mean, *depth_image, -20., 20.);
-    cv::imwrite("conversion/test_mean.png", converted);
+    cv::imwrite("conversion/test_mean.png", converted.data());
 
     // REQUIRE(util::average_pixel_error(mean, *ref_image) < 0.5);
 }

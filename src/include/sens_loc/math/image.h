@@ -51,7 +51,7 @@ class image {
     image(const image<PixelType> &other) = default;
 
     image(image<PixelType> &&other) = default;
-    image(cv::Mat &&other) noexcept
+    explicit image(cv::Mat &&other) noexcept
         : _data(std::move(other)) {
         Expects(_data.type() == detail::get_opencv_type<PixelType>());
         Expects(_data.channels() == 1);

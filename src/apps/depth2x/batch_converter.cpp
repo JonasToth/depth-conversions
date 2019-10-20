@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
+#include <sens_loc/math/image.h>
 #include <sens_loc/util/console.h>
 #include <sens_loc/util/correctness_util.h>
 #include <taskflow/taskflow.hpp>
@@ -15,16 +16,15 @@ namespace sens_loc::apps {
 bool batch_converter::process_index(int idx) const noexcept {
     Expects(!_files.input.empty());
 
-    const std::string      input_file = fmt::format(_files.input, idx);
-    std::optional<cv::Mat> depth_image =
-        io::load_image(input_file, cv::IMREAD_UNCHANGED);
+    const std::string input_file = fmt::format(_files.input, idx);
+    std::optional<math::image<ushort>> depth_image =
+        io::load_image<ushort>(input_file, cv::IMREAD_UNCHANGED);
 
     if (!depth_image)
         return false;
-    if ((*depth_image).type() != CV_16U)
-        return false;
 
-    cv::Mat pp_image = this->preprocess_depth(std::move(*depth_image));
+    math::image<double> pp_image =
+        this->preprocess_depth(std::move(*depth_image));
     return this->process_file(std::move(pp_image), idx);
 }
 
@@ -86,16 +86,19 @@ bool batch_converter::process_batch(int start, int end) const noexcept {
     return batch_success;
 }  // namespace sens_loc::apps
 
-cv::Mat batch_pinhole_converter::preprocess_depth(cv::Mat depth_image) const
+math::image<double>
+batch_pinhole_converter::preprocess_depth(math::image<ushort> depth_image) const
     noexcept {
     switch (_input_depth_type) {
     case depth_type::orthografic:
         return conversion::depth_to_laserscan<double, ushort>(depth_image,
                                                               intrinsic);
     case depth_type::euclidean:
-        cv::Mat depth_double(depth_image.rows, depth_image.cols, CV_64F);
-        depth_image.convertTo(depth_double, CV_64F);
-        return depth_double;
+        cv::Mat depth_double(depth_image.data().rows, depth_image.data().cols,
+                             math::detail::get_opencv_type<double>());
+        depth_image.data().convertTo(depth_double,
+                                     math::detail::get_opencv_type<double>());
+        return math::image<double>(std::move(depth_double));
     }
     UNREACHABLE("Switch is exhaustive");
 }

@@ -3,6 +3,7 @@
 
 #include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
+#include <sens_loc/math/image.h>
 #include <sens_loc/util/correctness_util.h>
 #include <stdexcept>
 #include <string>
@@ -105,15 +106,19 @@ class batch_converter {
 
     /// Function to potentially convert orthographic images into range images.
     /// \returns \c cv::Mat with proper input data for the conversion process.
-    [[nodiscard]] virtual cv::Mat preprocess_depth(cv::Mat depth_image) const
-        noexcept {
-        return depth_image;
+    [[nodiscard]] virtual math::image<double>
+    preprocess_depth(math::image<ushort> depth_image) const noexcept {
+        cv::Mat depth_double(depth_image.data().rows, depth_image.data().cols,
+                             math::detail::get_opencv_type<double>());
+        depth_image.data().convertTo(depth_double,
+                                     math::detail::get_opencv_type<double>());
+        return math::image<double>(std::move(depth_double));
     }
-    /// Method to process exactly on file. This method is expected to have
+    /// Method to process exactly one file. This method is expected to have
     /// no sideeffects and is called in parallel.
     /// \returns \c true on success, otherwise \c false.
-    [[nodiscard]] virtual bool process_file(cv::Mat depth_image, int idx) const
-        noexcept = 0;
+    [[nodiscard]] virtual bool process_file(math::image<double> depth_image,
+                                            int idx) const noexcept = 0;
 };
 
 /// This class provides common data and depth-image conversion for all
@@ -141,8 +146,8 @@ class batch_pinhole_converter : public batch_converter {
     /// model.
     /// \sa conversion::depth_to_laserscan
     /// \returns \c cv::Mat with one channel and double as data type.
-    [[nodiscard]] cv::Mat preprocess_depth(cv::Mat depth_image) const
-        noexcept override;
+    [[nodiscard]] math::image<double>
+    preprocess_depth(math::image<ushort> depth_image) const noexcept override;
 };
 
 /// @}

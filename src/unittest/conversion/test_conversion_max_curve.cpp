@@ -63,8 +63,8 @@ TEST_CASE("max curve formula") {
 }
 
 TEST_CASE("depth image to max curve") {
-    optional<cv::Mat> depth_image =
-        io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
+    auto depth_image = io::load_image<ushort>("conversion/data0-depth.png",
+                                              cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
 
     const camera_models::pinhole<double> p = {
@@ -77,19 +77,20 @@ TEST_CASE("depth image to max curve") {
     };
 
     SUBCASE("double accuracy") {
-        optional<cv::Mat> ref_double = io::load_image(
+        auto ref_double = io::load_image<ushort>(
             "conversion/max-curve-double.png", cv::IMREAD_UNCHANGED);
         REQUIRE(ref_double);
 
-        const cv::Mat laser_double =
+        const auto laser_double =
             depth_to_laserscan<double, ushort>(*depth_image, p);
-        const cv::Mat curve_double =
+        const auto curve_double =
             depth_to_max_curve<double, double>(laser_double, p);
-        REQUIRE(!curve_double.empty());
+        REQUIRE(!curve_double.data().empty());
 
-        const cv::Mat curve_ushort =
+        const auto curve_ushort =
             convert_max_curve<double, ushort>(curve_double);
-        cv::imwrite("conversion/test_max_curve_double.png", curve_ushort);
+        cv::imwrite("conversion/test_max_curve_double.png",
+                    curve_ushort.data());
         REQUIRE(util::average_pixel_error(*ref_double, curve_ushort) < 0.5);
     }
 }

@@ -5,24 +5,26 @@ using namespace sens_loc;
 
 TEST_CASE("Loading Images") {
     SUBCASE("Non existing file") {
-        std::optional<cv::Mat> file = io::load_image("DoesNotExist");
+        std::optional<math::image<ushort>> file =
+            io::load_image<ushort>("DoesNotExist");
         REQUIRE(!file);
     }
 
     SUBCASE("Existing file - JPG") {
-        std::optional<cv::Mat> file = io::load_image("io/example-image.jpg");
+        std::optional<math::image<uchar>> file =
+            io::load_image<uchar>("io/example-image.jpg", cv::IMREAD_UNCHANGED);
         REQUIRE(file);
     }
 
     SUBCASE("Existing file - PNG") {
-        std::optional<cv::Mat> file = io::load_image("io/example-image.png");
+        std::optional<math::image<uchar>> file =
+            io::load_image<uchar>("io/example-image.png", cv::IMREAD_UNCHANGED);
         REQUIRE(file);
     }
 
-#if 0
     SUBCASE("Existing file - Unrecognized format") {
-        std::optional<cv::Mat> file = io::load_image("io/not_an_image.txt");
+        std::optional<math::image<uchar>> file =
+            io::load_image<uchar>("io/not_an_image.txt");
         REQUIRE(!file);
     }
-#endif
 }

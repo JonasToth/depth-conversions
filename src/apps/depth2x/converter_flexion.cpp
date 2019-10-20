@@ -7,15 +7,16 @@
 
 
 namespace sens_loc::apps {
-bool flexion_converter::process_file(cv::Mat depth_image, int idx) const
-    noexcept {
+bool flexion_converter::process_file(math::image<double> depth_image,
+                                     int                 idx) const noexcept {
     Expects(!_files.output.empty());
     using namespace conversion;
 
-    const cv::Mat flexion =
+    const auto flexion =
         depth_to_flexion<double, double>(depth_image, intrinsic);
-    const cv::Mat flexion_ushort = convert_flexion<double, ushort>(flexion);
-    bool success = cv::imwrite(fmt::format(_files.output, idx), flexion_ushort);
+    ;
+    bool success = cv::imwrite(fmt::format(_files.output, idx),
+                               convert_flexion<double, ushort>(flexion).data());
 
     return success;
 }
