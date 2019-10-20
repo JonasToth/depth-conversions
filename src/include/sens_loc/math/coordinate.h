@@ -113,7 +113,7 @@ class coordinate
     /// point number.
     template <typename T = Real,
               typename   = std::enable_if_t<!std::is_integral_v<T>>>
-    Real norm() const noexcept {
+    [[nodiscard]] Real norm() const noexcept {
         return base_class::d.norm();
     }
 
@@ -123,20 +123,21 @@ class coordinate
     template <typename T = Real, typename U = frame,
               typename = std::enable_if_t<!std::is_integral_v<T> &&
                                           !detail::is_2d<Frame>::value>>
-    coordinate<Real, Frame> normalized() const noexcept {
+    [[nodiscard]] coordinate<Real, Frame> normalized() const noexcept {
         const auto res = base_class::d.normalized();
         return {res[0], res[1], res[2]};
     }
 
     /// Calculate the dot product with \p other.
-    Real dot(const coordinate<Real, Frame> &other) const noexcept {
+    [[nodiscard]] Real dot(const coordinate<Real, Frame> &other) const
+        noexcept {
         return base_class::d.dot(other.d);
     }
     /// Calculate the cross product with \p other.
     template <typename T = frame, typename = std::enable_if_t<!(
                                       Frame == T::pixel || Frame == T::image)>>
-    coordinate<Real, Frame> cross(const coordinate<Real, Frame> &other) const
-        noexcept {
+    [[nodiscard]] coordinate<Real, Frame>
+    cross(const coordinate<Real, Frame> &other) const noexcept {
         const auto res = base_class::d.cross(other.d);
         return {res[0], res[1], res[2]};
     }
@@ -144,51 +145,51 @@ class coordinate
     // clang-format off
     template <typename T = frame,
               typename   = std::enable_if_t<Frame == T::pixel>>
-    Real u() const noexcept { return base_class::d[0]; }
+    [[nodiscard]] Real u() const noexcept { return base_class::d[0]; }
     template <typename T = frame,
               typename   = typename std::enable_if<Frame == T::pixel>>
-    Real v() const noexcept { return base_class::d[1]; }
+    [[nodiscard]] Real v() const noexcept { return base_class::d[1]; }
 
 
     template <typename T = frame,
               typename   = typename std::enable_if_t<Frame == T::image>>
-    Real x() const noexcept { return base_class::d[0]; }
+    [[nodiscard]] Real x() const noexcept { return base_class::d[0]; }
     template <typename T = frame,
               typename   = typename std::enable_if<Frame == T::image>>
-    Real y() const noexcept { return base_class::d[1]; }
+    [[nodiscard]] Real y() const noexcept { return base_class::d[1]; }
 
 
     template <typename T = frame,
               typename   = typename std::enable_if_t<Frame == T::sphere>>
-    Real Xs() const noexcept { return base_class::d[0]; }
+    [[nodiscard]] Real Xs() const noexcept { return base_class::d[0]; }
     template <typename T = frame,
               typename   = typename std::enable_if<Frame == T::sphere>>
-    Real Ys() const noexcept { return base_class::d[1]; }
+    [[nodiscard]] Real Ys() const noexcept { return base_class::d[1]; }
     template <typename T = frame,
               typename   = typename std::enable_if<Frame == T::sphere>>
-    Real Zs() const noexcept { return base_class::d[2]; }
+    [[nodiscard]] Real Zs() const noexcept { return base_class::d[2]; }
 
 
     template <typename T = frame,
               typename   = typename std::enable_if_t<Frame == T::camera>>
-    Real X() const noexcept { return base_class::d[0]; }
+    [[nodiscard]] Real X() const noexcept { return base_class::d[0]; }
     template <typename T = frame,
               typename   = typename std::enable_if<Frame == T::camera>>
-    Real Y() const noexcept { return base_class::d[1]; }
+    [[nodiscard]] Real Y() const noexcept { return base_class::d[1]; }
     template <typename T = frame,
               typename   = typename std::enable_if<Frame == T::camera>>
-    Real Z() const noexcept { return base_class::d[2]; }
+    [[nodiscard]] Real Z() const noexcept { return base_class::d[2]; }
 
 
     template <typename T = frame,
               typename   = typename std::enable_if_t<Frame == T::world>>
-    Real U() const noexcept { return base_class::d[0]; }
+    [[nodiscard]] Real U() const noexcept { return base_class::d[0]; }
     template <typename T = frame,
               typename   = typename std::enable_if<Frame == T::world>>
-    Real V() const noexcept { return base_class::d[1]; }
+    [[nodiscard]] Real V() const noexcept { return base_class::d[1]; }
     template <typename T = frame,
               typename   = typename std::enable_if<Frame == T::world>>
-    Real W() const noexcept { return base_class::d[2]; }
+    [[nodiscard]] Real W() const noexcept { return base_class::d[2]; }
     // clang-format on
 
     coordinate<Real, Frame> operator-(const coordinate<Real, Frame> &p) const
