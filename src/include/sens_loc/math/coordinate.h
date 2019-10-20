@@ -21,10 +21,16 @@ enum class frame {
              ///< in an image. \f$(u, v)\f$
 };
 
+namespace detail {
+/// Helper type-traits to examine if a reference frame is 2D. If its is not
+/// 2D, the coordinate system is 3D.
+/// \sa math::frame
 template <frame Frame>
 struct is_2d
     : std::bool_constant<Frame == frame::image || Frame == frame::pixel> {};
 
+/// Small helper class that holds the data for 2 dimensional coordinates.
+/// \sa math::coordinate
 template <typename Real>
 struct coordinate2d {
     coordinate2d()
@@ -35,6 +41,8 @@ struct coordinate2d {
     vec<Real, 2> d;
 };
 
+/// Small helper class that holds the data for 3 dimensional coordinates.
+/// \sa math::coordinate
 template <typename Real>
 struct coordinate3d {
     coordinate3d()
@@ -44,24 +52,56 @@ struct coordinate3d {
 
     vec<Real, 3> d;
 };
+}  // namespace detail
 
 /// This class is a strongly typed coordinate class to ensure the implemented
 /// math does not mix up reference frames.
 ///
+/// The overall goal of this slightly complicated construct is to increase
+/// readability of the code **USING** this class and to improve correctness.
+///
+/// This class allows only access with the coordinate conventions for each
+/// frame.
+/// It prevents mixing different coordinates while assignment or other
+/// operations and therefore forces conversion functions. Such conversions
+/// are well defined through camera intrinsics for example.
+///
+/// There are helper typedefs, for easier writing:
+/// \c pixel_coord<Real>, \c image_coord<Real>, \c sphere_coord<Real>,
+/// \c camera_coord<Real> and \c world_coord<Real>.
+///
+/// \code
+///   const pixel_coord<int> pixel(42, 32);
+///   pixel.u(); // Accessing the u-coordinate for that pixel.
+///   pixel.x(); // DOES NOT COMPILE - WRONG CONVENTION!
+///
+///   // Changing coordinate systems requires an explicit transformation, for
+///   // example with the camera calibration as in this case.
+///   const image_coord<float> transformed = i.transform_to_image(pixel);
+///   transformed.x() // Accessing x-coordinate for that pixel.
+///                   // Same point but different coordinate system.
+///   transformed.u() // DOES NOT COMPILE - WRONG CONVENTION!
+///
+///   // It is not possible to mix coordinates up.
+///   pixel_coord<float> sub_pixel(42.42, 42.42);
+///   image_coord<float> transformed = sub_pixel; // DOES NOT COMPILE
+///                                               // TYPE MISSMATCH!!
+/// \endcode
+///
 /// \tparam Real underlying type of the coordinates
 /// \tparam Frame type of reference frame, results in either 2 or 3 dimensional
-/// vectors.
+/// vectors. The vector data is inherited.
 template <typename Real, frame Frame>
 class coordinate
-    : private std::conditional_t<is_2d<Frame>::value, coordinate2d<Real>,
-                                 coordinate3d<Real>> {
+    : private std::conditional_t<detail::is_2d<Frame>::value,
+                                 detail::coordinate2d<Real>,
+                                 detail::coordinate3d<Real>> {
     static_assert(std::is_arithmetic_v<Real>,
                   "Arithmetic type for Real required!");
 
-    double foo = 42;
-    using base_class =
-        std::conditional_t<is_2d<Frame>::value, coordinate2d<Real>,
-                           coordinate3d<Real>>;
+    using base_class = std::conditional_t<detail::is_2d<Frame>::value,
+                                          detail::coordinate2d<Real>,
+                                          detail::coordinate3d<Real>>;
 
   public:
     // Reuse constructors of baseclass
@@ -81,7 +121,7 @@ class coordinate
     /// point number and the vector is in 3 dimensional space.
     template <typename T = Real, typename U = frame,
               typename = std::enable_if_t<!std::is_integral_v<T> &&
-                                          !is_2d<Frame>::value>>
+                                          !detail::is_2d<Frame>::value>>
     coordinate<Real, Frame> normalized() const noexcept {
         const auto res = base_class::d.normalized();
         return {res[0], res[1], res[2]};
@@ -160,7 +200,7 @@ class coordinate
     }
 };
 
-template <typename Real = float>
+template <typename Real = int>
 using pixel_coord = coordinate<Real, frame::pixel>;
 template <typename Real = float>
 using image_coord = coordinate<Real, frame::image>;

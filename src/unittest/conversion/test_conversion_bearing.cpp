@@ -30,57 +30,59 @@ constexpr camera_models::pinhole<float> p_float = {
 };
 
 TEST_CASE("Acces Prior Pixel") {
+    using conversion::detail::pixel;
     SUBCASE("horizontal") {
-        detail::pixel<int, direction::horizontal> p;
-        const math::pixel_coord<int>              pp = p({1, 1});
+        pixel<int, direction::horizontal> p;
+        const pixel_coord<int>      pp = p({1, 1});
         REQUIRE(pp.u() == 0);
         REQUIRE(pp.v() == 1);
     }
     SUBCASE("horizontal") {
-        detail::pixel<int, direction::vertical> p;
-        const math::pixel_coord<int>            pp = p({1, 1});
+        pixel<int, direction::vertical> p;
+        const pixel_coord<int>    pp = p({1, 1});
         REQUIRE(pp.u() == 1);
         REQUIRE(pp.v() == 0);
     }
     SUBCASE("diagonal") {
-        detail::pixel<int, direction::diagonal> p;
-        const math::pixel_coord<int>            pp = p({1, 1});
+        pixel<int, direction::diagonal> p;
+        const pixel_coord<int>    pp = p({1, 1});
         REQUIRE(pp.u() == 0);
         REQUIRE(pp.v() == 0);
     }
     SUBCASE("antidiagonal") {
-        detail::pixel<int, direction::antidiagonal> p;
-        const math::pixel_coord<int>                pp = p({1, 1});
+        pixel<int, direction::antidiagonal> p;
+        const pixel_coord<int>        pp = p({1, 1});
         REQUIRE(pp.u() == 0);
         REQUIRE(pp.v() == 2);
     }
 }
 
 TEST_CASE("iteration range") {
+    using conversion::detail::pixel_range;
     cv::Mat img(42, 42, CV_8U);
     SUBCASE("horizontal") {
-        detail::pixel_range<direction::horizontal> r(img);
+        pixel_range<direction::horizontal> r(img);
         REQUIRE(r.x_start == 1);
         REQUIRE(r.x_end == 42);
         REQUIRE(r.y_start == 0);
         REQUIRE(r.y_end == 42);
     }
     SUBCASE("vertical") {
-        detail::pixel_range<direction::vertical> r(img);
+        pixel_range<direction::vertical> r(img);
         REQUIRE(r.x_start == 0);
         REQUIRE(r.x_end == 42);
         REQUIRE(r.y_start == 1);
         REQUIRE(r.y_end == 42);
     }
     SUBCASE("diagonal") {
-        detail::pixel_range<direction::diagonal> r(img);
+        pixel_range<direction::diagonal> r(img);
         REQUIRE(r.x_start == 1);
         REQUIRE(r.x_end == 42);
         REQUIRE(r.y_start == 1);
         REQUIRE(r.y_end == 42);
     }
     SUBCASE("antidiagonal") {
-        detail::pixel_range<direction::antidiagonal> r(img);
+        pixel_range<direction::antidiagonal> r(img);
         REQUIRE(r.x_start == 1);
         REQUIRE(r.x_end == 42);
         REQUIRE(r.y_start == 0);
