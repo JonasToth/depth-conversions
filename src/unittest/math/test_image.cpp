@@ -74,4 +74,8 @@ TEST_CASE("image access") {
         REQUIRE(f.at(pixel_coord<int>(11, 11)) == 69);
         REQUIRE(f.at(pixel_coord<int>(0, 0)) == 0);
     }
+
+    SUBCASE("underlying data") {
+        REQUIRE(i.data().at<ushort>(10, 10) == 0);
+    }
 }

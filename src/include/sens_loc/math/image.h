@@ -41,8 +41,9 @@ class image {
   public:
     image() = default;
 
+    /// Construct the image from a \c cv::Mat and uphold the class invariant.
     explicit image(const cv::Mat &image) noexcept
-        : data(image) {
+        : _data(image) {
         Expects(image.type() == detail::get_opencv_type<PixelType>());
         Expects(image.channels() == 1);
         Expects(!image.empty());
@@ -51,10 +52,10 @@ class image {
 
     image(image<PixelType> &&other) = default;
     image(cv::Mat &&other) noexcept
-        : data(std::move(other)) {
-        Expects(data.type() == detail::get_opencv_type<PixelType>());
-        Expects(data.channels() == 1);
-        Expects(!data.empty());
+        : _data(std::move(other)) {
+        Expects(_data.type() == detail::get_opencv_type<PixelType>());
+        Expects(_data.channels() == 1);
+        Expects(!_data.empty());
     }
 
     image<PixelType> &operator=(const image<PixelType> &other) = default;
@@ -62,7 +63,7 @@ class image {
         Expects(other.type() == detail::get_opencv_type<PixelType>());
         Expects(other.channels() == 1);
         Expects(!other.empty());
-        data = other;
+        _data = other;
         return *this;
     }
 
@@ -71,25 +72,30 @@ class image {
         Expects(other.type() == detail::get_opencv_type<PixelType>());
         Expects(other.channels() == 1);
         Expects(!other.empty());
-        data = std::move(other);
+        _data = std::move(other);
         return *this;
     }
 
     ~image() = default;
 
+    /// Read-Access in the image for some pixel \p p.
     template <typename Number = int>
     [[nodiscard]] PixelType at(const pixel_coord<Number> &p) const noexcept {
-        return data.at<PixelType>(gsl::narrow_cast<int>(p.v()),
-                                  gsl::narrow_cast<int>(p.u()));
+        return _data.at<PixelType>(gsl::narrow_cast<int>(p.v()),
+                                   gsl::narrow_cast<int>(p.u()));
     }
+    /// Write-Access in the image for some pixel \p p.
     template <typename Number = int>
     [[nodiscard]] PixelType &at(const pixel_coord<Number> &p) noexcept {
-        return data.at<PixelType>(gsl::narrow_cast<int>(p.v()),
-                                  gsl::narrow_cast<int>(p.u()));
+        return _data.at<PixelType>(gsl::narrow_cast<int>(p.v()),
+                                   gsl::narrow_cast<int>(p.u()));
     }
 
+    /// Get access to the underlying data to use it for normal cv operations.
+    const cv::Mat &data() const noexcept { return _data; }
+
   private:
-    cv::Mat data;
+    cv::Mat _data;
 };
 
 }}  // namespace sens_loc::math
