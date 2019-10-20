@@ -108,34 +108,26 @@ depth_to_max_curve(const cv::Mat &                     depth_image,
 
             using math::pixel_coord;
             using std::cos;
-            const Real phi_hor1  = intrinsic.phi(pixel_coord<Real>(u - 1, v),
-                                                pixel_coord<Real>(u, v));
-            const Real phi_hor2  = intrinsic.phi(pixel_coord<Real>(u, v),
-                                                pixel_coord<Real>(u + 1, v));
+            const Real phi_hor1  = intrinsic.phi({u - 1, v}, {u, v});
+            const Real phi_hor2  = intrinsic.phi({u, v}, {u + 1, v});
             const Real angle_hor = angle_formula(d__0__1, d__0__0, d__0_1,
                                                  cos(phi_hor1), cos(phi_hor2));
 
             // vertical angular resolution
-            const Real phi_ver1  = intrinsic.phi(pixel_coord<Real>(u, v - 1),
-                                                pixel_coord<Real>(u, v));
-            const Real phi_ver2  = intrinsic.phi(pixel_coord<Real>(u, v),
-                                                pixel_coord<Real>(u, v + 1));
+            const Real phi_ver1  = intrinsic.phi({u, v - 1}, {u, v});
+            const Real phi_ver2  = intrinsic.phi({u, v}, {u, v + 1});
             const Real angle_ver = angle_formula(d__1__0, d__0__0, d_1__0,
                                                  cos(phi_ver1), cos(phi_ver2));
 
             // diagonal angular resolution
-            const Real phi_dia1 = intrinsic.phi(pixel_coord<Real>(u - 1, v - 1),
-                                                pixel_coord<Real>(u, v));
-            const Real phi_dia2 = intrinsic.phi(
-                pixel_coord<Real>(u, v), pixel_coord<Real>(u + 1, v + 1));
+            const Real phi_dia1  = intrinsic.phi({u - 1, v - 1}, {u, v});
+            const Real phi_dia2  = intrinsic.phi({u, v}, {u + 1, v + 1});
             const Real angle_dia = angle_formula(d__1__1, d__0__0, d_1_1,
                                                  cos(phi_dia1), cos(phi_dia2));
 
             // antidiagonal angular resolution
-            const Real phi_ant1 = intrinsic.phi(pixel_coord<Real>(u + 1, v + 1),
-                                                pixel_coord<Real>(u, v));
-            const Real phi_ant2 = intrinsic.phi(
-                pixel_coord<Real>(u, v), pixel_coord<Real>(u + 1, v - 1));
+            const Real phi_ant1  = intrinsic.phi({u + 1, v + 1}, {u, v});
+            const Real phi_ant2  = intrinsic.phi({u, v}, {u + 1, v - 1});
             const Real angle_ant = angle_formula(d_1__1, d__0__0, d__1_1,
                                                  cos(phi_ant1), cos(phi_ant2));
 

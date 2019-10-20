@@ -69,7 +69,7 @@ using ::sens_loc::math::vec;
 template <typename Real = float>
 math::camera_coord<Real>
 to_camera(const camera_models::pinhole<Real> &intrinsic,
-          const math::pixel_coord<Real> &p, Real d) noexcept {
+          const math::pixel_coord<int> &p, Real d) noexcept {
     const math::sphere_coord<Real> P_s = intrinsic.pixel_to_sphere(p);
     return math::camera_coord<Real>(d * P_s.Xs(), d * P_s.Ys(), d * P_s.Zs());
 }
@@ -101,27 +101,27 @@ inline void flexion_inner(int v, const cv::Mat &depth_image,
         using math::pixel_coord;
 
         const camera_coord<Real> surface_pt0 =
-            to_camera(intrinsic, pixel_coord<Real>(u, v - 1), d__1__0);
+            to_camera(intrinsic, {u, v - 1}, d__1__0);
         const camera_coord<Real> surface_pt1 =
-            to_camera(intrinsic, pixel_coord<Real>(u, v + 1), d_1__0);
+            to_camera(intrinsic, {u, v + 1}, d_1__0);
         const camera_coord<Real> surface_dir0 = surface_pt1 - surface_pt0;
 
         const camera_coord<Real> surface_pt2 =
-            to_camera(intrinsic, pixel_coord<Real>(u - 1, v), d__0__1);
+            to_camera(intrinsic, {u - 1, v}, d__0__1);
         const camera_coord<Real> surface_pt3 =
-            to_camera(intrinsic, pixel_coord<Real>(u + 1, v), d__0_1);
+            to_camera(intrinsic, {u + 1, v}, d__0_1);
         const camera_coord<Real> surface_dir1 = surface_pt3 - surface_pt2;
 
         const camera_coord<Real> surface_pt4 =
-            to_camera(intrinsic, pixel_coord<Real>(u + 1, v - 1), d__1_1);
+            to_camera(intrinsic, {u + 1, v - 1}, d__1_1);
         const camera_coord<Real> surface_pt5 =
-            to_camera(intrinsic, pixel_coord<Real>(u - 1, v + 1), d_1__1);
+            to_camera(intrinsic, {u - 1, v + 1}, d_1__1);
         const camera_coord<Real> surface_dir2 = surface_pt5 - surface_pt4;
 
         const camera_coord<Real> surface_pt6 =
-            to_camera(intrinsic, pixel_coord<Real>(u - 1, v - 1), d__1__1);
+            to_camera(intrinsic, {u - 1, v - 1}, d__1__1);
         const camera_coord<Real> surface_pt7 =
-            to_camera(intrinsic, pixel_coord<Real>(u + 1, v + 1), d_1_1);
+            to_camera(intrinsic, {u + 1, v + 1}, d_1_1);
         const camera_coord<Real> surface_dir3 = surface_pt7 - surface_pt6;
 
         const auto cross0 =

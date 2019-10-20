@@ -46,7 +46,7 @@ void laserscan_inner(const int v, const cv::Mat &depth_image,
     for (int u = 0; u < depth_image.cols; ++u) {
         const PixelType d_o   = depth_image.at<PixelType>(v, u);
         euclid.at<Real>(v, u) = orthografic_to_euclidian<Real>(
-            math::pixel_coord<Real>(u, v), d_o, intrinsic);
+            math::pixel_coord<int>(u, v), d_o, intrinsic);
     }
 }
 }  // namespace detail

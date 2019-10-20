@@ -43,11 +43,13 @@ struct pinhole {
     /// \note This uses \p project_to_sphere internally.
     /// \sa project_to_sphere
     /// \returns radians of the angle between the two lightrays.
-    [[nodiscard]] Real phi(const math::pixel_coord<Real> &p1,
-                           const math::pixel_coord<Real> &p2) const noexcept;
+    template <typename Number = int>
+    [[nodiscard]] Real phi(const math::pixel_coord<Number> &p1,
+                           const math::pixel_coord<Number> &p2) const noexcept;
 
+    template <typename Number = int>
     [[nodiscard]] math::image_coord<Real>
-    transform_to_image(const math::pixel_coord<Real> &p) const noexcept;
+    transform_to_image(const math::pixel_coord<Number> &p) const noexcept;
 
     /// This methods calculates the inverse projection of the camera model
     /// to get the direction of the lightray for the pixel at \p p.
@@ -61,8 +63,9 @@ struct pinhole {
     /// \pre \p p1 == \p p2 == \p k1 == \p k2 == \p k3 == 0!!
     /// \post \f$\lVert result \rVert_2 = 1.\f$
     /// \returns normalized vector in camera coordinates
+    template <typename Number = int>
     [[nodiscard]] math::sphere_coord<Real>
-    pixel_to_sphere(const math::pixel_coord<Real> &p) const noexcept;
+    pixel_to_sphere(const math::pixel_coord<Number> &p) const noexcept;
 
     /// The same as \p project_to_sphere but the coordinate is already
     /// in the image frame of reference.
@@ -72,8 +75,10 @@ struct pinhole {
 };
 
 template <typename Real>
-inline Real pinhole<Real>::phi(const math::pixel_coord<Real> &p1,
-                               const math::pixel_coord<Real> &p2) const noexcept {
+template <typename Number>
+inline Real pinhole<Real>::phi(const math::pixel_coord<Number> &p1,
+                               const math::pixel_coord<Number> &p2) const
+    noexcept {
     Expects(p1.u() >= 0);
     Expects(p1.u() < w);
 
@@ -98,7 +103,9 @@ inline Real pinhole<Real>::phi(const math::pixel_coord<Real> &p1,
 }
 
 template <typename Real>
-math::image_coord<Real> pinhole<Real>::transform_to_image(const math::pixel_coord<Real> &p) const
+template <typename Number>
+math::image_coord<Real>
+pinhole<Real>::transform_to_image(const math::pixel_coord<Number> &p) const
     noexcept {
     Expects(fx > 0.);
     Expects(fy > 0.);
@@ -117,14 +124,17 @@ math::image_coord<Real> pinhole<Real>::transform_to_image(const math::pixel_coor
 }
 
 template <typename Real>
+template <typename Number>
 inline math::sphere_coord<Real>
-pinhole<Real>::pixel_to_sphere(const math::pixel_coord<Real> &p) const noexcept {
+pinhole<Real>::pixel_to_sphere(const math::pixel_coord<Number> &p) const
+    noexcept {
     return image_to_sphere(transform_to_image(p));
 }
 
 template <typename Real>
 inline math::sphere_coord<Real>
-pinhole<Real>::image_to_sphere(const math::image_coord<Real> &p) const noexcept {
+pinhole<Real>::image_to_sphere(const math::image_coord<Real> &p) const
+    noexcept {
     const double x = p.x();
     const double y = p.y();
     const double z = 1.;

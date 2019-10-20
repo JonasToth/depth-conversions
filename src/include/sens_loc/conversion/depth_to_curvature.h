@@ -116,8 +116,8 @@ void gaussian_inner(const int v, const cv::Mat &depth_image,
     for (int u = 1; u < depth_image.cols - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
-        const Real u_d     = u;
-        const Real v_d     = v;
+        const int  u_d     = u;
+        const int  v_d     = v;
         const Real d_phi   = intrinsic.phi({u_d - 1, v_d}, {u_d + 1, v_d});
         const Real d_theta = intrinsic.phi({u_d, v_d - 1}, {u_d, v_d + 1});
         const Real d_phi_theta =
@@ -139,8 +139,8 @@ void mean_inner(const int v, const cv::Mat &depth_image,
     for (int u = 1; u < depth_image.cols - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
-        const Real u_d     = u;
-        const Real v_d     = v;
+        const int  u_d     = u;
+        const int  v_d     = v;
         const Real d_phi   = intrinsic.phi({u_d - 1, v_d}, {u_d + 1, v_d});
         const Real d_theta = intrinsic.phi({u_d, v_d - 1}, {u_d, v_d + 1});
         const Real d_phi_theta =
@@ -227,7 +227,7 @@ reals_to_image(const cv::Mat &     real_image,
     Expects(real_image.rows > 0);
 
     // FIXME: Optimization opportunity: use min_max_element instead to save
-    // one iteration over all values of \par real_image.
+    // one iteration over all values of \p real_image.
     const Real source_min = clamp_min
                                 ? *clamp_min
                                 : *std::min_element(real_image.begin<Real>(),

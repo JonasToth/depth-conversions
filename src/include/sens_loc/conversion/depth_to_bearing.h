@@ -113,9 +113,9 @@ class pixel {
         : _du{get_du(Direction)}
         , _dv{get_dv(Direction)} {}
     /// \returns (u, v) for the prior point depending on the direction.
-    math::pixel_coord<Real> operator()(const math::pixel_coord<Real> &p) const
+    math::pixel_coord<int> operator()(const math::pixel_coord<int> &p) const
         noexcept {
-        return math::pixel_coord<Real>(p.u() + _du, p.v() + _dv);
+        return {p.u() + _du, p.v() + _dv};
     }
 
   private:
@@ -176,10 +176,10 @@ inline void bearing_inner(const RangeLimits &r,
                           const camera_models::pinhole<Real> &intrinsic,
                           cv::Mat &                           ba_image) {
     for (int u = r.x_start; u < r.x_end; ++u) {
-        const math::pixel_coord<Real> central(u, v);
-        const math::pixel_coord<Real> prior = prior_accessor(central);
-        const Real                    u_p   = prior.u();
-        const Real                    v_p   = prior.v();
+        const math::pixel_coord<int> central(u, v);
+        const math::pixel_coord<int> prior = prior_accessor(central);
+        const int                    u_p   = prior.u();
+        const int                    v_p   = prior.v();
 
         const PixelType d_i{depth_image.at<PixelType>(v, u)};
         const PixelType d_j{depth_image.at<PixelType>(v_p, u_p)};

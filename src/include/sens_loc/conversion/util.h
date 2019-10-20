@@ -31,7 +31,7 @@ namespace detail {
 /// suggested by the pinhole model.
 template <typename Real = float, typename PixelType = ushort>
 inline Real orthografic_to_euclidian(
-    math::pixel_coord<Real> p, PixelType d,
+    math::pixel_coord<int> p, PixelType d,
     const camera_models::pinhole<Real> &intrinsic) noexcept {
     if (d == 0)
         return Real(0.);
