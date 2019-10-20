@@ -11,8 +11,8 @@ using namespace conversion;
 NONIUS_BENCHMARK("Depth2Bearing Diagonal", [](nonius::chronometer meter) {
     const auto [_, euclid, p] = get_data();
     (void) _;
-    cv::Mat                          in   = euclid;
-    sens_loc::camera_models::pinhole cali = p;
+    auto in   = euclid;
+    auto cali = p;
     meter.measure(
         [&] { return depth_to_bearing<direction::diagonal>(in, cali); });
 })
@@ -21,11 +21,11 @@ NONIUS_BENCHMARK("Depth2Bearing Parallel Diagonal",
                  [](nonius::chronometer meter) {
                      const auto [_, euclid, p] = get_data();
                      (void) _;
-                     cv::Mat                          in   = euclid;
-                     cv::Mat                          out  = euclid;
-                     sens_loc::camera_models::pinhole cali = p;
-                     tf::Executor                     exe;
-                     tf::Taskflow                     flow;
+                     auto         in   = euclid;
+                     auto         out  = euclid;
+                     auto         cali = p;
+                     tf::Executor exe;
+                     tf::Taskflow flow;
                      meter.measure([&] {
                          par_depth_to_bearing<direction::diagonal>(in, cali,
                                                                    out, flow);
