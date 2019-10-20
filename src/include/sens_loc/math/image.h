@@ -50,6 +50,7 @@ class image {
     }
     image(const image<PixelType> &other) = default;
 
+    // NOLINTNEXTLINE(performance-noexcept-move-constructor)
     image(image<PixelType> &&other) = default;
     explicit image(cv::Mat &&other) noexcept
         : _data(std::move(other)) {
