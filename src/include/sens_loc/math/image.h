@@ -67,6 +67,7 @@ class image {
         return *this;
     }
 
+    // NOLINTNEXTLINE(performance-noexcept-move-constructor)
     image<PixelType> &operator=(image<PixelType> &&other) = default;
     image<PixelType> &operator=(cv::Mat &&other) noexcept {
         Expects(other.type() == detail::get_opencv_type<PixelType>());
@@ -92,7 +93,7 @@ class image {
     }
 
     /// Get access to the underlying data to use it for normal cv operations.
-    const cv::Mat &data() const noexcept { return _data; }
+    [[nodiscard]] const cv::Mat &data() const noexcept { return _data; }
 
   private:
     cv::Mat _data;
