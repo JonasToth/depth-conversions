@@ -11,7 +11,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
     SUBCASE("Nonexisting file") {
         ifstream unopened_file;
         unopened_file.setstate(std::ios_base::failbit);
-        optional<pinhole> p = load_pinhole_intrinsic(unopened_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(unopened_file);
         REQUIRE(!p);
     }
     SUBCASE("Proper intrinsic with 3 lines") {
@@ -20,7 +20,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "0.0 10.0 250.0\n";
         istringstream fake_file{intrinsic};
 
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(p);
         auto params = *p;
 
@@ -38,7 +38,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "0.0 0.0 1.0";
         istringstream fake_file{intrinsic};
 
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(p);
         auto params = *p;
 
@@ -52,13 +52,13 @@ TEST_CASE("Loading Pinhole Intrinsics") {
     SUBCASE("Negative value for dimension") {
         string intrinsic = "-960 540\n";
         istringstream fake_file{intrinsic};
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Zero value for dimension") {
         string intrinsic = "960 0\n";
         istringstream fake_file{intrinsic};
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(!p);
     }
 
@@ -66,14 +66,14 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         string intrinsic = "960 540\n"
                            "-10.0 0.0 500.0\n";
         istringstream fake_file{intrinsic};
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Zero value for cx") {
         string intrinsic = "-960 540\n"
                            "10.0 0.0 0.0\n";
         istringstream fake_file{intrinsic};
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(!p);
     }
 
@@ -82,7 +82,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "10.0 0.0 500.0\n"
                            "0.0 -10.0 250.0\n";
         istringstream fake_file{intrinsic};
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Zero value for cy") {
@@ -90,7 +90,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "10.0 0.0 0.0\n"
                            "0.0 10.0 0.0\n";
         istringstream fake_file{intrinsic};
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(!p);
     }
 
@@ -98,14 +98,14 @@ TEST_CASE("Loading Pinhole Intrinsics") {
     SUBCASE("Line ends to early in dimensions") {
         string intrinsic = "960\n";
         istringstream fake_file{intrinsic};
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Line ends too early for x-row") {
         string intrinsic = "960 540\n"
                            "10.0\n";
         istringstream fake_file{intrinsic};
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Line ends too early in y row") {
@@ -113,7 +113,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "10.0 0.0 500.0\n"
                            "0.0 10.0\n";
         istringstream fake_file{intrinsic};
-        optional<pinhole> p = load_pinhole_intrinsic(fake_file);
+        optional<pinhole<double>> p = load_pinhole_intrinsic<double>(fake_file);
         REQUIRE(!p);
     }
 }

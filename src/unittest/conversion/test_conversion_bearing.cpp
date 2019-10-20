@@ -8,10 +8,19 @@
 
 using namespace sens_loc;
 using namespace sens_loc::conversion;
+using namespace sens_loc::math;
 using namespace std;
 using doctest::Approx;
 
-constexpr camera_models::pinhole p = {
+constexpr camera_models::pinhole<double> p_double = {
+    .w  = 960,
+    .h  = 540,
+    .fx = 519.226,
+    .fy = 479.462,
+    .cx = 522.23,
+    .cy = 272.737,
+};
+constexpr camera_models::pinhole<float> p_float = {
     .w  = 960,
     .h  = 540,
     .fx = 519.226,
@@ -22,28 +31,28 @@ constexpr camera_models::pinhole p = {
 
 TEST_CASE("Acces Prior Pixel") {
     SUBCASE("horizontal") {
-        detail::pixel<direction::horizontal> p;
-        const auto [up, vp] = p(1, 1);
-        REQUIRE(up == 0);
-        REQUIRE(vp == 1);
+        detail::pixel<int, direction::horizontal> p;
+        const math::pixel_coord<int>              pp = p({1, 1});
+        REQUIRE(pp.u() == 0);
+        REQUIRE(pp.v() == 1);
     }
     SUBCASE("horizontal") {
-        detail::pixel<direction::vertical> p;
-        const auto [up, vp] = p(1, 1);
-        REQUIRE(up == 1);
-        REQUIRE(vp == 0);
+        detail::pixel<int, direction::vertical> p;
+        const math::pixel_coord<int>            pp = p({1, 1});
+        REQUIRE(pp.u() == 1);
+        REQUIRE(pp.v() == 0);
     }
     SUBCASE("diagonal") {
-        detail::pixel<direction::diagonal> p;
-        const auto [up, vp] = p(1, 1);
-        REQUIRE(up == 0);
-        REQUIRE(vp == 0);
+        detail::pixel<int, direction::diagonal> p;
+        const math::pixel_coord<int>            pp = p({1, 1});
+        REQUIRE(pp.u() == 0);
+        REQUIRE(pp.v() == 0);
     }
     SUBCASE("antidiagonal") {
-        detail::pixel<direction::antidiagonal> p;
-        const auto [up, vp] = p(1, 1);
-        REQUIRE(up == 0);
-        REQUIRE(vp == 2);
+        detail::pixel<int, direction::antidiagonal> p;
+        const math::pixel_coord<int>                pp = p({1, 1});
+        REQUIRE(pp.u() == 0);
+        REQUIRE(pp.v() == 2);
     }
 }
 
@@ -84,14 +93,16 @@ TEST_CASE("Convert depth image to vertical bearing angle image") {
         io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
     REQUIRE((*depth_image).type() == CV_16U);
-    cv::Mat laser_double = depth_to_laserscan<double, ushort>(*depth_image, p);
+    cv::Mat laser_double =
+        depth_to_laserscan<double, ushort>(*depth_image, p_double);
 
     optional<cv::Mat> ref_vert =
         io::load_image("conversion/bearing-vertical.png", cv::IMREAD_UNCHANGED);
     REQUIRE(ref_vert);
 
     auto vertical_bearing =
-        depth_to_bearing<direction::vertical, double, double>(laser_double, p);
+        depth_to_bearing<direction::vertical, double, double>(laser_double,
+                                                              p_double);
     auto converted = convert_bearing<double, uchar>(vertical_bearing);
     cv::imwrite("conversion/test_vertical.png", converted);
 
@@ -103,7 +114,7 @@ TEST_CASE("Convert depth image to vertical bearing angle image in parallel") {
         io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
     REQUIRE((*depth_image).type() == CV_16U);
-    cv::Mat laser = depth_to_laserscan<double, ushort>(*depth_image, p);
+    cv::Mat laser = depth_to_laserscan<double, ushort>(*depth_image, p_double);
 
     optional<cv::Mat> ref_vert =
         io::load_image("conversion/bearing-vertical.png", cv::IMREAD_UNCHANGED);
@@ -112,8 +123,8 @@ TEST_CASE("Convert depth image to vertical bearing angle image in parallel") {
     cv::Mat out(laser.rows, laser.cols, laser.type());
     {
         tf::Taskflow flow;
-        par_depth_to_bearing<direction::vertical, double, double>(laser, p, out,
-                                                                  flow);
+        par_depth_to_bearing<direction::vertical, double, double>(
+            laser, p_double, out, flow);
         tf::Executor().run(flow).wait();
     }
     auto converted = convert_bearing<double, uchar>(out);
@@ -127,14 +138,16 @@ TEST_CASE("Convert depth image to diagonal bearing angle image") {
         io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
     REQUIRE((*depth_image).type() == CV_16U);
-    cv::Mat laser_double = depth_to_laserscan<double, ushort>(*depth_image, p);
+    cv::Mat laser_double =
+        depth_to_laserscan<double, ushort>(*depth_image, p_double);
 
     optional<cv::Mat> ref_diag =
         io::load_image("conversion/bearing-diagonal.png", cv::IMREAD_UNCHANGED);
     REQUIRE(ref_diag);
 
     auto diagonal_bearing =
-        depth_to_bearing<direction::diagonal, double, double>(laser_double, p);
+        depth_to_bearing<direction::diagonal, double, double>(laser_double,
+                                                              p_double);
     auto converted = convert_bearing<double, ushort>(diagonal_bearing);
     cv::imwrite("conversion/test_diagonal.png", converted);
 
@@ -148,14 +161,15 @@ TEST_CASE("Convert depth image to antidiagonal bearing angle image") {
     REQUIRE((*depth_image).type() == CV_16U);
 
     const cv::Mat laser_float =
-        depth_to_laserscan<float, ushort>(*depth_image, p);
+        depth_to_laserscan<float, ushort>(*depth_image, p_float);
 
     const optional<cv::Mat> ref_anti = io::load_image(
         "conversion/bearing-antidiagonal.png", cv::IMREAD_UNCHANGED);
     REQUIRE(ref_anti);
 
     const auto antidiagonal_bearing =
-        depth_to_bearing<direction::antidiagonal, float, float>(laser_float, p);
+        depth_to_bearing<direction::antidiagonal, float, float>(laser_float,
+                                                                p_float);
     const auto converted_bearing =
         convert_bearing<float, uchar>(antidiagonal_bearing);
     cv::imwrite("conversion/test_antidiagonal.png", converted_bearing);
@@ -168,8 +182,10 @@ TEST_CASE("Convert depth image to horizontal bearing angle image") {
         io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
     REQUIRE((*depth_image).type() == CV_16U);
-    cv::Mat laser_double = depth_to_laserscan<double, ushort>(*depth_image, p);
-    cv::Mat laser_float  = depth_to_laserscan<float, ushort>(*depth_image, p);
+    cv::Mat laser_double =
+        depth_to_laserscan<double, ushort>(*depth_image, p_double);
+    cv::Mat laser_float =
+        depth_to_laserscan<float, ushort>(*depth_image, p_float);
 
     optional<cv::Mat> ref_hor_float = io::load_image(
         "conversion/bearing-horizontal-float.png", cv::IMREAD_UNCHANGED);
@@ -182,12 +198,14 @@ TEST_CASE("Convert depth image to horizontal bearing angle image") {
     REQUIRE(ref_diff);
 
     auto horizontal_bearing_float =
-        depth_to_bearing<direction::horizontal, float, double>(laser_double, p);
+        depth_to_bearing<direction::horizontal, float, double>(laser_double,
+                                                               p_float);
     auto converted_flt = convert_bearing(horizontal_bearing_float);
     cv::imwrite("conversion/test_horizontal_float.png", converted_flt);
 
     auto horizontal_bearing_double =
-        depth_to_bearing<direction::horizontal, double, float>(laser_float, p);
+        depth_to_bearing<direction::horizontal, double, float>(laser_float,
+                                                               p_double);
     auto converted_dbl = convert_bearing<double>(horizontal_bearing_double);
     cv::imwrite("conversion/test_horizontal_double.png", converted_dbl);
 

@@ -29,8 +29,9 @@ namespace sens_loc { namespace conversion {
 /// \pre \p depth_image is not empty
 /// \pre intrinsic matches the sensor that took the image
 template <typename Real = float, typename PixelType = float>
-cv::Mat depth_to_flexion(const cv::Mat &               depth_image,
-                         const camera_models::pinhole &intrinsic) noexcept;
+cv::Mat
+depth_to_flexion(const cv::Mat &                     depth_image,
+                 const camera_models::pinhole<Real> &intrinsic) noexcept;
 
 /// Convert range image to a flexion image in parallel
 //
@@ -47,8 +48,8 @@ cv::Mat depth_to_flexion(const cv::Mat &               depth_image,
 /// built. This graph will then execute all the tasks on request.
 template <typename Real = float, typename PixelType = float>
 std::pair<tf::Task, tf::Task>
-par_depth_to_flexion(const cv::Mat &               depth_image,
-                     const camera_models::pinhole &intrinsic,
+par_depth_to_flexion(const cv::Mat &                     depth_image,
+                     const camera_models::pinhole<Real> &intrinsic,
                      cv::Mat &triple_image, tf::Taskflow &flow) noexcept;
 
 /// Scale the flexion image to \p PixelType for normal image visualization.
@@ -66,16 +67,17 @@ cv::Mat convert_flexion(const cv::Mat &flexion_image) noexcept;
 namespace detail {
 using ::sens_loc::math::vec;
 template <typename Real = float>
-vec<Real, 3> get_cartesian(const camera_models::pinhole &intrinsic, int v,
-                           int u, Real d) noexcept {
-    const auto [xs, ys, zs] = intrinsic.project_to_sphere(u, v);
-    return d * vec<Real, 3>(xs, ys, zs);
+math::camera_coord<Real>
+to_camera(const camera_models::pinhole<Real> &intrinsic,
+          const math::pixel_coord<Real> &p, Real d) noexcept {
+    const math::sphere_coord<Real> P_s = intrinsic.pixel_to_sphere(p);
+    return math::camera_coord<Real>(d * P_s.Xs(), d * P_s.Ys(), d * P_s.Zs());
 }
 
 template <typename Real = float, typename PixelType = float>
 inline void flexion_inner(int v, const cv::Mat &depth_image,
-                          const camera_models::pinhole &intrinsic,
-                          cv::Mat &                     out) {
+                          const camera_models::pinhole<Real> &intrinsic,
+                          cv::Mat &                           out) {
     for (int u = 1; u < depth_image.cols - 1; ++u) {
         const Real d__1__0 = depth_image.at<PixelType>(v - 1, u);
         const Real d_1__0  = depth_image.at<PixelType>(v + 1, u);
@@ -95,22 +97,32 @@ inline void flexion_inner(int v, const cv::Mat &depth_image,
         // Not short-circuiting results in easier vectorization / GPU
         // acceleration.
 
-        const auto surface_pt0  = get_cartesian(intrinsic, v - 1, u, d__1__0);
-        const auto surface_pt1  = get_cartesian(intrinsic, v + 1, u, d_1__0);
-        const auto surface_dir0 = surface_pt1 - surface_pt0;
+        using math::camera_coord;
+        using math::pixel_coord;
 
-        const auto surface_pt2  = get_cartesian(intrinsic, v, u - 1, d__0__1);
-        const auto surface_pt3  = get_cartesian(intrinsic, v, u + 1, d__0_1);
-        const auto surface_dir1 = surface_pt3 - surface_pt2;
+        const camera_coord<Real> surface_pt0 =
+            to_camera(intrinsic, pixel_coord<Real>(u, v - 1), d__1__0);
+        const camera_coord<Real> surface_pt1 =
+            to_camera(intrinsic, pixel_coord<Real>(u, v + 1), d_1__0);
+        const camera_coord<Real> surface_dir0 = surface_pt1 - surface_pt0;
 
-        const auto surface_pt4 = get_cartesian(intrinsic, v - 1, u + 1, d__1_1);
-        const auto surface_pt5 = get_cartesian(intrinsic, v + 1, u - 1, d_1__1);
-        const auto surface_dir2 = surface_pt5 - surface_pt4;
+        const camera_coord<Real> surface_pt2 =
+            to_camera(intrinsic, pixel_coord<Real>(u - 1, v), d__0__1);
+        const camera_coord<Real> surface_pt3 =
+            to_camera(intrinsic, pixel_coord<Real>(u + 1, v), d__0_1);
+        const camera_coord<Real> surface_dir1 = surface_pt3 - surface_pt2;
 
-        const auto surface_pt6 =
-            get_cartesian(intrinsic, v - 1, u - 1, d__1__1);
-        const auto surface_pt7  = get_cartesian(intrinsic, v + 1, u + 1, d_1_1);
-        const auto surface_dir3 = surface_pt7 - surface_pt6;
+        const camera_coord<Real> surface_pt4 =
+            to_camera(intrinsic, pixel_coord<Real>(u + 1, v - 1), d__1_1);
+        const camera_coord<Real> surface_pt5 =
+            to_camera(intrinsic, pixel_coord<Real>(u - 1, v + 1), d_1__1);
+        const camera_coord<Real> surface_dir2 = surface_pt5 - surface_pt4;
+
+        const camera_coord<Real> surface_pt6 =
+            to_camera(intrinsic, pixel_coord<Real>(u - 1, v - 1), d__1__1);
+        const camera_coord<Real> surface_pt7 =
+            to_camera(intrinsic, pixel_coord<Real>(u + 1, v + 1), d_1_1);
+        const camera_coord<Real> surface_dir3 = surface_pt7 - surface_pt6;
 
         const auto cross0 =
             surface_dir0.normalized().cross(surface_dir1.normalized());
@@ -130,8 +142,8 @@ inline void flexion_inner(int v, const cv::Mat &depth_image,
 
 template <typename Real, typename PixelType>
 inline cv::Mat
-depth_to_flexion(const cv::Mat &               depth_image,
-                 const camera_models::pinhole &intrinsic) noexcept {
+depth_to_flexion(const cv::Mat &                     depth_image,
+                 const camera_models::pinhole<Real> &intrinsic) noexcept {
     Expects(depth_image.type() == detail::get_cv_type<PixelType>());
     Expects(depth_image.channels() == 1);
     Expects(!depth_image.empty());
@@ -156,8 +168,8 @@ depth_to_flexion(const cv::Mat &               depth_image,
 /// Convert an euclidian depth image to a triple-product-image.
 template <typename Real, typename PixelType>
 inline std::pair<tf::Task, tf::Task>
-par_depth_to_flexion(const cv::Mat &               depth_image,
-                     const camera_models::pinhole &intrinsic,
+par_depth_to_flexion(const cv::Mat &                     depth_image,
+                     const camera_models::pinhole<Real> &intrinsic,
                      cv::Mat &triple_image, tf::Taskflow &flow) noexcept {
     Expects(depth_image.type() == detail::get_cv_type<PixelType>());
     Expects(depth_image.channels() == 1);

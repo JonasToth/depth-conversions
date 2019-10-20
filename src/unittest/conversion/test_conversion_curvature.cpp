@@ -7,7 +7,7 @@
 #include <sens_loc/util/correctness_util.h>
 
 using namespace sens_loc;
-constexpr camera_models::pinhole p = {
+constexpr camera_models::pinhole<double> p = {
     .w  = 960,
     .h  = 540,
     .fx = 519.226,

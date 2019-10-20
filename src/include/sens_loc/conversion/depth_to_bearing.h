@@ -8,6 +8,7 @@
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/constants.h>
+#include <sens_loc/math/coordinate.h>
 #include <sens_loc/math/triangles.h>
 #include <sens_loc/util/correctness_util.h>
 #include <taskflow/taskflow.hpp>
@@ -40,8 +41,9 @@ namespace sens_loc { namespace conversion {
 /// is of course possible with matching changes in the \p depth_image.
 template <direction Direction, typename Real = float,
           typename PixelType = float>
-cv::Mat depth_to_bearing(const cv::Mat &               depth_image,
-                         const camera_models::pinhole &intrinsic) noexcept;
+cv::Mat
+depth_to_bearing(const cv::Mat &                     depth_image,
+                 const camera_models::pinhole<Real> &intrinsic) noexcept;
 
 /// This function provides are parallelized version of the conversion
 /// functionality.
@@ -60,9 +62,9 @@ cv::Mat depth_to_bearing(const cv::Mat &               depth_image,
 template <direction Direction, typename Real = float,
           typename PixelType = float>
 std::pair<tf::Task, tf::Task>
-par_depth_to_bearing(const cv::Mat &               depth_image,
-                     const camera_models::pinhole &intrinsic, cv::Mat &ba_image,
-                     tf::Taskflow &flow) noexcept;
+par_depth_to_bearing(const cv::Mat &                     depth_image,
+                     const camera_models::pinhole<Real> &intrinsic,
+                     cv::Mat &ba_image, tf::Taskflow &flow) noexcept;
 
 /// Convert a bearing angle image to an image with integer types.
 /// This function scales the bearing angles between
@@ -104,15 +106,16 @@ inline int get_dv(direction dir) {
 
 /// Provide a general accessor for the pixels that provide depth information
 /// to calculate the bearing angle.
-template <direction Direction>  // requires CVInteger<PixelType>
+template <typename Real, direction Direction>  // requires CVInteger<PixelType>
 class pixel {
   public:
     pixel()
         : _du{get_du(Direction)}
         , _dv{get_dv(Direction)} {}
     /// \returns (u, v) for the prior point depending on the direction.
-    std::pair<int, int> operator()(int u, int v) const noexcept {
-        return std::make_pair(u + _du, v + _dv);
+    math::pixel_coord<Real> operator()(const math::pixel_coord<Real> &p) const
+        noexcept {
+        return math::pixel_coord<Real>(p.u() + _du, p.v() + _dv);
     }
 
   private:
@@ -167,12 +170,16 @@ struct pixel_range {
 
 template <typename Real, typename PixelType, typename RangeLimits,
           typename PriorAccess>
-inline void
-bearing_inner(const RangeLimits &r, const PriorAccess &prior_accessor,
-              const int v, const cv::Mat &depth_image,
-              const camera_models::pinhole &intrinsic, cv::Mat &ba_image) {
+inline void bearing_inner(const RangeLimits &r,
+                          const PriorAccess &prior_accessor, const int v,
+                          const cv::Mat &                     depth_image,
+                          const camera_models::pinhole<Real> &intrinsic,
+                          cv::Mat &                           ba_image) {
     for (int u = r.x_start; u < r.x_end; ++u) {
-        const auto [u_p, v_p] = prior_accessor(u, v);
+        const math::pixel_coord<Real> central(u, v);
+        const math::pixel_coord<Real> prior = prior_accessor(central);
+        const Real                    u_p   = prior.u();
+        const Real                    v_p   = prior.v();
 
         const PixelType d_i{depth_image.at<PixelType>(v, u)};
         const PixelType d_j{depth_image.at<PixelType>(v_p, u_p)};
@@ -180,7 +187,7 @@ bearing_inner(const RangeLimits &r, const PriorAccess &prior_accessor,
         Expects(d_i >= 0.);
         Expects(d_j >= 0.);
 
-        const Real d_phi{gsl::narrow_cast<Real>(intrinsic.phi(u, v, u_p, v_p))};
+        const Real d_phi{gsl::narrow_cast<Real>(intrinsic.phi(central, prior))};
 
         // A depth==0 means there is no measurement at this pixel.
         const Real angle =
@@ -203,8 +210,8 @@ bearing_inner(const RangeLimits &r, const PriorAccess &prior_accessor,
 template <direction Direction, typename Real, typename PixelType>
 // requires Float<Real> && CVIntegerPixelType<PixelType>
 inline cv::Mat
-depth_to_bearing(const cv::Mat &               depth_image,
-                 const camera_models::pinhole &intrinsic) noexcept {
+depth_to_bearing(const cv::Mat &                     depth_image,
+                 const camera_models::pinhole<Real> &intrinsic) noexcept {
     using namespace detail;
 
     Expects(depth_image.type() == get_cv_type<PixelType>());
@@ -213,7 +220,7 @@ depth_to_bearing(const cv::Mat &               depth_image,
     Expects(depth_image.cols > 2);
     Expects(depth_image.rows > 2);
 
-    const pixel<Direction>       prior_accessor;
+    const pixel<Real, Direction> prior_accessor;
     const pixel_range<Direction> r{depth_image};
 
     // Image of Reals, that will be converted after the full calculation.
@@ -236,9 +243,9 @@ depth_to_bearing(const cv::Mat &               depth_image,
 
 template <direction Direction, typename Real, typename PixelType>
 inline std::pair<tf::Task, tf::Task>
-par_depth_to_bearing(const cv::Mat &               depth_image,
-                     const camera_models::pinhole &intrinsic, cv::Mat &ba_image,
-                     tf::Taskflow &flow) noexcept {
+par_depth_to_bearing(const cv::Mat &                     depth_image,
+                     const camera_models::pinhole<Real> &intrinsic,
+                     cv::Mat &ba_image, tf::Taskflow &flow) noexcept {
     using namespace detail;
     Expects(depth_image.type() == get_cv_type<PixelType>());
     Expects(depth_image.channels() == 1);
@@ -250,7 +257,7 @@ par_depth_to_bearing(const cv::Mat &               depth_image,
     Expects(ba_image.channels() == depth_image.channels());
     Expects(ba_image.type() == get_cv_type<Real>());
 
-    const pixel<Direction>       prior_accessor;
+    const pixel<Real, Direction> prior_accessor;
     const pixel_range<Direction> r{depth_image};
 
     auto sync_points = flow.parallel_for(

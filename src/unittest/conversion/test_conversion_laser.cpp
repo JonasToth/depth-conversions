@@ -23,7 +23,15 @@ TEST_CASE("convert depth image to laser-scan image") {
     depth_image->convertTo(depth_float, CV_32F);
     depth_image->convertTo(depth_double, CV_64F);
 
-    camera_models::pinhole p = {
+    camera_models::pinhole<float> p_float = {
+        .w  = 960,
+        .h  = 540,
+        .fx = 519.226,
+        .fy = 479.462,
+        .cx = 522.23,
+        .cy = 272.737,
+    };
+    camera_models::pinhole<double> p = {
         .w  = 960,
         .h  = 540,
         .fx = 519.226,
@@ -32,7 +40,7 @@ TEST_CASE("convert depth image to laser-scan image") {
         .cy = 272.737,
     };
 
-    cv::Mat laser_float  = depth_to_laserscan(*depth_image, p);
+    cv::Mat laser_float  = depth_to_laserscan(*depth_image, p_float);
     cv::Mat laser_double = depth_to_laserscan<double>(*depth_image, p);
 
     cv::Mat laser_float_16u;
@@ -59,7 +67,7 @@ TEST_CASE("convert depth image to laser-scan image parallel") {
     cv::Mat depth_float;
     depth_image->convertTo(depth_float, CV_32F);
 
-    camera_models::pinhole p = {
+    camera_models::pinhole<float> p = {
         .w  = 960,
         .h  = 540,
         .fx = 519.226,

@@ -3,6 +3,7 @@
 
 #include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/pinhole.h>
+#include <sens_loc/math/coordinate.h>
 #include <type_traits>
 
 namespace sens_loc {
@@ -29,9 +30,9 @@ namespace detail {
 /// Convert the orthografic depth of a pixel into the euclidian distance
 /// suggested by the pinhole model.
 template <typename Real = float, typename PixelType = ushort>
-inline Real
-orthografic_to_euclidian(int u, int v, PixelType d,
-                         const camera_models::pinhole &intrinsic) noexcept {
+inline Real orthografic_to_euclidian(
+    math::pixel_coord<Real> p, PixelType d,
+    const camera_models::pinhole<Real> &intrinsic) noexcept {
     if (d == 0)
         return Real(0.);
 
@@ -47,9 +48,10 @@ orthografic_to_euclidian(int u, int v, PixelType d,
     Expects(intrinsic.p1 == 0.);
     Expects(intrinsic.p2 == 0.);
 
-    const Real x        = (u - intrinsic.cx) / intrinsic.fx;
-    const Real y        = (v - intrinsic.cy) / intrinsic.fy;
-    const Real z_helper = x * x + y * y + 1.;
+    const math::image_coord<Real> p_i      = intrinsic.transform_to_image(p);
+    const Real                    x        = p_i.x();
+    const Real                    y        = p_i.y();
+    const Real                    z_helper = x * x + y * y + 1.;
 
     const Real euclid_distance = Real(d) * (z_helper) / std::sqrt(z_helper);
     Ensures(euclid_distance >= Real(d));
@@ -84,6 +86,7 @@ inline int get_cv_type() {
         return -1;
 }
 }  // namespace detail
-}}  // namespace sens_loc::conversion
+}  // namespace conversion
+}  // namespace sens_loc
 
 #endif /* end of include guard: UTIL_H_QNW3WCZL */

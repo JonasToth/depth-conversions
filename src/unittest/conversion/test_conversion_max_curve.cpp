@@ -67,7 +67,7 @@ TEST_CASE("depth image to max curve") {
         io::load_image("conversion/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
 
-    const camera_models::pinhole p = {
+    const camera_models::pinhole<double> p = {
         .w  = 960,
         .h  = 540,
         .fx = 519.226,
@@ -75,22 +75,6 @@ TEST_CASE("depth image to max curve") {
         .cx = 522.23,
         .cy = 272.737,
     };
-
-    SUBCASE("float accuracy") {
-        optional<cv::Mat> ref_float = io::load_image(
-            "conversion/max-curve-float.png", cv::IMREAD_UNCHANGED);
-        REQUIRE(ref_float);
-
-        const cv::Mat laser_float =
-            depth_to_laserscan<float, ushort>(*depth_image, p);
-        const cv::Mat curve_float = depth_to_max_curve(laser_float, p);
-        REQUIRE(!curve_float.empty());
-
-        const cv::Mat curve_ushort =
-            convert_max_curve<float, ushort>(curve_float);
-        cv::imwrite("conversion/test_max_curve_float.png", curve_ushort);
-        REQUIRE(util::average_pixel_error(*ref_float, curve_ushort) < 0.5);
-    }
 
     SUBCASE("double accuracy") {
         optional<cv::Mat> ref_double = io::load_image(

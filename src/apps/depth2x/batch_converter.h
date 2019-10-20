@@ -121,7 +121,7 @@ class batch_converter {
 class batch_pinhole_converter : public batch_converter {
   public:
     batch_pinhole_converter(const file_patterns &files, depth_type t,
-                            const camera_models::pinhole &intrinsic)
+                            const camera_models::pinhole<double> &intrinsic)
         : batch_converter(files, t)
         , intrinsic{intrinsic} {}
 
@@ -133,8 +133,8 @@ class batch_pinhole_converter : public batch_converter {
     ~batch_pinhole_converter() override                            = default;
 
   protected:
-    camera_models::pinhole intrinsic;  ///< pinhole-camera-model parameters used
-                                       ///< in the whole conversion.
+    /// pinhole-camera-model parameters used in the whole conversion.
+    camera_models::pinhole<double> intrinsic;
 
   private:
     /// Convert orthographic depth-images to range images using the pinhole
@@ -147,6 +147,7 @@ class batch_pinhole_converter : public batch_converter {
 
 /// @}
 
-}}  // namespace sens_loc::apps
+}  // namespace apps
+}  // namespace sens_loc
 
 #endif /* end of include guard: BATCH_CONVERTER_H_XDIRBPHG */

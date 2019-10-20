@@ -7,6 +7,7 @@
 #include <optional>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/util.h>
+#include <sens_loc/math/coordinate.h>
 #include <sens_loc/math/curvature.h>
 #include <sens_loc/math/derivatives.h>
 #include <sens_loc/math/scaling.h>
@@ -29,9 +30,9 @@ namespace sens_loc { namespace conversion {
 /// \note invalid depth values result in 0 for that pixel.
 /// \sa depth_to_laserscan
 template <typename Real = float, typename PixelType = float>
-cv::Mat
-depth_to_gaussian_curvature(const cv::Mat &               depth_image,
-                            const camera_models::pinhole &intrinsic) noexcept;
+cv::Mat depth_to_gaussian_curvature(
+    const cv::Mat &                     depth_image,
+    const camera_models::pinhole<Real> &intrinsic) noexcept;
 
 /// Convert the range image \p depth_image to a mean curvature image.
 ///
@@ -50,11 +51,11 @@ depth_to_gaussian_curvature(const cv::Mat &               depth_image,
 /// \sa depth_to_laserscan
 template <typename Real = float, typename PixelType = float>
 cv::Mat
-depth_to_mean_curvature(const cv::Mat &               depth_image,
-                        const camera_models::pinhole &intrinsic) noexcept;
+depth_to_mean_curvature(const cv::Mat &                     depth_image,
+                        const camera_models::pinhole<Real> &intrinsic) noexcept;
 
 /// Convert the curvature images to presentable images.
-/// 
+///
 /// The issue with the curvature images is that the result can be any real
 /// number. Together with the noisy input this result in gray images, because
 /// the classical integer types can not represent them well.
@@ -110,13 +111,17 @@ namespace detail {
 
 template <typename Real, typename PixelType>
 void gaussian_inner(const int v, const cv::Mat &depth_image,
-                    const camera_models::pinhole &intrinsic,
-                    cv::Mat &                     target_img) {
+                    const camera_models::pinhole<Real> &intrinsic,
+                    cv::Mat &                           target_img) {
     for (int u = 1; u < depth_image.cols - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
-        const Real d_phi       = intrinsic.phi(u - 1, v, u + 1, v);
-        const Real d_theta     = intrinsic.phi(u, v - 1, u, v + 1);
-        const Real d_phi_theta = intrinsic.phi(u - 1, v - 1, u + 1, v + 1);
+
+        const Real u_d     = u;
+        const Real v_d     = v;
+        const Real d_phi   = intrinsic.phi({u_d - 1, v_d}, {u_d + 1, v_d});
+        const Real d_theta = intrinsic.phi({u_d, v_d - 1}, {u_d, v_d + 1});
+        const Real d_phi_theta =
+            intrinsic.phi({u_d - 1, v_d - 1}, {u_d + 1, v_d + 1});
 
         const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
             d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1, d_1__0,
@@ -129,13 +134,17 @@ void gaussian_inner(const int v, const cv::Mat &depth_image,
 
 template <typename Real, typename PixelType>
 void mean_inner(const int v, const cv::Mat &depth_image,
-                const camera_models::pinhole &intrinsic, cv::Mat &target_img) {
+                const camera_models::pinhole<Real> &intrinsic,
+                cv::Mat &                           target_img) {
     for (int u = 1; u < depth_image.cols - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
-        const Real d_phi       = intrinsic.phi(u - 1, v, u + 1, v);
-        const Real d_theta     = intrinsic.phi(u, v - 1, u, v + 1);
-        const Real d_phi_theta = intrinsic.phi(u - 1, v - 1, u + 1, v + 1);
+        const Real u_d     = u;
+        const Real v_d     = v;
+        const Real d_phi   = intrinsic.phi({u_d - 1, v_d}, {u_d + 1, v_d});
+        const Real d_theta = intrinsic.phi({u_d, v_d - 1}, {u_d, v_d + 1});
+        const Real d_phi_theta =
+            intrinsic.phi({u_d - 1, v_d - 1}, {u_d + 1, v_d + 1});
 
         const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
             d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1, d_1__0,
@@ -151,9 +160,9 @@ void mean_inner(const int v, const cv::Mat &depth_image,
 
 /// Convert an euclidian depth image to a gaussian curvature image.
 template <typename Real, typename PixelType>
-inline cv::Mat
-depth_to_gaussian_curvature(const cv::Mat &               depth_image,
-                            const camera_models::pinhole &intrinsic) noexcept {
+inline cv::Mat depth_to_gaussian_curvature(
+    const cv::Mat &                     depth_image,
+    const camera_models::pinhole<Real> &intrinsic) noexcept {
 
     Expects(depth_image.type() == detail::get_cv_type<PixelType>());
     Expects(depth_image.channels() == 1);
@@ -178,9 +187,9 @@ depth_to_gaussian_curvature(const cv::Mat &               depth_image,
 
 /// Convert an euclidian depth image to a gaussian curvature image.
 template <typename Real, typename PixelType>
-inline cv::Mat
-depth_to_mean_curvature(const cv::Mat &               depth_image,
-                        const camera_models::pinhole &intrinsic) noexcept {
+inline cv::Mat depth_to_mean_curvature(
+    const cv::Mat &                     depth_image,
+    const camera_models::pinhole<Real> &intrinsic) noexcept {
 
     Expects(depth_image.type() == detail::get_cv_type<PixelType>());
     Expects(depth_image.channels() == 1);

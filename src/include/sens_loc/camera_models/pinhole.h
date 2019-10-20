@@ -4,6 +4,7 @@
 #include <cmath>
 #include <gsl/gsl>
 #include <sens_loc/math/constants.h>
+#include <sens_loc/math/coordinate.h>
 #include <utility>
 
 namespace sens_loc {
@@ -21,31 +22,37 @@ namespace camera_models {
 /// not smart itself.
 /// \warning Each value can be modified by everyone, as its just as list of
 /// numbers. Use \c const in your code to prevent bugs!
+template <typename Real = float>
 struct pinhole {
-    int    w  = 0;    ///< width of the image
-    int    h  = 0;    ///< height of the image
-    double fx = 0.0;  ///< x-coordinate of focal length
-    double fy = 0.0;  ///< y-corrdiante of focal length
-    double cx = 0.0;  ///< x-coordinate of image center
-    double cy = 0.0;  ///< y-coordinate of image center
+    int  w  = 0;    ///< width of the image
+    int  h  = 0;    ///< height of the image
+    Real fx = 0.0;  ///< x-coordinate of focal length
+    Real fy = 0.0;  ///< y-corrdiante of focal length
+    Real cx = 0.0;  ///< x-coordinate of image center
+    Real cy = 0.0;  ///< y-coordinate of image center
 
-    double p1 = 0.0;  ///< first order tangential distortion coefficient
-    double p2 = 0.0;  ///< second order tangential distortion coefficient
+    Real p1 = 0.0;  ///< first order tangential distortion coefficient
+    Real p2 = 0.0;  ///< second order tangential distortion coefficient
 
-    double k1 = 0.0;  ///< first order radial distortion coefficient
-    double k2 = 0.0;  ///< second order radial distortion coefficient
-    double k3 = 0.0;  ///< third order radial distortion coefficient
+    Real k1 = 0.0;  ///< first order radial distortion coefficient
+    Real k2 = 0.0;  ///< second order radial distortion coefficient
+    Real k3 = 0.0;  ///< third order radial distortion coefficient
 
     /// This method calculates the angle of the rays between two pixels.
-    /// \param u0,v0,u1,v1 non-negative pixel coordinates smaller \c w and \c h.
+    /// \param p1,p2 non-negative pixel coordinates smaller \c w and \c h.
     /// \note This uses \p project_to_sphere internally.
     /// \sa project_to_sphere
     /// \returns radians of the angle between the two lightrays.
-    [[nodiscard]] double phi(int u0, int v0, int u1, int v1) const noexcept;
+    [[nodiscard]] Real phi(const math::pixel_coord<Real> &p1,
+                           const math::pixel_coord<Real> &p2) const noexcept;
+
+    [[nodiscard]] math::image_coord<Real>
+    transform_to_image(const math::pixel_coord<Real> &p) const noexcept;
 
     /// This methods calculates the inverse projection of the camera model
-    /// to get the direction of the lightray for the pixel at \p u \p v.
+    /// to get the direction of the lightray for the pixel at \p p.
     ///
+    /// \param p non-negative pixel coordinates
     /// \warning This does not respect a distortion model at all!
     /// \pre \p fx > 0
     /// \pre \p fy > 0
@@ -54,26 +61,34 @@ struct pinhole {
     /// \pre \p p1 == \p p2 == \p k1 == \p k2 == \p k3 == 0!!
     /// \post \f$\lVert result \rVert_2 = 1.\f$
     /// \returns normalized vector in camera coordinates
-    [[nodiscard]] std::tuple<double, double, double>
-    project_to_sphere(int u, int v) const noexcept;
+    [[nodiscard]] math::sphere_coord<Real>
+    pixel_to_sphere(const math::pixel_coord<Real> &p) const noexcept;
+
+    /// The same as \p project_to_sphere but the coordinate is already
+    /// in the image frame of reference.
+    /// \sa pinhole::project_to_sphere
+    [[nodiscard]] math::sphere_coord<Real>
+    image_to_sphere(const math::image_coord<Real> &p) const noexcept;
 };
 
-inline double pinhole::phi(int u0, int v0, int u1, int v1) const noexcept {
-    Expects(u0 >= 0);
-    Expects(u0 < w);
+template <typename Real>
+inline Real pinhole<Real>::phi(const math::pixel_coord<Real> &p1,
+                               const math::pixel_coord<Real> &p2) const noexcept {
+    Expects(p1.u() >= 0);
+    Expects(p1.u() < w);
 
-    Expects(v0 >= 0);
-    Expects(v0 < h);
+    Expects(p1.v() >= 0);
+    Expects(p1.v() < h);
 
-    Expects(u1 >= 0);
-    Expects(u1 < w);
+    Expects(p2.u() >= 0);
+    Expects(p2.u() < w);
 
-    Expects(v1 >= 0);
-    Expects(v1 < h);
+    Expects(p2.v() >= 0);
+    Expects(p2.v() < h);
 
-    const auto [xs0, ys0, zs0] = project_to_sphere(u0, v0);
-    const auto [xs1, ys1, zs1] = project_to_sphere(u1, v1);
-    const auto cos_phi         = xs0 * xs1 + ys0 * ys1 + zs0 * zs1;
+    const auto s1      = pixel_to_sphere(p1);
+    const auto s2      = pixel_to_sphere(p2);
+    const auto cos_phi = s1.dot(s2);
 
     Ensures(cos_phi > -1.);
     Ensures(cos_phi < +1.);
@@ -82,8 +97,9 @@ inline double pinhole::phi(int u0, int v0, int u1, int v1) const noexcept {
     return angle;
 }
 
-inline std::tuple<double, double, double>
-pinhole::project_to_sphere(int u, int v) const noexcept {
+template <typename Real>
+math::image_coord<Real> pinhole<Real>::transform_to_image(const math::pixel_coord<Real> &p) const
+    noexcept {
     Expects(fx > 0.);
     Expects(fy > 0.);
     Expects(cx > 0.);
@@ -93,22 +109,36 @@ pinhole::project_to_sphere(int u, int v) const noexcept {
     Expects(k1 == 0.);
     Expects(k2 == 0.);
     Expects(k3 == 0.);
+    Expects(p.u() >= 0.);
+    Expects(p.u() < w);
+    Expects(p.v() >= 0.);
+    Expects(p.v() < h);
+    return math::image_coord<Real>((p.u() - cx) / fx, (p.v() - cy) / fy);
+}
 
-    const double x = (double(u) - cx) / fx;
-    const double y = (double(v) - cy) / fy;
+template <typename Real>
+inline math::sphere_coord<Real>
+pinhole<Real>::pixel_to_sphere(const math::pixel_coord<Real> &p) const noexcept {
+    return image_to_sphere(transform_to_image(p));
+}
+
+template <typename Real>
+inline math::sphere_coord<Real>
+pinhole<Real>::image_to_sphere(const math::image_coord<Real> &p) const noexcept {
+    const double x = p.x();
+    const double y = p.y();
     const double z = 1.;
 
     const double factor = std::sqrt(1. + x * x + y * y) / (1. + x * x + y * y);
-    const double xs     = factor * x;
-    const double ys     = factor * y;
-    const double zs     = factor * z;
+    math::sphere_coord<Real> res(factor * x, factor * y, factor * z);
 
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-    Ensures(std::abs(xs * xs + ys * ys + zs * zs - 1.) < 0.00000001);
+    Ensures(std::abs(res.norm() - 1.) < 0.000001);
 
-    return std::make_tuple(xs, ys, zs);
+    return res;
 }
-}}  // namespace sens_loc::camera_models
+}  // namespace camera_models
+}  // namespace sens_loc
 
 
 #endif /* end of include guard: PINHOLE_H_I3RZULX9 */

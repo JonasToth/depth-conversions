@@ -15,7 +15,7 @@ namespace sens_loc { namespace apps {
 class bearing_converter : public batch_pinhole_converter {
   public:
     bearing_converter(const file_patterns &files, depth_type t,
-                      const camera_models::pinhole &intrinsic)
+                      const camera_models::pinhole<double> &intrinsic)
         : batch_pinhole_converter(files, t, intrinsic) {
         if (files.horizontal.empty() && files.vertical.empty() &&
             files.diagonal.empty() && files.antidiagonal.empty()) {
@@ -39,7 +39,7 @@ class bearing_converter : public batch_pinhole_converter {
 class range_converter : public batch_pinhole_converter {
   public:
     range_converter(const file_patterns &files, depth_type t,
-                    const camera_models::pinhole &intrinsic)
+                    const camera_models::pinhole<double> &intrinsic)
         : batch_pinhole_converter(files, t, intrinsic) {}
     range_converter(const range_converter &) = default;
     range_converter(range_converter &&)      = default;
@@ -60,7 +60,7 @@ class gauss_curv_converter : public batch_pinhole_converter {
     /// \param lower_bound,upper_bound clamping parameters. Values below/above
     /// will map to these values.
     gauss_curv_converter(const file_patterns &files, depth_type t,
-                         const camera_models::pinhole &intrinsic,
+                         const camera_models::pinhole<double> &intrinsic,
                          double lower_bound, double upper_bound)
         : batch_pinhole_converter(files, t, intrinsic)
         , lower_bound{lower_bound}
@@ -87,7 +87,7 @@ class mean_curv_converter : public batch_pinhole_converter {
     /// \param lower_bound,upper_bound clamping parameters. Values below/above
     /// will map to these values.
     mean_curv_converter(const file_patterns &files, depth_type t,
-                        const camera_models::pinhole &intrinsic,
+                        const camera_models::pinhole<double> &intrinsic,
                         double lower_bound, double upper_bound)
         : batch_pinhole_converter(files, t, intrinsic)
         , lower_bound{lower_bound}
@@ -111,7 +111,7 @@ class mean_curv_converter : public batch_pinhole_converter {
 class max_curve_converter : public batch_pinhole_converter {
   public:
     max_curve_converter(const file_patterns &files, depth_type t,
-                        const camera_models::pinhole &intrinsic)
+                        const camera_models::pinhole<double> &intrinsic)
         : batch_pinhole_converter(files, t, intrinsic) {}
     max_curve_converter(const max_curve_converter &) = default;
     max_curve_converter(max_curve_converter &&)      = default;
@@ -129,7 +129,7 @@ class max_curve_converter : public batch_pinhole_converter {
 class flexion_converter : public batch_pinhole_converter {
   public:
     flexion_converter(const file_patterns &files, depth_type t,
-                      const camera_models::pinhole &intrinsic)
+                      const camera_models::pinhole<double> &intrinsic)
         : batch_pinhole_converter(files, t, intrinsic) {}
     flexion_converter(const flexion_converter &) = default;
     flexion_converter(flexion_converter &&)      = default;

@@ -16,7 +16,7 @@ TEST_CASE("Real world case found crashing") {
     REQUIRE(depth_image);
     REQUIRE((*depth_image).type() == CV_16U);
 
-    camera_models::pinhole p = {
+    camera_models::pinhole<double> p = {
         .w  = 960,
         .h  = 540,
         .fx = 519.226,
@@ -25,8 +25,8 @@ TEST_CASE("Real world case found crashing") {
         .cy = 272.737,
     };
 
-    cv::Mat laser_float = depth_to_laserscan<double, ushort>(*depth_image, p);
+    cv::Mat laser = depth_to_laserscan<double, ushort>(*depth_image, p);
 
     auto vert =
-        depth_to_bearing<direction::horizontal, double, double>(laser_float, p);
+        depth_to_bearing<direction::horizontal, double, double>(laser, p);
 }

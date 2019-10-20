@@ -253,9 +253,9 @@ int main(int argc, char **argv) try {
     CLI11_PARSE(app, argc, argv);
 
     // Options that are always required are checked first.
-    ifstream                         calibration_fstream{calibration_file};
-    optional<camera_models::pinhole> intrinsic =
-        io::load_pinhole_intrinsic(calibration_fstream);
+    ifstream calibration_fstream{calibration_file};
+    optional<camera_models::pinhole<double>> intrinsic =
+        io::load_pinhole_intrinsic<double>(calibration_fstream);
 
     // FIXME: Not nice, but scale_cmd is the only command that does not require
     // the intrinsic. Consequently if it is not given, some other command is

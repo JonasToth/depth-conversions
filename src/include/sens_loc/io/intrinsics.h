@@ -23,13 +23,14 @@ namespace sens_loc { namespace io {
 /// \warning The function is sensitive to UNIX-vs-MS line-endings.
 /// \returns \c std::optional<> with proper parameters on success, otherwise
 /// it contains \c None.
-inline std::optional<camera_models::pinhole>
+template <typename Real>
+inline std::optional<camera_models::pinhole<Real>>
 load_pinhole_intrinsic(std::istream &in) noexcept {
     if (!in.good())
         return std::nullopt;
 
-    camera_models::pinhole p;
-    double                 trash = 0.0;
+    camera_models::pinhole<Real> p;
+    Real                         trash = 0.0;
 
     std::string line;
     {

@@ -31,8 +31,9 @@ namespace sens_loc { namespace conversion {
 /// \post each pixel has a value in the range \f$[0, 2\pi)\f$
 /// \post the values are provided in radians
 template <typename Real = float, typename PixelType = float>
-cv::Mat depth_to_max_curve(const cv::Mat &               depth_image,
-                           const camera_models::pinhole &intrinsic) noexcept;
+cv::Mat
+depth_to_max_curve(const cv::Mat &                     depth_image,
+                   const camera_models::pinhole<Real> &intrinsic) noexcept;
 
 /// The max-curve picture is not a normal image and needs to be converted to
 /// the classical integer range.
@@ -79,8 +80,8 @@ inline Real angle_formula(const Real d__1, const Real d__0, const Real d_1,
 
 template <typename Real, typename PixelType>
 inline cv::Mat
-depth_to_max_curve(const cv::Mat &               depth_image,
-                   const camera_models::pinhole &intrinsic) noexcept {
+depth_to_max_curve(const cv::Mat &                     depth_image,
+                   const camera_models::pinhole<Real> &intrinsic) noexcept {
     using namespace detail;
 
     Expects(depth_image.type() == get_cv_type<PixelType>());
@@ -105,27 +106,36 @@ depth_to_max_curve(const cv::Mat &               depth_image,
             const Real d_1__0 = depth_image.at<PixelType>(v + 1, u);
             const Real d_1_1  = depth_image.at<PixelType>(v + 1, u + 1);
 
+            using math::pixel_coord;
             using std::cos;
-            const Real phi_hor1  = intrinsic.phi(u - 1, v, u, v);
-            const Real phi_hor2  = intrinsic.phi(u, v, u + 1, v);
+            const Real phi_hor1  = intrinsic.phi(pixel_coord<Real>(u - 1, v),
+                                                pixel_coord<Real>(u, v));
+            const Real phi_hor2  = intrinsic.phi(pixel_coord<Real>(u, v),
+                                                pixel_coord<Real>(u + 1, v));
             const Real angle_hor = angle_formula(d__0__1, d__0__0, d__0_1,
                                                  cos(phi_hor1), cos(phi_hor2));
 
             // vertical angular resolution
-            const Real phi_ver1  = intrinsic.phi(u, v - 1, u, v);
-            const Real phi_ver2  = intrinsic.phi(u, v, u, v + 1);
+            const Real phi_ver1  = intrinsic.phi(pixel_coord<Real>(u, v - 1),
+                                                pixel_coord<Real>(u, v));
+            const Real phi_ver2  = intrinsic.phi(pixel_coord<Real>(u, v),
+                                                pixel_coord<Real>(u, v + 1));
             const Real angle_ver = angle_formula(d__1__0, d__0__0, d_1__0,
                                                  cos(phi_ver1), cos(phi_ver2));
 
             // diagonal angular resolution
-            const Real phi_dia1  = intrinsic.phi(u - 1, v - 1, u, v);
-            const Real phi_dia2  = intrinsic.phi(u, v, u + 1, v + 1);
+            const Real phi_dia1 = intrinsic.phi(pixel_coord<Real>(u - 1, v - 1),
+                                                pixel_coord<Real>(u, v));
+            const Real phi_dia2 = intrinsic.phi(
+                pixel_coord<Real>(u, v), pixel_coord<Real>(u + 1, v + 1));
             const Real angle_dia = angle_formula(d__1__1, d__0__0, d_1_1,
                                                  cos(phi_dia1), cos(phi_dia2));
 
             // antidiagonal angular resolution
-            const Real phi_ant1  = intrinsic.phi(u + 1, v + 1, u, v);
-            const Real phi_ant2  = intrinsic.phi(u, v, u + 1, v - 1);
+            const Real phi_ant1 = intrinsic.phi(pixel_coord<Real>(u + 1, v + 1),
+                                                pixel_coord<Real>(u, v));
+            const Real phi_ant2 = intrinsic.phi(
+                pixel_coord<Real>(u, v), pixel_coord<Real>(u + 1, v - 1));
             const Real angle_ant = angle_formula(d_1__1, d__0__0, d__1_1,
                                                  cos(phi_ant1), cos(phi_ant2));
 

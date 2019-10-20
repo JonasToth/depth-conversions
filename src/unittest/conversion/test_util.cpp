@@ -8,7 +8,7 @@ using namespace sens_loc::conversion;
 using doctest::Approx;
 
 TEST_CASE("depth orthografic to euclidian") {
-    camera_models::pinhole p = {
+    camera_models::pinhole<double> p = {
         .w  = 10,
         .h  = 10,
         .fx = 10.,
@@ -20,17 +20,17 @@ TEST_CASE("depth orthografic to euclidian") {
     using namespace detail;
     SUBCASE("zero arg") {
         const int    d = 0;
-        const double e = orthografic_to_euclidian<double, int>(5, 5, d, p);
+        const double e = orthografic_to_euclidian<double, int>({5, 5}, d, p);
         REQUIRE(e == 0.);
     }
     SUBCASE("directly over center") {
         const int    d = 20;
-        const double e = orthografic_to_euclidian<double, int>(5, 5, d, p);
+        const double e = orthografic_to_euclidian<double, int>({5, 5}, d, p);
         REQUIRE(e == Approx(20.));
     }
     SUBCASE("not center") {
         const int    d = 20;
-        const double e = orthografic_to_euclidian<double, int>(8, 8, d, p);
+        const double e = orthografic_to_euclidian<double, int>({8, 8}, d, p);
         MESSAGE(e);
         REQUIRE(e > 20.);
     }
