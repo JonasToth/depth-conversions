@@ -77,6 +77,7 @@ struct coordinate3d {
 ///
 ///   // Changing coordinate systems requires an explicit transformation, for
 ///   // example with the camera calibration as in this case.
+///   const camera_models::pinhole<float> i;
 ///   const image_coord<float> transformed = i.transform_to_image(pixel);
 ///   transformed.x() // Accessing x-coordinate for that pixel.
 ///                   // Same point but different coordinate system.
