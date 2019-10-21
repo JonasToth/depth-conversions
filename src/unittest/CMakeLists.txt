@@ -60,3 +60,5 @@ create_test(util_terminate util/test_terminate.cpp)
 set_tests_properties(test_util_terminate PROPERTIES WILL_FAIL TRUE)
 create_test(util_terminate2 util/test_terminate2.cpp)
 set_tests_properties(test_util_terminate2 PROPERTIES WILL_FAIL TRUE)
+
+add_subdirectory(static_correctness)
