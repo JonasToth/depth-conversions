@@ -201,7 +201,7 @@ reals_to_image(const math::image<Real> &real_image,
                std::optional<Real>      clamp_max = std::nullopt) noexcept {
     const auto [min_it, max_it] = [&]()
         -> std::pair<cv::MatConstIterator_<Real>, cv::MatConstIterator_<Real>> {
-        if (clamp_min || clamp_max)
+        if (!clamp_min || !clamp_max)
             return std::minmax_element(real_image.data().template begin<Real>(),
                                        real_image.data().template end<Real>());
         return {nullptr, nullptr};
