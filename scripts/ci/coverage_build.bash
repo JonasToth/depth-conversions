@@ -24,4 +24,6 @@ ctest -j4 --output-on-failure .
 lcov --quiet --no-external --capture --directory ../src/apps --directory ../src/include --directory src/ --output-file test_coverage.info
 lcov --list test_coverage.info
 
+# genhtml test_coverage.info --output-directory coverage/
+
 exit 0

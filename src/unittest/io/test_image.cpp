@@ -21,10 +21,4 @@ TEST_CASE("Loading Images") {
             io::load_image<uchar>("io/example-image.png", cv::IMREAD_UNCHANGED);
         REQUIRE(file);
     }
-
-    SUBCASE("Existing file - Unrecognized format") {
-        std::optional<math::image<uchar>> file =
-            io::load_image<uchar>("io/not_an_image.txt");
-        REQUIRE(!file);
-    }
 }

@@ -22,8 +22,8 @@ TEST_CASE("gaussian curvature") {
                                               cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
 
-    auto ref_image = io::load_image<ushort>("conversion/gauss-reference.png",
-                                            cv::IMREAD_UNCHANGED);
+    // auto ref_image = io::load_image<ushort>("conversion/gauss-reference.png",
+    // cv::IMREAD_UNCHANGED);
     // REQUIRE(ref_image);
 
     auto laser_double =
@@ -43,8 +43,8 @@ TEST_CASE("mean curvature") {
                                               cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
 
-    auto ref_image = io::load_image<ushort>("conversion/mean-reference.png",
-                                            cv::IMREAD_UNCHANGED);
+    // auto ref_image = io::load_image<ushort>("conversion/mean-reference.png",
+    // cv::IMREAD_UNCHANGED);
     // REQUIRE(ref_image);
 
     auto laser_double =
@@ -52,9 +52,20 @@ TEST_CASE("mean curvature") {
 
     const auto mean =
         conversion::depth_to_mean_curvature<double, double>(laser_double, p);
-    const auto converted = conversion::curvature_to_image<double, ushort>(
-        mean, *depth_image, -20., 20.);
-    cv::imwrite("conversion/test_mean.png", converted.data());
 
-    // REQUIRE(util::average_pixel_error(mean, *ref_image) < 0.5);
+    SUBCASE("clamped conversion") {
+        const auto converted = conversion::curvature_to_image<double, ushort>(
+            mean, *depth_image, -20., 20.);
+        cv::imwrite("conversion/test_mean.png", converted.data());
+
+        // REQUIRE(util::average_pixel_error(mean, *ref_image) < 0.5);
+    }
+
+    SUBCASE("unclamped conversion") {
+        const auto converted =
+            conversion::curvature_to_image<double, ushort>(mean, *depth_image);
+        cv::imwrite("conversion/test_mean_unclamped.png", converted.data());
+
+        // REQUIRE(util::average_pixel_error(mean, *ref_image) < 0.5);
+    }
 }

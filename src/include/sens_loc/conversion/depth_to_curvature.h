@@ -204,7 +204,8 @@ reals_to_image(const math::image<Real> &real_image,
         if (!clamp_min || !clamp_max)
             return std::minmax_element(real_image.data().template begin<Real>(),
                                        real_image.data().template end<Real>());
-        return {nullptr, nullptr};
+        return {real_image.data().template end<Real>(),
+                real_image.data().template end<Real>()};
     }();
 
     const Real source_min = clamp_min ? *clamp_min : *min_it;
