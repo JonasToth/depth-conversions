@@ -116,7 +116,7 @@ ninja
 
 if [ "${WITH_TESTING}" == "ON" ]; then
     print_info "Run tests"
-    ctest --output-on-failure "-j$(nproc)" -R "test_" -R "fail_" .
+    ctest --output-on-failure "-j$(nproc)" -R "test_|fail_" .
 fi
 
 if [ "${WITH_BENCHMARK}" == "ON" ]; then
