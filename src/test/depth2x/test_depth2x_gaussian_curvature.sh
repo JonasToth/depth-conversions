@@ -12,6 +12,11 @@ helpers="$2"
 
 print_info "Using \"${exe}\" as driver executable"
 
+if grep --silent "Precise Pangolin" /etc/os-release ; then
+    print_warning "Skipping Tests on old linux - See #8 for more information!"
+    exit 0
+fi
+
 set -v
 
 print_info "Clearing test directory from old test result files."
