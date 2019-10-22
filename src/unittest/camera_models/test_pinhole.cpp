@@ -11,12 +11,7 @@ using doctest::Approx;
 
 TEST_CASE("Calculate angular resolution") {
     pinhole<double> p = {
-        .w  = 960,
-        .h  = 540,
-        .fx = 519.226,
-        .fy = 479.462,
-        .cx = 522.23,
-        .cy = 272.737,
+        960, 540, 519.226, 479.462, 522.23, 272.737,
     };
 
     // Angles must be symmetric.
@@ -36,12 +31,7 @@ TEST_CASE("Calculate angular resolution") {
 
 TEST_CASE("Project pixels to sphere") {
     pinhole<double> p = {
-        .w  = 960,
-        .h  = 540,
-        .fx = 519.226,
-        .fy = 479.462,
-        .cx = 522.23,
-        .cy = 272.737,
+        960, 540, 519.226, 479.462, 522.23, 272.737,
     };
     SUBCASE("Coordinate Transformations") {
         const pixel_coord<double>  pixel(50, 50);
@@ -51,8 +41,7 @@ TEST_CASE("Project pixels to sphere") {
 
         // Both coordinates needed to be identical. This can be checked
         // with 'v \cdot v == abs(v) * abs(v)'.
-        CHECK(P_s_pixel.norm() * P_s_image.norm() ==
-                P_s_pixel.dot(P_s_image));
+        CHECK(P_s_pixel.norm() * P_s_image.norm() == P_s_pixel.dot(P_s_image));
     }
     SUBCASE("horizontal") {
         auto p0 = p.pixel_to_sphere({1, 1});
@@ -62,7 +51,7 @@ TEST_CASE("Project pixels to sphere") {
         CHECK(p1.norm() == Approx(1.));
 
         const auto cos_phi = p0.dot(p1);
-        const auto angle = std::acos(cos_phi);
+        const auto angle   = std::acos(cos_phi);
         MESSAGE("horiz: acos(phi) == " << rad_to_deg(angle) << "°");
     }
     SUBCASE("vertical") {
@@ -73,7 +62,7 @@ TEST_CASE("Project pixels to sphere") {
         CHECK(p1.norm() == Approx(1.));
 
         const auto cos_phi = p0.dot(p1);
-        const auto angle = std::acos(cos_phi);
+        const auto angle   = std::acos(cos_phi);
         MESSAGE("vert: acos(phi) == " << rad_to_deg(angle) << "°");
     }
 
@@ -85,7 +74,7 @@ TEST_CASE("Project pixels to sphere") {
         CHECK(p1.norm() == Approx(1.));
 
         const auto cos_phi = p0.dot(p1);
-        const auto angle = std::acos(cos_phi);
+        const auto angle   = std::acos(cos_phi);
         MESSAGE("diag: acos(phi) == " << rad_to_deg(angle) << "°");
     }
 
@@ -97,7 +86,7 @@ TEST_CASE("Project pixels to sphere") {
         CHECK(p1.norm() == Approx(1.));
 
         const auto cos_phi = p0.dot(p1);
-        const auto angle = std::acos(cos_phi);
+        const auto angle   = std::acos(cos_phi);
         MESSAGE("antidiag: acos(phi) == " << rad_to_deg(angle) << "°");
     }
 }

@@ -13,20 +13,10 @@ using namespace std;
 using doctest::Approx;
 
 constexpr camera_models::pinhole<double> p_double = {
-    .w  = 960,
-    .h  = 540,
-    .fx = 519.226,
-    .fy = 479.462,
-    .cx = 522.23,
-    .cy = 272.737,
+    960, 540, 519.226, 479.462, 522.23, 272.737,
 };
 constexpr camera_models::pinhole<float> p_float = {
-    .w  = 960,
-    .h  = 540,
-    .fx = 519.226,
-    .fy = 479.462,
-    .cx = 522.23,
-    .cy = 272.737,
+    960, 540, 519.226, 479.462, 522.23, 272.737,
 };
 
 TEST_CASE("Acces Prior Pixel") {

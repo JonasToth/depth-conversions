@@ -9,12 +9,7 @@ using doctest::Approx;
 
 TEST_CASE("depth orthografic to euclidian") {
     camera_models::pinhole<double> p = {
-        .w  = 10,
-        .h  = 10,
-        .fx = 10.,
-        .fy = 10.,
-        .cx = 5.,
-        .cy = 5.,
+        10, 10, 10., 10., 5., 5.,
     };
 
     using namespace detail;

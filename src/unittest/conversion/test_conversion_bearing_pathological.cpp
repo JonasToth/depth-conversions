@@ -14,13 +14,8 @@ TEST_CASE("Real world case found crashing") {
         "conversion/crashing-file.png", cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
 
-    camera_models::pinhole<double> p = {
-        .w  = 960,
-        .h  = 540,
-        .fx = 519.226,
-        .fy = 479.462,
-        .cx = 522.23,
-        .cy = 272.737,
+    constexpr camera_models::pinhole<double> p = {
+        960, 540, 519.226, 479.462, 522.23, 272.737,
     };
 
     auto laser = depth_to_laserscan<double, ushort>(*depth_image, p);

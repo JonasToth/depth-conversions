@@ -23,21 +23,11 @@ TEST_CASE("convert depth image to laser-scan image") {
     depth_image->data().convertTo(depth_float, CV_32F);
     depth_image->data().convertTo(depth_double, CV_64F);
 
-    camera_models::pinhole<float> p_float = {
-        .w  = 960,
-        .h  = 540,
-        .fx = 519.226,
-        .fy = 479.462,
-        .cx = 522.23,
-        .cy = 272.737,
+    constexpr camera_models::pinhole<float> p_float = {
+        960, 540, 519.226, 479.462, 522.23, 272.737,
     };
-    camera_models::pinhole<double> p = {
-        .w  = 960,
-        .h  = 540,
-        .fx = 519.226,
-        .fy = 479.462,
-        .cx = 522.23,
-        .cy = 272.737,
+    constexpr camera_models::pinhole<double> p = {
+        960, 540, 519.226, 479.462, 522.23, 272.737,
     };
 
     auto laser_float  = depth_to_laserscan(*depth_image, p_float);
@@ -68,13 +58,8 @@ TEST_CASE("convert depth image to laser-scan image parallel") {
     cv::Mat depth_float;
     depth_image->data().convertTo(depth_float, CV_32F);
 
-    camera_models::pinhole<float> p = {
-        .w  = 960,
-        .h  = 540,
-        .fx = 519.226,
-        .fy = 479.462,
-        .cx = 522.23,
-        .cy = 272.737,
+    constexpr camera_models::pinhole<float> p = {
+        960, 540, 519.226, 479.462, 522.23, 272.737,
     };
 
     cv::Mat            laser_out = depth_float;
