@@ -2,7 +2,6 @@
 #define DEPTH_TO_LASERSCAN_H_P8V9HAVF
 
 #include <sens_loc/camera_models/pinhole.h>
-#include <sens_loc/camera_models/utility.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/image.h>
 #include <taskflow/taskflow.hpp>
