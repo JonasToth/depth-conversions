@@ -10,6 +10,10 @@ configure_file(depth2x/data003-depth.png
                depth2x/data003-depth.png COPYONLY)
 configure_file(depth2x/data004-depth.png
                depth2x/data004-depth.png COPYONLY)
+configure_file(depth2x/data005-depth.png
+               depth2x/data005-depth.png COPYONLY)
+configure_file(depth2x/data006-depth.png
+               depth2x/data006-depth.png COPYONLY)
 
 
 macro (add_app_test test_name)

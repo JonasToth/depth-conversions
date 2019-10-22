@@ -75,5 +75,22 @@ if  [ ! -f batch-flexion-from-range-002.png ] || \
     exit 1
 fi
 
+# Test that conversion fails if the image dimension change in between and don't
+# match the intrinsic anymore.
+if ${exe} -c "kinect_intrinsic.txt" \
+    -i "data{:03d}-depth.png" \
+    --start 5 --end 6 \
+    range \
+    --output "batch-range-{:03d}.png"
+then
+    print_error "Converted all range images which was not supposed to happen."
+    exit 1
+fi
+if  [ ! -f batch-range-005.png ] || \
+    [ -f batch-range-006.png ]; then
+    print_error "Index '5' needs to work, index '6' needs to fail."
+    exit 1
+fi
+
 print_info "Test successful!"
 exit 0
