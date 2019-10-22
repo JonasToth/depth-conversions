@@ -23,9 +23,13 @@ bool batch_converter::process_index(int idx) const noexcept {
     if (!depth_image)
         return false;
 
-    math::image<double> pp_image =
+    std::optional<math::image<double>> pp_image =
         this->preprocess_depth(std::move(*depth_image));
-    return this->process_file(std::move(pp_image), idx);
+
+    if (!pp_image)
+        return false;
+
+    return this->process_file(std::move(*pp_image), idx);
 }
 
 bool batch_converter::process_batch(int start, int end) const noexcept {
@@ -86,9 +90,12 @@ bool batch_converter::process_batch(int start, int end) const noexcept {
     return batch_success;
 }  // namespace sens_loc::apps
 
-math::image<double>
+std::optional<math::image<double>>
 batch_pinhole_converter::preprocess_depth(math::image<ushort> depth_image) const
     noexcept {
+    if ((depth_image.w() != intrinsic.w()) || depth_image.h() != intrinsic.h())
+        return std::nullopt;
+
     switch (_input_depth_type) {
     case depth_type::orthografic:
         return conversion::depth_to_laserscan<double, ushort>(depth_image,

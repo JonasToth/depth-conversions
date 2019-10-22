@@ -146,6 +146,9 @@ template <typename Real, typename PixelType>
 inline math::image<Real>
 depth_to_flexion(const math::image<PixelType> &      depth_image,
                  const camera_models::pinhole<Real> &intrinsic) noexcept {
+    Expects(depth_image.w() == intrinsic.w());
+    Expects(depth_image.h() == intrinsic.h());
+
     cv::Mat flexion(depth_image.data().rows, depth_image.data().cols,
                     math::detail::get_opencv_type<Real>());
     flexion = Real(0.);
@@ -167,6 +170,9 @@ par_depth_to_flexion(const math::image<PixelType> &      depth_image,
                      const camera_models::pinhole<Real> &intrinsic,
                      math::image<Real> &                 flexion_image,
                      tf::Taskflow &                      flow) noexcept {
+    Expects(depth_image.w() == intrinsic.w());
+    Expects(depth_image.h() == intrinsic.h());
+
     Expects(flexion_image.data().cols == depth_image.data().cols);
     Expects(flexion_image.data().rows == depth_image.data().rows);
 

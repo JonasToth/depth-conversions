@@ -80,6 +80,9 @@ class image {
 
     ~image() = default;
 
+    [[nodiscard]] int w() const noexcept { return _data.cols; }
+    [[nodiscard]] int h() const noexcept { return _data.rows; }
+
     /// Read-Access in the image for some pixel \p p.
     template <typename Number = int>
     [[nodiscard]] PixelType at(const pixel_coord<Number> &p) const noexcept {

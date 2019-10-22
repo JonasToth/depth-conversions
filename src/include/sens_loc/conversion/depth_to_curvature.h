@@ -118,9 +118,12 @@ void gaussian_inner(const int v, const math::image<PixelType> &depth_image,
     for (int u = 1; u < depth_image.data().cols - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
-        const Real d_phi       = camera_models::phi(intrinsic, {u - 1, v}, {u + 1, v});
-        const Real d_theta     = camera_models::phi(intrinsic, {u, v - 1}, {u, v + 1});
-        const Real d_phi_theta = camera_models::phi(intrinsic, {u - 1, v - 1}, {u + 1, v + 1});
+        const Real d_phi =
+            camera_models::phi(intrinsic, {u - 1, v}, {u + 1, v});
+        const Real d_theta =
+            camera_models::phi(intrinsic, {u, v - 1}, {u, v + 1});
+        const Real d_phi_theta =
+            camera_models::phi(intrinsic, {u - 1, v - 1}, {u + 1, v + 1});
 
         const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
             d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1, d_1__0,
@@ -138,9 +141,12 @@ void mean_inner(const int v, const math::image<PixelType> &depth_image,
     for (int u = 1; u < depth_image.data().cols - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
-        const Real d_phi       = camera_models::phi(intrinsic, {u - 1, v}, {u + 1, v});
-        const Real d_theta     = camera_models::phi(intrinsic, {u, v - 1}, {u, v + 1});
-        const Real d_phi_theta = camera_models::phi(intrinsic, {u - 1, v - 1}, {u + 1, v + 1});
+        const Real d_phi =
+            camera_models::phi(intrinsic, {u - 1, v}, {u + 1, v});
+        const Real d_theta =
+            camera_models::phi(intrinsic, {u, v - 1}, {u, v + 1});
+        const Real d_phi_theta =
+            camera_models::phi(intrinsic, {u - 1, v - 1}, {u + 1, v + 1});
 
         const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
             d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1, d_1__0,
@@ -159,6 +165,8 @@ template <typename Real, typename PixelType>
 inline math::image<Real> depth_to_gaussian_curvature(
     const math::image<PixelType> &      depth_image,
     const camera_models::pinhole<Real> &intrinsic) noexcept {
+    Expects(depth_image.w() == intrinsic.w());
+    Expects(depth_image.h() == intrinsic.h());
 
     cv::Mat gauss(depth_image.data().rows, depth_image.data().cols,
                   math::detail::get_opencv_type<Real>());
@@ -177,6 +185,8 @@ template <typename Real, typename PixelType>
 inline math::image<Real> depth_to_mean_curvature(
     const math::image<PixelType> &      depth_image,
     const camera_models::pinhole<Real> &intrinsic) noexcept {
+    Expects(depth_image.w() == intrinsic.w());
+    Expects(depth_image.h() == intrinsic.h());
 
     cv::Mat mean(depth_image.data().rows, depth_image.data().cols,
                  math::detail::get_opencv_type<Real>());

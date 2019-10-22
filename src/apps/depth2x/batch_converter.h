@@ -106,7 +106,7 @@ class batch_converter {
 
     /// Function to potentially convert orthographic images into range images.
     /// \returns \c cv::Mat with proper input data for the conversion process.
-    [[nodiscard]] virtual math::image<double>
+    [[nodiscard]] virtual std::optional<math::image<double>>
     preprocess_depth(math::image<ushort> depth_image) const noexcept {
         cv::Mat depth_double(depth_image.data().rows, depth_image.data().cols,
                              math::detail::get_opencv_type<double>());
@@ -146,7 +146,7 @@ class batch_pinhole_converter : public batch_converter {
     /// model.
     /// \sa conversion::depth_to_laserscan
     /// \returns \c cv::Mat with one channel and double as data type.
-    [[nodiscard]] math::image<double>
+    [[nodiscard]] std::optional<math::image<double>>
     preprocess_depth(math::image<ushort> depth_image) const noexcept override;
 };
 

@@ -209,6 +209,9 @@ template <direction Direction, typename Real, typename PixelType>
 inline math::image<Real>
 depth_to_bearing(const math::image<PixelType> &      depth_image,
                  const camera_models::pinhole<Real> &intrinsic) noexcept {
+    Expects(depth_image.w() == intrinsic.w());
+    Expects(depth_image.h() == intrinsic.h());
+
     using namespace detail;
     const pixel<Real, Direction> prior_accessor;
     const pixel_range<Direction> r{depth_image.data()};
@@ -235,6 +238,8 @@ par_depth_to_bearing(const math::image<PixelType> &      depth_image,
                      const camera_models::pinhole<Real> &intrinsic,
                      math::image<Real> &ba_image, tf::Taskflow &flow) noexcept {
     using namespace detail;
+    Expects(depth_image.w() == intrinsic.w());
+    Expects(depth_image.h() == intrinsic.h());
     Expects(ba_image.data().cols == depth_image.data().cols);
     Expects(ba_image.data().rows == depth_image.data().rows);
 

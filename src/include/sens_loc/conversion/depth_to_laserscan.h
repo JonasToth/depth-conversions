@@ -55,6 +55,9 @@ template <typename Real, typename PixelType>
 inline math::image<Real>
 depth_to_laserscan(const math::image<PixelType> &      depth_image,
                    const camera_models::pinhole<Real> &intrinsic) noexcept {
+    Expects(depth_image.w() == intrinsic.w());
+    Expects(depth_image.h() == intrinsic.h());
+
     cv::Mat euclid(depth_image.data().rows, depth_image.data().cols,
                    math::detail::get_opencv_type<Real>());
     euclid = Real(0.);
@@ -76,6 +79,9 @@ inline std::pair<tf::Task, tf::Task>
 par_depth_to_laserscan(const math::image<PixelType> &      depth_image,
                        const camera_models::pinhole<Real> &intrinsic,
                        math::image<Real> &out, tf::Taskflow &flow) noexcept {
+    Expects(depth_image.w() == intrinsic.w());
+    Expects(depth_image.h() == intrinsic.h());
+
     Expects(out.data().rows == depth_image.data().rows);
     Expects(out.data().cols == depth_image.data().cols);
 

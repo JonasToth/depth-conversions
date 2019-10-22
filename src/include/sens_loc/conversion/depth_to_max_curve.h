@@ -84,6 +84,9 @@ template <typename Real, typename PixelType>
 inline math::image<Real>
 depth_to_max_curve(const math::image<PixelType> &      depth_image,
                    const camera_models::pinhole<Real> &intrinsic) noexcept {
+    Expects(depth_image.w() == intrinsic.w());
+    Expects(depth_image.h() == intrinsic.h());
+
     cv::Mat max_curve(depth_image.data().rows, depth_image.data().cols,
                       math::detail::get_opencv_type<Real>());
     max_curve = Real(0.);
@@ -106,26 +109,34 @@ depth_to_max_curve(const math::image<PixelType> &      depth_image,
             using detail::angle_formula;
             using math::pixel_coord;
             using std::cos;
-            const Real phi_hor1  = camera_models::phi(intrinsic, {u - 1, v}, {u, v});
-            const Real phi_hor2  = camera_models::phi(intrinsic, {u, v}, {u + 1, v});
+            const Real phi_hor1 =
+                camera_models::phi(intrinsic, {u - 1, v}, {u, v});
+            const Real phi_hor2 =
+                camera_models::phi(intrinsic, {u, v}, {u + 1, v});
             const Real angle_hor = angle_formula(d__0__1, d__0__0, d__0_1,
                                                  cos(phi_hor1), cos(phi_hor2));
 
             // vertical angular resolution
-            const Real phi_ver1  = camera_models::phi(intrinsic, {u, v - 1}, {u, v});
-            const Real phi_ver2  = camera_models::phi(intrinsic, {u, v}, {u, v + 1});
+            const Real phi_ver1 =
+                camera_models::phi(intrinsic, {u, v - 1}, {u, v});
+            const Real phi_ver2 =
+                camera_models::phi(intrinsic, {u, v}, {u, v + 1});
             const Real angle_ver = angle_formula(d__1__0, d__0__0, d_1__0,
                                                  cos(phi_ver1), cos(phi_ver2));
 
             // diagonal angular resolution
-            const Real phi_dia1  = camera_models::phi(intrinsic, {u - 1, v - 1}, {u, v});
-            const Real phi_dia2  = camera_models::phi(intrinsic, {u, v}, {u + 1, v + 1});
+            const Real phi_dia1 =
+                camera_models::phi(intrinsic, {u - 1, v - 1}, {u, v});
+            const Real phi_dia2 =
+                camera_models::phi(intrinsic, {u, v}, {u + 1, v + 1});
             const Real angle_dia = angle_formula(d__1__1, d__0__0, d_1_1,
                                                  cos(phi_dia1), cos(phi_dia2));
 
             // antidiagonal angular resolution
-            const Real phi_ant1  = camera_models::phi(intrinsic, {u + 1, v + 1}, {u, v});
-            const Real phi_ant2  = camera_models::phi(intrinsic, {u, v}, {u + 1, v - 1});
+            const Real phi_ant1 =
+                camera_models::phi(intrinsic, {u + 1, v + 1}, {u, v});
+            const Real phi_ant2 =
+                camera_models::phi(intrinsic, {u, v}, {u + 1, v - 1});
             const Real angle_ant = angle_formula(d_1__1, d__0__0, d__1_1,
                                                  cos(phi_ant1), cos(phi_ant2));
 
