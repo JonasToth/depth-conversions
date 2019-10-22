@@ -4,6 +4,7 @@ add_library(sens_loc INTERFACE)
 target_sources(sens_loc INTERFACE
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/version.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/pinhole.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/equirectangular.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/conversion/depth_to_bearing.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/conversion/depth_to_curvature.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/conversion/depth_to_flexion.h"

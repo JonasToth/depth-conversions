@@ -5,7 +5,6 @@
 #include <gsl/gsl>
 #include <sens_loc/math/constants.h>
 #include <sens_loc/math/coordinate.h>
-#include <utility>
 
 namespace sens_loc {
 
@@ -40,7 +39,6 @@ struct pinhole {
 
     /// This method calculates the angle of the rays between two pixels.
     /// \param p1,p2 non-negative pixel coordinates smaller \c w and \c h.
-    /// \note This uses \p project_to_sphere internally.
     /// \sa project_to_sphere
     /// \returns radians of the angle between the two lightrays.
     template <typename Number = int>
