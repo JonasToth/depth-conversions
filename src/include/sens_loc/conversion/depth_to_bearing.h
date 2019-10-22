@@ -5,6 +5,7 @@
 #include <gsl/gsl>
 #include <limits>
 #include <sens_loc/camera_models/pinhole.h>
+#include <sens_loc/camera_models/utility.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/constants.h>
 #include <sens_loc/math/coordinate.h>
@@ -186,7 +187,7 @@ inline void bearing_inner(const RangeLimits &r,
         Expects(d_i >= Real(0.));
         Expects(d_j >= Real(0.));
 
-        const Real d_phi = intrinsic.phi(central, prior);
+        const Real d_phi = camera_models::phi(intrinsic, central, prior);
 
         // A depth==0 means there is no measurement at this pixel.
         const Real angle = (d_i == Real(0.) || d_j == Real(0.))

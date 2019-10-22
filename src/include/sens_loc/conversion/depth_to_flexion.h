@@ -6,6 +6,7 @@
 #include <iostream>
 #include <limits>
 #include <sens_loc/camera_models/pinhole.h>
+#include <sens_loc/camera_models/utility.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/eigen_types.h>
 #include <sens_loc/math/image.h>

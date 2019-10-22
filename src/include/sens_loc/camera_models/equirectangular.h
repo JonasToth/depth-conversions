@@ -35,7 +35,7 @@ template <typename Real = float>
 class equirectangular {
   public:
     /// Default initialize all parameters to zero.
-    equirectangular() = default;
+    constexpr equirectangular() = default;
 
     /// Construct a equirectangular image for the full sphere.
     ///
@@ -43,11 +43,11 @@ class equirectangular {
     /// horizontally which wraps around
     /// \param height height of the image, this
     /// maps to 180° field of view vertically which does __NOT__ wrap.
-    equirectangular(int width, int height) noexcept
-        : w(width)
-        , h(height)
+    constexpr equirectangular(int width, int height) noexcept
+        : _w(width)
+        , _h(height)
         , d_phi(detail::get_d_phi<Real>(width))
-        , d_theta(math::pi<Real> / Real(h))
+        , d_theta(math::pi<Real> / Real(height))
         , theta_min(Real(0.)) {
         Expects(width > 0);
         Expects(height > 0);
@@ -60,12 +60,12 @@ class equirectangular {
     /// \param width,height image dimensions
     /// \param theta_range minimum and maximum angle on the unit-sphere in
     /// vertical direction.
-    equirectangular(int width, int height,
-                    math::numeric_range<Real> theta_range) noexcept
-        : w(width)
-        , h(height)
+    constexpr equirectangular(int width, int height,
+                              math::numeric_range<Real> theta_range) noexcept
+        : _w(width)
+        , _h(height)
         , d_phi(detail::get_d_phi<Real>(width))
-        , d_theta((theta_range.max - theta_range.min) / Real(h))
+        , d_theta((theta_range.max - theta_range.min) / Real(height))
         , theta_min(theta_range.min) {
         Expects(width > 0);
         Expects(height > 0);
@@ -81,9 +81,10 @@ class equirectangular {
     /// \param theta_min,d_theta vertical resolution configuration
     /// \throws if the \f$\theta\f$-angle would be out of the range with the
     /// configuration this constructor throws an exception.
-    equirectangular(int width, int height, Real theta_min, Real d_theta)
-        : w(width)
-        , h(height)
+    constexpr equirectangular(int width, int height, Real theta_min,
+                              Real d_theta)
+        : _w(width)
+        , _h(height)
         , d_phi(detail::get_d_phi<Real>(width))
         , d_theta(d_theta)
         , theta_min(theta_min) {
@@ -93,13 +94,8 @@ class equirectangular {
         ensure_invariant();
     }
 
-    /// This method calculates the angle of the rays between two pixels.
-    /// \param p1,p2 non-negative pixel coordinates smaller \c w and \c h.
-    /// \sa project_to_sphere
-    /// \returns radians of the angle between the two lightrays.
-    template <typename Number = int>
-    [[nodiscard]] Real phi(const math::pixel_coord<Number> &p1,
-                           const math::pixel_coord<Number> &p2) const noexcept;
+    [[nodiscard]] int w() const noexcept { return _w; }
+    [[nodiscard]] int h() const noexcept { return _h; }
 
     /// This methods calculates the inverse projection of the equirectangular
     /// model to get the direction of the lightray for the pixel at \p p.
@@ -119,45 +115,17 @@ class equirectangular {
         Ensures(theta_min >= Real(0.));
 
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        Ensures(std::abs(d_phi * w - Real(2.) * math::pi<Real>) < 0.00001);
+        Ensures(std::abs(d_phi * _w - Real(2.) * math::pi<Real>) < 0.00001);
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        Ensures(theta_min + h * d_theta <= math::pi<Real> + 0.00001);
+        Ensures(theta_min + _h * d_theta <= math::pi<Real> + 0.00001);
     }
 
-    int  w;          ///< width of a laser-scan image
-    int  h;          ///< height of a laser-scan image.
+    int  _w;         ///< width of a laser-scan image
+    int  _h;         ///< height of a laser-scan image.
     Real d_phi;      ///< Angle increment in u-direction.
     Real d_theta;    ///< Angle increment in v-direction.
     Real theta_min;  ///< Smallest angle in v-direction.
 };
-
-template <typename Real>
-template <typename Number>
-inline Real
-equirectangular<Real>::phi(const math::pixel_coord<Number> &p1,
-                           const math::pixel_coord<Number> &p2) const noexcept {
-    Expects(p1.u() >= 0);
-    Expects(p1.u() < w);
-
-    Expects(p1.v() >= 0);
-    Expects(p1.v() < h);
-
-    Expects(p2.u() >= 0);
-    Expects(p2.u() < w);
-
-    Expects(p2.v() >= 0);
-    Expects(p2.v() < h);
-
-    const auto s1      = pixel_to_sphere(p1);
-    const auto s2      = pixel_to_sphere(p2);
-    const auto cos_phi = s1.dot(s2);
-
-    Ensures(cos_phi > -1.);
-    Ensures(cos_phi < +1.);
-
-    const auto angle = std::acos(cos_phi);
-    return angle;
-}
 
 template <typename Real>
 template <typename Number>

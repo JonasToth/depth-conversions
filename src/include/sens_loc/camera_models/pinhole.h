@@ -22,28 +22,35 @@ namespace camera_models {
 /// \warning Each value can be modified by everyone, as its just as list of
 /// numbers. Use \c const in your code to prevent bugs!
 template <typename Real = float>
-struct pinhole {
-    int  w  = 0;    ///< width of the image
-    int  h  = 0;    ///< height of the image
-    Real fx = 0.0;  ///< x-coordinate of focal length
-    Real fy = 0.0;  ///< y-corrdiante of focal length
-    Real cx = 0.0;  ///< x-coordinate of image center
-    Real cy = 0.0;  ///< y-coordinate of image center
+class pinhole {
+  public:
+    constexpr pinhole() = default;
 
-    Real p1 = 0.0;  ///< first order tangential distortion coefficient
-    Real p2 = 0.0;  ///< second order tangential distortion coefficient
+    /// Initialize the pinhole model with it's essential parameters.
+    /// \param w,h image dimensions
+    /// \param fx,fy focal point
+    /// \param cx,cy image center
+    constexpr pinhole(int w, int h, Real fx, Real fy, Real cx, Real cy) noexcept
+        : _w(w)
+        , _h(h)
+        , _fx(fx)
+        , _fy(fy)
+        , _cx(cx)
+        , _cy(cy) {
+        Expects(w > 0);
+        Expects(h > 0);
+        Expects(_fx > Real(0.));
+        Expects(_fy > Real(0.));
+        Expects(_cx > Real(0.));
+        Expects(_cy > Real(0.));
+    }
 
-    Real k1 = 0.0;  ///< first order radial distortion coefficient
-    Real k2 = 0.0;  ///< second order radial distortion coefficient
-    Real k3 = 0.0;  ///< third order radial distortion coefficient
-
-    /// This method calculates the angle of the rays between two pixels.
-    /// \param p1,p2 non-negative pixel coordinates smaller \c w and \c h.
-    /// \sa project_to_sphere
-    /// \returns radians of the angle between the two lightrays.
-    template <typename Number = int>
-    [[nodiscard]] Real phi(const math::pixel_coord<Number> &p1,
-                           const math::pixel_coord<Number> &p2) const noexcept;
+    [[nodiscard]] int w() const noexcept { return _w; }
+    [[nodiscard]] int h() const noexcept { return _h; }
+    [[nodiscard]] Real fx() const noexcept { return _fx; }
+    [[nodiscard]] Real fy() const noexcept { return _fy; }
+    [[nodiscard]] Real cx() const noexcept { return _cx; }
+    [[nodiscard]] Real cy() const noexcept { return _cy; }
 
     template <typename Number = int>
     [[nodiscard]] math::image_coord<Real>
@@ -70,55 +77,42 @@ struct pinhole {
     /// \sa pinhole::project_to_sphere
     [[nodiscard]] math::sphere_coord<Real>
     image_to_sphere(const math::image_coord<Real> &p) const noexcept;
+
+  private:
+    int  _w  = 0;    ///< width of the image
+    int  _h  = 0;    ///< height of the image
+    Real _fx = 0.0;  ///< x-coordinate of focal length
+    Real _fy = 0.0;  ///< y-corrdiante of focal length
+    Real _cx = 0.0;  ///< x-coordinate of image center
+    Real _cy = 0.0;  ///< y-coordinate of image center
+
+    Real p1 = 0.0;  ///< first order tangential distortion coefficient
+    Real p2 = 0.0;  ///< second order tangential distortion coefficient
+
+    Real k1 = 0.0;  ///< first order radial distortion coefficient
+    Real k2 = 0.0;  ///< second order radial distortion coefficient
+    Real k3 = 0.0;  ///< third order radial distortion coefficient
 };
-
-template <typename Real>
-template <typename Number>
-inline Real pinhole<Real>::phi(const math::pixel_coord<Number> &p1,
-                               const math::pixel_coord<Number> &p2) const
-    noexcept {
-    Expects(p1.u() >= 0);
-    Expects(p1.u() < w);
-
-    Expects(p1.v() >= 0);
-    Expects(p1.v() < h);
-
-    Expects(p2.u() >= 0);
-    Expects(p2.u() < w);
-
-    Expects(p2.v() >= 0);
-    Expects(p2.v() < h);
-
-    const auto s1      = pixel_to_sphere(p1);
-    const auto s2      = pixel_to_sphere(p2);
-    const auto cos_phi = s1.dot(s2);
-
-    Ensures(cos_phi > -1.);
-    Ensures(cos_phi < +1.);
-
-    const auto angle = std::acos(cos_phi);
-    return angle;
-}
 
 template <typename Real>
 template <typename Number>
 math::image_coord<Real>
 pinhole<Real>::transform_to_image(const math::pixel_coord<Number> &p) const
     noexcept {
-    Expects(fx > 0.);
-    Expects(fy > 0.);
-    Expects(cx > 0.);
-    Expects(cy > 0.);
+    Expects(_fx > 0.);
+    Expects(_fy > 0.);
+    Expects(_cx > 0.);
+    Expects(_cy > 0.);
     Expects(p1 == 0.);
     Expects(p2 == 0.);
     Expects(k1 == 0.);
     Expects(k2 == 0.);
     Expects(k3 == 0.);
     Expects(p.u() >= 0.);
-    Expects(p.u() < w);
+    Expects(p.u() < w());
     Expects(p.v() >= 0.);
-    Expects(p.v() < h);
-    return math::image_coord<Real>((p.u() - cx) / fx, (p.v() - cy) / fy);
+    Expects(p.v() < h());
+    return math::image_coord<Real>((p.u() - _cx) / _fx, (p.v() - _cy) / _fy);
 }
 
 template <typename Real>

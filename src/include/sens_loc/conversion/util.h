@@ -37,16 +37,6 @@ inline Real orthografic_to_euclidian(
         return Real(0.);
 
     Expects(d > PixelType(0));
-    Expects(intrinsic.fx > 0.);
-    Expects(intrinsic.fy > 0.);
-    Expects(intrinsic.cx > 0.);
-    Expects(intrinsic.cy > 0.);
-    Expects(intrinsic.k2 == 0.);
-    Expects(intrinsic.k1 == 0.);
-    Expects(intrinsic.k2 == 0.);
-    Expects(intrinsic.k3 == 0.);
-    Expects(intrinsic.p1 == 0.);
-    Expects(intrinsic.p2 == 0.);
 
     const math::image_coord<Real> p_i      = intrinsic.transform_to_image(p);
     const Real                    x        = p_i.x();

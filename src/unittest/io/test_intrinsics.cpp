@@ -24,12 +24,12 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         REQUIRE(p);
         auto params = *p;
 
-        REQUIRE(params.w == 960);
-        REQUIRE(params.h == 540);
-        REQUIRE(params.fx == 10.0);
-        REQUIRE(params.fy == 10.0);
-        REQUIRE(params.cx == 500.0);
-        REQUIRE(params.cy == 250.0);
+        REQUIRE(params.w() == 960);
+        REQUIRE(params.h() == 540);
+        REQUIRE(params.fx() == 10.0);
+        REQUIRE(params.fy() == 10.0);
+        REQUIRE(params.cx() == 500.0);
+        REQUIRE(params.cy() == 250.0);
     }
     SUBCASE("Proper intrinsic with more then 2 lines") {
         string intrinsic = "960 540\n"
@@ -42,12 +42,12 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         REQUIRE(p);
         auto params = *p;
 
-        REQUIRE(params.w == 960);
-        REQUIRE(params.h == 540);
-        REQUIRE(params.fx == 10.0);
-        REQUIRE(params.fy == 10.0);
-        REQUIRE(params.cx == 500.0);
-        REQUIRE(params.cy == 250.0);
+        REQUIRE(params.w() == 960);
+        REQUIRE(params.h() == 540);
+        REQUIRE(params.fx() == 10.0);
+        REQUIRE(params.fy() == 10.0);
+        REQUIRE(params.cx() == 500.0);
+        REQUIRE(params.cy() == 250.0);
     }
     SUBCASE("Negative value for dimension") {
         string intrinsic = "-960 540\n";

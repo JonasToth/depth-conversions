@@ -29,16 +29,21 @@ load_pinhole_intrinsic(std::istream &in) noexcept {
     if (!in.good())
         return std::nullopt;
 
-    camera_models::pinhole<Real> p;
-    Real                         trash = 0.0;
+    int  w     = 0;
+    int  h     = 0;
+    Real fx    = 0.;
+    Real fy    = 0.;
+    Real cx    = 0.;
+    Real cy    = 0.;
+    Real trash = 0.0;
 
     std::string line;
     {
         std::getline(in, line);
         std::istringstream ss{line};
         // Parsing line 1 with expected format 'w h'.
-        ss >> p.w >> p.h;
-        if (p.w <= 0 || p.h <= 0)
+        ss >> w >> h;
+        if (w <= 0 || h <= 0)
             return std::nullopt;
 
         if (ss.rdstate() != std::ios_base::eofbit)
@@ -49,8 +54,8 @@ load_pinhole_intrinsic(std::istream &in) noexcept {
         std::getline(in, line);
         std::istringstream ss{line};
         // Parsing line 2 with expected format 'fx 0.0 cx'.
-        ss >> p.fx >> trash >> p.cx;
-        if (p.fx <= 0. || p.cx <= 0.)
+        ss >> fx >> trash >> cx;
+        if (fx <= 0. || cx <= 0.)
             return std::nullopt;
 
         if (ss.rdstate() != std::ios_base::eofbit)
@@ -61,14 +66,14 @@ load_pinhole_intrinsic(std::istream &in) noexcept {
         std::getline(in, line);
         std::istringstream ss{line};
         // Parsing line 3 with expected format '0.0 fy cy'.
-        ss >> trash >> p.fy >> p.cy;
-        if (p.fy <= 0. || p.cy <= 0.)
+        ss >> trash >> fy >> cy;
+        if (fy <= 0. || cy <= 0.)
             return std::nullopt;
 
         if (ss.rdstate() != std::ios_base::eofbit)
             return std::nullopt;
     }
-    return p;
+    return camera_models::pinhole<Real>(w, h, fx, fy, cx, cy);
 }
 }}  // namespace sens_loc::io
 

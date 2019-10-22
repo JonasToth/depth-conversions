@@ -1,6 +1,7 @@
 #include <cmath>
 #include <doctest/doctest.h>
 #include <sens_loc/camera_models/pinhole.h>
+#include <sens_loc/camera_models/utility.h>
 #include <sens_loc/math/angle_conversion.h>
 
 using namespace sens_loc::camera_models;
@@ -19,18 +20,18 @@ TEST_CASE("Calculate angular resolution") {
     };
 
     // Angles must be symmetric.
-    CHECK(p.phi({0, 1}, {1, 1}) == p.phi({1, 1}, {0, 1}));
-    CHECK(p.phi({1, 0}, {1, 1}) == p.phi({1, 1}, {1, 0}));
-    CHECK(p.phi({1, 1}, {0, 0}) == p.phi({0, 0}, {1, 1}));
-    CHECK(p.phi({1, 0}, {0, 1}) == p.phi({0, 1}, {1, 0}));
+    CHECK(phi(p, {0, 1}, {1, 1}) == phi(p, {1, 1}, {0, 1}));
+    CHECK(phi(p, {1, 0}, {1, 1}) == phi(p, {1, 1}, {1, 0}));
+    CHECK(phi(p, {1, 1}, {0, 0}) == phi(p, {0, 0}, {1, 1}));
+    CHECK(phi(p, {1, 0}, {0, 1}) == phi(p, {0, 1}, {1, 0}));
 
     // Diagonals create a bigger angle.
-    CHECK(p.phi({0, 0}, {1, 1}) > p.phi({0, 0}, {1, 0}));
-    CHECK(p.phi({0, 0}, {1, 1}) > p.phi({0, 0}, {0, 1}));
+    CHECK(phi(p, {0, 0}, {1, 1}) > phi(p, {0, 0}, {1, 0}));
+    CHECK(phi(p, {0, 0}, {1, 1}) > phi(p, {0, 0}, {0, 1}));
 
     // Angular resolution gets finer in outer parts of image.
-    CHECK(p.phi({0, 0}, {1, 0}) < p.phi({480, 0}, {481, 0}));
-    CHECK(p.phi({900, 0}, {901, 0}) < p.phi({480, 0}, {481, 0}));
+    CHECK(phi(p, {0, 0}, {1, 0}) < phi(p, {480, 0}, {481, 0}));
+    CHECK(phi(p, {900, 0}, {901, 0}) < phi(p, {480, 0}, {481, 0}));
 }
 
 TEST_CASE("Project pixels to sphere") {

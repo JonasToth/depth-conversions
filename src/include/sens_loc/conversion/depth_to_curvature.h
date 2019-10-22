@@ -5,6 +5,7 @@
 #include <limits>
 #include <optional>
 #include <sens_loc/camera_models/pinhole.h>
+#include <sens_loc/camera_models/utility.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/coordinate.h>
 #include <sens_loc/math/curvature.h>
@@ -117,9 +118,9 @@ void gaussian_inner(const int v, const math::image<PixelType> &depth_image,
     for (int u = 1; u < depth_image.data().cols - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
-        const Real d_phi       = intrinsic.phi({u - 1, v}, {u + 1, v});
-        const Real d_theta     = intrinsic.phi({u, v - 1}, {u, v + 1});
-        const Real d_phi_theta = intrinsic.phi({u - 1, v - 1}, {u + 1, v + 1});
+        const Real d_phi       = camera_models::phi(intrinsic, {u - 1, v}, {u + 1, v});
+        const Real d_theta     = camera_models::phi(intrinsic, {u, v - 1}, {u, v + 1});
+        const Real d_phi_theta = camera_models::phi(intrinsic, {u - 1, v - 1}, {u + 1, v + 1});
 
         const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
             d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1, d_1__0,
@@ -137,9 +138,9 @@ void mean_inner(const int v, const math::image<PixelType> &depth_image,
     for (int u = 1; u < depth_image.data().cols - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
-        const Real d_phi       = intrinsic.phi({u - 1, v}, {u + 1, v});
-        const Real d_theta     = intrinsic.phi({u, v - 1}, {u, v + 1});
-        const Real d_phi_theta = intrinsic.phi({u - 1, v - 1}, {u + 1, v + 1});
+        const Real d_phi       = camera_models::phi(intrinsic, {u - 1, v}, {u + 1, v});
+        const Real d_theta     = camera_models::phi(intrinsic, {u, v - 1}, {u, v + 1});
+        const Real d_phi_theta = camera_models::phi(intrinsic, {u - 1, v - 1}, {u + 1, v + 1});
 
         const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
             d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1, d_1__0,
