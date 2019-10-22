@@ -94,7 +94,9 @@ class equirectangular {
         ensure_invariant();
     }
 
+    /// Return the width of the image corresponding to this intrinsic.
     [[nodiscard]] int w() const noexcept { return _w; }
+    /// Return the height of the image corresponding to this intrinsic.
     [[nodiscard]] int h() const noexcept { return _h; }
 
     /// This methods calculates the inverse projection of the equirectangular

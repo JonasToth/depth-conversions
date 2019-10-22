@@ -45,11 +45,17 @@ class pinhole {
         Expects(_cy > Real(0.));
     }
 
+    /// Return the width of the image corresponding to this calibration.
     [[nodiscard]] int w() const noexcept { return _w; }
+    /// Return the height of the image corresponding to this calibration.
     [[nodiscard]] int h() const noexcept { return _h; }
+    /// Return the x-component of the focal point.
     [[nodiscard]] Real fx() const noexcept { return _fx; }
+    /// Return the y-component of the focal point.
     [[nodiscard]] Real fy() const noexcept { return _fy; }
+    /// Return the x-component of the image center.
     [[nodiscard]] Real cx() const noexcept { return _cx; }
+    /// Return the y-component of the image center.
     [[nodiscard]] Real cy() const noexcept { return _cy; }
 
     template <typename Number = int>

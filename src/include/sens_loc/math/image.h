@@ -80,7 +80,9 @@ class image {
 
     ~image() = default;
 
+    /// Return the width of the image.
     [[nodiscard]] int w() const noexcept { return _data.cols; }
+    /// Return the height of the image.
     [[nodiscard]] int h() const noexcept { return _data.rows; }
 
     /// Read-Access in the image for some pixel \p p.
