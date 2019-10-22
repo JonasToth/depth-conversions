@@ -120,11 +120,11 @@ class equirectangular {
         Ensures(theta_min + _h * d_theta <= math::pi<Real> + 0.00001);
     }
 
-    int  _w;         ///< width of a laser-scan image
-    int  _h;         ///< height of a laser-scan image.
-    Real d_phi;      ///< Angle increment in u-direction.
-    Real d_theta;    ///< Angle increment in v-direction.
-    Real theta_min;  ///< Smallest angle in v-direction.
+    int  _w = 0;          ///< width of a laser-scan image
+    int  _h = 0;          ///< height of a laser-scan image.
+    Real d_phi;           ///< Angle increment in u-direction.
+    Real d_theta;         ///< Angle increment in v-direction.
+    Real theta_min = 0.;  ///< Smallest angle in v-direction.
 };
 
 template <typename Real>

@@ -11,6 +11,11 @@ TEST_CASE("image access") {
     // Copy construction with cv::Mat
     image<ushort> i(m);
 
+    SUBCASE("dimensions") {
+        CHECK(i.w() == 20);
+        CHECK(i.h() == 20);
+    }
+
     SUBCASE("read access") { REQUIRE(i.at(pixel_coord<int>(10, 10)) == 0); }
     SUBCASE("write access") {
         i.at(pixel_coord<int>(10, 10)) = 10;
@@ -33,7 +38,7 @@ TEST_CASE("image access") {
     }
     SUBCASE("move construction with matrix") {
         cv::Mat m_assign(20, 20, CV_16U);
-        m_assign = 0;
+        m_assign                    = 0;
         m_assign.at<ushort>(11, 11) = 69;
         image<ushort> f(std::move(m_assign));
         REQUIRE(f.at(pixel_coord<int>(11, 11)) == 69);
@@ -49,10 +54,10 @@ TEST_CASE("image access") {
     }
     SUBCASE("copy assignment with matrix") {
         image<ushort> f;
-        cv::Mat m_assign(20, 20, CV_16U);
-        m_assign = 0;
+        cv::Mat       m_assign(20, 20, CV_16U);
+        m_assign                    = 0;
         m_assign.at<ushort>(11, 11) = 69;
-        f = m_assign;
+        f                           = m_assign;
         REQUIRE(f.at(pixel_coord<int>(11, 11)) == 69);
         REQUIRE(f.at(pixel_coord<int>(0, 0)) == 0);
     }
@@ -67,17 +72,15 @@ TEST_CASE("image access") {
     }
     SUBCASE("move assignment with matrix") {
         image<ushort> f;
-        cv::Mat m_assign(20, 20, CV_16U);
-        m_assign = 0;
+        cv::Mat       m_assign(20, 20, CV_16U);
+        m_assign                    = 0;
         m_assign.at<ushort>(11, 11) = 69;
-        f = std::move(m_assign);
+        f                           = std::move(m_assign);
         REQUIRE(f.at(pixel_coord<int>(11, 11)) == 69);
         REQUIRE(f.at(pixel_coord<int>(0, 0)) == 0);
     }
 
-    SUBCASE("underlying data") {
-        REQUIRE(i.data().at<ushort>(10, 10) == 0);
-    }
+    SUBCASE("underlying data") { REQUIRE(i.data().at<ushort>(10, 10) == 0); }
 }
 
 TEST_CASE("get_cv_type") {

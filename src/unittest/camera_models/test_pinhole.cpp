@@ -33,6 +33,10 @@ TEST_CASE("Project pixels to sphere") {
     pinhole<double> p = {
         960, 540, 519.226, 479.462, 522.23, 272.737,
     };
+    SUBCASE("Dimensions") {
+        CHECK(p.w() == 960);
+        CHECK(p.h() == 540);
+    }
     SUBCASE("Coordinate Transformations") {
         const pixel_coord<double>  pixel(50, 50);
         const image_coord<double>  img       = p.transform_to_image(pixel);

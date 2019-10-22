@@ -9,11 +9,13 @@ using doctest::Approx;
 TEST_CASE("Construction") {
     SUBCASE("default constructor") {
         equirectangular<double> e;
-        (void) e;
+        CHECK(e.w() == 0);
+        CHECK(e.h() == 0);
     }
     SUBCASE("width and height constructor") {
         equirectangular<double> e(100, 50);
-        (void) e;
+        CHECK(e.w() == 100);
+        CHECK(e.h() == 50);
     }
     SUBCASE("width, height and theta range") {
         equirectangular<double> e(100, 50,
