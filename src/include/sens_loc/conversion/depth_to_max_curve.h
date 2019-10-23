@@ -31,10 +31,10 @@ namespace sens_loc { namespace conversion {
 /// \pre the underlying types match
 /// \post each pixel has a value in the range \f$[0, 2\pi)\f$
 /// \post the values are provided in radians
-template <typename Real = float, typename PixelType = float>
-math::image<Real>
-depth_to_max_curve(const math::image<PixelType> &      depth_image,
-                   const camera_models::pinhole<Real> &intrinsic) noexcept;
+template <typename Real = float, typename PixelType = float,
+          template <typename> typename Intrinsic = camera_models::pinhole>
+math::image<Real> depth_to_max_curve(const math::image<PixelType> &depth_image,
+                                     const Intrinsic<Real> &intrinsic) noexcept;
 
 /// The max-curve picture is not a normal image and needs to be converted to
 /// the classical integer range.
@@ -80,10 +80,11 @@ inline Real angle_formula(const Real d__1, const Real d__0, const Real d_1,
 }
 }  // namespace detail
 
-template <typename Real, typename PixelType>
+template <typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
 inline math::image<Real>
-depth_to_max_curve(const math::image<PixelType> &      depth_image,
-                   const camera_models::pinhole<Real> &intrinsic) noexcept {
+depth_to_max_curve(const math::image<PixelType> &depth_image,
+                   const Intrinsic<Real> &       intrinsic) noexcept {
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 

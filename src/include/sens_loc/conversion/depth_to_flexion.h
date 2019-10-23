@@ -28,10 +28,10 @@ namespace sens_loc { namespace conversion {
 /// \sa conversion::depth_to_laserscan
 /// \pre \p depth_image is not empty
 /// \pre intrinsic matches the sensor that took the image
-template <typename Real = float, typename PixelType = float>
-math::image<Real>
-depth_to_flexion(const math::image<PixelType> &      depth_image,
-                 const camera_models::pinhole<Real> &intrinsic) noexcept;
+template <typename Real = float, typename PixelType = float,
+          template <typename> typename Intrinsic = camera_models::pinhole>
+math::image<Real> depth_to_flexion(const math::image<PixelType> &depth_image,
+                                   const Intrinsic<Real> &intrinsic) noexcept;
 
 /// Convert range image to a flexion image in parallel
 //
@@ -46,12 +46,11 @@ depth_to_flexion(const math::image<PixelType> &      depth_image,
 /// \pre \p flexion_image has the same dimension as \p depth_image
 /// \pre the underlying types match the defined template parameters
 /// built. This graph will then execute all the tasks on request.
-template <typename Real = float, typename PixelType = float>
-std::pair<tf::Task, tf::Task>
-par_depth_to_flexion(const math::image<PixelType> &      depth_image,
-                     const camera_models::pinhole<Real> &intrinsic,
-                     math::image<Real> &                 flexion_image,
-                     tf::Taskflow &                      flow) noexcept;
+template <typename Real = float, typename PixelType = float,
+          template <typename> typename Intrinsic = camera_models::pinhole>
+std::pair<tf::Task, tf::Task> par_depth_to_flexion(
+    const math::image<PixelType> &depth_image, const Intrinsic<Real> &intrinsic,
+    math::image<Real> &flexion_image, tf::Taskflow &flow) noexcept;
 
 /// Scale the flexion image to \p PixelType for normal image visualization.
 ///
@@ -68,18 +67,19 @@ convert_flexion(const math::image<Real> &flexion_image) noexcept;
 
 namespace detail {
 using ::sens_loc::math::vec;
-template <typename Real = float>
-math::camera_coord<Real>
-to_camera(const camera_models::pinhole<Real> &intrinsic,
-          const math::pixel_coord<int> &p, Real d) noexcept {
+template <typename Real = float, template <typename> typename Intrinsic>
+math::camera_coord<Real> to_camera(const Intrinsic<Real> &       intrinsic,
+                                   const math::pixel_coord<int> &p,
+                                   Real                          d) noexcept {
     const math::sphere_coord<Real> P_s = intrinsic.pixel_to_sphere(p);
     return math::camera_coord<Real>(d * P_s.Xs(), d * P_s.Ys(), d * P_s.Zs());
 }
 
-template <typename Real = float, typename PixelType = float>
+template <typename Real = float, typename PixelType = float,
+          template <typename> typename Intrinsic>
 inline void flexion_inner(int v, const math::image<PixelType> &depth_image,
-                          const camera_models::pinhole<Real> &intrinsic,
-                          math::image<Real> &                 out) {
+                          const Intrinsic<Real> &intrinsic,
+                          math::image<Real> &    out) {
     for (int u = 1; u < depth_image.w() - 1; ++u) {
         const Real d__1__0 = depth_image.at({u, v - 1});
         const Real d_1__0  = depth_image.at({u, v + 1});
@@ -142,10 +142,11 @@ inline void flexion_inner(int v, const math::image<PixelType> &depth_image,
 
 }  // namespace detail
 
-template <typename Real, typename PixelType>
+template <typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
 inline math::image<Real>
-depth_to_flexion(const math::image<PixelType> &      depth_image,
-                 const camera_models::pinhole<Real> &intrinsic) noexcept {
+depth_to_flexion(const math::image<PixelType> &depth_image,
+                 const Intrinsic<Real> &       intrinsic) noexcept {
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
@@ -164,12 +165,11 @@ depth_to_flexion(const math::image<PixelType> &      depth_image,
 }
 
 /// Convert an euclidian depth image to a flexion-image.
-template <typename Real, typename PixelType>
-inline std::pair<tf::Task, tf::Task>
-par_depth_to_flexion(const math::image<PixelType> &      depth_image,
-                     const camera_models::pinhole<Real> &intrinsic,
-                     math::image<Real> &                 flexion_image,
-                     tf::Taskflow &                      flow) noexcept {
+template <typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
+inline std::pair<tf::Task, tf::Task> par_depth_to_flexion(
+    const math::image<PixelType> &depth_image, const Intrinsic<Real> &intrinsic,
+    math::image<Real> &flexion_image, tf::Taskflow &flow) noexcept {
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 

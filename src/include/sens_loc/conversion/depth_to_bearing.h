@@ -41,10 +41,10 @@ namespace sens_loc { namespace conversion {
 /// \post each bearing angle is in the range \f$[0, \pi)\f$
 /// is of course possible with matching changes in the \p depth_image.
 template <direction Direction, typename Real = float,
-          typename PixelType = float>
-math::image<Real>
-depth_to_bearing(const math::image<PixelType> &      depth_image,
-                 const camera_models::pinhole<Real> &intrinsic) noexcept;
+          typename PixelType                     = float,
+          template <typename> typename Intrinsic = camera_models::pinhole>
+math::image<Real> depth_to_bearing(const math::image<PixelType> &depth_image,
+                                   const Intrinsic<Real> &intrinsic) noexcept;
 
 /// This function provides are parallelized version of the conversion
 /// functionality.
@@ -61,10 +61,11 @@ depth_to_bearing(const math::image<PixelType> &      depth_image,
 /// bearing angle image.
 /// \sa depth_to_bearing
 template <direction Direction, typename Real = float,
-          typename PixelType = float>
+          typename PixelType                     = float,
+          template <typename> typename Intrinsic = camera_models::pinhole>
 std::pair<tf::Task, tf::Task>
-par_depth_to_bearing(const math::image<PixelType> &      depth_image,
-                     const camera_models::pinhole<Real> &intrinsic,
+par_depth_to_bearing(const math::image<PixelType> &depth_image,
+                     const Intrinsic<Real> &       intrinsic,
                      math::image<Real> &ba_image, tf::Taskflow &flow) noexcept;
 
 /// Convert a bearing angle image to an image with integer types.
@@ -171,12 +172,11 @@ struct pixel_range {
 };
 
 template <typename Real, typename PixelType, typename RangeLimits,
-          typename PriorAccess>
-inline void bearing_inner(const RangeLimits &r,
-                          const PriorAccess &prior_accessor, const int v,
-                          const math::image<PixelType> &      depth_image,
-                          const camera_models::pinhole<Real> &intrinsic,
-                          math::image<Real> &                 ba_image) {
+          typename PriorAccess, template <typename> typename Intrinsic>
+inline void
+bearing_inner(const RangeLimits &r, const PriorAccess &prior_accessor,
+              const int v, const math::image<PixelType> &depth_image,
+              const Intrinsic<Real> &intrinsic, math::image<Real> &ba_image) {
     for (int u = r.x_start; u < r.x_end; ++u) {
         const math::pixel_coord<int> central(u, v);
         const math::pixel_coord<int> prior = prior_accessor(central);
@@ -204,11 +204,12 @@ inline void bearing_inner(const RangeLimits &r,
 }
 }  // namespace detail
 
-template <direction Direction, typename Real, typename PixelType>
+template <direction Direction, typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
 // requires Float<Real> && CVIntegerPixelType<PixelType>
 inline math::image<Real>
-depth_to_bearing(const math::image<PixelType> &      depth_image,
-                 const camera_models::pinhole<Real> &intrinsic) noexcept {
+depth_to_bearing(const math::image<PixelType> &depth_image,
+                 const Intrinsic<Real> &       intrinsic) noexcept {
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
@@ -232,10 +233,11 @@ depth_to_bearing(const math::image<PixelType> &      depth_image,
     return ba_image;
 }
 
-template <direction Direction, typename Real, typename PixelType>
+template <direction Direction, typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
 inline std::pair<tf::Task, tf::Task>
-par_depth_to_bearing(const math::image<PixelType> &      depth_image,
-                     const camera_models::pinhole<Real> &intrinsic,
+par_depth_to_bearing(const math::image<PixelType> &depth_image,
+                     const Intrinsic<Real> &       intrinsic,
                      math::image<Real> &ba_image, tf::Taskflow &flow) noexcept {
     using namespace detail;
     Expects(depth_image.w() == intrinsic.w());

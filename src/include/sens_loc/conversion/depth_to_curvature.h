@@ -30,10 +30,11 @@ namespace sens_loc { namespace conversion {
 /// \pre \p PixelType matches the underlying type of \p depth_image
 /// \note invalid depth values result in 0 for that pixel.
 /// \sa depth_to_laserscan
-template <typename Real = float, typename PixelType = float>
-math::image<Real> depth_to_gaussian_curvature(
-    const math::image<PixelType> &      depth_image,
-    const camera_models::pinhole<Real> &intrinsic) noexcept;
+template <typename Real = float, typename PixelType = float,
+          template <typename> typename Intrinsic = camera_models::pinhole>
+math::image<Real>
+depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
+                            const Intrinsic<Real> &       intrinsic) noexcept;
 
 /// Convert the range image \p depth_image to a mean curvature image.
 ///
@@ -50,10 +51,11 @@ math::image<Real> depth_to_gaussian_curvature(
 /// \pre \p PixelType matches the underlying type of \p depth_image
 /// \note invalid depth values result in 0 for that pixel.
 /// \sa depth_to_laserscan
-template <typename Real = float, typename PixelType = float>
+template <typename Real = float, typename PixelType = float,
+          template <typename> typename Intrinsic = camera_models::pinhole>
 math::image<Real>
-depth_to_mean_curvature(const math::image<PixelType> &      depth_image,
-                        const camera_models::pinhole<Real> &intrinsic) noexcept;
+depth_to_mean_curvature(const math::image<PixelType> &depth_image,
+                        const Intrinsic<Real> &       intrinsic) noexcept;
 
 /// Convert the curvature images to presentable images.
 ///
@@ -111,10 +113,11 @@ namespace detail {
         continue;                                                              \
     }
 
-template <typename Real, typename PixelType>
+template <typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
 void gaussian_inner(const int v, const math::image<PixelType> &depth_image,
-                    const camera_models::pinhole<Real> &intrinsic,
-                    math::image<Real> &                 target_img) {
+                    const Intrinsic<Real> &intrinsic,
+                    math::image<Real> &    target_img) {
     for (int u = 1; u < depth_image.w() - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
@@ -132,10 +135,11 @@ void gaussian_inner(const int v, const math::image<PixelType> &depth_image,
     }
 }
 
-template <typename Real, typename PixelType>
+template <typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
 void mean_inner(const int v, const math::image<PixelType> &depth_image,
-                const camera_models::pinhole<Real> &intrinsic,
-                math::image<Real> &                 target_img) {
+                const Intrinsic<Real> &intrinsic,
+                math::image<Real> &    target_img) {
     for (int u = 1; u < depth_image.w() - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
@@ -157,10 +161,11 @@ void mean_inner(const int v, const math::image<PixelType> &depth_image,
 }  // namespace detail
 
 /// Convert an euclidian depth image to a gaussian curvature image.
-template <typename Real, typename PixelType>
-inline math::image<Real> depth_to_gaussian_curvature(
-    const math::image<PixelType> &      depth_image,
-    const camera_models::pinhole<Real> &intrinsic) noexcept {
+template <typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
+inline math::image<Real>
+depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
+                            const Intrinsic<Real> &       intrinsic) noexcept {
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
@@ -177,10 +182,11 @@ inline math::image<Real> depth_to_gaussian_curvature(
 }
 
 /// Convert an euclidian depth image to a gaussian curvature image.
-template <typename Real, typename PixelType>
-inline math::image<Real> depth_to_mean_curvature(
-    const math::image<PixelType> &      depth_image,
-    const camera_models::pinhole<Real> &intrinsic) noexcept {
+template <typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
+inline math::image<Real>
+depth_to_mean_curvature(const math::image<PixelType> &depth_image,
+                        const Intrinsic<Real> &       intrinsic) noexcept {
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 

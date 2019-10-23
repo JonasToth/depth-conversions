@@ -10,8 +10,9 @@ using namespace std;
 using doctest::Approx;
 
 TEST_CASE("Calculate angular resolution") {
-    pinhole<float> p = {
-        960, 540, 519.226, 479.462, 522.23, 272.737,
+    pinhole<double> p = {
+        /*w=*/960,      /*h=*/540,     /*fx=*/519.226,
+        /*fy=*/479.462, /*cx=*/522.23, /*cy=*/272.737,
     };
 
     // Angles must be symmetric.
@@ -31,7 +32,8 @@ TEST_CASE("Calculate angular resolution") {
 
 TEST_CASE("Project pixels to sphere") {
     pinhole<double> p = {
-        960, 540, 519.226, 479.462, 522.23, 272.737,
+        /*w=*/960,      /*h=*/540,     /*fx=*/519.226,
+        /*fy=*/479.462, /*cx=*/522.23, /*cy=*/272.737,
     };
     SUBCASE("Dimensions") {
         CHECK(p.w() == 960);
