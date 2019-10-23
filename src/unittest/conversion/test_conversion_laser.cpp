@@ -1,4 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
+#include "intrinsic.h"
+
 #include <doctest/doctest.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
@@ -22,13 +25,6 @@ TEST_CASE("convert depth image to laser-scan image") {
     cv::Mat depth_double;
     depth_image->data().convertTo(depth_float, CV_32F);
     depth_image->data().convertTo(depth_double, CV_64F);
-
-    constexpr camera_models::pinhole<float> p_float = {
-        960, 540, 519.226, 479.462, 522.23, 272.737,
-    };
-    constexpr camera_models::pinhole<double> p = {
-        960, 540, 519.226, 479.462, 522.23, 272.737,
-    };
 
     auto laser_float  = depth_to_laserscan(*depth_image, p_float);
     auto laser_double = depth_to_laserscan<double>(*depth_image, p);
@@ -58,15 +54,11 @@ TEST_CASE("convert depth image to laser-scan image parallel") {
     cv::Mat depth_float;
     depth_image->data().convertTo(depth_float, CV_32F);
 
-    constexpr camera_models::pinhole<float> p = {
-        960, 540, 519.226, 479.462, 522.23, 272.737,
-    };
-
     cv::Mat            laser_out = depth_float;
     math::image<float> laser_img(std::move(laser_out));
     {
         tf::Taskflow flow;
-        par_depth_to_laserscan<float>(*depth_image, p, laser_img, flow);
+        par_depth_to_laserscan<float>(*depth_image, p_float, laser_img, flow);
         tf::Executor().run(flow).wait();
     }
     cv::Mat laser_float_16u;

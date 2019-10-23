@@ -1,4 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
+#include "intrinsic.h"
+
 #include <doctest/doctest.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <sens_loc/conversion/depth_scaling.h>

@@ -1,4 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
+#include "intrinsic.h"
+
 #include <doctest/doctest.h>
 #include <opencv2/imgproc/imgproc.hpp>
 #include <sens_loc/conversion/depth_to_flexion.h>
@@ -7,9 +10,6 @@
 #include <sens_loc/util/correctness_util.h>
 
 using namespace sens_loc;
-constexpr camera_models::pinhole<double> p = {
-    960, 540, 519.226, 479.462, 522.23, 272.737,
-};
 
 TEST_CASE("flexion image") {
     auto depth_image = io::load_image<ushort>("conversion/data0-depth.png",

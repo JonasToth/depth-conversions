@@ -1,4 +1,7 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
+#include "intrinsic.h"
+
 #include <doctest/doctest.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/conversion/depth_to_max_curve.h>
@@ -66,10 +69,6 @@ TEST_CASE("depth image to max curve") {
     auto depth_image = io::load_image<ushort>("conversion/data0-depth.png",
                                               cv::IMREAD_UNCHANGED);
     REQUIRE(depth_image);
-
-    constexpr camera_models::pinhole<double> p = {
-        960, 540, 519.226, 479.462, 522.23, 272.737,
-    };
 
     SUBCASE("double accuracy") {
         auto ref_double = io::load_image<ushort>(

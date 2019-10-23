@@ -1,6 +1,8 @@
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
+
+#include "intrinsic.h"
+
 #include <doctest/doctest.h>
-#include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/conversion/depth_to_bearing.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
@@ -11,13 +13,6 @@ using namespace sens_loc::conversion;
 using namespace sens_loc::math;
 using namespace std;
 using doctest::Approx;
-
-constexpr camera_models::pinhole<double> p_double = {
-    960, 540, 519.226, 479.462, 522.23, 272.737,
-};
-constexpr camera_models::pinhole<float> p_float = {
-    960, 540, 519.226, 479.462, 522.23, 272.737,
-};
 
 TEST_CASE("Acces Prior Pixel") {
     using conversion::detail::pixel;

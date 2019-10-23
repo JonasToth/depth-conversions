@@ -8,7 +8,8 @@ inline std::tuple<sens_loc::math::image<ushort>, sens_loc::math::image<float>,
                   sens_loc::camera_models::pinhole<float>>
 get_data() {
     constexpr sens_loc::camera_models::pinhole<float> p = {
-        960, 540, 519.226, 479.462, 522.23, 272.737,
+        /*w=*/960,      /*h=*/540,     /*fx=*/519.226,
+        /*fy=*/479.462, /*cx=*/522.23, /*cy=*/272.737,
     };
     const std::optional<sens_loc::math::image<ushort>> img =
         sens_loc::io::load_image<ushort>("conversion/data0-depth.png",
