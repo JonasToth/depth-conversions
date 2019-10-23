@@ -19,7 +19,7 @@ namespace math {
 /// \post \f$0. <= result <= 2\pi\f$
 /// \post \c rad_to_deg(result) == \p degree
 template <typename T>  // requires(Float(T))
-inline T deg_to_rad(T degree) {
+constexpr inline T deg_to_rad(T degree) {
     Expects(degree <= T(360.));
     Expects(degree >= T(0.));
     const T radians = degree / T(180.) * pi<T>;
@@ -38,7 +38,7 @@ inline T deg_to_rad(T degree) {
 /// \post \f$0. <= result <= 360.\f$
 /// \post \c deg_to_rad(result) == \p radians
 template <typename T>  // requires(Float(T))
-inline T rad_to_deg(T radians) {
+constexpr inline T rad_to_deg(T radians) {
     Expects(radians >= T(0.));
     Expects(radians <= T(2. * pi<T>));
     const T degree = radians * T(180.) / pi<T>;

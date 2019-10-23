@@ -23,7 +23,7 @@ std::optional<math::image<PixelType>> load_image(Arg &&... args) {
         return std::nullopt;
     if (result.type() != math::detail::get_opencv_type<PixelType>())
         return std::nullopt;
-    return {math::image<PixelType>(result)};
+    return {math::image<PixelType>(std::move(result))};
 }
 }  // namespace io
 }  // namespace sens_loc

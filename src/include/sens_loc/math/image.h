@@ -105,6 +105,13 @@ class image {
     cv::Mat _data;
 };
 
+template <typename TargetType, typename PixelType>
+image<TargetType> convert(const image<PixelType> &img) noexcept {
+    cv::Mat tmp(img.h(), img.w(), detail::get_opencv_type<TargetType>());
+    img.data().convertTo(tmp, detail::get_opencv_type<TargetType>());
+    return math::image<TargetType>(std::move(tmp));
+}
+
 }}  // namespace sens_loc::math
 
 #endif /* end of include guard: IMAGE_H_YQCE0AWR */

@@ -12,7 +12,7 @@ namespace sens_loc { namespace camera_models {
 
 namespace detail {
 template <typename Real>
-Real get_d_phi(int width) noexcept {
+constexpr Real get_d_phi(int width) noexcept {
     return Real(2.) * math::pi<Real> / Real(width);
 }
 }  // namespace detail
@@ -113,7 +113,7 @@ class equirectangular {
     pixel_to_sphere(const math::pixel_coord<Number> &p) const noexcept;
 
   private:
-    void ensure_invariant() const noexcept {
+    constexpr void ensure_invariant() const noexcept {
         Ensures(d_phi > Real(0.));
         Ensures(d_theta > Real(0.));
         Ensures(theta_min >= Real(0.));
@@ -124,10 +124,10 @@ class equirectangular {
         Ensures(theta_min + _h * d_theta <= math::pi<Real> + 0.00001);
     }
 
-    int  _w = 0;          ///< width of a laser-scan image
-    int  _h = 0;          ///< height of a laser-scan image.
-    Real d_phi;           ///< Angle increment in u-direction.
-    Real d_theta;         ///< Angle increment in v-direction.
+    int  _w        = 0;   ///< width of a laser-scan image
+    int  _h        = 0;   ///< height of a laser-scan image.
+    Real d_phi     = 0.;  ///< Angle increment in u-direction.
+    Real d_theta   = 0.;  ///< Angle increment in v-direction.
     Real theta_min = 0.;  ///< Smallest angle in v-direction.
 };
 

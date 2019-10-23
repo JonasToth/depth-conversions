@@ -6,6 +6,9 @@ test_add_file(camera_models camera_models/test_equirectangular.cpp)
 
 # Conversion tests all require this file.
 configure_file(conversion/data0-depth.png conversion/data0-depth.png COPYONLY)
+configure_file(conversion/laserscan-depth.png conversion/laserscan-depth.png COPYONLY)
+configure_file(conversion/laserscan-depth-half.png conversion/laserscan-depth-half.png COPYONLY)
+configure_file(conversion/laserscan-depth-quarter.png conversion/laserscan-depth-quarter.png COPYONLY)
 
 create_test(conversion_bearing conversion/test_conversion_bearing.cpp)
 test_add_file(conversion_bearing conversion/test_conversion_bearing_pathological.cpp)
@@ -23,6 +26,7 @@ create_test(conversion_curvature conversion/test_conversion_curvature.cpp)
 
 create_test(conversion_flexion conversion/test_conversion_flexion.cpp)
 configure_file(conversion/flexion-reference.png conversion/flexion-reference.png COPYONLY)
+configure_file(conversion/flexion-laserscan-reference.png conversion/flexion-laserscan-reference.png COPYONLY)
 
 create_test(conversion_laser conversion/test_conversion_laser.cpp)
 configure_file(conversion/data0-depth-laser.png conversion/data0-depth-laser.png COPYONLY)
