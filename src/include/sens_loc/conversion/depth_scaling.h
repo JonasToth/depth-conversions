@@ -19,7 +19,7 @@ template <typename PixelType = ushort>
 math::image<PixelType> depth_scaling(const math::image<PixelType> &depth_image,
                                      double                        scale,
                                      double offset = 0.) noexcept {
-    cv::Mat img(depth_image.data().rows, depth_image.data().cols,
+    cv::Mat img(depth_image.h(), depth_image.w(),
                 math::detail::get_opencv_type<PixelType>());
     depth_image.data().convertTo(
         img, math::detail::get_opencv_type<PixelType>(), scale, offset);

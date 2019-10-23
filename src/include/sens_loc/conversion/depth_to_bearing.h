@@ -217,7 +217,7 @@ depth_to_bearing(const math::image<PixelType> &      depth_image,
     const pixel_range<Direction> r{depth_image.data()};
 
     // Image of Reals, that will be converted after the full calculation.
-    cv::Mat ba(depth_image.data().rows, depth_image.data().cols,
+    cv::Mat ba(depth_image.h(), depth_image.w(),
                math::detail::get_opencv_type<Real>());
     ba = Real(0.);
     math::image<Real> ba_image(std::move(ba));
@@ -226,8 +226,8 @@ depth_to_bearing(const math::image<PixelType> &      depth_image,
         detail::bearing_inner<Real, PixelType>(
             r, prior_accessor, v, depth_image, intrinsic, ba_image);
 
-    Ensures(ba_image.data().rows == depth_image.data().rows);
-    Ensures(ba_image.data().cols == depth_image.data().cols);
+    Ensures(ba_image.h() == depth_image.h());
+    Ensures(ba_image.w() == depth_image.w());
 
     return ba_image;
 }
@@ -240,8 +240,8 @@ par_depth_to_bearing(const math::image<PixelType> &      depth_image,
     using namespace detail;
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
-    Expects(ba_image.data().cols == depth_image.data().cols);
-    Expects(ba_image.data().rows == depth_image.data().rows);
+    Expects(ba_image.w() == depth_image.w());
+    Expects(ba_image.h() == depth_image.h());
 
     const pixel<Real, Direction> prior_accessor;
     const pixel_range<Direction> r{depth_image.data()};
@@ -260,15 +260,15 @@ template <typename Real, typename PixelType>
 inline math::image<PixelType>
 convert_bearing(const math::image<Real> &bearing_image) noexcept {
     using detail::scaling_factor;
-    cv::Mat img(bearing_image.data().rows, bearing_image.data().cols,
+    cv::Mat img(bearing_image.h(), bearing_image.w(),
                 math::detail::get_opencv_type<PixelType>());
     auto [scale, offset] =
         scaling_factor<Real, PixelType>(/*max_angle = */ math::pi<Real>);
     bearing_image.data().convertTo(
         img, math::detail::get_opencv_type<PixelType>(), scale, offset);
 
-    Ensures(img.cols == bearing_image.data().cols);
-    Ensures(img.rows == bearing_image.data().rows);
+    Ensures(img.cols == bearing_image.w());
+    Ensures(img.rows == bearing_image.h());
     Ensures(img.type() == math::detail::get_opencv_type<PixelType>());
     Ensures(img.channels() == 1);
 

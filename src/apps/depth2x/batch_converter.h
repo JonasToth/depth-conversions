@@ -108,7 +108,7 @@ class batch_converter {
     /// \returns \c cv::Mat with proper input data for the conversion process.
     [[nodiscard]] virtual std::optional<math::image<double>>
     preprocess_depth(math::image<ushort> depth_image) const noexcept {
-        cv::Mat depth_double(depth_image.data().rows, depth_image.data().cols,
+        cv::Mat depth_double(depth_image.h(), depth_image.w(),
                              math::detail::get_opencv_type<double>());
         depth_image.data().convertTo(depth_double,
                                      math::detail::get_opencv_type<double>());

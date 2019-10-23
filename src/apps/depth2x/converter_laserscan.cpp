@@ -13,7 +13,7 @@ bool range_converter::process_file(math::image<double> depth_image,
 
     /// The input 'depth_image' is already in range-form as its beeing
     /// preprocessed.
-    cv::Mat depth_16bit(depth_image.data().rows, depth_image.data().cols,
+    cv::Mat depth_16bit(depth_image.h(), depth_image.w(),
                         CV_16U);
     depth_image.data().convertTo(depth_16bit, CV_16U);
     bool success = cv::imwrite(fmt::format(_files.output, idx), depth_16bit);

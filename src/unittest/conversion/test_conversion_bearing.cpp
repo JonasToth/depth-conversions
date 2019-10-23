@@ -105,7 +105,7 @@ TEST_CASE("Convert depth image to vertical bearing angle image in parallel") {
                                           cv::IMREAD_UNCHANGED);
     REQUIRE(ref_vert);
 
-    cv::Mat out(laser.data().rows, laser.data().cols, laser.data().type());
+    cv::Mat out(laser.h(), laser.w(), laser.data().type());
     math::image<double> out_img(std::move(out));
     {
         tf::Taskflow flow;

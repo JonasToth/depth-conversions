@@ -87,13 +87,13 @@ depth_to_max_curve(const math::image<PixelType> &      depth_image,
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
-    cv::Mat max_curve(depth_image.data().rows, depth_image.data().cols,
+    cv::Mat max_curve(depth_image.h(), depth_image.w(),
                       math::detail::get_opencv_type<Real>());
     max_curve = Real(0.);
     math::image<Real> max_curve_image(std::move(max_curve));
 
-    for (int v = 1; v < depth_image.data().rows - 1; ++v) {
-        for (int u = 1; u < depth_image.data().cols - 1; ++u) {
+    for (int v = 1; v < depth_image.h() - 1; ++v) {
+        for (int u = 1; u < depth_image.w() - 1; ++u) {
             const Real d__1__1 = depth_image.at({u - 1, v - 1});
             const Real d__1__0 = depth_image.at({u, v - 1});
             const Real d__1_1  = depth_image.at({u + 1, v - 1});
@@ -151,7 +151,7 @@ template <typename Real, typename PixelType>
 inline math::image<PixelType>
 convert_max_curve(const math::image<Real> &max_curve) noexcept {
     using detail::scaling_factor;
-    cv::Mat img(max_curve.data().rows, max_curve.data().cols,
+    cv::Mat img(max_curve.h(), max_curve.w(),
                 math::detail::get_opencv_type<PixelType>());
     const auto [scale, offset] =
         // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
@@ -159,8 +159,8 @@ convert_max_curve(const math::image<Real> &max_curve) noexcept {
     max_curve.data().convertTo(img, math::detail::get_opencv_type<PixelType>(),
                                scale, offset);
 
-    Ensures(img.cols == max_curve.data().cols);
-    Ensures(img.rows == max_curve.data().rows);
+    Ensures(img.cols == max_curve.w());
+    Ensures(img.rows == max_curve.h());
     Ensures(img.type() == math::detail::get_opencv_type<PixelType>());
     Ensures(img.channels() == 1);
 

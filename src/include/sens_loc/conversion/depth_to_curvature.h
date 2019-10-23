@@ -115,7 +115,7 @@ template <typename Real, typename PixelType>
 void gaussian_inner(const int v, const math::image<PixelType> &depth_image,
                     const camera_models::pinhole<Real> &intrinsic,
                     math::image<Real> &                 target_img) {
-    for (int u = 1; u < depth_image.data().cols - 1; ++u) {
+    for (int u = 1; u < depth_image.w() - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
         using camera_models::phi;
@@ -136,7 +136,7 @@ template <typename Real, typename PixelType>
 void mean_inner(const int v, const math::image<PixelType> &depth_image,
                 const camera_models::pinhole<Real> &intrinsic,
                 math::image<Real> &                 target_img) {
-    for (int u = 1; u < depth_image.data().cols - 1; ++u) {
+    for (int u = 1; u < depth_image.w() - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
         using camera_models::phi;
@@ -164,12 +164,12 @@ inline math::image<Real> depth_to_gaussian_curvature(
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
-    cv::Mat gauss(depth_image.data().rows, depth_image.data().cols,
+    cv::Mat gauss(depth_image.h(), depth_image.w(),
                   math::detail::get_opencv_type<Real>());
     gauss = Real(0.);
     math::image<Real> gauss_image(std::move(gauss));
 
-    for (int v = 1; v < depth_image.data().rows - 1; ++v) {
+    for (int v = 1; v < depth_image.h() - 1; ++v) {
         detail::gaussian_inner<Real, PixelType>(v, depth_image, intrinsic,
                                                 gauss_image);
     }
@@ -184,12 +184,12 @@ inline math::image<Real> depth_to_mean_curvature(
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
-    cv::Mat mean(depth_image.data().rows, depth_image.data().cols,
+    cv::Mat mean(depth_image.h(), depth_image.w(),
                  math::detail::get_opencv_type<Real>());
     mean = Real(0.);
     math::image<Real> mean_image(std::move(mean));
 
-    for (int v = 1; v < depth_image.data().rows - 1; ++v) {
+    for (int v = 1; v < depth_image.h() - 1; ++v) {
         detail::mean_inner<Real, PixelType>(v, depth_image, intrinsic,
                                             mean_image);
     }
@@ -221,7 +221,7 @@ reals_to_image(const math::image<Real> &real_image,
     const Real target_min = std::numeric_limits<PixelType>::min();
     const Real target_max = std::numeric_limits<PixelType>::max();
 
-    cv::Mat target_image(real_image.data().rows, real_image.data().cols,
+    cv::Mat target_image(real_image.h(), real_image.w(),
                          math::detail::get_opencv_type<PixelType>());
 
     std::transform(real_image.data().template begin<Real>(),
@@ -232,8 +232,8 @@ reals_to_image(const math::image<Real> &real_image,
                                        {target_min, target_max}, value));
                    });
 
-    Ensures(target_image.cols == real_image.data().cols);
-    Ensures(target_image.rows == real_image.data().rows);
+    Ensures(target_image.cols == real_image.w());
+    Ensures(target_image.rows == real_image.h());
 
     return math::image<PixelType>(std::move(target_image));
 }
@@ -246,8 +246,8 @@ curvature_to_image(const math::image<Real> &    curvature_img,
                    const math::image<MaskType> &depth_image_as_mask,
                    std::optional<Real>          clamp_min,
                    std::optional<Real>          clamp_max) noexcept {
-    Expects(curvature_img.data().cols == depth_image_as_mask.data().cols);
-    Expects(curvature_img.data().rows == depth_image_as_mask.data().rows);
+    Expects(curvature_img.w() == depth_image_as_mask.w());
+    Expects(curvature_img.h() == depth_image_as_mask.h());
 
     cv::Mat mask_from_depth;
     depth_image_as_mask.data().convertTo(mask_from_depth, CV_8U);
@@ -257,12 +257,12 @@ curvature_to_image(const math::image<Real> &    curvature_img,
         .data()
         .convertTo(intermediate, math::detail::get_opencv_type<PixelType>());
 
-    cv::Mat result(curvature_img.data().rows, curvature_img.data().cols,
+    cv::Mat result(curvature_img.h(), curvature_img.w(),
                    math::detail::get_opencv_type<PixelType>());
     intermediate.copyTo(result, mask_from_depth);
 
-    Ensures(result.cols == curvature_img.data().cols);
-    Ensures(result.rows == curvature_img.data().rows);
+    Ensures(result.cols == curvature_img.w());
+    Ensures(result.rows == curvature_img.h());
     Ensures(result.type() == math::detail::get_opencv_type<PixelType>());
     Ensures(result.channels() == 1);
 

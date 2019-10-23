@@ -101,7 +101,7 @@ batch_pinhole_converter::preprocess_depth(math::image<ushort> depth_image) const
         return conversion::depth_to_laserscan<double, ushort>(depth_image,
                                                               intrinsic);
     case depth_type::euclidean:
-        cv::Mat depth_double(depth_image.data().rows, depth_image.data().cols,
+        cv::Mat depth_double(depth_image.h(), depth_image.w(),
                              math::detail::get_opencv_type<double>());
         depth_image.data().convertTo(depth_double,
                                      math::detail::get_opencv_type<double>());

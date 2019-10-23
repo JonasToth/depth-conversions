@@ -43,7 +43,7 @@ template <typename Real, typename PixelType>
 void laserscan_inner(const int v, const math::image<PixelType> &depth_image,
                      const camera_models::pinhole<Real> &intrinsic,
                      math::image<Real> &                 euclid) {
-    for (int u = 0; u < depth_image.data().cols; ++u) {
+    for (int u = 0; u < depth_image.w(); ++u) {
         const PixelType d_o = depth_image.at({u, v});
         euclid.at({u, v}) =
             orthografic_to_euclidian<Real>({u, v}, d_o, intrinsic);
@@ -58,17 +58,17 @@ depth_to_laserscan(const math::image<PixelType> &      depth_image,
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
-    cv::Mat euclid(depth_image.data().rows, depth_image.data().cols,
+    cv::Mat euclid(depth_image.h(), depth_image.w(),
                    math::detail::get_opencv_type<Real>());
     euclid = Real(0.);
     math::image<Real> euclid_image(std::move(euclid));
 
-    for (int v = 0; v < depth_image.data().rows; ++v)
+    for (int v = 0; v < depth_image.h(); ++v)
         detail::laserscan_inner<Real, PixelType>(v, depth_image, intrinsic,
                                                  euclid_image);
 
-    Ensures(euclid_image.data().rows == depth_image.data().rows);
-    Ensures(euclid_image.data().cols == depth_image.data().cols);
+    Ensures(euclid_image.h() == depth_image.h());
+    Ensures(euclid_image.w() == depth_image.w());
 
     return euclid_image;
 }
@@ -82,11 +82,11 @@ par_depth_to_laserscan(const math::image<PixelType> &      depth_image,
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
-    Expects(out.data().rows == depth_image.data().rows);
-    Expects(out.data().cols == depth_image.data().cols);
+    Expects(out.h() == depth_image.h());
+    Expects(out.w() == depth_image.w());
 
     auto sync_points =
-        flow.parallel_for(0, depth_image.data().rows, 1, [&](int v) {
+        flow.parallel_for(0, depth_image.h(), 1, [&](int v) {
             detail::laserscan_inner<Real, PixelType>(v, depth_image, intrinsic,
                                                      out);
         });
