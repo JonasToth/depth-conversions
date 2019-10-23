@@ -118,12 +118,10 @@ void gaussian_inner(const int v, const math::image<PixelType> &depth_image,
     for (int u = 1; u < depth_image.data().cols - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
-        const Real d_phi =
-            camera_models::phi(intrinsic, {u - 1, v}, {u + 1, v});
-        const Real d_theta =
-            camera_models::phi(intrinsic, {u, v - 1}, {u, v + 1});
-        const Real d_phi_theta =
-            camera_models::phi(intrinsic, {u - 1, v - 1}, {u + 1, v + 1});
+        using camera_models::phi;
+        const Real d_phi       = phi(intrinsic, {u - 1, v}, {u + 1, v});
+        const Real d_theta     = phi(intrinsic, {u, v - 1}, {u, v + 1});
+        const Real d_phi_theta = phi(intrinsic, {u - 1, v - 1}, {u + 1, v + 1});
 
         const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
             d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1, d_1__0,
@@ -141,12 +139,10 @@ void mean_inner(const int v, const math::image<PixelType> &depth_image,
     for (int u = 1; u < depth_image.data().cols - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
-        const Real d_phi =
-            camera_models::phi(intrinsic, {u - 1, v}, {u + 1, v});
-        const Real d_theta =
-            camera_models::phi(intrinsic, {u, v - 1}, {u, v + 1});
-        const Real d_phi_theta =
-            camera_models::phi(intrinsic, {u - 1, v - 1}, {u + 1, v + 1});
+        using camera_models::phi;
+        const Real d_phi       = phi(intrinsic, {u - 1, v}, {u + 1, v});
+        const Real d_theta     = phi(intrinsic, {u, v - 1}, {u, v + 1});
+        const Real d_phi_theta = phi(intrinsic, {u - 1, v - 1}, {u + 1, v + 1});
 
         const auto [f_u, f_v, f_uu, f_vv, f_uv] = math::derivatives(
             d__1__1, d__1__0, d__1_1, d__0__1, d__0__0, d__0_1, d_1__1, d_1__0,

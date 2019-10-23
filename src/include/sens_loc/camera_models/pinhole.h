@@ -24,6 +24,8 @@ namespace camera_models {
 template <typename Real = float>
 class pinhole {
   public:
+    using real_type = Real;
+
     constexpr pinhole() = default;
 
     /// Initialize the pinhole model with it's essential parameters.

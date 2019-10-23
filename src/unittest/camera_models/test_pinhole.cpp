@@ -10,7 +10,7 @@ using namespace std;
 using doctest::Approx;
 
 TEST_CASE("Calculate angular resolution") {
-    pinhole<double> p = {
+    pinhole<float> p = {
         960, 540, 519.226, 479.462, 522.23, 272.737,
     };
 

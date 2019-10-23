@@ -34,6 +34,8 @@ Real get_d_phi(int width) noexcept {
 template <typename Real = float>
 class equirectangular {
   public:
+    using real_type = Real;
+
     /// Default initialize all parameters to zero.
     constexpr equirectangular() = default;
 
