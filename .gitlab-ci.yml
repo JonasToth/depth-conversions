@@ -78,10 +78,6 @@ ubuntu-1804-clang-9:
     refs:
       - merge_requests
     <<: *code_change_filter_definition
-  artifacts:
-    reports:
-      junit:
-        - build/src/benchmarks/bm_*.xml
   tags:
     - docker
 
@@ -186,10 +182,6 @@ ubuntu-1804-gcc-9:
     refs:
       - merge_requests
     <<: *code_change_filter_definition
-  artifacts:
-    reports:
-      junit:
-        - build/src/benchmarks/bm_*.xml
   tags:
     - docker
 
