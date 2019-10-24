@@ -71,7 +71,7 @@ ubuntu-1804-clang-9:
     LD: "lld-9"
     USE_LIBCXX: "OFF"
     WITH_BENCHMARK: "ON"
-    WITH_BENCHMARK_JUNIT_REPORT: "ON"
+    WITH_BENCHMARK_JUNIT_REPORT: "OFF"
   script:
     - ./scripts/ci/normal_build.bash
   only:
@@ -179,7 +179,7 @@ ubuntu-1804-gcc-9:
     CC: "gcc-9"
     CXX: "g++-9"
     WITH_BENCHMARK: "ON"
-    WITH_BENCHMARK_JUNIT_REPORT: "ON"
+    WITH_BENCHMARK_JUNIT_REPORT: "OFF"
   script:
     - ./scripts/ci/normal_build.bash
   only:
