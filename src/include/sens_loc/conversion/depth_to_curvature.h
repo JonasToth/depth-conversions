@@ -258,14 +258,12 @@ curvature_to_image(const math::image<Real> &    curvature_img,
     cv::Mat mask_from_depth;
     depth_image_as_mask.data().convertTo(mask_from_depth, CV_8U);
 
-    cv::Mat intermediate;
-    detail::reals_to_image<Real>(curvature_img, clamp_min, clamp_max)
-        .data()
-        .convertTo(intermediate, math::detail::get_opencv_type<PixelType>());
+    const auto intermediate =
+        detail::reals_to_image<Real>(curvature_img, clamp_min, clamp_max);
 
     cv::Mat result(curvature_img.h(), curvature_img.w(),
                    math::detail::get_opencv_type<PixelType>());
-    intermediate.copyTo(result, mask_from_depth);
+    intermediate.data().copyTo(result, mask_from_depth);
 
     Ensures(result.cols == curvature_img.w());
     Ensures(result.rows == curvature_img.h());

@@ -88,3 +88,20 @@ TEST_CASE("depth image to max curve") {
         REQUIRE(util::average_pixel_error(*ref_double, curve_ushort) < 0.5);
     }
 }
+
+TEST_CASE("laserscan to max curve") {
+    auto depth_image = io::load_image<ushort>("conversion/laserscan-depth.png",
+                                              cv::IMREAD_UNCHANGED);
+    REQUIRE(depth_image);
+
+    const auto laser_double = math::convert<double>(*depth_image);
+    const auto curve_double =
+        depth_to_max_curve<double, double>(laser_double, e_double);
+    const auto curve_ushort = convert_max_curve<double, ushort>(curve_double);
+    cv::imwrite("conversion/test_max_curve_laserscan.png", curve_ushort.data());
+
+    auto ref_double = io::load_image<ushort>(
+        "conversion/max-curve-laserscan.png", cv::IMREAD_UNCHANGED);
+    REQUIRE(ref_double);
+    REQUIRE(util::average_pixel_error(*ref_double, curve_ushort) < 0.5);
+}

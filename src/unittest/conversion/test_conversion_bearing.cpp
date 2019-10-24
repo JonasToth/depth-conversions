@@ -105,7 +105,7 @@ TEST_CASE("Convert depth image to vertical bearing angle image in parallel") {
                                           cv::IMREAD_UNCHANGED);
     REQUIRE(ref_vert);
 
-    cv::Mat out(laser.h(), laser.w(), laser.data().type());
+    cv::Mat             out(laser.h(), laser.w(), laser.data().type());
     math::image<double> out_img(std::move(out));
     {
         tf::Taskflow flow;
@@ -201,4 +201,25 @@ TEST_CASE("Convert depth image to horizontal bearing angle image") {
     cv::imwrite("conversion/test-horizontal-diff.png", diff);
     /// Small Difference, but not zero.
     REQUIRE(util::average_pixel_error(diff, ref_diff->data()) < 0.5);
+}
+
+TEST_CASE("convert laserscan to horizontal bearing angle") {
+    auto depth_image = io::load_image<ushort>("conversion/laserscan-depth.png",
+                                              cv::IMREAD_UNCHANGED);
+    REQUIRE(depth_image);
+
+    const auto laser_double = math::convert<double>(*depth_image);
+    const auto bearing =
+        conversion::depth_to_bearing<direction::horizontal, double, double>(
+            laser_double, e_double);
+    const auto converted = conversion::convert_bearing<double, ushort>(bearing);
+    cv::imwrite("conversion/test_horizontal_bearing_laserscan.png",
+                converted.data());
+
+    auto ref_image = io::load_image<ushort>(
+        "conversion/bearing-horizontal-laserscan-reference.png",
+        cv::IMREAD_UNCHANGED);
+    REQUIRE(ref_image);
+
+    REQUIRE(util::average_pixel_error(*ref_image, converted) < 0.5);
 }
