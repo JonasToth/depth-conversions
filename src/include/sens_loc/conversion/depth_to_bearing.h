@@ -94,7 +94,7 @@ inline int get_du(direction dir) {
     case direction::horizontal: return -1;
     case direction::vertical: return 0;
     }
-    UNREACHABLE("Only 4 directions are possible");
+    UNREACHABLE("Only 4 directions are possible");  // LCOV_EXCL_LINE
 }
 
 inline int get_dv(direction dir) {
@@ -104,7 +104,7 @@ inline int get_dv(direction dir) {
     case direction::horizontal: return 0;
     case direction::antidiagonal: return 1;
     }
-    UNREACHABLE("Only 4 directions are possible");
+    UNREACHABLE("Only 4 directions are possible");  // LCOV_EXCL_LINE
 }
 
 /// Provide a general accessor for the pixels that provide depth information
@@ -133,7 +133,7 @@ inline int get_x_start(direction dir) {
     case direction::diagonal: return 1;
     case direction::vertical: return 0;
     }
-    UNREACHABLE("Only 4 directions are possible");
+    UNREACHABLE("Only 4 directions are possible");  // LCOV_EXCL_LINE
 }
 
 inline int get_y_start(direction dir) {
@@ -143,7 +143,7 @@ inline int get_y_start(direction dir) {
     case direction::diagonal:
     case direction::vertical: return 1;
     }
-    UNREACHABLE("Only 4 directions are possible");
+    UNREACHABLE("Only 4 directions are possible");  // LCOV_EXCL_LINE
 }
 
 inline int get_dy_end(direction dir) {
@@ -153,7 +153,7 @@ inline int get_dy_end(direction dir) {
     case direction::diagonal:
     case direction::vertical: return 0;
     }
-    UNREACHABLE("Only 4 directions are possible");
+    UNREACHABLE("Only 4 directions are possible");  // LCOV_EXCL_LINE
 }
 
 /// Define the start and end iterator for each bearing angle direction.

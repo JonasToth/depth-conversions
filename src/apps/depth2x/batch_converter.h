@@ -40,7 +40,8 @@ inline depth_type str_to_depth_type(std::string_view option) {
     if (option == "pinhole-range")
         return depth_type::euclidean;
 
-    UNREACHABLE("no other options are allowed as input depth type");
+    UNREACHABLE(                                              // LCOV_EXCL_LINE
+        "no other options are allowed as input depth type");  // LCOV_EXCL_LINE
 }
 
 /// Helper struct to contain path specification for input and output files.

@@ -103,6 +103,6 @@ batch_pinhole_converter::preprocess_depth(math::image<ushort> depth_image) const
     case depth_type::euclidean:
         return math::convert<double>(depth_image);
     }
-    UNREACHABLE("Switch is exhaustive");
+    UNREACHABLE("Switch is exhaustive"); // LCOV_EXCL_LINE
 }
 }  // namespace sens_loc::apps

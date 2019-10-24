@@ -33,6 +33,8 @@ namespace util {
 /// \endcode
 ///
 /// \note \c unreachable is inspired by \c llvm_unreachable
+/// \note use  `// LCOV_EXCL_LINE` to exclude UNREACHABLE from the coverage
+/// reports
 [[noreturn]] inline void unreachable(const std::string_view message = {},
                                      const std::string_view file    = {},
                                      int                    line    = -1) {
