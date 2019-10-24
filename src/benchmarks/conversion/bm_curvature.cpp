@@ -23,3 +23,17 @@ NONIUS_BENCHMARK("Depth2Curvature Mean", [](nonius::chronometer meter) {
     auto cali = p;
     meter.measure([&] { return depth_to_mean_curvature(in, cali); });
 })
+
+NONIUS_BENCHMARK("Depth2Curvature Laserscan Gaussian", [](nonius::chronometer meter) {
+    const auto [euclid, p] = get_data_laserscan();
+    auto in   = euclid;
+    auto cali = p;
+    meter.measure([&] { return depth_to_gaussian_curvature(in, cali); });
+})
+
+NONIUS_BENCHMARK("Depth2Curvature Laserscan Mean", [](nonius::chronometer meter) {
+    const auto [euclid, p] = get_data_laserscan();
+    auto in   = euclid;
+    auto cali = p;
+    meter.measure([&] { return depth_to_mean_curvature(in, cali); });
+})

@@ -33,3 +33,29 @@ NONIUS_BENCHMARK("Depth2Bearing Parallel Diagonal",
                          flow.clear();
                      });
                  })
+
+NONIUS_BENCHMARK("Depth2Bearing Laserscan", [](nonius::chronometer meter) {
+    const auto [euclid, p] = get_data_laserscan();
+    auto in                = euclid;
+    auto cali              = p;
+    meter.measure(
+        [&] { return depth_to_bearing<direction::diagonal>(in, cali); });
+})
+
+NONIUS_BENCHMARK("Depth2Bearing Laserscan Parallel",
+                 [](nonius::chronometer meter) {
+                     const auto [euclid, p] = get_data_laserscan();
+
+                     auto         in   = euclid;
+                     auto         out  = euclid;
+                     auto         cali = p;
+                     tf::Executor exe;
+                     tf::Taskflow flow;
+
+                     meter.measure([&] {
+                         par_depth_to_bearing<direction::diagonal>(in, cali,
+                                                                   out, flow);
+                         exe.run(flow).wait();
+                         flow.clear();
+                     });
+                 })
