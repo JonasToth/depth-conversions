@@ -10,7 +10,7 @@
 inline std::tuple<sens_loc::math::image<ushort>, sens_loc::math::image<float>,
                   sens_loc::camera_models::pinhole<float>>
 get_data() {
-    constexpr sens_loc::camera_models::pinhole<float> p = {
+    const sens_loc::camera_models::pinhole<float> p = {
         /*w=*/960,      /*h=*/540,     /*fx=*/519.226,
         /*fy=*/479.462, /*cx=*/522.23, /*cy=*/272.737,
     };
@@ -29,7 +29,7 @@ inline std::tuple<sens_loc::math::image<float>,
                   sens_loc::camera_models::equirectangular<float>>
 get_data_laserscan() {
     using namespace sens_loc;
-    constexpr camera_models::equirectangular<float> e_float{
+    const camera_models::equirectangular<float> e_float{
         /*width=*/1799,
         /*height=*/397,
         /*theta_range=*/
