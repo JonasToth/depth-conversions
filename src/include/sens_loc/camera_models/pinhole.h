@@ -26,13 +26,13 @@ class pinhole {
   public:
     using real_type = Real;
 
-    constexpr pinhole() = default;
+    pinhole() = default;
 
     /// Initialize the pinhole model with it's essential parameters.
     /// \param w,h image dimensions
     /// \param fx,fy focal point
     /// \param cx,cy image center
-    constexpr pinhole(int w, int h, Real fx, Real fy, Real cx, Real cy) noexcept
+    pinhole(int w, int h, Real fx, Real fy, Real cx, Real cy) noexcept
         : _w(w)
         , _h(h)
         , _fx(fx)

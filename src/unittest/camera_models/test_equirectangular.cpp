@@ -29,12 +29,12 @@ TEST_CASE("Construction") {
         SUBCASE("valid") {
             equirectangular<double> e(100, 50, pi<double> / 4.,
                                       0.5 * pi<double> / 50.);
-            (void) e;
+            CHECK(e.pixel_to_sphere({50, 25}).norm() == Approx(1.0));
         }
         SUBCASE("invalid - must throw") {
             CHECK_THROWS_AS(equirectangular<double>(100, 50, pi<double> / 4.,
-                                                      2. * pi<double> / 50.),
-                              std::invalid_argument);
+                                                    2. * pi<double> / 50.),
+                            std::invalid_argument);
         }
     }
 }

@@ -12,7 +12,7 @@ namespace sens_loc { namespace camera_models {
 
 namespace detail {
 template <typename Real>
-constexpr Real get_d_phi(int width) noexcept {
+Real get_d_phi(int width) noexcept {
     return Real(2.) * math::pi<Real> / Real(width);
 }
 }  // namespace detail
@@ -37,15 +37,15 @@ class equirectangular {
     using real_type = Real;
 
     /// Default initialize all parameters to zero.
-    constexpr equirectangular() = default;
+    equirectangular() = default;
 
     /// Construct a equirectangular image for the full sphere.
     ///
     /// \param width width of the image, this maps to 360° field of vie
     /// horizontally which wraps around
     /// \param height height of the image, this
-    /// maps to 180° field of view vertically which does __NOT__ wrap.
-    constexpr equirectangular(int width, int height) noexcept
+    /// maps to 180° field of view vertically which does __NOT__ wrap
+    equirectangular(int width, int height) noexcept
         : _w(width)
         , _h(height)
         , d_phi(detail::get_d_phi<Real>(width))
@@ -62,8 +62,8 @@ class equirectangular {
     /// \param width,height image dimensions
     /// \param theta_range minimum and maximum angle on the unit-sphere in
     /// vertical direction.
-    constexpr equirectangular(int width, int height,
-                              math::numeric_range<Real> theta_range) noexcept
+    equirectangular(int width, int height,
+                    math::numeric_range<Real> theta_range) noexcept
         : _w(width)
         , _h(height)
         , d_phi(detail::get_d_phi<Real>(width))
@@ -83,8 +83,7 @@ class equirectangular {
     /// \param theta_min,d_theta vertical resolution configuration
     /// \throws if the \f$\theta\f$-angle would be out of the range with the
     /// configuration this constructor throws an exception.
-    constexpr equirectangular(int width, int height, Real theta_min,
-                              Real d_theta)
+    equirectangular(int width, int height, Real theta_min, Real d_theta)
         : _w(width)
         , _h(height)
         , d_phi(detail::get_d_phi<Real>(width))
@@ -113,7 +112,7 @@ class equirectangular {
     pixel_to_sphere(const math::pixel_coord<Number> &p) const noexcept;
 
   private:
-    constexpr void ensure_invariant() const noexcept {
+    void ensure_invariant() const noexcept {
         Ensures(d_phi > Real(0.));
         Ensures(d_theta > Real(0.));
         Ensures(theta_min >= Real(0.));
