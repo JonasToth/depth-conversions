@@ -19,23 +19,15 @@ constexpr sens_loc::camera_models::pinhole<float> p_float = {
 };
 
 
-constexpr sens_loc::camera_models::equirectangular<double> e{
-    /*width=*/3597, /*height=*/794,
-    /*theta_range=*/
-    {sens_loc::math::deg_to_rad(50.), sens_loc::math::deg_to_rad(130.)}};
+using sens_loc::math::deg_to_rad;
+constexpr sens_loc::camera_models::equirectangular<double> e_double{
+    /*width=*/1799,
+    /*height=*/397,
+    /*theta_range=*/{deg_to_rad(50.), deg_to_rad(130.)}};
 
-constexpr sens_loc::camera_models::equirectangular<double> e_half{
-    /*width=*/1799, /*height=*/397,
-    /*theta_range=*/
-    {sens_loc::math::deg_to_rad(50.), sens_loc::math::deg_to_rad(130.)}};
-
-constexpr sens_loc::camera_models::equirectangular<double> e_quarter{
-    /*width=*/900, /*height=*/199,
-    /*theta_range=*/
-    {sens_loc::math::deg_to_rad(50.), sens_loc::math::deg_to_rad(130.)}};
 constexpr sens_loc::camera_models::equirectangular<float> e_float{
-    /*width=*/3597, /*height=*/794,
-    /*theta_range=*/
-    {sens_loc::math::deg_to_rad(50.f), sens_loc::math::deg_to_rad(130.f)}};
+    /*width=*/1799,
+    /*height=*/397,
+    /*theta_range=*/{deg_to_rad(50.f), deg_to_rad(130.f)}};
 
 #endif /* end of include guard: INTRINSIC_H_LKU5JQYM */

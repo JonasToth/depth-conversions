@@ -7,8 +7,6 @@ test_add_file(camera_models camera_models/test_equirectangular.cpp)
 # Conversion tests all require this file.
 configure_file(conversion/data0-depth.png conversion/data0-depth.png COPYONLY)
 configure_file(conversion/laserscan-depth.png conversion/laserscan-depth.png COPYONLY)
-configure_file(conversion/laserscan-depth-half.png conversion/laserscan-depth-half.png COPYONLY)
-configure_file(conversion/laserscan-depth-quarter.png conversion/laserscan-depth-quarter.png COPYONLY)
 
 create_test(conversion_bearing conversion/test_conversion_bearing.cpp)
 test_add_file(conversion_bearing conversion/test_conversion_bearing_pathological.cpp)
