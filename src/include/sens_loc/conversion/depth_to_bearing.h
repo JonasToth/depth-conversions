@@ -23,9 +23,10 @@ namespace sens_loc { namespace conversion {
 /// pixels that form the bearing angle
 /// \tparam Real precision to calculate in.
 /// \tparam PixelType underlying datatype of \p depth_image
+/// \tparam Intrinsic camera model that projects pixel to the unit sphere
 /// \param depth_image range image that was taken by a sensor with the
 /// calibration from \p intrinsic
-/// \param intrinsic pinhole camera model to calculate the angle between light
+/// \param intrinsic camera model to calculate the angle between light
 /// rays that correspond to pixels
 /// \returns cv::Mat<Real> with each pixel the bearing angle (radians) in
 /// \p Direction. Invalid depth values result in 0 as result.

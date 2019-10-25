@@ -23,6 +23,7 @@ namespace sens_loc { namespace conversion {
 ///
 /// \tparam Real precision of the calculation
 /// \tparam PixelType underlying type of \p depth_image
+/// \tparam Intrinsic camera model that projects pixel to the unit sphere
 /// \param depth_image range image that will be converted
 /// \param intrinsic calibration of the sensor that took the image.
 /// \returns estimated gaussian curvature for each pixel as \p Real
@@ -44,6 +45,7 @@ depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
 ///
 /// \tparam Real precision of the calculation
 /// \tparam PixelType underlying type of \p depth_image
+/// \tparam Intrinsic camera model that projects pixel to the unit sphere
 /// \param depth_image range image that will be converted
 /// \param intrinsic calibration of the sensor that took the image.
 /// \returns estimated mean curvature for each pixel as \p Real

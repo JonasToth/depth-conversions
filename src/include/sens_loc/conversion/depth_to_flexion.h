@@ -22,6 +22,7 @@ namespace sens_loc { namespace conversion {
 ///
 /// \tparam Real precision of the calculation
 /// \tparam PixelType underlying type of \p depth_image
+/// \tparam Intrinsic camera model that projects pixel to the unit sphere
 /// \param depth_image range image
 /// \param intrinsic calibration of the sensor that took the image
 /// \returns flexion image, each pixel in the range \f$[0,1]\f$

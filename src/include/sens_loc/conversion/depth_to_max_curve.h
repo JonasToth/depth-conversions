@@ -23,6 +23,7 @@ namespace sens_loc { namespace conversion {
 /// \sa conversion::depth_to_bearing
 /// \tparam Real precision of the calculation
 /// \tparam PixelType underlying type of \p depth_image
+/// \tparam Intrinsic camera model that projects pixel to the unit sphere
 /// \param depth_image range image the calculations are made with
 /// \param intrinsic matching calibration for the sensor
 /// \returns the max-curve image with each pixel in the range \f$[0, 2\pi)\f$
