@@ -216,13 +216,13 @@ TEST_CASE("Loading Equirectangular Intrinsics") {
     }
 
     SUBCASE("Line ends to early in dimensions") {
-        string        intrinsic = "960\n";
+        string        intrinsic = "1000\n";
         istringstream fake_file{intrinsic};
         auto p = io<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Line ends too early for theta row") {
-        string intrinsic = "960 540\n"
+        string intrinsic = "1000 250\n"
                            "0.4\n";
         istringstream fake_file{intrinsic};
         auto p = io<double, equirectangular>::load_intrinsic(fake_file);

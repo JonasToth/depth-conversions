@@ -1,5 +1,8 @@
 configure_file(depth2x/kinect_intrinsic.txt
                depth2x/kinect_intrinsic.txt COPYONLY)
+configure_file(depth2x/laser_intrinsic.txt
+               depth2x/laser_intrinsic.txt COPYONLY)
+
 configure_file(depth2x/data0-depth.png
                depth2x/data0-depth.png COPYONLY)
 configure_file(depth2x/data1-depth.png
@@ -14,6 +17,11 @@ configure_file(depth2x/data005-depth.png
                depth2x/data005-depth.png COPYONLY)
 configure_file(depth2x/data006-depth.png
                depth2x/data006-depth.png COPYONLY)
+
+configure_file(depth2x/laserscan-0-depth.png
+               depth2x/laserscan-0-depth.png COPYONLY)
+configure_file(depth2x/laserscan-1-depth.png
+               depth2x/laserscan-1-depth.png COPYONLY)
 
 
 macro (add_app_test test_name)
