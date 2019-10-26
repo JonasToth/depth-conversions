@@ -4,11 +4,7 @@ target_sources(depth2x
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/batch_converter.h"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/batch_converter.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converters.h"
-    "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_bearing.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_curvature.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_flexion.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_laserscan.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_max_curve.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/depth2x/converters.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_scale.cpp"
     )
 add_dependencies(depth2x opencv)

@@ -10,6 +10,76 @@
 #include <sens_loc/version.h>
 #include <stdexcept>
 #include <string>
+#include <variant>
+
+
+#define EXTERN_CONVERTER(type)                                                 \
+    extern template class sens_loc::apps::type##_converter<                    \
+        sens_loc::camera_models::pinhole<double>>;                             \
+    extern template class sens_loc::apps::type##_converter<                    \
+        sens_loc::camera_models::equirectangular<double>>;
+
+EXTERN_CONVERTER(bearing)
+EXTERN_CONVERTER(range)
+EXTERN_CONVERTER(gauss_curv)
+EXTERN_CONVERTER(mean_curv)
+EXTERN_CONVERTER(max_curve)
+EXTERN_CONVERTER(flexion)
+
+
+namespace detail {
+
+/// Helper type for the visitor to create the proper converter.
+/// Necessary to create a dependent type.
+template <class T>
+struct always_false : std::false_type {};
+
+using intrinsic_variant =
+    std::variant<sens_loc::camera_models::pinhole<double>,
+                 sens_loc::camera_models::equirectangular<double>>;
+
+/// This macro is a little monster for template reasons.
+/// In order to instantiate all necessary batch conversions
+/// (feature-type, like bearing_angle) combined with
+/// camera_models (e.g. the pinhole model). As everything is
+/// templated instead of virtually dispatched these
+/// instantiations need to be explicitly written down.
+/// This macro hides this to reduce the code duplication!
+template <template <typename> typename Converter, typename... Arguments>
+std::unique_ptr<sens_loc::apps::batch_converter>
+make_converter(const sens_loc::apps::file_patterns &files,
+               sens_loc::apps::depth_type t, const intrinsic_variant &intrinsic,
+               Arguments &&... args) {
+    using namespace sens_loc::camera_models;
+    using sens_loc::apps::batch_converter;
+
+    return std::visit(
+        [&](auto &&arg) -> std::unique_ptr<batch_converter> {
+            using Intrinsic = std::decay_t<decltype(arg)>;
+
+            if constexpr (std::is_same_v<Intrinsic, pinhole<double>>) {
+                static_assert(
+                    std::is_base_of_v<batch_converter,
+                                      Converter<pinhole<double>>>,
+                    "Converter must derive from apps::batch_converter");
+
+                return std::make_unique<Converter<pinhole<double>>>(
+                    files, t, arg, std::forward<Arguments>(args)...);
+            } else if constexpr (std::is_same_v<Intrinsic,
+                                                equirectangular<double>>) {
+                static_assert(
+                    std::is_base_of_v<batch_converter,
+                                      Converter<equirectangular<double>>>,
+                    "Converter must derive from apps::batch_converter");
+                return std::make_unique<Converter<equirectangular<double>>>(
+                    files, t, arg, std::forward<Arguments>(args)...);
+            } else
+                static_assert(always_false<Intrinsic>::value,
+                              "not all models were considered");
+        },
+        intrinsic);
+}
+}  // namespace detail
 
 /// \defgroup conversion-driver depth-image converter
 ///
@@ -54,6 +124,13 @@ int main(int argc, char **argv) try {
     app.add_option("-c,--calibration", calibration_file,
                    "File that contains calibration parameters for the camera")
         ->check(CLI::ExistingFile);
+
+    string camera_model = "pinhole";
+    app.add_set("-m,--model", camera_model, {"pinhole", "equirectangular"},
+                "Camera model that describes the project of the pixels "
+                "into cartesian space. Must match with the '--calibration'"
+                " file.",
+                /*defaulted=*/true);
 
     apps::file_patterns files;
     app.add_option("-i,--input", files.input,
@@ -253,14 +330,32 @@ int main(int argc, char **argv) try {
     CLI11_PARSE(app, argc, argv);
 
     // Options that are always required are checked first.
-    ifstream calibration_fstream{calibration_file};
-    optional<camera_models::pinhole<double>> intrinsic =
-        io<double, camera_models::pinhole>::load_intrinsic(calibration_fstream);
+    ifstream cali_fstream{calibration_file};
 
-    // FIXME: Not nice, but scale_cmd is the only command that does not require
-    // the intrinsic. Consequently if it is not given, some other command is
-    // expected. This error will then make sense.
-    if (!intrinsic && !(*scale_cmd)) {
+    const auto potential_intrinsic =
+        [&]() -> optional<detail::intrinsic_variant> {
+        using camera_models::equirectangular;
+        using camera_models::pinhole;
+#define LOAD_INTRINSIC(model_name)                                             \
+    if (camera_model == #model_name) {                                         \
+        auto r = io<double, model_name>::load_intrinsic(cali_fstream);         \
+        if (r)                                                                 \
+            return *r;                                                         \
+        return nullopt;                                                        \
+    }
+        LOAD_INTRINSIC(pinhole);
+        LOAD_INTRINSIC(equirectangular);
+
+#undef LOAD_INTRINSIC
+
+        UNREACHABLE("unexpected camera model received "  // LCOV_EXCL_LINE
+                    "from command line parsing");        // LCOV_EXCL_LINE
+    }();
+
+    // FIXME: Not nice, but scale_cmd is the only command that does not
+    // require the intrinsic. Consequently if it is not given, some other
+    // command is expected. This error will then make sense.
+    if (!potential_intrinsic && !(*scale_cmd)) {
         cerr << util::err{};
         cerr << "Could not load intrinsic calibration \"" << rang::style::bold
              << calibration_file << rang::style::reset << "\"!\n";
@@ -268,31 +363,35 @@ int main(int argc, char **argv) try {
     }
 
     try {
+        Expects(potential_intrinsic);
+
         auto c = [&]() -> unique_ptr<apps::batch_converter> {
-            if (*bearing_cmd)
-                return make_unique<apps::bearing_converter>(
-                    files, apps::str_to_depth_type(input_type), *intrinsic);
-            if (*range_cmd)
-                return make_unique<apps::range_converter>(
-                    files, apps::str_to_depth_type(input_type), *intrinsic);
-            if (*mean_curv_cmd)
-                return make_unique<apps::mean_curv_converter>(
-                    files, apps::str_to_depth_type(input_type), *intrinsic,
-                    lower_bound, upper_bound);
-            if (*gauss_curv_cmd)
-                return make_unique<apps::gauss_curv_converter>(
-                    files, apps::str_to_depth_type(input_type), *intrinsic,
-                    lower_bound, upper_bound);
-            if (*max_curve_cmd)
-                return make_unique<apps::max_curve_converter>(
-                    files, apps::str_to_depth_type(input_type), *intrinsic);
-            if (*flexion_cmd)
-                return make_unique<apps::flexion_converter>(
-                    files, apps::str_to_depth_type(input_type), *intrinsic);
+            using namespace apps;
+            auto input_enum = apps::str_to_depth_type(input_type);
             if (*scale_cmd)
                 return make_unique<apps::scale_converter>(
-                    files, apps::str_to_depth_type(input_type), scale_factor,
-                    scale_delta);
+                    files, input_enum, scale_factor, scale_delta);
+
+            if (*bearing_cmd)
+                return detail::make_converter<bearing_converter>(
+                    files, input_enum, *potential_intrinsic);
+            if (*flexion_cmd)
+                return detail::make_converter<flexion_converter>(
+                    files, input_enum, *potential_intrinsic);
+            if (*gauss_curv_cmd)
+                return detail::make_converter<gauss_curv_converter>(
+                    files, input_enum, *potential_intrinsic, lower_bound,
+                    upper_bound);
+            if (*max_curve_cmd)
+                return detail::make_converter<max_curve_converter>(
+                    files, input_enum, *potential_intrinsic);
+            if (*mean_curv_cmd)
+                return detail::make_converter<mean_curv_converter>(
+                    files, input_enum, *potential_intrinsic, lower_bound,
+                    upper_bound);
+            if (*range_cmd)
+                return detail::make_converter<range_converter>(
+                    files, input_enum, *potential_intrinsic);
 
             throw std::invalid_argument{"target type for conversion required!"};
         }();

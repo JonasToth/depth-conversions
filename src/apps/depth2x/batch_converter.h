@@ -2,12 +2,15 @@
 #define BATCH_CONVERTER_H_XDIRBPHG
 
 #include <opencv2/core/mat.hpp>
+#include <sens_loc/camera_models/equirectangular.h>
 #include <sens_loc/camera_models/pinhole.h>
+#include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/math/image.h>
 #include <sens_loc/util/correctness_util.h>
 #include <stdexcept>
 #include <string>
 #include <string_view>
+#include <type_traits>
 
 namespace sens_loc {
 
@@ -124,12 +127,13 @@ class batch_converter {
 
 /// This class provides common data and depth-image conversion for all
 /// pinhole-camera based input images.
+template <typename Intrinsic>
 class batch_pinhole_converter : public batch_converter {
   public:
     batch_pinhole_converter(const file_patterns &files, depth_type t,
-                            const camera_models::pinhole<double> &intrinsic)
+                            Intrinsic intrinsic)
         : batch_converter(files, t)
-        , intrinsic{intrinsic} {}
+        , intrinsic{std::move(intrinsic)} {}
 
     batch_pinhole_converter(const batch_pinhole_converter &) = default;
     batch_pinhole_converter(batch_pinhole_converter &&)      = default;
@@ -140,7 +144,7 @@ class batch_pinhole_converter : public batch_converter {
 
   protected:
     /// pinhole-camera-model parameters used in the whole conversion.
-    camera_models::pinhole<double> intrinsic;
+    Intrinsic intrinsic;
 
   private:
     /// Convert orthographic depth-images to range images using the pinhole
@@ -148,7 +152,19 @@ class batch_pinhole_converter : public batch_converter {
     /// \sa conversion::depth_to_laserscan
     /// \returns \c cv::Mat with one channel and double as data type.
     [[nodiscard]] std::optional<math::image<double>>
-    preprocess_depth(math::image<ushort> depth_image) const noexcept override;
+    preprocess_depth(math::image<ushort> depth_image) const noexcept override {
+        if ((depth_image.w() != intrinsic.w()) ||
+            depth_image.h() != intrinsic.h())
+            return std::nullopt;
+
+        switch (_input_depth_type) {
+        case depth_type::orthografic:
+            return conversion::depth_to_laserscan<double, ushort>(depth_image,
+                                                                  intrinsic);
+        case depth_type::euclidean: return math::convert<double>(depth_image);
+        }
+        UNREACHABLE("Switch is exhaustive");  // LCOV_EXCL_LINE
+    }
 };
 
 /// @}

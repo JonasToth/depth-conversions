@@ -16,15 +16,16 @@ namespace sens_loc { namespace conversion {
 /// The result type is 'Real'.
 /// \tparam Real precision of the calculation
 /// \tparam PixelType underlying type of the input image
+/// \tparam Intrinsic camera model that projects pixel to the unit sphere
 /// \param depth_image orthgraphic depth image, e.g. from a kinect
 /// \param intrinsic matching calibration of the sensor
 /// \returns matrix with each value converted to the euclidean distance
 /// \note invalid values (where the depth is zero) will be zero as well
 /// \post each value is bigger or equal to the original pixel value
-template <typename Real = float, typename PixelType = ushort>
-math::image<Real>
-depth_to_laserscan(const math::image<PixelType> &      depth_image,
-                   const camera_models::pinhole<Real> &intrinsic) noexcept;
+template <typename Real = float, typename PixelType = ushort,
+          template <typename> typename Intrinsic = camera_models::pinhole>
+math::image<Real> depth_to_laserscan(const math::image<PixelType> &depth_image,
+                                     const Intrinsic<Real> &intrinsic) noexcept;
 
 /// This function is the parallel implementation for the conversions.
 /// \sa conversion::depth_to_laserscan
@@ -32,16 +33,18 @@ depth_to_laserscan(const math::image<PixelType> &      depth_image,
 /// \param[out] out resulting converted image
 /// \param[inout] flow taskgraph that will be used for the parallel jobs
 /// \returns synchronization tasks before and after the conversion.
-template <typename Real = float, typename PixelType = ushort>
+template <typename Real = float, typename PixelType = ushort,
+          template <typename> typename Intrinsic = camera_models::pinhole>
 std::pair<tf::Task, tf::Task>
-par_depth_to_laserscan(const math::image<PixelType> &      depth_image,
-                       const camera_models::pinhole<Real> &intrinsic,
-                       math::image<Real> &out, tf::Taskflow &flow) noexcept;
+par_depth_to_laserscan(const math::image<PixelType> &depth_image,
+                       const Intrinsic<Real> &intrinsic, math::image<Real> &out,
+                       tf::Taskflow &flow) noexcept;
 
 namespace detail {
-template <typename Real, typename PixelType>
+template <typename Real, typename PixelType,
+          template <typename> typename Intrinsic = camera_models::pinhole>
 void laserscan_inner(const int v, const math::image<PixelType> &depth_image,
-                     const camera_models::pinhole<Real> &intrinsic,
+                     const Intrinsic<Real> &intrinsic,
                      math::image<Real> &                 euclid) {
     for (int u = 0; u < depth_image.w(); ++u) {
         const PixelType d_o = depth_image.at({u, v});
@@ -51,10 +54,11 @@ void laserscan_inner(const int v, const math::image<PixelType> &depth_image,
 }
 }  // namespace detail
 
-template <typename Real, typename PixelType>
+template <typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
 inline math::image<Real>
 depth_to_laserscan(const math::image<PixelType> &      depth_image,
-                   const camera_models::pinhole<Real> &intrinsic) noexcept {
+                   const Intrinsic<Real> &intrinsic) noexcept {
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
@@ -74,10 +78,11 @@ depth_to_laserscan(const math::image<PixelType> &      depth_image,
 }
 
 
-template <typename Real, typename PixelType>
+template <typename Real, typename PixelType,
+          template <typename> typename Intrinsic>
 inline std::pair<tf::Task, tf::Task>
 par_depth_to_laserscan(const math::image<PixelType> &      depth_image,
-                       const camera_models::pinhole<Real> &intrinsic,
+                       const Intrinsic<Real> &intrinsic,
                        math::image<Real> &out, tf::Taskflow &flow) noexcept {
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
@@ -85,11 +90,10 @@ par_depth_to_laserscan(const math::image<PixelType> &      depth_image,
     Expects(out.h() == depth_image.h());
     Expects(out.w() == depth_image.w());
 
-    auto sync_points =
-        flow.parallel_for(0, depth_image.h(), 1, [&](int v) {
-            detail::laserscan_inner<Real, PixelType>(v, depth_image, intrinsic,
-                                                     out);
-        });
+    auto sync_points = flow.parallel_for(0, depth_image.h(), 1, [&](int v) {
+        detail::laserscan_inner<Real, PixelType>(v, depth_image, intrinsic,
+                                                 out);
+    });
 
     return sync_points;
 }

@@ -88,21 +88,5 @@ bool batch_converter::process_batch(int start, int end) const noexcept {
     }
 
     return batch_success;
-}  // namespace sens_loc::apps
-
-std::optional<math::image<double>>
-batch_pinhole_converter::preprocess_depth(math::image<ushort> depth_image) const
-    noexcept {
-    if ((depth_image.w() != intrinsic.w()) || depth_image.h() != intrinsic.h())
-        return std::nullopt;
-
-    switch (_input_depth_type) {
-    case depth_type::orthografic:
-        return conversion::depth_to_laserscan<double, ushort>(depth_image,
-                                                              intrinsic);
-    case depth_type::euclidean:
-        return math::convert<double>(depth_image);
-    }
-    UNREACHABLE("Switch is exhaustive"); // LCOV_EXCL_LINE
 }
 }  // namespace sens_loc::apps

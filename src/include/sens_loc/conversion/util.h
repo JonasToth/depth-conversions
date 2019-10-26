@@ -2,6 +2,7 @@
 #define UTIL_H_QNW3WCZL
 
 #include <opencv2/core/mat.hpp>
+#include <sens_loc/camera_models/equirectangular.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/math/coordinate.h>
 #include <type_traits>
@@ -47,6 +48,13 @@ inline Real orthografic_to_euclidian(
     Ensures(euclid_distance >= Real(d));
 
     return euclid_distance;
+}
+
+template <typename Real = float, typename PixelType = ushort>
+inline Real orthografic_to_euclidian(
+    math::pixel_coord<int>, PixelType d,
+    const camera_models::equirectangular<Real> &) noexcept {
+    return d;
 }
 
 /// Return the scaling factor for bearing angle conversion.
