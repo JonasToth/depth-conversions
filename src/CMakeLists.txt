@@ -24,6 +24,7 @@ target_sources(sens_loc INTERFACE
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/image.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/scaling.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/triangles.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/preprocess/filter.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/console.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/correctness_util.h"
     )

@@ -29,7 +29,7 @@ list(APPEND opencv_options
     -DBUILD_PROTOBUF:BOOL=OFF
     -DBUILD_SHARED_LIBS:BOOL=OFF
     -DBUILD_TBB:BOOL=OFF
-    -DBUILD_TESTS:BOOL=$<IF:$<BOOL:${WITH_DEP_TESTING}>,ON,OFF>
+    -DBUILD_TESTS:BOOL=OFF
     -DBUILD_TIFF:BOOL=OFF
     -DBUILD_USE_SYMLINKS:BOOL=OFF
     -DBUILD_WEBP:BOOL=OFF
@@ -88,7 +88,7 @@ list(APPEND opencv_options
     -DBUILD_opencv_videostab:BOOL=OFF
     -DBUILD_opencv_world:BOOL=OFF
     -DBUILD_opencv_xfeatures2d:BOOL=OFF
-    -DBUILD_opencv_ximgproc:BOOL=OFF
+    -DBUILD_opencv_ximgproc:BOOL=ON
     -DBUILD_opencv_xobjdetect:BOOL=OFF
     -DBUILD_opencv_xphoto:BOOL=OFF
     -DCMAKE_BUILD_TYPE:STRING=Release

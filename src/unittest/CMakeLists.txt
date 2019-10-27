@@ -63,6 +63,8 @@ test_add_file(math math/test_image.cpp)
 test_add_file(math math/test_scaling.cpp)
 test_add_file(math math/test_triangles.cpp)
 
+create_test(preprocess preprocess/test_pp.cpp)
+
 create_test(util util/test_util.cpp)
 test_add_file(util util/test_console.cpp)
 test_add_file(util util/test_version.cpp)
