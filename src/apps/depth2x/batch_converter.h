@@ -128,19 +128,18 @@ class batch_converter {
 /// This class provides common data and depth-image conversion for all
 /// pinhole-camera based input images.
 template <typename Intrinsic>
-class batch_pinhole_converter : public batch_converter {
+class batch_sensor_converter : public batch_converter {
   public:
-    batch_pinhole_converter(const file_patterns &files, depth_type t,
-                            Intrinsic intrinsic)
+    batch_sensor_converter(const file_patterns &files, depth_type t,
+                           Intrinsic intrinsic)
         : batch_converter(files, t)
         , intrinsic{std::move(intrinsic)} {}
 
-    batch_pinhole_converter(const batch_pinhole_converter &) = default;
-    batch_pinhole_converter(batch_pinhole_converter &&)      = default;
-    batch_pinhole_converter &
-                             operator=(const batch_pinhole_converter &) = default;
-    batch_pinhole_converter &operator=(batch_pinhole_converter &&) = default;
-    ~batch_pinhole_converter() override                            = default;
+    batch_sensor_converter(const batch_sensor_converter &) = default;
+    batch_sensor_converter(batch_sensor_converter &&)      = default;
+    batch_sensor_converter &operator=(const batch_sensor_converter &) = default;
+    batch_sensor_converter &operator=(batch_sensor_converter &&) = default;
+    ~batch_sensor_converter() override                           = default;
 
   protected:
     /// pinhole-camera-model parameters used in the whole conversion.

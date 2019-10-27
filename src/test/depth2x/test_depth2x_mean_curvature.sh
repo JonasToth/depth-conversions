@@ -67,5 +67,23 @@ then
     exit 1
 fi
 
+# Test that equirectangular images are converted properly as well
+if ! ${exe} \
+    -m "equirectangular" \
+    -c "laser_intrinsic.txt" \
+    -i "laserscan-{}-depth.png" \
+    -s 0 -e 1 \
+    mean-curvature \
+    --output "batch-mean-curv-laserscan-{}.png"
+then
+    print_error "Could not create all mean curvature images."
+    exit 1
+fi
+if  [ ! -f batch-mean-curv-laserscan-0.png ] || \
+    [ ! -f batch-mean-curv-laserscan-1.png ]; then
+    print_error "Did not create expected output files without leading 0."
+    exit 1
+fi
+
 print_info "Test successful!"
 exit 0

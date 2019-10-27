@@ -20,11 +20,11 @@ namespace sens_loc { namespace apps {
 /// Batch conversion to bearing-angle images.
 /// \sa conversion::depth_to_bearing
 template <typename Intrinsic>
-class bearing_converter : public batch_pinhole_converter<Intrinsic> {
+class bearing_converter : public batch_sensor_converter<Intrinsic> {
   public:
     bearing_converter(const file_patterns &files, depth_type t,
                       Intrinsic intrinsic)
-        : batch_pinhole_converter<Intrinsic>(files, t, std::move(intrinsic)) {
+        : batch_sensor_converter<Intrinsic>(files, t, std::move(intrinsic)) {
         if (files.horizontal.empty() && files.vertical.empty() &&
             files.diagonal.empty() && files.antidiagonal.empty()) {
             throw std::invalid_argument{
@@ -46,11 +46,11 @@ class bearing_converter : public batch_pinhole_converter<Intrinsic> {
 /// Convert orthographic depth-images to range (laserscan-like) images.
 /// \sa conversion::depth_to_laserscan
 template <typename Intrinsic>
-class range_converter : public batch_pinhole_converter<Intrinsic> {
+class range_converter : public batch_sensor_converter<Intrinsic> {
   public:
     range_converter(const file_patterns &files, depth_type t,
                     Intrinsic intrinsic)
-        : batch_pinhole_converter<Intrinsic>(files, t, std::move(intrinsic)) {}
+        : batch_sensor_converter<Intrinsic>(files, t, std::move(intrinsic)) {}
     range_converter(const range_converter &) = default;
     range_converter(range_converter &&)      = default;
     range_converter &operator=(const range_converter &) = default;
@@ -66,7 +66,7 @@ class range_converter : public batch_pinhole_converter<Intrinsic> {
 /// Convert range-images to gaussian curvature images.
 /// \sa conversion::depth_to_gaussian_curvature
 template <typename Intrinsic>
-class gauss_curv_converter : public batch_pinhole_converter<Intrinsic> {
+class gauss_curv_converter : public batch_sensor_converter<Intrinsic> {
   public:
     /// \param files,t,intrinsic normal parameters for batch conversion
     /// \param lower_bound,upper_bound clamping parameters. Values below/above
@@ -74,7 +74,7 @@ class gauss_curv_converter : public batch_pinhole_converter<Intrinsic> {
     gauss_curv_converter(const file_patterns &files, depth_type t,
                          Intrinsic intrinsic, double lower_bound,
                          double upper_bound)
-        : batch_pinhole_converter<Intrinsic>(files, t, std::move(intrinsic))
+        : batch_sensor_converter<Intrinsic>(files, t, std::move(intrinsic))
         , lower_bound{lower_bound}
         , upper_bound{upper_bound} {}
     gauss_curv_converter(const gauss_curv_converter &) = default;
@@ -94,7 +94,7 @@ class gauss_curv_converter : public batch_pinhole_converter<Intrinsic> {
 /// Convert range-images to mean curvature images.
 /// \sa conversion::depth_to_mean_curvature
 template <typename Intrinsic>
-class mean_curv_converter : public batch_pinhole_converter<Intrinsic> {
+class mean_curv_converter : public batch_sensor_converter<Intrinsic> {
   public:
     /// \param files,t,intrinsic normal parameters for batch conversion
     /// \param lower_bound,upper_bound clamping parameters. Values
@@ -102,7 +102,7 @@ class mean_curv_converter : public batch_pinhole_converter<Intrinsic> {
     mean_curv_converter(const file_patterns &files, depth_type t,
                         Intrinsic intrinsic, double lower_bound,
                         double upper_bound)
-        : batch_pinhole_converter<Intrinsic>(files, t, std::move(intrinsic))
+        : batch_sensor_converter<Intrinsic>(files, t, std::move(intrinsic))
         , lower_bound{lower_bound}
         , upper_bound{upper_bound} {}
     mean_curv_converter(const mean_curv_converter &) = default;
@@ -123,11 +123,11 @@ class mean_curv_converter : public batch_pinhole_converter<Intrinsic> {
 /// Convert range-images to max-curve images.
 /// \sa conversion::depth_to_max_curve
 template <typename Intrinsic>
-class max_curve_converter : public batch_pinhole_converter<Intrinsic> {
+class max_curve_converter : public batch_sensor_converter<Intrinsic> {
   public:
     max_curve_converter(const file_patterns &files, depth_type t,
                         Intrinsic intrinsic)
-        : batch_pinhole_converter<Intrinsic>(files, t, std::move(intrinsic)) {}
+        : batch_sensor_converter<Intrinsic>(files, t, std::move(intrinsic)) {}
     max_curve_converter(const max_curve_converter &) = default;
     max_curve_converter(max_curve_converter &&)      = default;
     max_curve_converter &operator=(const max_curve_converter &) = default;
@@ -143,11 +143,11 @@ class max_curve_converter : public batch_pinhole_converter<Intrinsic> {
 /// Convert range-images to flexion images.
 /// \sa conversion::depth_to_flexion
 template <typename Intrinsic>
-class flexion_converter : public batch_pinhole_converter<Intrinsic> {
+class flexion_converter : public batch_sensor_converter<Intrinsic> {
   public:
     flexion_converter(const file_patterns &files, depth_type t,
                       Intrinsic intrinsic)
-        : batch_pinhole_converter<Intrinsic>(files, t, std::move(intrinsic)) {}
+        : batch_sensor_converter<Intrinsic>(files, t, std::move(intrinsic)) {}
     flexion_converter(const flexion_converter &) = default;
     flexion_converter(flexion_converter &&)      = default;
     flexion_converter &operator=(const flexion_converter &) = default;

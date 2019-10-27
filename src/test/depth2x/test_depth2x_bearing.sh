@@ -77,5 +77,22 @@ if  [ ! -f batch-bearing-002-horizontal.png ] || \
     exit 1
 fi
 
+# Test that equirectangular images are converted properly as well
+if ! ${exe} \
+    -m "equirectangular" \
+    -c "laser_intrinsic.txt" \
+    -i "laserscan-{}-depth.png" \
+    -s 0 -e 1 \
+    bearing \
+    --horizontal "batch-bearing-laserscan-{}-horizontal.png"
+then
+    print_error "Could not create equirectangular bearing angle images."
+    exit 1
+fi
+if  [ ! -f batch-bearing-laserscan-0-horizontal.png ] || \
+    [ ! -f batch-bearing-laserscan-1-horizontal.png ]; then
+    print_error "Did not create expected output files without leading 0."
+    exit 1
+fi
 print_info "Test successful!"
 exit 0

@@ -55,7 +55,7 @@ if  [ ! -f batch-flexion-002.png ] || \
     exit 1
 fi
 
-
+# Test that equirectangular images are converted properly as well
 if ! ${exe} \
     -m "equirectangular" \
     -c "laser_intrinsic.txt" \
@@ -67,7 +67,6 @@ then
     print_error "Could not create all flexion images."
     exit 1
 fi
-
 if  [ ! -f batch-flexion-laserscan-0.png ] || \
     [ ! -f batch-flexion-laserscan-1.png ]; then
     print_error "Did not create expected output files without leading 0."

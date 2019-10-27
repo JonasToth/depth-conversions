@@ -92,5 +92,23 @@ if  [ ! -f batch-range-005.png ] || \
     exit 1
 fi
 
+# Test that equirectangular images are converted properly as well
+if ! ${exe} \
+    -m "equirectangular" \
+    -c "laser_intrinsic.txt" \
+    -i "laserscan-{}-depth.png" \
+    -s 0 -e 1 \
+    range \
+    --output "batch-range-laserscan-{}.png"
+then
+    print_error "Could not create all range images."
+    exit 1
+fi
+if  [ ! -f batch-range-laserscan-0.png ] || \
+    [ ! -f batch-range-laserscan-1.png ]; then
+    print_error "Did not create expected output files without leading 0."
+    exit 1
+fi
+
 print_info "Test successful!"
 exit 0

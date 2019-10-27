@@ -12,21 +12,6 @@
 #include <string>
 #include <variant>
 
-
-#define EXTERN_CONVERTER(type)                                                 \
-    extern template class sens_loc::apps::type##_converter<                    \
-        sens_loc::camera_models::pinhole<double>>;                             \
-    extern template class sens_loc::apps::type##_converter<                    \
-        sens_loc::camera_models::equirectangular<double>>;
-
-EXTERN_CONVERTER(bearing)
-EXTERN_CONVERTER(range)
-EXTERN_CONVERTER(gauss_curv)
-EXTERN_CONVERTER(mean_curv)
-EXTERN_CONVERTER(max_curve)
-EXTERN_CONVERTER(flexion)
-
-
 namespace detail {
 
 /// Helper type for the visitor to create the proper converter.
