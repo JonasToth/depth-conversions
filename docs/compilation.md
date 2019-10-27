@@ -85,7 +85,7 @@ $ cmake .. \
    -DWITH_CONTRACT_EXCEPTION=ON \
    -DWITH_STATIC_STDCXXLIB=ON \
    -DWITH_IPO=ON \
-   -DWITH_BENCHMARK=OFF \
+   -DWITH_BENCHMARK=OFF
 # Build OpenCV first and download Eigen3. After that project is reconfigured
 # to use these dependencies and resolve everything properly.
 $ ninja dependencies # Optionally 'make -j$(nproc) dependencies'
