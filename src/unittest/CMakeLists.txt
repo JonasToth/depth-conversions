@@ -63,7 +63,10 @@ test_add_file(math math/test_image.cpp)
 test_add_file(math math/test_scaling.cpp)
 test_add_file(math math/test_triangles.cpp)
 
+configure_file(conversion/data0-depth.png preprocess/data0-depth.png COPYONLY)
+configure_file(conversion/laserscan-depth.png preprocess/laserscan-depth.png COPYONLY)
 create_test(preprocess preprocess/test_pp.cpp)
+test_add_file(preprocess preprocess/test_bilateral_filter.cpp)
 
 create_test(util util/test_util.cpp)
 test_add_file(util util/test_console.cpp)
