@@ -17,8 +17,8 @@ TEST_CASE("filter pinhole") {
     auto laser = conversion::depth_to_laserscan<float, ushort>(*img, p_float);
 
     SUBCASE("Small distance --> fast filter") {
-        auto res = bilateral_filter(laser, /*distance=*/20, /*sigma_color=*/50.,
-                                    /*sigma_space=*/50.);
+        auto res = bilateral_filter(laser, /*distance=*/10, /*sigma_color=*/20.,
+                                    /*sigma_space=*/20.);
         cv::imwrite("preprocess/test_fast_bilateral.png",
                     math::convert<ushort>(res).data());
 
@@ -28,7 +28,6 @@ TEST_CASE("filter pinhole") {
     }
 }
 
-
 TEST_CASE("filter equirectangular") {
     optional<math::image<ushort>> img = io::load_image<ushort>(
         "preprocess/laserscan-depth.png", cv::IMREAD_UNCHANGED);
@@ -37,8 +36,8 @@ TEST_CASE("filter equirectangular") {
 
     SUBCASE("Small distance --> fast filter") {
         auto res =
-            bilateral_filter(laser, /*distance=*/50, /*sigma_color=*/100.,
-                             /*sigma_space=*/100.);
+            bilateral_filter(laser, /*distance=*/5, /*sigma_color=*/10.,
+                             /*sigma_space=*/10.);
         cv::imwrite("preprocess/test_fast_bilateral_laser.png",
                     math::convert<ushort>(res).data());
 
