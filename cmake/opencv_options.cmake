@@ -5,6 +5,7 @@ message(STATUS "Build-Tools used for opencv build")
 message(STATUS "C++ Compiler: ${CMAKE_CXX_COMPILER}")
 message(STATUS "C Compiler: ${CMAKE_C_COMPILER}")
 message(STATUS "Linker: ${CMAKE_LINKER}")
+message(STATUS "Contrib Modules: ${OPENCV_CONTRIB_MODULES}")
 
 list(APPEND opencv_options
     -DCMAKE_CXX_COMPILER=${CMAKE_CXX_COMPILER}
@@ -40,16 +41,17 @@ list(APPEND opencv_options
     -DBUILD_opencv_aruco:BOOL=OFF
     -DBUILD_opencv_bgsegm:BOOL=OFF
     -DBUILD_opencv_bioinspired:BOOL=OFF
-    -DBUILD_opencv_calib3d:BOOL=OFF
+    -DBUILD_opencv_calib3d:BOOL=ON
     -DBUILD_opencv_ccalib:BOOL=OFF
     -DBUILD_opencv_core:BOOL=ON
     -DBUILD_opencv_datasets:BOOL=OFF
     -DBUILD_opencv_dnn:BOOL=OFF
     -DBUILD_opencv_dnn_objdetect:BOOL=OFF
+    -DBUILD_opencv_dnn_superres:BOOL=OFF
     -DBUILD_opencv_dpm:BOOL=OFF
     -DBUILD_opencv_face:BOOL=OFF
-    -DBUILD_opencv_features2d:BOOL=OFF
-    -DBUILD_opencv_flann:BOOL=OFF
+    -DBUILD_opencv_features2d:BOOL=ON
+    -DBUILD_opencv_flann:BOOL=ON
     -DBUILD_opencv_freetype:BOOL=OFF
     -DBUILD_opencv_fuzzy:BOOL=OFF
     -DBUILD_opencv_gapi:BOOL=OFF
@@ -74,6 +76,7 @@ list(APPEND opencv_options
     -DBUILD_opencv_reg:BOOL=OFF
     -DBUILD_opencv_rgbd:BOOL=OFF
     -DBUILD_opencv_saliency:BOOL=OFF
+    -DBUILD_opencv_sfm:BOOL=OFF
     -DBUILD_opencv_shape:BOOL=OFF
     -DBUILD_opencv_stereo:BOOL=OFF
     -DBUILD_opencv_stitching:BOOL=OFF
@@ -87,7 +90,7 @@ list(APPEND opencv_options
     -DBUILD_opencv_videoio:BOOL=OFF
     -DBUILD_opencv_videostab:BOOL=OFF
     -DBUILD_opencv_world:BOOL=OFF
-    -DBUILD_opencv_xfeatures2d:BOOL=OFF
+    -DBUILD_opencv_xfeatures2d:BOOL=ON
     -DBUILD_opencv_ximgproc:BOOL=ON
     -DBUILD_opencv_xobjdetect:BOOL=OFF
     -DBUILD_opencv_xphoto:BOOL=OFF
@@ -144,7 +147,7 @@ list(APPEND opencv_options
     -DWITH_CLP:BOOL=OFF
     -DWITH_CUDA:BOOL=OFF
     -DWITH_DIRECTX:BOOL=OFF
-    -DWITH_EIGEN:BOOL=OFF
+    -DWITH_EIGEN:BOOL=ON
     -DWITH_FFMPEG:BOOL=OFF
     -DWITH_GDAL:BOOL=OFF
     -DWITH_GDCM:BOOL=OFF
