@@ -50,6 +50,7 @@ make_converter(const sens_loc::apps::file_patterns &files,
 
                 return std::make_unique<Converter<pinhole<double>>>(
                     files, t, arg, std::forward<Arguments>(args)...);
+            // NOLINTNEXTLINE(readability-misleading-indentation)
             } else if constexpr (std::is_same_v<Intrinsic,
                                                 equirectangular<double>>) {
                 static_assert(
@@ -321,6 +322,7 @@ int main(int argc, char **argv) try {
         [&]() -> optional<detail::intrinsic_variant> {
         using camera_models::equirectangular;
         using camera_models::pinhole;
+        // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOAD_INTRINSIC(model_name)                                             \
     if (camera_model == #model_name) {                                         \
         auto r = io<double, model_name>::load_intrinsic(cali_fstream);         \

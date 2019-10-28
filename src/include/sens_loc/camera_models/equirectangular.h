@@ -13,6 +13,7 @@ namespace sens_loc { namespace camera_models {
 namespace detail {
 template <typename Real>
 Real get_d_phi(int width) noexcept {
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     return Real(2.) * math::pi<Real> / Real(width);
 }
 }  // namespace detail

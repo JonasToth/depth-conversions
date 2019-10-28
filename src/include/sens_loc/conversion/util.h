@@ -52,8 +52,9 @@ inline Real orthografic_to_euclidian(
 
 template <typename Real = float, typename PixelType = ushort>
 inline Real orthografic_to_euclidian(
-    math::pixel_coord<int>, PixelType d,
-    const camera_models::equirectangular<Real> &) noexcept {
+    // NOLINTNEXTLINE(performance-unnecessary-value-param)
+    math::pixel_coord<int> /*unused*/, PixelType d,
+    const camera_models::equirectangular<Real> & /*unused*/) noexcept {
     return d;
 }
 

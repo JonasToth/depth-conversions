@@ -14,7 +14,7 @@ template <typename Real, template <typename> typename Intrinsic>
 class io {
   public:
     static std::optional<Intrinsic<Real>>
-    load_intrinsic(std::istream &) noexcept {
+    load_intrinsic(std::istream & /*unused*/) noexcept {
         return std::nullopt;
     }
 };
