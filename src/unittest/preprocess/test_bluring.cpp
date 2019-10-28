@@ -24,19 +24,36 @@ TEST_CASE("gaussian blur pinhole") {
                 conversion::convert_flexion<float, ushort>(flex).data());
 }
 
-TEST_CASE("median blur pinhole") {
-    optional<math::image<ushort>> img = io::load_image<ushort>(
-        "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
-    REQUIRE(img);
-    auto laser = conversion::depth_to_laserscan<float, ushort>(*img, p_float);
+TEST_CASE("median blur") {
+    SUBCASE("pinhole") {
+        optional<math::image<ushort>> img = io::load_image<ushort>(
+            "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
+        REQUIRE(img);
+        auto laser =
+            conversion::depth_to_laserscan<float, ushort>(*img, p_float);
 
-    auto res = median_blur(laser, /*ksize=*/5);
-    cv::imwrite("preprocess/test_median.png",
-                math::convert<ushort>(res).data());
+        auto res = median_blur(laser, /*ksize=*/5);
+        cv::imwrite("preprocess/test_median.png",
+                    math::convert<ushort>(res).data());
 
-    auto flex = conversion::depth_to_flexion(res, p_float);
-    cv::imwrite("preprocess/test_median_flexion.png",
-                conversion::convert_flexion<float, ushort>(flex).data());
+        auto flex = conversion::depth_to_flexion(res, p_float);
+        cv::imwrite("preprocess/test_median_flexion.png",
+                    conversion::convert_flexion<float, ushort>(flex).data());
+    }
+    SUBCASE("laserscan") {
+        optional<math::image<ushort>> img = io::load_image<ushort>(
+            "preprocess/laserscan-depth.png", cv::IMREAD_UNCHANGED);
+        REQUIRE(img);
+
+        auto laser = math::convert<float>(*img);
+        math::image<float> res = median_blur(laser, /*ksize=*/3);
+        cv::imwrite("preprocess/test_median_laserscan.png",
+                    math::convert<ushort>(res).data());
+
+        auto flex = conversion::depth_to_flexion(res, e_float);
+        cv::imwrite("preprocess/test_median_flexion_laserscan.png",
+                    conversion::convert_flexion<float, ushort>(flex).data());
+    }
 }
 
 TEST_CASE("blur pinhole") {
@@ -46,8 +63,7 @@ TEST_CASE("blur pinhole") {
     auto laser = conversion::depth_to_laserscan<float, ushort>(*img, p_float);
 
     auto res = blur(laser, /*ksize=*/{5, 5});
-    cv::imwrite("preprocess/test_blur.png",
-                math::convert<ushort>(res).data());
+    cv::imwrite("preprocess/test_blur.png", math::convert<ushort>(res).data());
 
     auto flex = conversion::depth_to_flexion(res, p_float);
     cv::imwrite("preprocess/test_blur_flexion.png",
