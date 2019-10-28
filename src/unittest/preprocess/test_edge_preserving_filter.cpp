@@ -10,6 +10,7 @@ using namespace sens_loc;
 using namespace preprocess;
 using namespace std;
 
+#if 0
 TEST_CASE("edge-preserving-filter pinhole") {
     optional<math::image<ushort>> img = io::load_image<ushort>(
         "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
@@ -39,3 +40,4 @@ TEST_CASE("anisotropic pinhole") {
     cv::imwrite("preprocess/test_anisotropic_diffusion_flexion.png",
                 conversion::convert_flexion<float, ushort>(flex).data());
 }
+#endif
