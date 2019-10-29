@@ -124,8 +124,9 @@ class coordinate
     /// Return the normalized vector of this coordinate.
     /// \note This function is only enabled if the \p Real type is a floating
     /// point number and the vector is in 3 dimensional space.
-    template <typename T = Real, typename U = frame,
-              typename = std::enable_if_t<!std::is_integral_v<T> &&
+    template <typename T = Real,
+              typename U = frame,
+              typename   = std::enable_if_t<!std::is_integral_v<T> &&
                                           !detail::is_2d<Frame>::value>>
     [[nodiscard]] coordinate<Real, Frame> normalized() const noexcept {
         const auto res = base_class::d.normalized();
@@ -133,15 +134,16 @@ class coordinate
     }
 
     /// Calculate the dot product with \p other.
-    [[nodiscard]] Real dot(const coordinate<Real, Frame> &other) const
+    [[nodiscard]] Real dot(const coordinate<Real, Frame>& other) const
         noexcept {
         return base_class::d.dot(other.d);
     }
     /// Calculate the cross product with \p other.
-    template <typename T = frame, typename = std::enable_if_t<!(
-                                      Frame == T::pixel || Frame == T::image)>>
+    template <
+        typename T = frame,
+        typename = std::enable_if_t<!(Frame == T::pixel || Frame == T::image)>>
     [[nodiscard]] coordinate<Real, Frame>
-    cross(const coordinate<Real, Frame> &other) const noexcept {
+    cross(const coordinate<Real, Frame>& other) const noexcept {
         const auto res = base_class::d.cross(other.d);
         return {res[0], res[1], res[2]};
     }
@@ -196,7 +198,7 @@ class coordinate
     [[nodiscard]] Real W() const noexcept { return base_class::d[2]; }
     // clang-format on
 
-    coordinate<Real, Frame> operator-(const coordinate<Real, Frame> &p) const
+    coordinate<Real, Frame> operator-(const coordinate<Real, Frame>& p) const
         noexcept {
         coordinate<Real, Frame> res;
         auto                    difference = base_class::d - p.d;

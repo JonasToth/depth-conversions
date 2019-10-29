@@ -71,7 +71,8 @@ class equirectangular {
     /// \param width,height image dimensions
     /// \param theta_range minimum and maximum angle on the unit-sphere in
     /// vertical direction.
-    equirectangular(int width, int height,
+    equirectangular(int                       width,
+                    int                       height,
                     math::numeric_range<Real> theta_range) noexcept
         : _w(width)
         , _h(height)
@@ -122,7 +123,7 @@ class equirectangular {
     /// its center!
     template <typename _Real = int>
     [[nodiscard]] math::sphere_coord<Real>
-    pixel_to_sphere(const math::pixel_coord<_Real> &p) const noexcept;
+    pixel_to_sphere(const math::pixel_coord<_Real>& p) const noexcept;
 
   private:
     void ensure_invariant() const noexcept {
@@ -146,7 +147,7 @@ class equirectangular {
 template <typename Real>
 template <typename _Real>
 inline math::sphere_coord<Real>
-equirectangular<Real>::pixel_to_sphere(const math::pixel_coord<_Real> &p) const
+equirectangular<Real>::pixel_to_sphere(const math::pixel_coord<_Real>& p) const
     noexcept {
     static_assert(std::is_arithmetic_v<_Real>);
     const Real phi   = p.u() * d_phi - math::pi<Real>;

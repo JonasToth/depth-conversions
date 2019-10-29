@@ -68,15 +68,14 @@ TEST_CASE("second derivative central quotient") {
         const double y_1  = -2.;
         const double dx   = 1.;
 
-        REQUIRE(second_derivative_central(y__1, y, y_1, dx) ==
-                Approx(-1.));
+        REQUIRE(second_derivative_central(y__1, y, y_1, dx) == Approx(-1.));
     }
 }
 
 TEST_CASE("Derivatives for a surface patch") {
     SUBCASE("Fake") {
-        const auto [f_u, f_v, f_uu, f_vv, f_uv] = derivatives(
-            0., 0., 0., 0., 0., 0., 0., 0., 0., 0.1, 0.1, 0.1414);
+        const auto [f_u, f_v, f_uu, f_vv, f_uv] =
+            derivatives(0., 0., 0., 0., 0., 0., 0., 0., 0., 0.1, 0.1, 0.1414);
         REQUIRE(f_u == 0.);
         REQUIRE(f_v == 0.);
         REQUIRE(f_uu == 0.);

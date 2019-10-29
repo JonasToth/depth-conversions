@@ -64,7 +64,7 @@ class pinhole {
 
     template <typename Number = int>
     [[nodiscard]] math::image_coord<Real>
-    transform_to_image(const math::pixel_coord<Number> &p) const noexcept;
+    transform_to_image(const math::pixel_coord<Number>& p) const noexcept;
 
     /// This methods calculates the inverse projection of the camera model
     /// to get the direction of the lightray for the pixel at \p p.
@@ -85,13 +85,13 @@ class pinhole {
     /// its center!
     template <typename _Real = int>
     [[nodiscard]] math::sphere_coord<Real>
-    pixel_to_sphere(const math::pixel_coord<_Real> &p) const noexcept;
+    pixel_to_sphere(const math::pixel_coord<_Real>& p) const noexcept;
 
     /// The same as \p project_to_sphere but the coordinate is already
     /// in the image frame of reference.
     /// \sa pinhole::project_to_sphere
     [[nodiscard]] math::sphere_coord<Real>
-    image_to_sphere(const math::image_coord<Real> &p) const noexcept;
+    image_to_sphere(const math::image_coord<Real>& p) const noexcept;
 
   private:
     int  _w  = 0;    ///< width of the image
@@ -112,7 +112,7 @@ class pinhole {
 template <typename Real>
 template <typename _Real>
 math::image_coord<Real>
-pinhole<Real>::transform_to_image(const math::pixel_coord<_Real> &p) const
+pinhole<Real>::transform_to_image(const math::pixel_coord<_Real>& p) const
     noexcept {
     static_assert(std::is_arithmetic_v<_Real>);
     Expects(_fx > 0.);
@@ -134,7 +134,7 @@ pinhole<Real>::transform_to_image(const math::pixel_coord<_Real> &p) const
 template <typename Real>
 template <typename _Real>
 inline math::sphere_coord<Real>
-pinhole<Real>::pixel_to_sphere(const math::pixel_coord<_Real> &p) const
+pinhole<Real>::pixel_to_sphere(const math::pixel_coord<_Real>& p) const
     noexcept {
     static_assert(std::is_arithmetic_v<_Real>);
     return image_to_sphere(transform_to_image(p));
@@ -142,7 +142,7 @@ pinhole<Real>::pixel_to_sphere(const math::pixel_coord<_Real> &p) const
 
 template <typename Real>
 inline math::sphere_coord<Real>
-pinhole<Real>::image_to_sphere(const math::image_coord<Real> &p) const
+pinhole<Real>::image_to_sphere(const math::image_coord<Real>& p) const
     noexcept {
     const double x = p.x();
     const double y = p.y();

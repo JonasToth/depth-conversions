@@ -28,7 +28,7 @@ namespace sens_loc { namespace camera_models {
 /// The code that needs to work:
 /// \code
 /// Intrinsic<float> i; // Create an intrinsic with floating point precision
-/// Expects(i.w() > i.h()); // use width and height 
+/// Expects(i.w() > i.h()); // use width and height
 /// auto p1 = i.pixel_to_sphere({42, 42});
 /// auto p2 = i.pixel_to_sphere({42.5f, 42.5f});
 /// Expects(p1.norm() == 1.0f && p2.norm() == 1.0f);

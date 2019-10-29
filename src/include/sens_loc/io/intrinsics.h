@@ -18,7 +18,7 @@ class io {
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
 
     static std::optional<Intrinsic<Real>>
-    load_intrinsic(std::istream & /*unused*/) noexcept {
+    load_intrinsic(std::istream& /*unused*/) noexcept {
         return std::nullopt;
     }
 };
@@ -45,7 +45,7 @@ class io<Real, camera_models::pinhole> {
     /// std::optional<> with proper parameters on success, otherwise it contains
     /// \c None.
     static std::optional<camera_models::pinhole<Real>>
-    load_intrinsic(std::istream &in) noexcept {
+    load_intrinsic(std::istream& in) noexcept {
         if (!in.good())
             return std::nullopt;
 
@@ -121,7 +121,7 @@ class io<Real, camera_models::equirectangular> {
     /// sensitive to UNIX-vs-MS line-endings. \returns \c std::optional<> with
     /// proper parameters on success, otherwise it contains \c None.
     static std::optional<camera_models::equirectangular<Real>>
-    load_intrinsic(std::istream &in) noexcept {
+    load_intrinsic(std::istream& in) noexcept {
         if (!in.good())
             return std::nullopt;
 

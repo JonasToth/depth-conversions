@@ -75,7 +75,7 @@ bool batch_converter::process_batch(int start, int end) const noexcept {
         if (fails > 0)
             std::cerr << util::warn{} << "Encountered " << rang::style::bold
                       << fails << rang::style::reset << " problematic files!\n";
-    } catch (const std::exception &e) {
+    } catch (const std::exception& e) {
         std::cerr << util::err{} << "Problem occured during batch-processing!\n"
                   << "Message: " << e.what() << "\n";
         batch_success = false;

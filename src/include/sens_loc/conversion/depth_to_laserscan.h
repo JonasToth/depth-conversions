@@ -23,10 +23,12 @@ namespace sens_loc { namespace conversion {
 /// \note invalid values (where the depth is zero) will be zero as well
 /// \post each value is bigger or equal to the original pixel value
 /// \sa camera_models::is_intrinsic_v
-template <typename Real = float, typename PixelType = ushort,
-          template <typename> typename Intrinsic>
-math::image<Real> depth_to_laserscan(const math::image<PixelType> &depth_image,
-                                     const Intrinsic<Real> &intrinsic) noexcept;
+template <typename Real      = float,
+          typename PixelType = ushort,
+          template <typename>
+          typename Intrinsic>
+math::image<Real> depth_to_laserscan(const math::image<PixelType>& depth_image,
+                                     const Intrinsic<Real>& intrinsic) noexcept;
 
 /// This function is the parallel implementation for the conversions.
 /// \sa conversion::depth_to_laserscan
@@ -34,19 +36,25 @@ math::image<Real> depth_to_laserscan(const math::image<PixelType> &depth_image,
 /// \param[out] out resulting converted image
 /// \param[inout] flow taskgraph that will be used for the parallel jobs
 /// \returns synchronization tasks before and after the conversion.
-template <typename Real = float, typename PixelType = ushort,
-          template <typename> typename Intrinsic>
+template <typename Real      = float,
+          typename PixelType = ushort,
+          template <typename>
+          typename Intrinsic>
 std::pair<tf::Task, tf::Task>
-par_depth_to_laserscan(const math::image<PixelType> &depth_image,
-                       const Intrinsic<Real> &intrinsic, math::image<Real> &out,
-                       tf::Taskflow &flow) noexcept;
+par_depth_to_laserscan(const math::image<PixelType>& depth_image,
+                       const Intrinsic<Real>&        intrinsic,
+                       math::image<Real>&            out,
+                       tf::Taskflow&                 flow) noexcept;
 
 namespace detail {
-template <typename Real, typename PixelType,
-          template <typename> typename Intrinsic>
-void laserscan_inner(const int v, const math::image<PixelType> &depth_image,
-                     const Intrinsic<Real> &intrinsic,
-                     math::image<Real> &                 euclid) {
+template <typename Real,
+          typename PixelType,
+          template <typename>
+          typename Intrinsic>
+void laserscan_inner(const int                     v,
+                     const math::image<PixelType>& depth_image,
+                     const Intrinsic<Real>&        intrinsic,
+                     math::image<Real>&            euclid) {
     for (int u = 0; u < depth_image.w(); ++u) {
         const PixelType d_o = depth_image.at({u, v});
         euclid.at({u, v}) =
@@ -55,11 +63,13 @@ void laserscan_inner(const int v, const math::image<PixelType> &depth_image,
 }
 }  // namespace detail
 
-template <typename Real, typename PixelType,
-          template <typename> typename Intrinsic>
+template <typename Real,
+          typename PixelType,
+          template <typename>
+          typename Intrinsic>
 inline math::image<Real>
-depth_to_laserscan(const math::image<PixelType> &      depth_image,
-                   const Intrinsic<Real> &intrinsic) noexcept {
+depth_to_laserscan(const math::image<PixelType>& depth_image,
+                   const Intrinsic<Real>&        intrinsic) noexcept {
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
     static_assert(std::is_floating_point_v<Real>);
     static_assert(std::is_arithmetic_v<PixelType>);
@@ -83,12 +93,15 @@ depth_to_laserscan(const math::image<PixelType> &      depth_image,
 }
 
 
-template <typename Real, typename PixelType,
-          template <typename> typename Intrinsic>
+template <typename Real,
+          typename PixelType,
+          template <typename>
+          typename Intrinsic>
 inline std::pair<tf::Task, tf::Task>
-par_depth_to_laserscan(const math::image<PixelType> &      depth_image,
-                       const Intrinsic<Real> &intrinsic,
-                       math::image<Real> &out, tf::Taskflow &flow) noexcept {
+par_depth_to_laserscan(const math::image<PixelType>& depth_image,
+                       const Intrinsic<Real>&        intrinsic,
+                       math::image<Real>&            out,
+                       tf::Taskflow&                 flow) noexcept {
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
     static_assert(std::is_floating_point_v<Real>);
     static_assert(std::is_arithmetic_v<PixelType>);

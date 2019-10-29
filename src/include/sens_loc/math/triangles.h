@@ -9,7 +9,7 @@
 #include <type_traits>
 
 namespace sens_loc { namespace math {
- 
+
 /// This function calculates the bearing angle between two neighbouring range
 /// measurements.
 /// \param b reference depth and > 0
@@ -24,8 +24,8 @@ namespace sens_loc { namespace math {
 /// from 'c' to 'b'.
 /// It is bigger 0° and smaller 180° due to triangle constraints.
 template <typename Real>
-inline Real bearing_angle(const Real b, const Real c,
-                          const Real cos_alpha) noexcept {
+inline Real
+bearing_angle(const Real b, const Real c, const Real cos_alpha) noexcept {
     static_assert(std::is_arithmetic_v<Real>);
 
     Expects(b > 0.);
@@ -71,7 +71,8 @@ inline Real bearing_angle(const Real b, const Real c,
 /// This implementation is here to verify the difference in the results
 /// and testing covers that as well.
 template <typename Real = float>
-inline Real reference_lin_bearing_angle(const Real b, const Real c,
+inline Real reference_lin_bearing_angle(const Real b,
+                                        const Real c,
                                         const Real cos_alpha) noexcept {
     static_assert(std::is_arithmetic_v<Real>);
 

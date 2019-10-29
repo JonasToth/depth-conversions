@@ -31,14 +31,15 @@ using intrinsic_variant =
 /// instantiations need to be explicitly written down.
 template <template <typename> typename Converter, typename... Arguments>
 std::unique_ptr<sens_loc::apps::batch_converter>
-make_converter(const sens_loc::apps::file_patterns &files,
-               sens_loc::apps::depth_type t, const intrinsic_variant &intrinsic,
-               Arguments &&... args) {
+make_converter(const sens_loc::apps::file_patterns& files,
+               sens_loc::apps::depth_type           t,
+               const intrinsic_variant&             intrinsic,
+               Arguments&&... args) {
     using namespace sens_loc::camera_models;
     using sens_loc::apps::batch_converter;
 
     return std::visit(
-        [&](auto &&arg) -> std::unique_ptr<batch_converter> {
+        [&](auto&& arg) -> std::unique_ptr<batch_converter> {
             using Intrinsic = std::decay_t<decltype(arg)>;
 
             if constexpr (std::is_same_v<Intrinsic, pinhole<double>>) {
@@ -49,7 +50,7 @@ make_converter(const sens_loc::apps::file_patterns &files,
 
                 return std::make_unique<Converter<pinhole<double>>>(
                     files, t, arg, std::forward<Arguments>(args)...);
-            // NOLINTNEXTLINE(readability-misleading-indentation)
+                // NOLINTNEXTLINE(readability-misleading-indentation)
             } else if constexpr (std::is_same_v<Intrinsic,
                                                 equirectangular<double>>) {
                 static_assert(
@@ -75,7 +76,7 @@ make_converter(const sens_loc::apps::file_patterns &files,
 /// \sa sens_loc::conversion
 /// \ingroup conversion-driver
 /// \returns 0 if all images could be converted, 1 if any image fails
-int main(int argc, char **argv) try {
+int main(int argc, char** argv) try {
     using namespace sens_loc;
     using namespace std;
 
@@ -136,7 +137,7 @@ int main(int argc, char **argv) try {
         ->required();
 
     // Bearing angle images territory
-    CLI::App *bearing_cmd = app.add_subcommand(
+    CLI::App* bearing_cmd = app.add_subcommand(
         "bearing", "Convert depth images into bearing angle images");
     bearing_cmd->footer("\n\n"
                         "An example invocation of the tool is:\n"
@@ -166,7 +167,7 @@ int main(int argc, char **argv) try {
         "Calculate anti-diagonal bearing angle and write to this pattern");
 
     // Range images territory
-    CLI::App *range_cmd = app.add_subcommand(
+    CLI::App* range_cmd = app.add_subcommand(
         "range", "Convert depth images into range images (laser-scan like)");
     range_cmd->footer("\n\n"
                       "An example invocation of the tool is:\n"
@@ -188,7 +189,7 @@ int main(int argc, char **argv) try {
     double upper_bound = +20.;  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
     double lower_bound = -20.;  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
 
-    CLI::App *mean_curv_cmd = app.add_subcommand(
+    CLI::App* mean_curv_cmd = app.add_subcommand(
         "mean-curvature", "Convert depth images into mean-curvature images");
     mean_curv_cmd->footer(
         "\n\n"
@@ -217,7 +218,7 @@ int main(int argc, char **argv) try {
         "Define an lower bound that curvature values are clamped to.",
         /*defaulted=*/true);
 
-    CLI::App *gauss_curv_cmd = app.add_subcommand(
+    CLI::App* gauss_curv_cmd = app.add_subcommand(
         "gauss-curvature",
         "Convert depth images into gaussian-curvature images");
     gauss_curv_cmd->footer(
@@ -248,7 +249,7 @@ int main(int argc, char **argv) try {
         /*defaulted=*/true);
 
     // Max-Curve images
-    CLI::App *max_curve_cmd = app.add_subcommand(
+    CLI::App* max_curve_cmd = app.add_subcommand(
         "max-curve", "Convert depth images into max-curve images");
     max_curve_cmd->footer("\n\n"
                           "An example invocation of the tool is:\n"
@@ -267,7 +268,7 @@ int main(int argc, char **argv) try {
         ->required();
 
     // Flexion images
-    CLI::App *flexion_cmd = app.add_subcommand(
+    CLI::App* flexion_cmd = app.add_subcommand(
         "flexion", "Convert depth images into flexion images");
     flexion_cmd->footer("\n\n"
                         "An example invocation of the tool is:\n"
@@ -286,7 +287,7 @@ int main(int argc, char **argv) try {
         ->required();
 
     // Flexion images
-    CLI::App *scale_cmd = app.add_subcommand(
+    CLI::App* scale_cmd = app.add_subcommand(
         "scale", "Scale depth images and add an optional offset.");
     scale_cmd->footer("\n\n"
                       "An example invocation of the tool is:\n"
@@ -382,7 +383,7 @@ int main(int argc, char **argv) try {
             throw std::invalid_argument{"target type for conversion required!"};
         }();
         return c->process_batch(start_idx, end_idx) ? 0 : 1;
-    } catch (const std::invalid_argument &e) {
+    } catch (const std::invalid_argument& e) {
         cerr << util::err{} << "Could not initialize the batch process.\n"
              << util::err{} << e.what() << "\n";
         return 1;
@@ -393,7 +394,7 @@ int main(int argc, char **argv) try {
     }
 
     UNREACHABLE("All possible options should have terminated already");
-} catch (const std::exception &e) {
+} catch (const std::exception& e) {
     std::cerr << sens_loc::util::err{}
               << "Severe problem occured while system-setup.\n"
               << "Message:" << e.what();

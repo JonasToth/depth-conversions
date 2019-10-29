@@ -67,16 +67,16 @@ struct file_patterns {
 /// tasks.
 class batch_converter {
   public:
-    batch_converter(const file_patterns &files, depth_type t)
+    batch_converter(const file_patterns& files, depth_type t)
         : _files{files}
         , _input_depth_type{t} {
         Expects(!_files.input.empty());
     }
 
-    batch_converter(const batch_converter &) = default;
-    batch_converter(batch_converter &&)      = default;
-    batch_converter &operator=(const batch_converter &) = default;
-    batch_converter &operator=(batch_converter &&) = default;
+    batch_converter(const batch_converter&) = default;
+    batch_converter(batch_converter&&)      = default;
+    batch_converter& operator=(const batch_converter&) = default;
+    batch_converter& operator=(batch_converter&&) = default;
 
     /// Process the whole batch calling 'process_file' for each index.
     /// \note This function does parallel batch processing.
@@ -129,16 +129,17 @@ class batch_converter {
 template <typename Intrinsic>
 class batch_sensor_converter : public batch_converter {
   public:
-    batch_sensor_converter(const file_patterns &files, depth_type t,
-                           Intrinsic intrinsic)
+    batch_sensor_converter(const file_patterns& files,
+                           depth_type           t,
+                           Intrinsic            intrinsic)
         : batch_converter(files, t)
         , intrinsic{std::move(intrinsic)} {}
 
-    batch_sensor_converter(const batch_sensor_converter &) = default;
-    batch_sensor_converter(batch_sensor_converter &&)      = default;
-    batch_sensor_converter &operator=(const batch_sensor_converter &) = default;
-    batch_sensor_converter &operator=(batch_sensor_converter &&) = default;
-    ~batch_sensor_converter() override                           = default;
+    batch_sensor_converter(const batch_sensor_converter&) = default;
+    batch_sensor_converter(batch_sensor_converter&&)      = default;
+    batch_sensor_converter& operator=(const batch_sensor_converter&) = default;
+    batch_sensor_converter& operator=(batch_sensor_converter&&) = default;
+    ~batch_sensor_converter() override                          = default;
 
   protected:
     /// pinhole-camera-model parameters used in the whole conversion.

@@ -182,8 +182,8 @@ par_depth_to_flexion(const math::image<Real>& depth_image,
     Expects(flexion_image.w() == depth_image.w());
     Expects(flexion_image.h() == depth_image.h());
 
-    auto sync_points = flow.parallel_for(
-        1, depth_image.h() - 1, 1, [&](int v) noexcept {
+    auto sync_points =
+        flow.parallel_for(1, depth_image.h() - 1, 1, [&](int v) noexcept {
             detail::flexion_inner(v, depth_image, intrinsic, flexion_image);
         });
 

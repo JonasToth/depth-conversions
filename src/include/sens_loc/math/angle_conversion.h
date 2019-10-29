@@ -52,6 +52,7 @@ constexpr inline T rad_to_deg(T radians) {
 
     return degree;
 }
-}}  // namespace sens_loc::math
+}  // namespace math
+}  // namespace sens_loc
 
 #endif /* end of include guard: ANGLE_CONVERSION_H_1QTGVG9X */
