@@ -4,7 +4,7 @@
 #include <cmath>
 #include <gsl/gsl>
 #include <limits>
-#include <sens_loc/camera_models/pinhole.h>
+#include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/camera_models/utility.h>
 #include <sens_loc/conversion/util.h>
 #include <sens_loc/math/constants.h>
@@ -33,6 +33,7 @@ namespace sens_loc { namespace conversion {
 //
 /// \note Depth images are orthografic and require conversion first!
 /// \sa conversion::depth_to_laserscan
+/// \sa camera_models::is_intrinsic_v
 ///
 /// \pre \p depth_image to have 1 channel
 /// \pre \p depth_image == laser-scan like image!
@@ -211,6 +212,8 @@ template <direction Direction, typename Real, typename PixelType,
 inline math::image<Real>
 depth_to_bearing(const math::image<PixelType> &depth_image,
                  const Intrinsic<Real> &       intrinsic) noexcept {
+    static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
@@ -240,6 +243,8 @@ inline std::pair<tf::Task, tf::Task>
 par_depth_to_bearing(const math::image<PixelType> &depth_image,
                      const Intrinsic<Real> &       intrinsic,
                      math::image<Real> &ba_image, tf::Taskflow &flow) noexcept {
+    static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+
     using namespace detail;
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());

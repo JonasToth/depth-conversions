@@ -31,6 +31,7 @@ namespace sens_loc { namespace conversion {
 /// \pre \p PixelType matches the underlying type of \p depth_image
 /// \note invalid depth values result in 0 for that pixel.
 /// \sa depth_to_laserscan
+/// \sa camera_models::is_intrinsic_v
 template <typename Real = float, typename PixelType = float,
           template <typename> typename Intrinsic = camera_models::pinhole>
 math::image<Real>
@@ -168,6 +169,8 @@ template <typename Real, typename PixelType,
 inline math::image<Real>
 depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
                             const Intrinsic<Real> &       intrinsic) noexcept {
+    static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
@@ -189,6 +192,8 @@ template <typename Real, typename PixelType,
 inline math::image<Real>
 depth_to_mean_curvature(const math::image<PixelType> &depth_image,
                         const Intrinsic<Real> &       intrinsic) noexcept {
+    static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 

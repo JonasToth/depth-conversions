@@ -22,6 +22,7 @@ namespace sens_loc { namespace conversion {
 /// \returns matrix with each value converted to the euclidean distance
 /// \note invalid values (where the depth is zero) will be zero as well
 /// \post each value is bigger or equal to the original pixel value
+/// \sa camera_models::is_intrinsic_v
 template <typename Real = float, typename PixelType = ushort,
           template <typename> typename Intrinsic = camera_models::pinhole>
 math::image<Real> depth_to_laserscan(const math::image<PixelType> &depth_image,
@@ -59,6 +60,8 @@ template <typename Real, typename PixelType,
 inline math::image<Real>
 depth_to_laserscan(const math::image<PixelType> &      depth_image,
                    const Intrinsic<Real> &intrinsic) noexcept {
+    static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
@@ -84,6 +87,8 @@ inline std::pair<tf::Task, tf::Task>
 par_depth_to_laserscan(const math::image<PixelType> &      depth_image,
                        const Intrinsic<Real> &intrinsic,
                        math::image<Real> &out, tf::Taskflow &flow) noexcept {
+    static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 

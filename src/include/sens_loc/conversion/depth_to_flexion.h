@@ -29,6 +29,7 @@ namespace sens_loc { namespace conversion {
 /// \sa conversion::depth_to_laserscan
 /// \pre \p depth_image is not empty
 /// \pre intrinsic matches the sensor that took the image
+/// \sa camera_models::is_intrinsic_v
 template <typename Real = float, typename PixelType = float,
           template <typename> typename Intrinsic = camera_models::pinhole>
 math::image<Real> depth_to_flexion(const math::image<PixelType> &depth_image,
@@ -148,6 +149,8 @@ template <typename Real, typename PixelType,
 inline math::image<Real>
 depth_to_flexion(const math::image<PixelType> &depth_image,
                  const Intrinsic<Real> &       intrinsic) noexcept {
+    static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
@@ -171,6 +174,8 @@ template <typename Real, typename PixelType,
 inline std::pair<tf::Task, tf::Task> par_depth_to_flexion(
     const math::image<PixelType> &depth_image, const Intrinsic<Real> &intrinsic,
     math::image<Real> &flexion_image, tf::Taskflow &flow) noexcept {
+    static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
 
