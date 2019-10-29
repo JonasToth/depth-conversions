@@ -24,7 +24,7 @@ namespace sens_loc { namespace conversion {
 /// \post each value is bigger or equal to the original pixel value
 /// \sa camera_models::is_intrinsic_v
 template <typename Real = float, typename PixelType = ushort,
-          template <typename> typename Intrinsic = camera_models::pinhole>
+          template <typename> typename Intrinsic>
 math::image<Real> depth_to_laserscan(const math::image<PixelType> &depth_image,
                                      const Intrinsic<Real> &intrinsic) noexcept;
 
@@ -35,7 +35,7 @@ math::image<Real> depth_to_laserscan(const math::image<PixelType> &depth_image,
 /// \param[inout] flow taskgraph that will be used for the parallel jobs
 /// \returns synchronization tasks before and after the conversion.
 template <typename Real = float, typename PixelType = ushort,
-          template <typename> typename Intrinsic = camera_models::pinhole>
+          template <typename> typename Intrinsic>
 std::pair<tf::Task, tf::Task>
 par_depth_to_laserscan(const math::image<PixelType> &depth_image,
                        const Intrinsic<Real> &intrinsic, math::image<Real> &out,
@@ -43,7 +43,7 @@ par_depth_to_laserscan(const math::image<PixelType> &depth_image,
 
 namespace detail {
 template <typename Real, typename PixelType,
-          template <typename> typename Intrinsic = camera_models::pinhole>
+          template <typename> typename Intrinsic>
 void laserscan_inner(const int v, const math::image<PixelType> &depth_image,
                      const Intrinsic<Real> &intrinsic,
                      math::image<Real> &                 euclid) {

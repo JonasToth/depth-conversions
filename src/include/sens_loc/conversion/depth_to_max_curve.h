@@ -34,7 +34,7 @@ namespace sens_loc { namespace conversion {
 /// \post the values are provided in radians
 /// \sa camera_models::is_intrinsic_v
 template <typename Real = float, typename PixelType = float,
-          template <typename> typename Intrinsic = camera_models::pinhole>
+          template <typename> typename Intrinsic>
 math::image<Real> depth_to_max_curve(const math::image<PixelType> &depth_image,
                                      const Intrinsic<Real> &intrinsic) noexcept;
 

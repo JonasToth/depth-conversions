@@ -17,6 +17,5 @@ TEST_CASE("Real world case found crashing") {
     REQUIRE(depth_image);
 
     auto laser = depth_to_laserscan<double, ushort>(*depth_image, p);
-    auto vert =
-        depth_to_bearing<direction::horizontal, double, double>(laser, p);
+    auto vert  = depth_to_bearing<direction::horizontal>(laser, p);
 }

@@ -12,13 +12,12 @@ create_test(conversion_bearing conversion/test_conversion_bearing.cpp)
 test_add_file(conversion_bearing conversion/test_conversion_bearing_pathological.cpp)
 configure_file(conversion/bearing-antidiagonal.png
                conversion/bearing-antidiagonal.png COPYONLY)
-configure_file(conversion/bearing-diagonal.png conversion/bearing-diagonal.png COPYONLY)
-configure_file(conversion/bearing-horizontal-double.png
-               conversion/bearing-horizontal-double.png COPYONLY)
-configure_file(conversion/bearing-horizontal-float.png
-               conversion/bearing-horizontal-float.png COPYONLY)
-configure_file(conversion/bearing-vertical.png conversion/bearing-vertical.png COPYONLY)
-configure_file(conversion/horizontal-diff.png conversion/horizontal-diff.png COPYONLY)
+configure_file(conversion/bearing-diagonal.png
+               conversion/bearing-diagonal.png COPYONLY)
+configure_file(conversion/bearing-horizontal.png
+               conversion/bearing-horizontal.png COPYONLY)
+configure_file(conversion/bearing-vertical.png
+               conversion/bearing-vertical.png COPYONLY)
 configure_file(conversion/crashing-file.png conversion/crashing-file.png COPYONLY)
 configure_file(conversion/bearing-horizontal-laserscan-reference.png
                conversion/bearing-horizontal-laserscan-reference.png COPYONLY)

@@ -10,9 +10,8 @@ bool bearing_converter<Intrinsic>::process_file(math::image<double> depth_image,
     // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BEARING_PROCESS(DIRECTION)                                             \
     if (!this->_files.DIRECTION.empty()) {                                     \
-        math::image<double> bearing =                                          \
-            depth_to_bearing<direction::DIRECTION, double, double>(            \
-                depth_image, this->intrinsic);                                 \
+        math::image<double> bearing = depth_to_bearing<direction::DIRECTION>(  \
+            depth_image, this->intrinsic);                                     \
         bool success =                                                         \
             cv::imwrite(fmt::format(this->_files.DIRECTION, idx),              \
                         convert_bearing<double, ushort>(bearing).data());      \

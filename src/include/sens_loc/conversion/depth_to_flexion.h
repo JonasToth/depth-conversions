@@ -31,7 +31,7 @@ namespace sens_loc { namespace conversion {
 /// \pre intrinsic matches the sensor that took the image
 /// \sa camera_models::is_intrinsic_v
 template <typename Real = float, typename PixelType = float,
-          template <typename> typename Intrinsic = camera_models::pinhole>
+          template <typename> typename Intrinsic>
 math::image<Real> depth_to_flexion(const math::image<PixelType> &depth_image,
                                    const Intrinsic<Real> &intrinsic) noexcept;
 
@@ -49,7 +49,7 @@ math::image<Real> depth_to_flexion(const math::image<PixelType> &depth_image,
 /// \pre the underlying types match the defined template parameters
 /// built. This graph will then execute all the tasks on request.
 template <typename Real = float, typename PixelType = float,
-          template <typename> typename Intrinsic = camera_models::pinhole>
+          template <typename> typename Intrinsic>
 std::pair<tf::Task, tf::Task> par_depth_to_flexion(
     const math::image<PixelType> &depth_image, const Intrinsic<Real> &intrinsic,
     math::image<Real> &flexion_image, tf::Taskflow &flow) noexcept;

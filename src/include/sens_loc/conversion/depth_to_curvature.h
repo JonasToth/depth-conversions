@@ -33,7 +33,7 @@ namespace sens_loc { namespace conversion {
 /// \sa depth_to_laserscan
 /// \sa camera_models::is_intrinsic_v
 template <typename Real = float, typename PixelType = float,
-          template <typename> typename Intrinsic = camera_models::pinhole>
+          template <typename> typename Intrinsic>
 math::image<Real>
 depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
                             const Intrinsic<Real> &       intrinsic) noexcept;
@@ -55,7 +55,7 @@ depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
 /// \note invalid depth values result in 0 for that pixel.
 /// \sa depth_to_laserscan
 template <typename Real = float, typename PixelType = float,
-          template <typename> typename Intrinsic = camera_models::pinhole>
+          template <typename> typename Intrinsic>
 math::image<Real>
 depth_to_mean_curvature(const math::image<PixelType> &depth_image,
                         const Intrinsic<Real> &       intrinsic) noexcept;
