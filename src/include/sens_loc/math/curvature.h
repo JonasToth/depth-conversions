@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <gsl/gsl>
+#include <type_traits>
 
 namespace sens_loc { namespace math {
 
@@ -16,6 +17,8 @@ namespace sens_loc { namespace math {
 template <typename Real>
 inline Real gaussian_curvature(Real f_u, Real f_v, Real f_uu, Real f_vv,
                                Real f_uv) noexcept {
+    static_assert(std::is_floating_point_v<Real>);
+
     return (f_uu * f_vv - f_uv * f_uv) / (Real(1.) + f_u * f_u + f_v * f_v);
 }
 
@@ -29,6 +32,8 @@ inline Real gaussian_curvature(Real f_u, Real f_v, Real f_uu, Real f_vv,
 template <typename Real>
 inline Real mean_curvature(Real f_u, Real f_v, Real f_uu, Real f_vv,
                            Real f_uv) noexcept {
+    static_assert(std::is_floating_point_v<Real>);
+
     using std::pow;
     using std::sqrt;
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)

@@ -6,6 +6,7 @@
 #include <iostream>
 #include <limits>
 #include <sens_loc/math/constants.h>
+#include <type_traits>
 
 namespace sens_loc { namespace math {
  
@@ -25,6 +26,8 @@ namespace sens_loc { namespace math {
 template <typename Real>
 inline Real bearing_angle(const Real b, const Real c,
                           const Real cos_alpha) noexcept {
+    static_assert(std::is_arithmetic_v<Real>);
+
     Expects(b > 0.);
     Expects(c > 0.);
     // => alpha is smaller 90°
@@ -70,6 +73,8 @@ inline Real bearing_angle(const Real b, const Real c,
 template <typename Real = float>
 inline Real reference_lin_bearing_angle(const Real b, const Real c,
                                         const Real cos_alpha) noexcept {
+    static_assert(std::is_arithmetic_v<Real>);
+
     Expects(b > 0.);
     Expects(c > 0.);
     // => alpha is smaller 90°

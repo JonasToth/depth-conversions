@@ -4,12 +4,15 @@
 #include <gsl/gsl>
 #include <opencv2/core/mat.hpp>
 #include <sens_loc/math/coordinate.h>
+#include <type_traits>
 
 namespace sens_loc { namespace math {
 
 namespace detail {
 template <typename Number>  // requires Number<Number>
 inline int get_opencv_type() {
+    static_assert(std::is_arithmetic_v<Number>);
+
     if constexpr (std::is_same<Number, float>::value)
         return CV_32F;  // NOLINT(bugprone-branch-clone)
     else if constexpr (std::is_same<Number, double>::value)
@@ -39,28 +42,30 @@ inline int get_opencv_type() {
 template <typename PixelType = ushort>
 class image {
   public:
+    static_assert(std::is_arithmetic_v<PixelType>);
+
     image() = default;
 
     /// Construct the image from a \c cv::Mat and uphold the class invariant.
-    explicit image(const cv::Mat &image) noexcept
+    explicit image(const cv::Mat& image) noexcept
         : _data(image) {
         Expects(image.type() == detail::get_opencv_type<PixelType>());
         Expects(image.channels() == 1);
         Expects(!image.empty());
     }
-    image(const image<PixelType> &other) = default;
+    image(const image<PixelType>& other) = default;
 
     // NOLINTNEXTLINE(performance-noexcept-move-constructor)
-    image(image<PixelType> &&other) = default;
-    explicit image(cv::Mat &&other) noexcept
+    image(image<PixelType>&& other) = default;
+    explicit image(cv::Mat&& other) noexcept
         : _data(std::move(other)) {
         Expects(_data.type() == detail::get_opencv_type<PixelType>());
         Expects(_data.channels() == 1);
         Expects(!_data.empty());
     }
 
-    image<PixelType> &operator=(const image<PixelType> &other) = default;
-    image<PixelType> &operator=(const cv::Mat &other) noexcept {
+    image<PixelType>& operator=(const image<PixelType>& other) = default;
+    image<PixelType>& operator=(const cv::Mat& other) noexcept {
         Expects(other.type() == detail::get_opencv_type<PixelType>());
         Expects(other.channels() == 1);
         Expects(!other.empty());
@@ -69,8 +74,8 @@ class image {
     }
 
     // NOLINTNEXTLINE(performance-noexcept-move-constructor)
-    image<PixelType> &operator=(image<PixelType> &&other) = default;
-    image<PixelType> &operator=(cv::Mat &&other) noexcept {
+    image<PixelType>& operator=(image<PixelType>&& other) = default;
+    image<PixelType>& operator=(cv::Mat&& other) noexcept {
         Expects(other.type() == detail::get_opencv_type<PixelType>());
         Expects(other.channels() == 1);
         Expects(!other.empty());
@@ -87,26 +92,33 @@ class image {
 
     /// Read-Access in the image for some pixel \p p.
     template <typename Number = int>
-    [[nodiscard]] PixelType at(const pixel_coord<Number> &p) const noexcept {
+    [[nodiscard]] PixelType at(const pixel_coord<Number>& p) const noexcept {
+        static_assert(std::is_arithmetic_v<Number>);
+
         return _data.at<PixelType>(gsl::narrow_cast<int>(p.v()),
                                    gsl::narrow_cast<int>(p.u()));
     }
     /// Write-Access in the image for some pixel \p p.
     template <typename Number = int>
-    [[nodiscard]] PixelType &at(const pixel_coord<Number> &p) noexcept {
+    [[nodiscard]] PixelType& at(const pixel_coord<Number>& p) noexcept {
+        static_assert(std::is_arithmetic_v<Number>);
+
         return _data.at<PixelType>(gsl::narrow_cast<int>(p.v()),
                                    gsl::narrow_cast<int>(p.u()));
     }
 
     /// Get access to the underlying data to use it for normal cv operations.
-    [[nodiscard]] const cv::Mat &data() const noexcept { return _data; }
+    [[nodiscard]] const cv::Mat& data() const noexcept { return _data; }
 
   private:
     cv::Mat _data;
 };
 
 template <typename TargetType, typename PixelType>
-image<TargetType> convert(const image<PixelType> &img) noexcept {
+image<TargetType> convert(const image<PixelType>& img) noexcept {
+    static_assert(std::is_arithmetic_v<TargetType>);
+    static_assert(std::is_arithmetic_v<PixelType>);
+
     cv::Mat tmp(img.h(), img.w(), detail::get_opencv_type<TargetType>());
     img.data().convertTo(tmp, detail::get_opencv_type<TargetType>());
     return math::image<TargetType>(std::move(tmp));

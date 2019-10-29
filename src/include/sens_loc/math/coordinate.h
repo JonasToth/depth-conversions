@@ -33,6 +33,8 @@ struct is_2d
 /// \sa math::coordinate
 template <typename Real>
 struct coordinate2d {
+    static_assert(std::is_arithmetic_v<Real>);
+
     coordinate2d()
         : d(Real(0.), Real(0.)) {}
     coordinate2d(Real x1, Real x2)
@@ -45,6 +47,8 @@ struct coordinate2d {
 /// \sa math::coordinate
 template <typename Real>
 struct coordinate3d {
+    static_assert(std::is_arithmetic_v<Real>);
+
     coordinate3d()
         : d(Real(0.), Real(0.), Real(0.)) {}
     coordinate3d(Real x1, Real x2, Real x3)

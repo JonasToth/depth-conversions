@@ -1,6 +1,7 @@
 #ifndef UTILITY_H_SAL9APRW
 #define UTILITY_H_SAL9APRW
 
+#include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/math/coordinate.h>
 #include <type_traits>
 
@@ -10,10 +11,16 @@ namespace sens_loc { namespace camera_models {
 /// \param calibration projection model for a specific sensor
 /// \param p1,p2 non-negative pixel coordinates smaller \c w and \c h.
 /// \returns radians of the angle between the two lightrays.
-template <typename Intrinsic, typename Number = int>
-typename Intrinsic::real_type
-phi(const Intrinsic &calibration, const math::pixel_coord<Number> &p1,
-    const math::pixel_coord<Number> &p2) noexcept {
+template <template <typename> typename Intrinsic,
+          typename Real   = float,
+          typename Number = int>
+Real phi(const Intrinsic<Real>&           calibration,
+         const math::pixel_coord<Number>& p1,
+         const math::pixel_coord<Number>& p2) noexcept {
+    static_assert(is_intrinsic_v<Intrinsic, Real>);
+    static_assert(std::is_floating_point_v<Real>);
+    static_assert(std::is_arithmetic_v<Number>);
+
     Expects(p1.u() >= 0);
     Expects(p1.u() < calibration.w());
 

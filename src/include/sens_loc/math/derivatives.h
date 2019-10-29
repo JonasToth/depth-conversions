@@ -3,6 +3,7 @@
 
 #include <gsl/gsl>
 #include <tuple>
+#include <type_traits>
 
 namespace sens_loc { namespace math {
 
@@ -14,6 +15,8 @@ namespace sens_loc { namespace math {
 /// \returns first derivative at this point of order \f$\mathcal{O}(dx^2)\f$
 template <typename Real>
 inline Real first_derivative_central(Real y__1, Real y_1, Real dx) noexcept {
+    static_assert(std::is_floating_point_v<Real>);
+
     Expects(dx > Real(0.));
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     return (y_1 - y__1) / (Real(2.) * dx);
@@ -29,6 +32,8 @@ inline Real first_derivative_central(Real y__1, Real y_1, Real dx) noexcept {
 template <typename Real>
 inline Real second_derivative_central(Real y__1, Real y_0, Real y_1,
                                       Real dx) noexcept {
+    static_assert(std::is_floating_point_v<Real>);
+
     Expects(dx > Real(0.));
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     return (y_1 + y__1 - Real(2.) * y_0) / (dx * dx);
@@ -62,6 +67,8 @@ derivatives(Real d__1__1, Real d__1__0, Real d__1_1,
             Real d__0__1, Real d__0__0, Real d__0_1,
             Real d_1__1, Real d_1__0, Real d_1_1,
             Real d_phi, Real d_theta, Real d_phi_theta) noexcept {
+    static_assert(std::is_floating_point_v<Real>);
+
     Expects(d_phi > 0.);
     Expects(d_theta > 0.);
     Expects(d_phi_theta > 0.);

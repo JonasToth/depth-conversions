@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <gsl/gsl>
+#include <type_traits>
 #include <utility>
 
 namespace sens_loc { namespace math {
@@ -14,6 +15,8 @@ namespace sens_loc { namespace math {
 /// \warning this struct does not ensure that \p min is always smaller \p max.
 template <typename Real>
 struct numeric_range {
+    static_assert(std::is_arithmetic_v<Real>);
+
     Real min;  ///< lower bound of the range
     Real max;  ///< uppoer bound of the range
 };
@@ -24,9 +27,11 @@ struct numeric_range {
 /// \pre the ranges are well formed (\p min is smaller \p max)
 /// \returns the scaled value that is clamped to \p target_range.
 template <typename Real>
-inline constexpr Real scale(numeric_range<Real> source_range,
-                            numeric_range<Real> target_range,
-                            Real                value) noexcept {
+inline constexpr Real scale(const numeric_range<Real>& source_range,
+                            const numeric_range<Real>& target_range,
+                            Real                       value) noexcept {
+    static_assert(std::is_arithmetic_v<Real>);
+
     Expects(source_range.min < source_range.max);
     Expects(target_range.min < target_range.max);
 

@@ -54,8 +54,8 @@ namespace util {
 ///
 /// \returns
 /// \f[\frac{\lVert i_1 - i_2 \rVert_2}{\#Pixel \cdot \#Channels}\f]
-inline double average_pixel_error(const cv::Mat &i1,
-                                  const cv::Mat &i2) noexcept {
+inline double average_pixel_error(const cv::Mat& i1,
+                                  const cv::Mat& i2) noexcept {
     Expects(i1.cols == i2.cols);
     Expects(i1.rows == i2.rows);
     Expects(i1.type() == i2.type());
@@ -68,7 +68,7 @@ inline double average_pixel_error(const cv::Mat &i1,
     return result / double(n_pixels);
 }
 template <typename Image>
-double average_pixel_error(const Image &i1, const Image &i2) noexcept {
+double average_pixel_error(const Image& i1, const Image& i2) noexcept {
     return average_pixel_error(i1.data(), i2.data());
 }
 }  // namespace util

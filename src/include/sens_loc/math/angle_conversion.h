@@ -3,6 +3,7 @@
 
 #include <gsl/gsl>
 #include <sens_loc/math/constants.h>
+#include <type_traits>
 
 namespace sens_loc {
 
@@ -20,6 +21,8 @@ namespace math {
 /// \post \c rad_to_deg(result) == \p degree
 template <typename T>  // requires(Float(T))
 constexpr inline T deg_to_rad(T degree) {
+    static_assert(std::is_floating_point_v<T>);
+
     Expects(degree <= T(360.));
     Expects(degree >= T(0.));
     const T radians = degree / T(180.) * pi<T>;
@@ -39,6 +42,8 @@ constexpr inline T deg_to_rad(T degree) {
 /// \post \c deg_to_rad(result) == \p radians
 template <typename T>  // requires(Float(T))
 constexpr inline T rad_to_deg(T radians) {
+    static_assert(std::is_floating_point_v<T>);
+
     Expects(radians >= T(0.));
     Expects(radians <= T(2. * pi<T>));
     const T degree = radians * T(180.) / pi<T>;

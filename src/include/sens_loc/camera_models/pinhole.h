@@ -110,10 +110,11 @@ class pinhole {
 };
 
 template <typename Real>
-template <typename Number>
+template <typename _Real>
 math::image_coord<Real>
-pinhole<Real>::transform_to_image(const math::pixel_coord<Number> &p) const
+pinhole<Real>::transform_to_image(const math::pixel_coord<_Real> &p) const
     noexcept {
+    static_assert(std::is_arithmetic_v<_Real>);
     Expects(_fx > 0.);
     Expects(_fy > 0.);
     Expects(_cx > 0.);
@@ -135,6 +136,7 @@ template <typename _Real>
 inline math::sphere_coord<Real>
 pinhole<Real>::pixel_to_sphere(const math::pixel_coord<_Real> &p) const
     noexcept {
+    static_assert(std::is_arithmetic_v<_Real>);
     return image_to_sphere(transform_to_image(p));
 }
 

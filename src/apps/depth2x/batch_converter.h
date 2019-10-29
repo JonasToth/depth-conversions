@@ -2,8 +2,7 @@
 #define BATCH_CONVERTER_H_XDIRBPHG
 
 #include <opencv2/core/mat.hpp>
-#include <sens_loc/camera_models/equirectangular.h>
-#include <sens_loc/camera_models/pinhole.h>
+#include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/math/image.h>
 #include <sens_loc/util/correctness_util.h>

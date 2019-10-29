@@ -3,6 +3,7 @@
 
 #include <istream>
 #include <optional>
+#include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/camera_models/equirectangular.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sstream>
@@ -13,6 +14,9 @@ namespace sens_loc {
 template <typename Real, template <typename> typename Intrinsic>
 class io {
   public:
+    static_assert(std::is_floating_point_v<Real>);
+    static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+
     static std::optional<Intrinsic<Real>>
     load_intrinsic(std::istream & /*unused*/) noexcept {
         return std::nullopt;
@@ -22,6 +26,8 @@ class io {
 template <typename Real>
 class io<Real, camera_models::pinhole> {
   public:
+    static_assert(std::is_floating_point_v<Real>);
+
     /// Load the pinhole intrinsic parameters from an input stream
     /// (e.g. a filestream).
     ///
@@ -95,6 +101,8 @@ class io<Real, camera_models::pinhole> {
 template <typename Real>
 class io<Real, camera_models::equirectangular> {
   public:
+    static_assert(std::is_floating_point_v<Real>);
+
     /// Load the equirectangular intrinsic parameters from an input stream
     /// (e.g. a filestream).
     ///

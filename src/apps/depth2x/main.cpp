@@ -23,13 +23,12 @@ using intrinsic_variant =
     std::variant<sens_loc::camera_models::pinhole<double>,
                  sens_loc::camera_models::equirectangular<double>>;
 
-/// This macro is a little monster for template reasons.
+/// This function is a little monster for template reasons.
 /// In order to instantiate all necessary batch conversions
 /// (feature-type, like bearing_angle) combined with
 /// camera_models (e.g. the pinhole model). As everything is
 /// templated instead of virtually dispatched these
 /// instantiations need to be explicitly written down.
-/// This macro hides this to reduce the code duplication!
 template <template <typename> typename Converter, typename... Arguments>
 std::unique_ptr<sens_loc::apps::batch_converter>
 make_converter(const sens_loc::apps::file_patterns &files,

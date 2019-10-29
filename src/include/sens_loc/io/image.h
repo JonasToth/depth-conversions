@@ -4,6 +4,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <optional>
 #include <sens_loc/math/image.h>
+#include <type_traits>
 #include <utility>
 
 namespace sens_loc {
@@ -17,7 +18,9 @@ namespace io {
 /// If the optional contains a value, the load was successful, otherwise it is
 /// \c None.
 template <typename PixelType, typename... Arg>
-std::optional<math::image<PixelType>> load_image(Arg &&... args) {
+std::optional<math::image<PixelType>> load_image(Arg&&... args) {
+    static_assert(std::is_arithmetic_v<PixelType>);
+
     cv::Mat result = cv::imread(std::forward<Arg>(args)...);
     if (result.data == nullptr)
         return std::nullopt;

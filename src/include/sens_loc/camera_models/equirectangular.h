@@ -15,6 +15,7 @@ namespace sens_loc { namespace camera_models {
 namespace detail {
 template <typename Real>
 Real get_d_phi(int width) noexcept {
+    static_assert(std::is_floating_point_v<Real>);
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     return Real(2.) * math::pi<Real> / Real(width);
 }
@@ -111,8 +112,7 @@ class equirectangular {
     /// This methods calculates the inverse projection of the equirectangular
     /// model to get the direction of the lightray for the pixel at \p p.
     ///
-    /// \tparam _Real either integer or floating point value for pixel or
-    /// subpixel precision
+    /// \tparam _Real either integer pixels or floating point for subpixels
     /// \param p non-negative pixel coordinates
     /// \post \f$\lVert result \rVert_2 = 1.\f$
     /// \returns normalized vector in camera coordinates - unit sphere
@@ -148,6 +148,7 @@ template <typename _Real>
 inline math::sphere_coord<Real>
 equirectangular<Real>::pixel_to_sphere(const math::pixel_coord<_Real> &p) const
     noexcept {
+    static_assert(std::is_arithmetic_v<_Real>);
     const Real phi   = p.u() * d_phi - math::pi<Real>;
     const Real theta = theta_min + (p.v() * d_theta);
 
