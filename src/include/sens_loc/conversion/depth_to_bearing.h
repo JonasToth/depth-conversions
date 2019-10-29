@@ -41,10 +41,12 @@ namespace sens_loc { namespace conversion {
 /// \pre \p intrinsic matches sensor that took the image, prior preprocessing
 /// \post each bearing angle is in the range \f$[0, \pi)\f$
 /// is of course possible with matching changes in the \p depth_image.
-template <direction Direction, template <typename> typename Intrinsic,
+template <direction Direction,
+          template <typename>
+          typename Intrinsic,
           typename Real = float>
-math::image<Real> depth_to_bearing(const math::image<Real> &depth_image,
-                                   const Intrinsic<Real> &  intrinsic) noexcept;
+math::image<Real> depth_to_bearing(const math::image<Real>& depth_image,
+                                   const Intrinsic<Real>&   intrinsic) noexcept;
 
 /// This function provides are parallelized version of the conversion
 /// functionality.
@@ -60,12 +62,15 @@ math::image<Real> depth_to_bearing(const math::image<Real> &depth_image,
 /// \returns synchronization points before and after the calculation of the
 /// bearing angle image.
 /// \sa depth_to_bearing
-template <direction Direction, template <typename> typename Intrinsic,
+template <direction Direction,
+          template <typename>
+          typename Intrinsic,
           typename Real = float>
 std::pair<tf::Task, tf::Task>
-par_depth_to_bearing(const math::image<Real> &depth_image,
-                     const Intrinsic<Real> &  intrinsic,
-                     math::image<Real> &ba_image, tf::Taskflow &flow) noexcept;
+par_depth_to_bearing(const math::image<Real>& depth_image,
+                     const Intrinsic<Real>&   intrinsic,
+                     math::image<Real>&       ba_image,
+                     tf::Taskflow&            flow) noexcept;
 
 /// Convert a bearing angle image to an image with integer types.
 /// This function scales the bearing angles between
@@ -85,7 +90,7 @@ par_depth_to_bearing(const math::image<Real> &depth_image,
 /// \sa conversion::depth_to_bearing
 template <typename Real = float, typename PixelType = ushort>
 math::image<PixelType>
-convert_bearing(const math::image<Real> &bearing_image) noexcept;
+convert_bearing(const math::image<Real>& bearing_image) noexcept;
 
 namespace detail {
 inline int get_du(direction dir) {
@@ -110,14 +115,14 @@ inline int get_dv(direction dir) {
 
 /// Provide a general accessor for the pixels that provide depth information
 /// to calculate the bearing angle.
-template <typename Real, direction Direction>  // requires CVInteger<PixelType>
+template <typename Real, direction Direction>
 class pixel {
   public:
     pixel()
         : _du{get_du(Direction)}
         , _dv{get_dv(Direction)} {}
     /// \returns (u, v) for the prior point depending on the direction.
-    math::pixel_coord<int> operator()(const math::pixel_coord<int> &p) const
+    math::pixel_coord<int> operator()(const math::pixel_coord<int>& p) const
         noexcept {
         return {p.u() + _du, p.v() + _dv};
     }
@@ -160,7 +165,7 @@ inline int get_dy_end(direction dir) {
 /// Define the start and end iterator for each bearing angle direction.
 template <direction Direction>
 struct pixel_range {
-    pixel_range(const cv::Mat &depth_image) noexcept
+    pixel_range(const cv::Mat& depth_image) noexcept
         : x_start{get_x_start(Direction)}
         , x_end{depth_image.cols}
         , y_start{get_y_start(Direction)}
@@ -172,12 +177,17 @@ struct pixel_range {
     const int y_end;
 };
 
-template <typename Real, typename RangeLimits, typename PriorAccess,
-          template <typename> typename Intrinsic>
-inline void
-bearing_inner(const RangeLimits &r, const PriorAccess &prior_accessor,
-              const int v, const math::image<Real> &depth_image,
-              const Intrinsic<Real> &intrinsic, math::image<Real> &ba_image) {
+template <typename Real,
+          typename RangeLimits,
+          typename PriorAccess,
+          template <typename>
+          typename Intrinsic>
+inline void bearing_inner(const RangeLimits&       r,
+                          const PriorAccess&       prior_accessor,
+                          const int                v,
+                          const math::image<Real>& depth_image,
+                          const Intrinsic<Real>&   intrinsic,
+                          math::image<Real>&       ba_image) {
     for (int u = r.x_start; u < r.x_end; ++u) {
         const math::pixel_coord<int> central(u, v);
         const math::pixel_coord<int> prior = prior_accessor(central);
@@ -205,11 +215,13 @@ bearing_inner(const RangeLimits &r, const PriorAccess &prior_accessor,
 }
 }  // namespace detail
 
-template <direction Direction, template <typename> typename Intrinsic,
+template <direction Direction,
+          template <typename>
+          typename Intrinsic,
           typename Real>
 inline math::image<Real>
-depth_to_bearing(const math::image<Real> &depth_image,
-                 const Intrinsic<Real> &  intrinsic) noexcept {
+depth_to_bearing(const math::image<Real>& depth_image,
+                 const Intrinsic<Real>&   intrinsic) noexcept {
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
     static_assert(std::is_floating_point_v<Real>);
 
@@ -227,8 +239,8 @@ depth_to_bearing(const math::image<Real> &depth_image,
     math::image<Real> ba_image(std::move(ba));
 
     for (int v = r.y_start; v < r.y_end; ++v)
-        detail::bearing_inner<Real>(r, prior_accessor, v, depth_image,
-                                    intrinsic, ba_image);
+        detail::bearing_inner(r, prior_accessor, v, depth_image, intrinsic,
+                              ba_image);
 
     Ensures(ba_image.h() == depth_image.h());
     Ensures(ba_image.w() == depth_image.w());
@@ -236,12 +248,15 @@ depth_to_bearing(const math::image<Real> &depth_image,
     return ba_image;
 }
 
-template <direction Direction, template <typename> typename Intrinsic,
+template <direction Direction,
+          template <typename>
+          typename Intrinsic,
           typename Real>
 inline std::pair<tf::Task, tf::Task>
-par_depth_to_bearing(const math::image<Real> &depth_image,
-                     const Intrinsic<Real> &  intrinsic,
-                     math::image<Real> &ba_image, tf::Taskflow &flow) noexcept {
+par_depth_to_bearing(const math::image<Real>& depth_image,
+                     const Intrinsic<Real>&   intrinsic,
+                     math::image<Real>&       ba_image,
+                     tf::Taskflow&            flow) noexcept {
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
     static_assert(std::is_floating_point_v<Real>);
 
@@ -257,8 +272,8 @@ par_depth_to_bearing(const math::image<Real> &depth_image,
     auto sync_points = flow.parallel_for(
         r.y_start, r.y_end, 1,
         [prior_accessor, r, &depth_image, &intrinsic, &ba_image](int v) {
-            detail::bearing_inner<Real>(r, prior_accessor, v, depth_image,
-                                        intrinsic, ba_image);
+            detail::bearing_inner(r, prior_accessor, v, depth_image, intrinsic,
+                                  ba_image);
         });
 
     return sync_points;
@@ -266,7 +281,7 @@ par_depth_to_bearing(const math::image<Real> &depth_image,
 
 template <typename Real, typename PixelType>
 inline math::image<PixelType>
-convert_bearing(const math::image<Real> &bearing_image) noexcept {
+convert_bearing(const math::image<Real>& bearing_image) noexcept {
     static_assert(std::is_floating_point_v<Real>);
     static_assert(std::is_arithmetic_v<PixelType>);
 

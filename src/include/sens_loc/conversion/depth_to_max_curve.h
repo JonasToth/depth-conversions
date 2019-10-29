@@ -21,8 +21,7 @@ namespace sens_loc { namespace conversion {
 ///
 /// \sa conversion::depth_to_laserscan
 /// \sa conversion::depth_to_bearing
-/// \tparam Real precision of the calculation
-/// \tparam PixelType underlying type of \p depth_image
+/// \tparam Real precision of the calculation, floating-point
 /// \tparam Intrinsic camera model that projects pixel to the unit sphere
 /// \param depth_image range image the calculations are made with
 /// \param intrinsic matching calibration for the sensor
@@ -33,28 +32,29 @@ namespace sens_loc { namespace conversion {
 /// \post each pixel has a value in the range \f$[0, 2\pi)\f$
 /// \post the values are provided in radians
 /// \sa camera_models::is_intrinsic_v
-template <typename Real = float, typename PixelType = float,
-          template <typename> typename Intrinsic>
-math::image<Real> depth_to_max_curve(const math::image<PixelType> &depth_image,
-                                     const Intrinsic<Real> &intrinsic) noexcept;
+template <template <typename> typename Intrinsic, typename Real = float>
+math::image<Real> depth_to_max_curve(const math::image<Real>& depth_image,
+                                     const Intrinsic<Real>& intrinsic) noexcept;
 
 /// The max-curve picture is not a normal image and needs to be converted to
 /// the classical integer range.
 ///
-/// \tparam Real underlying type of \p max_curve
-/// \tparam PixelType underlying type of the result
+/// \tparam Real underlying type of \p max_curve, floating-point
+/// \tparam PixelType underlying type of the result, arithmetic
 /// \param max_curve max-curve image
 /// \returns scaled image with underlying type \p PixelType
 /// \pre each pixel of \p max_curve is in range \f$[0, 2\pi)\f$
 /// \post each pixel is in range \f$[PixelType_{min}, PixelType_{max}]\f$
-template <typename Real = float, typename PixelType = ushort>
+template <typename PixelType = ushort, typename Real = float>
 math::image<PixelType>
-convert_max_curve(const math::image<Real> &max_curve) noexcept;
+convert_max_curve(const math::image<Real>& max_curve) noexcept;
 
 namespace detail {
 
 template <typename Real>  // require Float<Real>
-inline Real angle_formula(const Real d__1, const Real d__0, const Real d_1,
+inline Real angle_formula(const Real d__1,
+                          const Real d__0,
+                          const Real d_1,
                           const Real cos_alpha1,
                           const Real cos_alpha2) noexcept {
     if (d__1 == 0. || d__0 == 0. || d_1 == 0.)
@@ -82,12 +82,12 @@ inline Real angle_formula(const Real d__1, const Real d__0, const Real d_1,
 }
 }  // namespace detail
 
-template <typename Real, typename PixelType,
-          template <typename> typename Intrinsic>
+template <template <typename> typename Intrinsic, typename Real>
 inline math::image<Real>
-depth_to_max_curve(const math::image<PixelType> &depth_image,
-                   const Intrinsic<Real> &       intrinsic) noexcept {
+depth_to_max_curve(const math::image<Real>& depth_image,
+                   const Intrinsic<Real>&   intrinsic) noexcept {
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+    static_assert(std::is_floating_point_v<Real>);
 
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
@@ -152,9 +152,12 @@ depth_to_max_curve(const math::image<PixelType> &depth_image,
     return max_curve_image;
 }
 
-template <typename Real, typename PixelType>
+template <typename PixelType, typename Real>
 inline math::image<PixelType>
-convert_max_curve(const math::image<Real> &max_curve) noexcept {
+convert_max_curve(const math::image<Real>& max_curve) noexcept {
+    static_assert(std::is_floating_point_v<Real>);
+    static_assert(std::is_arithmetic_v<PixelType>);
+
     using detail::scaling_factor;
     cv::Mat img(max_curve.h(), max_curve.w(),
                 math::detail::get_opencv_type<PixelType>());

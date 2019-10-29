@@ -21,8 +21,7 @@ namespace sens_loc { namespace conversion {
 /// to the inner geometry. See https://en.wikipedia.org/wiki/Gaussian_curvature
 /// for more information.
 ///
-/// \tparam Real precision of the calculation
-/// \tparam PixelType underlying type of \p depth_image
+/// \tparam Real precision of the calculation, floating-point
 /// \tparam Intrinsic camera model that projects pixel to the unit sphere
 /// \param depth_image range image that will be converted
 /// \param intrinsic calibration of the sensor that took the image.
@@ -32,11 +31,10 @@ namespace sens_loc { namespace conversion {
 /// \note invalid depth values result in 0 for that pixel.
 /// \sa depth_to_laserscan
 /// \sa camera_models::is_intrinsic_v
-template <typename Real = float, typename PixelType = float,
-          template <typename> typename Intrinsic>
+template <template <typename> typename Intrinsic, typename Real = float>
 math::image<Real>
-depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
-                            const Intrinsic<Real> &       intrinsic) noexcept;
+depth_to_gaussian_curvature(const math::image<Real>& depth_image,
+                            const Intrinsic<Real>&   intrinsic) noexcept;
 
 /// Convert the range image \p depth_image to a mean curvature image.
 ///
@@ -44,8 +42,7 @@ depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
 /// differential geometry. See https://en.wikipedia.org/wiki/Mean_curvature
 /// for more information.
 ///
-/// \tparam Real precision of the calculation
-/// \tparam PixelType underlying type of \p depth_image
+/// \tparam Real precision of the calculation, floating-point
 /// \tparam Intrinsic camera model that projects pixel to the unit sphere
 /// \param depth_image range image that will be converted
 /// \param intrinsic calibration of the sensor that took the image.
@@ -54,11 +51,10 @@ depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
 /// \pre \p PixelType matches the underlying type of \p depth_image
 /// \note invalid depth values result in 0 for that pixel.
 /// \sa depth_to_laserscan
-template <typename Real = float, typename PixelType = float,
-          template <typename> typename Intrinsic>
+template <template <typename> typename Intrinsic, typename Real = float>
 math::image<Real>
-depth_to_mean_curvature(const math::image<PixelType> &depth_image,
-                        const Intrinsic<Real> &       intrinsic) noexcept;
+depth_to_mean_curvature(const math::image<Real>& depth_image,
+                        const Intrinsic<Real>&   intrinsic) noexcept;
 
 /// Convert the curvature images to presentable images.
 ///
@@ -70,8 +66,9 @@ depth_to_mean_curvature(const math::image<PixelType> &depth_image,
 /// If the clamping is off, the final images are probably not well suited for
 /// classical computer vision tasks like feature matching.
 ///
-/// \tparam Real underlying type of \p curvature_img
-/// \tparam PixelType underlying type of the final converted image
+/// \tparam Real underlying type of \p curvature_img, floating-point
+/// \tparam PixelType underlying type of the final converted image, arithmetic
+/// \tparam MaskType underlying type of the mask image, arithmetic
 /// \param curvature_img curvature image to convert
 /// \param depth_image_as_mask invalid values are a 0 in the original
 /// depth image. Because the curvature can not reflect this well the mask
@@ -85,11 +82,12 @@ depth_to_mean_curvature(const math::image<PixelType> &depth_image,
 /// \post range of each pixel is either
 /// \f$[min(curvature_img), max(curvature_img)\f$ or
 /// \f$[clamp_{min}, clamp_{max}]\f$ or any combination of the range limits.
-template <typename Real = double, typename PixelType = ushort,
-          typename MaskType = PixelType>
+template <typename PixelType = ushort,
+          typename Real      = double,
+          typename MaskType  = PixelType>
 math::image<PixelType>
-curvature_to_image(const math::image<Real> &    curvature_img,
-                   const math::image<MaskType> &depth_image_as_mask,
+curvature_to_image(const math::image<Real>&     curvature_img,
+                   const math::image<MaskType>& depth_image_as_mask,
                    std::optional<Real>          clamp_min = std::nullopt,
                    std::optional<Real> clamp_max = std::nullopt) noexcept;
 
@@ -116,11 +114,11 @@ namespace detail {
         continue;                                                              \
     }
 
-template <typename Real, typename PixelType,
-          template <typename> typename Intrinsic>
-void gaussian_inner(const int v, const math::image<PixelType> &depth_image,
-                    const Intrinsic<Real> &intrinsic,
-                    math::image<Real> &    target_img) {
+template <template <typename> typename Intrinsic, typename Real>
+void gaussian_inner(const int                v,
+                    const math::image<Real>& depth_image,
+                    const Intrinsic<Real>&   intrinsic,
+                    math::image<Real>&       target_img) noexcept {
     for (int u = 1; u < depth_image.w() - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
@@ -138,11 +136,11 @@ void gaussian_inner(const int v, const math::image<PixelType> &depth_image,
     }
 }
 
-template <typename Real, typename PixelType,
-          template <typename> typename Intrinsic>
-void mean_inner(const int v, const math::image<PixelType> &depth_image,
-                const Intrinsic<Real> &intrinsic,
-                math::image<Real> &    target_img) {
+template <template <typename> typename Intrinsic, typename Real>
+void mean_inner(const int                v,
+                const math::image<Real>& depth_image,
+                const Intrinsic<Real>&   intrinsic,
+                math::image<Real>&       target_img) noexcept {
     for (int u = 1; u < depth_image.w() - 1; ++u) {
         DIFF_STAR(depth_image, target_img)
 
@@ -164,12 +162,12 @@ void mean_inner(const int v, const math::image<PixelType> &depth_image,
 }  // namespace detail
 
 /// Convert an euclidian depth image to a gaussian curvature image.
-template <typename Real, typename PixelType,
-          template <typename> typename Intrinsic>
+template <template <typename> typename Intrinsic, typename Real>
 inline math::image<Real>
-depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
-                            const Intrinsic<Real> &       intrinsic) noexcept {
+depth_to_gaussian_curvature(const math::image<Real>& depth_image,
+                            const Intrinsic<Real>&   intrinsic) noexcept {
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+    static_assert(std::is_floating_point_v<Real>);
 
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
@@ -179,20 +177,19 @@ depth_to_gaussian_curvature(const math::image<PixelType> &depth_image,
     gauss = Real(0.);
     math::image<Real> gauss_image(std::move(gauss));
 
-    for (int v = 1; v < depth_image.h() - 1; ++v) {
-        detail::gaussian_inner<Real, PixelType>(v, depth_image, intrinsic,
-                                                gauss_image);
-    }
+    for (int v = 1; v < depth_image.h() - 1; ++v)
+        detail::gaussian_inner(v, depth_image, intrinsic, gauss_image);
+
     return gauss_image;
 }
 
 /// Convert an euclidian depth image to a gaussian curvature image.
-template <typename Real, typename PixelType,
-          template <typename> typename Intrinsic>
+template <template <typename> typename Intrinsic, typename Real>
 inline math::image<Real>
-depth_to_mean_curvature(const math::image<PixelType> &depth_image,
-                        const Intrinsic<Real> &       intrinsic) noexcept {
+depth_to_mean_curvature(const math::image<Real>& depth_image,
+                        const Intrinsic<Real>&   intrinsic) noexcept {
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+    static_assert(std::is_floating_point_v<Real>);
 
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
@@ -202,10 +199,9 @@ depth_to_mean_curvature(const math::image<PixelType> &depth_image,
     mean = Real(0.);
     math::image<Real> mean_image(std::move(mean));
 
-    for (int v = 1; v < depth_image.h() - 1; ++v) {
-        detail::mean_inner<Real, PixelType>(v, depth_image, intrinsic,
-                                            mean_image);
-    }
+    for (int v = 1; v < depth_image.h() - 1; ++v)
+        detail::mean_inner(v, depth_image, intrinsic, mean_image);
+
     return mean_image;
 }
 
@@ -216,7 +212,7 @@ namespace detail {
 /// preferably to 16bit unsigned integers.
 template <typename Real, typename PixelType = ushort>
 inline math::image<PixelType>
-reals_to_image(const math::image<Real> &real_image,
+reals_to_image(const math::image<Real>& real_image,
                std::optional<Real>      clamp_min = std::nullopt,
                std::optional<Real>      clamp_max = std::nullopt) noexcept {
     const auto [min_it, max_it] = [&]()
@@ -253,12 +249,16 @@ reals_to_image(const math::image<Real> &real_image,
 
 }  // namespace detail
 
-template <typename Real, typename PixelType, typename MaskType>
+template <typename PixelType, typename Real, typename MaskType>
 inline math::image<PixelType>
-curvature_to_image(const math::image<Real> &    curvature_img,
-                   const math::image<MaskType> &depth_image_as_mask,
+curvature_to_image(const math::image<Real>&     curvature_img,
+                   const math::image<MaskType>& depth_image_as_mask,
                    std::optional<Real>          clamp_min,
                    std::optional<Real>          clamp_max) noexcept {
+    static_assert(std::is_floating_point_v<Real>);
+    static_assert(std::is_arithmetic_v<PixelType>);
+    static_assert(std::is_arithmetic_v<MaskType>);
+
     Expects(curvature_img.w() == depth_image_as_mask.w());
     Expects(curvature_img.h() == depth_image_as_mask.h());
 

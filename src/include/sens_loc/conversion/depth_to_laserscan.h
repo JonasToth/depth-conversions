@@ -61,6 +61,8 @@ inline math::image<Real>
 depth_to_laserscan(const math::image<PixelType> &      depth_image,
                    const Intrinsic<Real> &intrinsic) noexcept {
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+    static_assert(std::is_floating_point_v<Real>);
+    static_assert(std::is_arithmetic_v<PixelType>);
 
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());
@@ -88,6 +90,8 @@ par_depth_to_laserscan(const math::image<PixelType> &      depth_image,
                        const Intrinsic<Real> &intrinsic,
                        math::image<Real> &out, tf::Taskflow &flow) noexcept {
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
+    static_assert(std::is_floating_point_v<Real>);
+    static_assert(std::is_arithmetic_v<PixelType>);
 
     Expects(depth_image.w() == intrinsic.w());
     Expects(depth_image.h() == intrinsic.h());

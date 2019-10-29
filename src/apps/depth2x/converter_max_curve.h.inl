@@ -4,11 +4,10 @@ bool max_curve_converter<Intrinsic>::process_file(
     Expects(!this->_files.output.empty());
     using namespace conversion;
 
-    const auto max_curve =
-        depth_to_max_curve<double, double>(depth_image, this->intrinsic);
-    bool success =
+    const auto max_curve = depth_to_max_curve(depth_image, this->intrinsic);
+    const bool success =
         cv::imwrite(fmt::format(this->_files.output, idx),
-                    convert_max_curve<double, ushort>(max_curve).data());
+                    convert_max_curve<ushort>(max_curve).data());
 
     return success;
 }

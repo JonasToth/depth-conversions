@@ -4,12 +4,11 @@ bool gauss_curv_converter<Intrinsic>::process_file(
     Expects(!this->_files.output.empty());
     using namespace conversion;
 
-    const auto gauss = depth_to_gaussian_curvature<double, double>(
-        depth_image, this->intrinsic);
-    const auto converted =
-        conversion::curvature_to_image<double, ushort, double>(
-            gauss, depth_image, lower_bound, upper_bound);
-    bool success =
+    const auto gauss =
+        depth_to_gaussian_curvature(depth_image, this->intrinsic);
+    const auto converted = conversion::curvature_to_image<ushort>(
+        gauss, depth_image, {lower_bound}, {upper_bound});
+    const bool success =
         cv::imwrite(fmt::format(this->_files.output, idx), converted.data());
 
     return success;
@@ -21,12 +20,10 @@ bool mean_curv_converter<Intrinsic>::process_file(
     Expects(!this->_files.output.empty());
     using namespace conversion;
 
-    const auto mean =
-        depth_to_mean_curvature<double, double>(depth_image, this->intrinsic);
-    const auto converted =
-        conversion::curvature_to_image<double, ushort, double>(
-            mean, depth_image, lower_bound, upper_bound);
-    bool success =
+    const auto mean = depth_to_mean_curvature(depth_image, this->intrinsic);
+    const auto converted = conversion::curvature_to_image<ushort>(
+        mean, depth_image, {lower_bound}, {upper_bound});
+    const bool success =
         cv::imwrite(fmt::format(this->_files.output, idx), converted.data());
 
     return success;

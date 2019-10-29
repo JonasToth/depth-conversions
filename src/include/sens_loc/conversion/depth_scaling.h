@@ -11,14 +11,18 @@ namespace sens_loc { namespace conversion {
 /// \note This function saturates on overflow
 /// \sa cv::Mat::convertTo
 //
+/// \tparam underlying type of the pixels, arithmetic (floating-point or
+/// integer)
 /// \param depth_image unchanged image that is scaled, can be anything, not
 /// just depth_images. In this project it will be usually a depth image.
 /// \param scale,offset scaling parameters
 /// \returns matrix with each pixel: \f$scale * pixel + offset\f$
 template <typename PixelType = ushort>
-math::image<PixelType> depth_scaling(const math::image<PixelType> &depth_image,
+math::image<PixelType> depth_scaling(const math::image<PixelType>& depth_image,
                                      double                        scale,
                                      double offset = 0.) noexcept {
+    static_assert(std::is_arithmetic_v<PixelType>);
+
     cv::Mat img(depth_image.h(), depth_image.w(),
                 math::detail::get_opencv_type<PixelType>());
     depth_image.data().convertTo(
