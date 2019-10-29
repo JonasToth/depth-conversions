@@ -10,7 +10,7 @@ namespace sens_loc {
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SENS_LOC_MAJOR 0
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define SENS_LOC_MINOR 2
+#define SENS_LOC_MINOR 3
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SENS_LOC_PATCH 0
 
