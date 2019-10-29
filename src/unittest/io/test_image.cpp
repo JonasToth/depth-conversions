@@ -10,12 +10,6 @@ TEST_CASE("Loading Images") {
         REQUIRE(!file);
     }
 
-    SUBCASE("Existing file - JPG") {
-        std::optional<math::image<uchar>> file =
-            io::load_image<uchar>("io/example-image.jpg", cv::IMREAD_UNCHANGED);
-        REQUIRE(file);
-    }
-
     SUBCASE("Existing file - PNG") {
         std::optional<math::image<uchar>> file =
             io::load_image<uchar>("io/example-image.png", cv::IMREAD_UNCHANGED);

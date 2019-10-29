@@ -21,7 +21,7 @@ list(APPEND opencv_options
     -DBUILD_ITT:BOOL=OFF
     -DBUILD_JASPER:BOOL=OFF
     -DBUILD_JAVA:BOOL=OFF
-    -DBUILD_JPEG:BOOL=ON
+    -DBUILD_JPEG:BOOL=OFF
     -DBUILD_LIST:STRING=
     -DBUILD_OPENEXR:BOOL=OFF
     -DBUILD_PACKAGE:BOOL=OFF
@@ -74,7 +74,7 @@ list(APPEND opencv_options
     -DBUILD_opencv_python_tests:BOOL=OFF
     -DBUILD_opencv_quality:BOOL=OFF
     -DBUILD_opencv_reg:BOOL=OFF
-    -DBUILD_opencv_rgbd:BOOL=OFF
+    -DBUILD_opencv_rgbd:BOOL=ON
     -DBUILD_opencv_saliency:BOOL=OFF
     -DBUILD_opencv_sfm:BOOL=OFF
     -DBUILD_opencv_shape:BOOL=OFF
@@ -165,7 +165,7 @@ list(APPEND opencv_options
     -DWITH_IPP:BOOL=OFF
     -DWITH_ITT:BOOL=OFF
     -DWITH_JASPER:BOOL=OFF
-    -DWITH_JPEG:BOOL=ON
+    -DWITH_JPEG:BOOL=OFF
     -DWITH_LAPACK:BOOL=OFF
     -DWITH_LIBREALSENSE:BOOL=OFF
     -DWITH_MFX:BOOL=OFF
