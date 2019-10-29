@@ -1,10 +1,16 @@
 #include <doctest/doctest.h>
+#include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/camera_models/equirectangular.h>
 
 using namespace sens_loc::camera_models;
 using namespace sens_loc::math;
 using namespace std;
 using doctest::Approx;
+
+TEST_CASE("concept requirements") {
+    static_assert(is_intrinsic_v<equirectangular, double>);
+    static_assert(is_intrinsic_v<equirectangular, float>);
+}
 
 TEST_CASE("Construction") {
     SUBCASE("default constructor") {

@@ -3,8 +3,10 @@
 
 #include <cmath>
 #include <gsl/gsl>
+#include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/math/constants.h>
 #include <sens_loc/math/coordinate.h>
+#include <type_traits>
 
 namespace sens_loc {
 
@@ -17,13 +19,13 @@ namespace camera_models {
 /// <a href="https://docs.opencv.org/master/d9/d0c/group__calib3d.html"
 /// target="_blank">OpenCV documentation (Section 'Detailed Description')</a>.
 ///
-/// The struct itself provides some helper functions useful in the code but is
-/// not smart itself.
-/// \warning Each value can be modified by everyone, as its just as list of
-/// numbers. Use \c const in your code to prevent bugs!
+/// \tparam Real floating point type that determines the precision of the
+/// calculations.
+/// \sa is_intrinsic_v
 template <typename Real = float>
 class pinhole {
   public:
+    static_assert(std::is_floating_point_v<Real>);
     using real_type = Real;
 
     pinhole() = default;
@@ -67,6 +69,8 @@ class pinhole {
     /// This methods calculates the inverse projection of the camera model
     /// to get the direction of the lightray for the pixel at \p p.
     ///
+    /// \tparam _Real either integer or floating point value for pixel or
+    /// subpixel precision
     /// \param p non-negative pixel coordinates
     /// \warning This does not respect a distortion model at all!
     /// \pre \p fx > 0
@@ -76,9 +80,12 @@ class pinhole {
     /// \pre \p p1 == \p p2 == \p k1 == \p k2 == \p k3 == 0!!
     /// \post \f$\lVert result \rVert_2 = 1.\f$
     /// \returns normalized vector in camera coordinates
-    template <typename Number = int>
+    /// \note if \p _Real is an integer-type the value is itself backprojected,
+    /// which usually means the bottom left corner of the pixel and __NOT__
+    /// its center!
+    template <typename _Real = int>
     [[nodiscard]] math::sphere_coord<Real>
-    pixel_to_sphere(const math::pixel_coord<Number> &p) const noexcept;
+    pixel_to_sphere(const math::pixel_coord<_Real> &p) const noexcept;
 
     /// The same as \p project_to_sphere but the coordinate is already
     /// in the image frame of reference.
@@ -124,9 +131,9 @@ pinhole<Real>::transform_to_image(const math::pixel_coord<Number> &p) const
 }
 
 template <typename Real>
-template <typename Number>
+template <typename _Real>
 inline math::sphere_coord<Real>
-pinhole<Real>::pixel_to_sphere(const math::pixel_coord<Number> &p) const
+pinhole<Real>::pixel_to_sphere(const math::pixel_coord<_Real> &p) const
     noexcept {
     return image_to_sphere(transform_to_image(p));
 }

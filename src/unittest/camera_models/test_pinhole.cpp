@@ -1,5 +1,6 @@
 #include <cmath>
 #include <doctest/doctest.h>
+#include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/camera_models/utility.h>
 #include <sens_loc/math/angle_conversion.h>
@@ -8,6 +9,11 @@ using namespace sens_loc::camera_models;
 using namespace sens_loc::math;
 using namespace std;
 using doctest::Approx;
+
+TEST_CASE("concept requirements") {
+    static_assert(is_intrinsic_v<pinhole, double>);
+    static_assert(is_intrinsic_v<pinhole, float>);
+}
 
 TEST_CASE("Calculate angular resolution") {
     pinhole<double> p = {

@@ -3,10 +3,12 @@
 
 #include <cmath>
 #include <gsl/gsl>
+#include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/math/constants.h>
 #include <sens_loc/math/coordinate.h>
 #include <sens_loc/math/scaling.h>
 #include <stdexcept>
+#include <type_traits>
 
 namespace sens_loc { namespace camera_models {
 
@@ -32,9 +34,14 @@ Real get_d_phi(int width) noexcept {
 ///   - \f$\theta \in [0, \pi] \mapsto v\f$ - not wrapping!
 ///   - it is possible to have a different range for \f$\theta\f$ but not for
 ///     \f$\varphi\f$.
+///
+/// \tparam Real floating point type that determines the precision of the
+/// calculations.
+/// \sa is_intrinsic_v
 template <typename Real = float>
 class equirectangular {
   public:
+    static_assert(std::is_floating_point_v<Real>);
     using real_type = Real;
 
     /// Default initialize all parameters to zero.
@@ -104,13 +111,18 @@ class equirectangular {
     /// This methods calculates the inverse projection of the equirectangular
     /// model to get the direction of the lightray for the pixel at \p p.
     ///
+    /// \tparam _Real either integer or floating point value for pixel or
+    /// subpixel precision
     /// \param p non-negative pixel coordinates
     /// \post \f$\lVert result \rVert_2 = 1.\f$
     /// \returns normalized vector in camera coordinates - unit sphere
     /// coordinate
-    template <typename Number = int>
+    /// \note if \p _Real is an integer-type the value is itself backprojected,
+    /// which usually means the bottom left corner of the pixel and __NOT__
+    /// its center!
+    template <typename _Real = int>
     [[nodiscard]] math::sphere_coord<Real>
-    pixel_to_sphere(const math::pixel_coord<Number> &p) const noexcept;
+    pixel_to_sphere(const math::pixel_coord<_Real> &p) const noexcept;
 
   private:
     void ensure_invariant() const noexcept {
@@ -132,9 +144,9 @@ class equirectangular {
 };
 
 template <typename Real>
-template <typename Number>
+template <typename _Real>
 inline math::sphere_coord<Real>
-equirectangular<Real>::pixel_to_sphere(const math::pixel_coord<Number> &p) const
+equirectangular<Real>::pixel_to_sphere(const math::pixel_coord<_Real> &p) const
     noexcept {
     const Real phi   = p.u() * d_phi - math::pi<Real>;
     const Real theta = theta_min + (p.v() * d_theta);
