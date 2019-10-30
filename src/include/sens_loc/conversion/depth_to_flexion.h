@@ -61,7 +61,7 @@ par_depth_to_flexion(const math::image<Real>& depth_image,
 /// \pre underlying types match
 /// \pre range of each pixel is \f$[0, 1]\f$
 /// \post range of result pixels is \f$[PixelType_{min}, PixelType_{max}]\f$
-template <typename Real, typename PixelType>
+template <typename PixelType, typename Real>
 math::image<PixelType>
 convert_flexion(const math::image<Real>& flexion_image) noexcept;
 
@@ -190,7 +190,7 @@ par_depth_to_flexion(const math::image<Real>& depth_image,
     return sync_points;
 }
 
-template <typename Real, typename PixelType>
+template <typename PixelType, typename Real>
 inline math::image<PixelType>
 convert_flexion(const math::image<Real>& flexion_image) noexcept {
     static_assert(std::is_floating_point_v<Real>);

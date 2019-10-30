@@ -23,6 +23,6 @@ TEST_CASE("filter pinhole") {
 
         auto flex = conversion::depth_to_flexion(res, p_float);
         cv::imwrite("preprocess/test_fast_guided_flexion.png",
-                    conversion::convert_flexion<float, ushort>(flex).data());
+                    conversion::convert_flexion<ushort>(flex).data());
     }
 }

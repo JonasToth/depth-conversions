@@ -5,6 +5,7 @@
 #include <opencv2/ximgproc.hpp>
 #include <sens_loc/math/image.h>
 #include <type_traits>
+#include <variant>
 
 namespace sens_loc {
 
@@ -13,13 +14,52 @@ namespace sens_loc {
 /// for the strongly typed interfaces.
 namespace preprocess {
 
+/// This function wraps OpenCVs implementation of the bilateral filter for
+/// single channel images.
+///
+/// https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#ga9d7064d478c95d60003cf839430737ed
+///
+/// Sigma values: For simplicity, you can set the 2 sigma values to be the same.
+/// If they are small (< 10), the filter will not have much effect, whereas if
+/// they are large (> 150), they will have a very strong effect, making the
+/// image look "cartoonish".
+///
+/// Filter size: Large filters (d > 5) are very slow, so it is recommended to
+/// use d=5 for real-time applications, and perhaps d=9 for offline
+/// applications that need heavy noise filtering.
+///
+/// This filter does not work inplace.
+///
+/// \note This function will convert \p input to \c image<float> before
+/// running the filter.
+/// \tparam PixelType underlying image type - note that internal conversion to
+/// \c float will happen if \p PixelType is not \c float.
+/// \param input input image that is going to be filtered
+/// \param sigma_color Filter sigma in the color space. A larger value of the
+/// parameter means that farther colors within the pixel neighborhood
+/// (see \p sigmaSpace) will be mixed together, resulting in larger areas of
+/// semi-equal color.
+/// \param proximity Filter sigma in the coordinate space.
+/// A larger value of the parameter means that farther pixels will influence
+/// each other as long as their colors are close enough (see \p sigmaColor).
+/// When an integer is provided the proximity is defined as the diameter in
+/// pixels, if a double is provided the proximity is calculated from it.
 template <typename PixelType>
-math::image<PixelType> bilateral_filter(const math::image<PixelType> &input,
-                                        int distance, double sigma_color,
-                                        double sigma_space) noexcept {
+math::image<PixelType>
+bilateral_filter(const math::image<PixelType>& input,
+                 double                        sigma_color,
+                 std::variant<int, double>     proximity) noexcept {
+    static_assert(std::is_arithmetic_v<PixelType>);
+
     cv::Mat filter_result(input.h(), input.w(),
-                          math::detail::get_opencv_type<float>());
-    filter_result = 0.0f;
+                          math::detail::get_opencv_type<float>(), 0.0f);
+
+    const auto [distance,
+                sigma_space] = [&proximity]() -> std::pair<int, double> {
+        if (std::holds_alternative<int>(proximity))
+            return std::make_pair(std::get<int>(proximity), 0.);
+        return std::make_pair(0, std::get<double>(proximity));
+    }();
 
     // The input is already in float format and does not require a prior
     // conversion.
@@ -38,8 +78,9 @@ math::image<PixelType> bilateral_filter(const math::image<PixelType> &input,
 
 
 template <typename PixelType>
-math::image<float> guided_filter(const math::image<PixelType> &input,
-                                 int radius, double eps) noexcept {
+math::image<float> guided_filter(const math::image<PixelType>& input,
+                                 int                           radius,
+                                 double                        eps) noexcept {
     cv::Mat filter_result(input.h(), input.w(),
                           math::detail::get_opencv_type<float>());
     filter_result = 0.0f;
@@ -61,8 +102,9 @@ math::image<float> guided_filter(const math::image<PixelType> &input,
 }
 
 template <typename PixelType>
-math::image<PixelType> gaussian_blur(const math::image<PixelType> &input,
-                                     cv::Size ksize, double sigmaX,
+math::image<PixelType> gaussian_blur(const math::image<PixelType>& input,
+                                     cv::Size                      ksize,
+                                     double                        sigmaX,
                                      double sigmaY = 0) noexcept {
     cv::Mat filter_result(input.h(), input.w(),
                           math::detail::get_opencv_type<PixelType>());
@@ -71,7 +113,7 @@ math::image<PixelType> gaussian_blur(const math::image<PixelType> &input,
 }
 
 template <typename PixelType>
-math::image<PixelType> median_blur(const math::image<PixelType> &input,
+math::image<PixelType> median_blur(const math::image<PixelType>& input,
                                    int ksize) noexcept {
     cv::Mat filter_result(input.h(), input.w(),
                           math::detail::get_opencv_type<PixelType>());
@@ -80,57 +122,13 @@ math::image<PixelType> median_blur(const math::image<PixelType> &input,
 }
 
 template <typename PixelType>
-math::image<PixelType> blur(const math::image<PixelType> &input,
+math::image<PixelType> blur(const math::image<PixelType>& input,
                             cv::Size                      ksize) noexcept {
     cv::Mat filter_result(input.h(), input.w(),
                           math::detail::get_opencv_type<PixelType>());
     cv::blur(input.data(), filter_result, ksize);
     return math::image<PixelType>(std::move(filter_result));
 }
-
-template <typename PixelType>
-math::image<uchar> edge_preserving_filter(const math::image<PixelType> &input,
-                                          int size, double threshold) noexcept {
-    cv::Mat scaled = input.data() * (1. / 255.);
-    cv::Mat narrowed;
-    scaled.convertTo(narrowed, CV_8U);
-
-    cv::Mat converted;
-    cv::cvtColor(narrowed, converted, cv::COLOR_GRAY2BGR, 3);
-
-    cv::Mat filter_result(input.h(), input.w(), CV_8UC3);
-    cv::ximgproc::edgePreservingFilter(converted, filter_result, size,
-                                       threshold);
-
-    cv::Mat channels[3];
-    // The actual splitting.
-    cv::split(filter_result, channels);
-
-    return math::image<uchar>(channels[0]);
-}
-
-template <typename PixelType>
-math::image<uchar> anistropic_diffusion(const math::image<PixelType> &input,
-                                        float alpha, float K,
-                                        int iterations) noexcept {
-    cv::Mat scaled = input.data() * (1. / 255.);
-    cv::Mat narrowed;
-    scaled.convertTo(narrowed, CV_8U);
-
-    cv::Mat converted;
-    cv::cvtColor(narrowed, converted, cv::COLOR_GRAY2BGR, 3);
-
-    cv::Mat filter_result(input.h(), input.w(), CV_8UC3);
-    cv::ximgproc::anisotropicDiffusion(converted, filter_result, alpha, K,
-                                       iterations);
-
-    cv::Mat channels[3];
-    // The actual splitting.
-    cv::split(filter_result, channels);
-
-    return math::image<uchar>(channels[0]);
-}
-
 }  // namespace preprocess
 }  // namespace sens_loc
 

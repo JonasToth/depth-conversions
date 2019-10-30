@@ -5,9 +5,8 @@ bool flexion_converter<Intrinsic>::process_file(math::image<double> depth_image,
     using namespace conversion;
 
     const auto flexion = depth_to_flexion(depth_image, this->intrinsic);
-    const bool success =
-        cv::imwrite(fmt::format(this->_files.output, idx),
-                    convert_flexion<double, ushort>(flexion).data());
+    const bool success = cv::imwrite(fmt::format(this->_files.output, idx),
+                                     convert_flexion<ushort>(flexion).data());
 
     return success;
 }

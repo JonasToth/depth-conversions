@@ -24,7 +24,7 @@ TEST_CASE("flexion image pinhole") {
         conversion::depth_to_laserscan<double, ushort>(*depth_image, p);
 
     const auto triple    = conversion::depth_to_flexion(laser_double, p);
-    const auto converted = conversion::convert_flexion<double, ushort>(triple);
+    const auto converted = conversion::convert_flexion<ushort>(triple);
     cv::imwrite("conversion/test_flexion.png", converted.data());
 
     REQUIRE(util::average_pixel_error(*ref_image, converted) < 0.5);
@@ -37,7 +37,7 @@ TEST_CASE("flexion image equirectangular") {
 
     const auto laser_double = math::convert<double>(*depth_image);
     const auto flexion   = conversion::depth_to_flexion(laser_double, e_double);
-    const auto converted = conversion::convert_flexion<double, ushort>(flexion);
+    const auto converted = conversion::convert_flexion<ushort>(flexion);
     cv::imwrite("conversion/test_flexion_laserscan.png", converted.data());
 
     auto ref_image = io::load_image<ushort>(

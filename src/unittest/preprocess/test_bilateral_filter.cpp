@@ -10,22 +10,41 @@ using namespace sens_loc;
 using namespace preprocess;
 using namespace std;
 
-TEST_CASE("filter pinhole") {
+TEST_CASE("bilateral coverage") {
     optional<math::image<ushort>> img = io::load_image<ushort>(
         "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(img);
     auto laser = conversion::depth_to_laserscan<float, ushort>(*img, p_float);
 
     SUBCASE("Small distance --> fast filter") {
-        auto res = bilateral_filter(laser, /*distance=*/9, /*sigma_color=*/25.,
-                                    /*sigma_space=*/25.);
-        res = median_blur(res, /*ksize=*/3);
-        cv::imwrite("preprocess/test_fast_bilateral.png",
+        auto laser =
+            conversion::depth_to_laserscan<double, ushort>(*img, p_double);
+        auto res =
+            bilateral_filter(laser, /*sigma_color=*/25., /*proximity=*/5);
+        cv::imwrite("preprocess/test_bilateral_fast.png",
                     math::convert<ushort>(res).data());
-
+        auto flex = conversion::depth_to_flexion(res, p_double);
+        cv::imwrite("preprocess/test_bilateral_fast_flexion.png",
+                    conversion::convert_flexion<ushort>(flex).data());
+    }
+    SUBCASE("Big distance --> slower filter, better result") {
+        auto res =
+            bilateral_filter(laser, /*sigma_color=*/25., /*proximity=*/9);
+        cv::imwrite("preprocess/test_bilateral_slow.png",
+                    math::convert<ushort>(res).data());
         auto flex = conversion::depth_to_flexion(res, p_float);
-        cv::imwrite("preprocess/test_fast_bilateral_flexion.png",
-                    conversion::convert_flexion<float, ushort>(flex).data());
+        cv::imwrite("preprocess/test_bilateral_slow_flexion.png",
+                    conversion::convert_flexion<ushort>(flex).data());
+    }
+
+    SUBCASE("Proximity via sigma value") {
+        auto res =
+            bilateral_filter(laser, /*sigma_color=*/20., /*proximity=*/20.);
+        cv::imwrite("preprocess/test_bilateral_sigma.png",
+                    math::convert<ushort>(res).data());
+        auto flex = conversion::depth_to_flexion(res, p_float);
+        cv::imwrite("preprocess/test_bilateral_sigma_flexion.png",
+                    conversion::convert_flexion<ushort>(flex).data());
     }
 }
 
@@ -37,14 +56,13 @@ TEST_CASE("filter equirectangular") {
 
     SUBCASE("Small distance --> fast filter") {
         math::image<float> res =
-            bilateral_filter(laser, /*distance=*/9, /*sigma_color=*/50.,
-                             /*sigma_space=*/30.);
+            bilateral_filter(laser, /*sigma_color=*/25., /*proximity=*/5);
         res = median_blur(res, /*ksize=*/5);
-        cv::imwrite("preprocess/test_fast_bilateral_laser.png",
+        cv::imwrite("preprocess/test_bilateral_fast_laser.png",
                     math::convert<ushort>(res).data());
 
         auto flex = conversion::depth_to_flexion(res, e_float);
-        cv::imwrite("preprocess/test_fast_bilateral_flexion_laser.png",
-                    conversion::convert_flexion<float, ushort>(flex).data());
+        cv::imwrite("preprocess/test_bilateral_fast_flexion_laser.png",
+                    conversion::convert_flexion<ushort>(flex).data());
     }
 }
