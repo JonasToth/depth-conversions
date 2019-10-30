@@ -17,7 +17,9 @@ namespace preprocess {
 /// This function wraps OpenCVs implementation of the bilateral filter for
 /// single channel images.
 ///
+/// See
 /// https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#ga9d7064d478c95d60003cf839430737ed
+/// for more information.
 ///
 /// Sigma values: For simplicity, you can set the 2 sigma values to be the same.
 /// If they are small (< 10), the filter will not have much effect, whereas if
@@ -81,6 +83,8 @@ template <typename PixelType>
 math::image<float> guided_filter(const math::image<PixelType>& input,
                                  int                           radius,
                                  double                        eps) noexcept {
+    static_assert(std::is_arithmetic_v<PixelType>);
+
     cv::Mat filter_result(input.h(), input.w(),
                           math::detail::get_opencv_type<float>());
     filter_result = 0.0f;
@@ -101,32 +105,48 @@ math::image<float> guided_filter(const math::image<PixelType>& input,
     return math::convert<PixelType>(res_pic);
 }
 
+/// Apply gaussian bluring to the \p input image. Uses the implementation from
+/// OpenCV.
+///
+/// See
+/// https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#gaabe8c836e97159a9193fb0b11ac52cf1
+/// for a full description.
+///
+/// \tparam PixelType of the underlying image.
+/// \param input image that shall be blurred
+/// \param ksize,sigmaX,sigmaY parameters for gaussian blur.
+/// If \p sigmaY is 0 the same value as \p sigmaX is used.
 template <typename PixelType>
 math::image<PixelType> gaussian_blur(const math::image<PixelType>& input,
                                      cv::Size                      ksize,
                                      double                        sigmaX,
                                      double sigmaY = 0) noexcept {
+    static_assert(std::is_arithmetic_v<PixelType>);
+
     cv::Mat filter_result(input.h(), input.w(),
                           math::detail::get_opencv_type<PixelType>());
     cv::GaussianBlur(input.data(), filter_result, ksize, sigmaX, sigmaY);
     return math::image<PixelType>(std::move(filter_result));
 }
 
+/// Apply median bluring to the \p input image. Uses the implementation from
+/// OpenCV.
+///
+/// See
+/// https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html#ga564869aa33e58769b4469101aac458f9
+/// for a full description.
+///
+/// \tparam PixelType of the underlying image.
+/// \param input image that shall be blurred
+/// \param ksize size of the square that is used as window for blurring.
 template <typename PixelType>
 math::image<PixelType> median_blur(const math::image<PixelType>& input,
                                    int ksize) noexcept {
+    static_assert(std::is_arithmetic_v<PixelType>);
+
     cv::Mat filter_result(input.h(), input.w(),
                           math::detail::get_opencv_type<PixelType>());
     cv::medianBlur(input.data(), filter_result, ksize);
-    return math::image<PixelType>(std::move(filter_result));
-}
-
-template <typename PixelType>
-math::image<PixelType> blur(const math::image<PixelType>& input,
-                            cv::Size                      ksize) noexcept {
-    cv::Mat filter_result(input.h(), input.w(),
-                          math::detail::get_opencv_type<PixelType>());
-    cv::blur(input.data(), filter_result, ksize);
     return math::image<PixelType>(std::move(filter_result));
 }
 }  // namespace preprocess

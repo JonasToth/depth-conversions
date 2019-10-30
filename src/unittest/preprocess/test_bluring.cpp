@@ -15,13 +15,8 @@ TEST_CASE("gaussian blur pinhole") {
         "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(img);
     auto laser = conversion::depth_to_laserscan<float, ushort>(*img, p_float);
-
-    auto res = gaussian_blur(laser, /*ksize=*/{5, 5}, /*sigmaX=*/1.);
+    auto res = gaussian_blur(laser, /*ksize=*/{3, 3}, /*sigmaX=*/0.5);
     cv::imwrite("preprocess/test_gauss.png", math::convert<ushort>(res).data());
-
-    auto flex = conversion::depth_to_flexion(res, p_float);
-    cv::imwrite("preprocess/test_gauss_flexion.png",
-                conversion::convert_flexion<ushort>(flex).data());
 }
 
 TEST_CASE("median blur") {
@@ -35,10 +30,6 @@ TEST_CASE("median blur") {
         auto res = median_blur(laser, /*ksize=*/5);
         cv::imwrite("preprocess/test_median.png",
                     math::convert<ushort>(res).data());
-
-        auto flex = conversion::depth_to_flexion(res, p_float);
-        cv::imwrite("preprocess/test_median_flexion.png",
-                    conversion::convert_flexion<ushort>(flex).data());
     }
     SUBCASE("laserscan") {
         optional<math::image<ushort>> img = io::load_image<ushort>(
@@ -49,23 +40,5 @@ TEST_CASE("median blur") {
         math::image<float> res = median_blur(laser, /*ksize=*/3);
         cv::imwrite("preprocess/test_median_laserscan.png",
                     math::convert<ushort>(res).data());
-
-        auto flex = conversion::depth_to_flexion(res, e_float);
-        cv::imwrite("preprocess/test_median_flexion_laserscan.png",
-                    conversion::convert_flexion<ushort>(flex).data());
     }
-}
-
-TEST_CASE("blur pinhole") {
-    optional<math::image<ushort>> img = io::load_image<ushort>(
-        "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
-    REQUIRE(img);
-    auto laser = conversion::depth_to_laserscan<float, ushort>(*img, p_float);
-
-    auto res = blur(laser, /*ksize=*/{5, 5});
-    cv::imwrite("preprocess/test_blur.png", math::convert<ushort>(res).data());
-
-    auto flex = conversion::depth_to_flexion(res, p_float);
-    cv::imwrite("preprocess/test_blur_flexion.png",
-                conversion::convert_flexion<ushort>(flex).data());
 }
