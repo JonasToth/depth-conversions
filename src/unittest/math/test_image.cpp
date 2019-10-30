@@ -83,6 +83,22 @@ TEST_CASE("image access") {
     SUBCASE("underlying data") { REQUIRE(i.data().at<ushort>(10, 10) == 0); }
 }
 
+TEST_CASE("image convert") {
+    cv::Mat m(20, 20, CV_32F);
+    m = 42.5f;
+
+    SUBCASE("different types") {
+        image<float>         foo(m);
+        image<unsigned char> bar = convert<unsigned char>(foo);
+        REQUIRE(bar.at({5, 5}) == 42u);
+    }
+    SUBCASE("same types") {
+        image<float> foo(m);
+        image<float> bar = convert<float>(foo);
+        REQUIRE(bar.at({5, 5}) == 42.5f);
+    }
+}
+
 TEST_CASE("get_cv_type") {
     using namespace detail;
     REQUIRE(get_opencv_type<uchar>() == CV_8U);
