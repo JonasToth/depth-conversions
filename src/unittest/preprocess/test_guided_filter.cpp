@@ -14,15 +14,18 @@ TEST_CASE("filter pinhole") {
     optional<math::image<ushort>> img = io::load_image<ushort>(
         "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(img);
-    auto laser = conversion::depth_to_laserscan<float, ushort>(*img, p_float);
+    auto laser = conversion::depth_to_laserscan<float>(*img, p_float);
 
     SUBCASE("Small distance --> fast filter") {
-        auto res = guided_filter(laser, /*radius=*/20, /*eps=*/100.);
-        cv::imwrite("preprocess/test_fast_guided.png",
+        auto res = guided_filter(laser, /*radius=*/3, /*eps=*/10.);
+        cv::imwrite("preprocess/test_guided_fast.png",
                     math::convert<ushort>(res).data());
+    }
 
-        auto flex = conversion::depth_to_flexion(res, p_float);
-        cv::imwrite("preprocess/test_fast_guided_flexion.png",
-                    conversion::convert_flexion<ushort>(flex).data());
+    SUBCASE("Bigger distance --> slow filter") {
+        auto laser = conversion::depth_to_laserscan<double>(*img, p_double);
+        auto res   = guided_filter(laser, /*radius=*/3, /*eps=*/10.);
+        cv::imwrite("preprocess/test_guided_slow.png",
+                    math::convert<ushort>(res).data());
     }
 }

@@ -79,10 +79,16 @@ bilateral_filter(const math::image<PixelType>& input,
 };
 
 
+/// This function wraps OpenCVs implementation of the guided filter for
+/// single channel images. (It does not produce good results...)
+///
+/// See
+/// https://docs.opencv.org/master/da/d17/group__ximgproc__filters.html#ga86813d59f8452a9600e979c6287805f5
+/// for more information.
 template <typename PixelType>
-math::image<float> guided_filter(const math::image<PixelType>& input,
-                                 int                           radius,
-                                 double                        eps) noexcept {
+math::image<PixelType> guided_filter(const math::image<PixelType>& input,
+                                     int                           radius,
+                                     double eps) noexcept {
     static_assert(std::is_arithmetic_v<PixelType>);
 
     cv::Mat filter_result(input.h(), input.w(),

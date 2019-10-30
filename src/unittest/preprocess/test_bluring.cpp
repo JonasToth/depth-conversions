@@ -14,9 +14,8 @@ TEST_CASE("gaussian blur pinhole") {
     optional<math::image<ushort>> img = io::load_image<ushort>(
         "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(img);
-    auto laser = conversion::depth_to_laserscan<float, ushort>(*img, p_float);
-    auto res = gaussian_blur(laser, /*ksize=*/{3, 3}, /*sigmaX=*/0.5);
-    cv::imwrite("preprocess/test_gauss.png", math::convert<ushort>(res).data());
+    auto res = gaussian_blur(*img, /*ksize=*/{3, 3}, /*sigmaX=*/0.5);
+    cv::imwrite("preprocess/test_gauss.png", res.data());
 }
 
 TEST_CASE("median blur") {
@@ -24,21 +23,7 @@ TEST_CASE("median blur") {
         optional<math::image<ushort>> img = io::load_image<ushort>(
             "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
         REQUIRE(img);
-        auto laser =
-            conversion::depth_to_laserscan<float, ushort>(*img, p_float);
-
-        auto res = median_blur(laser, /*ksize=*/5);
-        cv::imwrite("preprocess/test_median.png",
-                    math::convert<ushort>(res).data());
-    }
-    SUBCASE("laserscan") {
-        optional<math::image<ushort>> img = io::load_image<ushort>(
-            "preprocess/laserscan-depth.png", cv::IMREAD_UNCHANGED);
-        REQUIRE(img);
-
-        auto laser = math::convert<float>(*img);
-        math::image<float> res = median_blur(laser, /*ksize=*/3);
-        cv::imwrite("preprocess/test_median_laserscan.png",
-                    math::convert<ushort>(res).data());
+        auto res = median_blur(*img, /*ksize=*/5);
+        cv::imwrite("preprocess/test_median.png", res.data());
     }
 }
