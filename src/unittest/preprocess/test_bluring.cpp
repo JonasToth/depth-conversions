@@ -21,7 +21,7 @@ TEST_CASE("gaussian blur pinhole") {
 TEST_CASE("median blur") {
     SUBCASE("pinhole") {
         optional<math::image<ushort>> img = io::load_image<ushort>(
-            "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
+            "preprocess/laserscan-depth.png", cv::IMREAD_UNCHANGED);
         REQUIRE(img);
         auto res = median_blur(*img, /*ksize=*/5);
         cv::imwrite("preprocess/test_median.png", res.data());
