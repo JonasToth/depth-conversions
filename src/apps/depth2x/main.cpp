@@ -2,11 +2,13 @@
 
 #include <CLI/CLI.hpp>
 #include <fstream>
+#include <gsl/gsl>
 #include <iostream>
 #include <memory>
 #include <rang.hpp>
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/util/console.h>
+#include <sens_loc/util/correctness_util.h>
 #include <sens_loc/version.h>
 #include <stdexcept>
 #include <string>
