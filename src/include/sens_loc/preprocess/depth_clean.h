@@ -3,9 +3,6 @@
 
 #if (CV_MAJOR_VERSION >= 4 && CV_MINOR_VERSION >= 1)
 #include <opencv2/rgbd/depth.hpp>
-#else
-#include <opencv2/depth.hpp>
-#endif
 #include <sens_loc/math/image.h>
 #include <type_traits>
 
@@ -38,5 +35,7 @@ class depth_cleaner {
 };
 
 }}  // namespace sens_loc::preprocess
+
+#endif
 
 #endif /* end of include guard: DEPTH_CLEAN_H_SVV42W9L */

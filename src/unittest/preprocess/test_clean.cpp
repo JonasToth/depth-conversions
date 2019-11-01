@@ -1,7 +1,14 @@
+
 #define DOCTEST_CONFIG_IMPLEMENT_WITH_MAIN
 #include "../conversion/intrinsic.h"
 
 #include <doctest/doctest.h>
+
+TEST_CASE("dummy") {
+    CHECK(true);
+}
+
+#if (CV_MAJOR_VERSION >= 4 && CV_MINOR_VERSION >= 1)
 #include <sens_loc/conversion/depth_to_flexion.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
@@ -42,3 +49,5 @@ TEST_CASE("clean images") {
         cv::imwrite("preprocess/test_clean_big.png", converted.data());
     }
 }
+
+#endif
