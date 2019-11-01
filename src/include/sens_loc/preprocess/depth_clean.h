@@ -1,7 +1,11 @@
 #ifndef DEPTH_CLEAN_H_SVV42W9L
 #define DEPTH_CLEAN_H_SVV42W9L
 
+#if (CV_MAJOR_VERSION >= 4 && CV_MINOR_VERSION >= 1)
 #include <opencv2/rgbd/depth.hpp>
+#else
+#include <depth.hpp>
+#endif
 #include <sens_loc/math/image.h>
 #include <type_traits>
 
