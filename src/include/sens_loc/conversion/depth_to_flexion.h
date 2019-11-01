@@ -132,7 +132,8 @@ inline void flexion_inner(int                      v,
         const auto cross1 =
             surface_dir2.normalized().cross(surface_dir3.normalized());
 
-        const auto flexion = std::abs(cross0.dot(cross1));
+        const auto flexion =
+            std::clamp(std::abs(cross0.dot(cross1)), Real(0.), Real(1.));
 
         Ensures(flexion >= 0.);
         Ensures(flexion <= 1.);
