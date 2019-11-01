@@ -4,6 +4,7 @@
 #include <fmt/core.h>
 #include <gsl/gsl>
 #include <iostream>
+#include <opencv2/core/mat.hpp>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/math/image.h>
@@ -30,6 +31,16 @@ bool batch_converter::process_index(int idx) const noexcept {
         return false;
 
     return this->process_file(std::move(*pp_image), idx);
+}
+
+std::optional<math::image<double>>
+batch_converter::preprocess_depth(math::image<ushort> depth_image) const
+    noexcept {
+    cv::Mat depth_double(depth_image.h(), depth_image.w(),
+                         math::detail::get_opencv_type<double>());
+    depth_image.data().convertTo(depth_double,
+                                 math::detail::get_opencv_type<double>());
+    return math::image<double>(std::move(depth_double));
 }
 
 bool batch_converter::process_batch(int start, int end) const noexcept {

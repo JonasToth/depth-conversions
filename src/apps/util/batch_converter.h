@@ -1,7 +1,6 @@
 #ifndef BATCH_CONVERTER_H_XDIRBPHG
 #define BATCH_CONVERTER_H_XDIRBPHG
 
-#include <opencv2/core/mat.hpp>
 #include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/math/image.h>
@@ -110,13 +109,8 @@ class batch_converter {
     /// Function to potentially convert orthographic images into range images.
     /// \returns \c cv::Mat with proper input data for the conversion process.
     [[nodiscard]] virtual std::optional<math::image<double>>
-    preprocess_depth(math::image<ushort> depth_image) const noexcept {
-        cv::Mat depth_double(depth_image.h(), depth_image.w(),
-                             math::detail::get_opencv_type<double>());
-        depth_image.data().convertTo(depth_double,
-                                     math::detail::get_opencv_type<double>());
-        return math::image<double>(std::move(depth_double));
-    }
+    preprocess_depth(math::image<ushort> depth_image) const noexcept;
+
     /// Method to process exactly one file. This method is expected to have
     /// no sideeffects and is called in parallel.
     /// \returns \c true on success, otherwise \c false.

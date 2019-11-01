@@ -1,8 +1,6 @@
 #ifndef CONVERTERS_H_HVFGCFVK
 #define CONVERTERS_H_HVFGCFVK
 
-#include "batch_converter.h"
-
 #include <fmt/core.h>
 #include <gsl/gsl>
 #include <opencv2/imgcodecs.hpp>
@@ -11,6 +9,7 @@
 #include <sens_loc/conversion/depth_to_flexion.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/conversion/depth_to_max_curve.h>
+#include <util/batch_converter.h>
 
 namespace sens_loc { namespace apps {
 
