@@ -69,8 +69,6 @@ test_add_file(preprocess_filter preprocess/test_bilateral_filter.cpp)
 test_add_file(preprocess_filter preprocess/test_guided_filter.cpp)
 test_add_file(preprocess_filter preprocess/test_bluring.cpp)
 
-create_test(preprocess_clean preprocess/test_clean.cpp)
-
 create_test(util util/test_util.cpp)
 test_add_file(util util/test_console.cpp)
 test_add_file(util util/test_version.cpp)
