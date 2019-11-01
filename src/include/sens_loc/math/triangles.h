@@ -35,25 +35,22 @@ bearing_angle(const Real b, const Real c, const Real cos_alpha) noexcept {
     // => alpha is bigger 0°
     Expects(cos_alpha < 1.);
 
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
+    const Real delta = Real(10.) * std::numeric_limits<Real>::epsilon();
+
     const Real nom = b - c * cos_alpha;
-    const Real den = std::sqrt(b * b + c * c - 2. * b * c * cos_alpha);
+    const Real den = [&]() {
+        const Real d = std::sqrt(b * b + c * c - Real(2.) * b * c * cos_alpha);
+        return d == Real(0.) ? d + delta : d;
+    }();
     Ensures(den != 0.);
 
-    Real ratio = nom / den;
-
-    /// Note: Because of inaccuracy of floating point operations it is possible
-    /// to get abs(ratio) == 1. This is not an error in the implementation
-    /// but rather an numerical artifact. To not hit the post-conditions
-    /// it is ok to subtract a tiny epsilon.
-    /// The problem only occured with 'float' but did not occur with 'double'.
-    if (ratio >= 1.) {
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        ratio = 1. - Real(10.) * std::numeric_limits<Real>::epsilon();
-    }
-    if (ratio <= -1.) {
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        ratio = -1. + Real(10.) * std::numeric_limits<Real>::epsilon();
-    }
+    // Note: Because of inaccuracy of floating point operations it is possible
+    // to get abs(ratio) == 1. This is not an error in the implementation
+    // but rather an numerical artifact. To not hit the post-conditions
+    // it is ok to subtract a tiny epsilon.
+    const Real ratio =
+        std::clamp(nom / den, Real(-1.) + delta, Real(1.) - delta);
 
     Ensures(ratio > -1.);
     Ensures(ratio < +1.);
@@ -86,21 +83,7 @@ inline Real reference_lin_bearing_angle(const Real b,
     const Real nom   = (b - c * cos_alpha);
     const Real denom = (b * b + c * c - 2. * b * c * cos_alpha);
 
-    Real ratio = nom / denom;
-
-    /// Note: Because of inaccuracy of floating point operations it is possible
-    /// to get abs(ratio) == 1. This is not an error in the implementation
-    /// but rather an numerical artifact. To not hit the post-conditions
-    /// it is ok to subtract a tiny epsilon.
-    /// The problem only occured with 'float' but did not occur with 'double'.
-    if (ratio >= 1.) {
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        ratio = 1. - Real(10.) * std::numeric_limits<Real>::epsilon();
-    }
-    if (ratio <= -1.) {
-        // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
-        ratio = -1. + Real(10.) * std::numeric_limits<Real>::epsilon();
-    }
+    const Real ratio = nom / denom;
 
     Ensures(ratio > -1.);
     Ensures(ratio < +1.);

@@ -118,10 +118,9 @@ template <typename TargetType, typename PixelType>
 image<TargetType> convert(const image<PixelType>& img) noexcept {
     static_assert(std::is_arithmetic_v<TargetType>);
     static_assert(std::is_arithmetic_v<PixelType>);
-    
-    if constexpr (std::is_same_v<TargetType, PixelType>) {
-        return img;
-    }
+
+    if constexpr (std::is_same_v<TargetType, PixelType>)
+        return img; // NOLINT(bugprone-suspicious-semicolon)
 
     cv::Mat tmp(img.h(), img.w(), detail::get_opencv_type<TargetType>());
     img.data().convertTo(tmp, detail::get_opencv_type<TargetType>());
