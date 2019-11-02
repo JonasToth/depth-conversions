@@ -64,9 +64,18 @@ int main(int argc, char** argv) try {
                                   "Other option to define proximity relation, "
                                   "closeness is computed from that value");
 
+    CLI::App* median_blur_cmd = app.add_subcommand(
+        "median-blur", "Apply the median-blur filter to the input.");
+    int kernel_size_median = 5;
+    median_blur_cmd->add_set(
+        "-d,--distance", kernel_size_median, {3, 5},
+        "The distance of pixels that are considered for the median blur.",
+        /*defaulted=*/true);
+
     CLI11_PARSE(app, argc, argv);
 
-    if (distance_option->empty() && sigma_space_option->empty()) {
+    if (app.got_subcommand(bilateral_cmd) && distance_option->empty() &&
+        sigma_space_option->empty()) {
         cerr << util::err{}
              << "Provide a proximity-measure for the bilateral filter!\n";
         return 1;
@@ -88,13 +97,17 @@ int main(int argc, char** argv) try {
             commands.push_back(
                 make_unique<apps::bilateral_filter>(sigma_color, sigma_space));
         }
+
+        if (cmd == median_blur_cmd)
+            commands.push_back(
+                make_unique<apps::median_blur_filter>(kernel_size_median));
     }
     Ensures(!commands.empty());
 
     // Batch-processing will then just execute the functors for each image.
     // It needs to take care, that the elements are moved through.
     // The final step is conversion to U16 and writing to disk.
-    apps::batch_filter process(files);
+    apps::batch_filter process(files, commands);
 
     return process.process_batch(start_idx, end_idx) ? 0 : 1;
 

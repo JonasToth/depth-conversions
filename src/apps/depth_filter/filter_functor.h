@@ -18,12 +18,25 @@ struct bilateral_filter : abstract_filter {
         , _proximity{sigma_space} {}
 
     math::image<float> filter(const math::image<float>& input) const override {
-        return preprocess::bilateral_filter(input, _sigma_color, _proximity); 
+        return preprocess::bilateral_filter(input, _sigma_color, _proximity);
     }
 
   private:
     double                    _sigma_color;
     std::variant<int, double> _proximity;
+};
+
+struct median_blur_filter : abstract_filter {
+    median_blur_filter(int kernel_size)
+        : abstract_filter{}
+        , _kernel_size{kernel_size} {}
+
+    math::image<float> filter(const math::image<float>& input) const override {
+        return preprocess::median_blur(input, _kernel_size);
+    }
+
+  private:
+    int _kernel_size;
 };
 
 }}  // namespace sens_loc::apps
