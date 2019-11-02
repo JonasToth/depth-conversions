@@ -36,11 +36,7 @@ bool batch_converter::process_index(int idx) const noexcept {
 std::optional<math::image<double>>
 batch_converter::preprocess_depth(math::image<ushort> depth_image) const
     noexcept {
-    cv::Mat depth_double(depth_image.h(), depth_image.w(),
-                         math::detail::get_opencv_type<double>());
-    depth_image.data().convertTo(depth_double,
-                                 math::detail::get_opencv_type<double>());
-    return math::image<double>(std::move(depth_double));
+    return math::convert<double>(std::move(depth_image));
 }
 
 bool batch_converter::process_batch(int start, int end) const noexcept {

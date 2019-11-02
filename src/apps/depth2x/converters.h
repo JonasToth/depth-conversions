@@ -172,10 +172,9 @@ class flexion_converter : public batch_sensor_converter<Intrinsic> {
 class scale_converter : public batch_converter {
   public:
     scale_converter(const file_patterns& files,
-                    depth_type           t,
                     double               scale,
                     double               offset)
-        : batch_converter(files, t)
+        : batch_converter(files)
         , _scale{scale}
         , _offset{offset} {}
     scale_converter(const scale_converter&) = default;

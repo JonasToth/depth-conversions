@@ -22,6 +22,7 @@ set -v
 if ! ${exe} \
     -i "data{}-depth.png" \
     -o "bilateral-distance-{}.png" \
+    -s 0 -e 1 \
     bilateral --sigma-color 20. --distance 5 ; then
     print_error "Color-similarity and pixel-distance for filter must suffice"
     exit 1
@@ -30,6 +31,7 @@ fi
 if ! ${exe} \
     -i "data{}-depth.png" \
     -o "bilateral-space-{}.png" \
+    -s 0 -e 1 \
     bilateral --sigma-color 20. --sigma-space 10. ; then
     print_error "Color-similarity and pixel-distance for filter must suffice"
     exit 1

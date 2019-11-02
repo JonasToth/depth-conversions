@@ -66,9 +66,8 @@ struct file_patterns {
 /// tasks.
 class batch_converter {
   public:
-    batch_converter(const file_patterns& files, depth_type t)
-        : _files{files}
-        , _input_depth_type{t} {
+    batch_converter(const file_patterns& files)
+        : _files{files} {
         Expects(!_files.input.empty());
     }
 
@@ -87,8 +86,7 @@ class batch_converter {
     virtual ~batch_converter() = default;
 
   protected:
-    file_patterns _files;          ///< File patterns that shall be processed.
-    depth_type _input_depth_type;  ///< Discriminate input type of the images.
+    file_patterns _files;  ///< File patterns that shall be processed.
 
   private:
     /// Function that does the management-tasks for the conversion job, like
@@ -126,8 +124,9 @@ class batch_sensor_converter : public batch_converter {
     batch_sensor_converter(const file_patterns& files,
                            depth_type           t,
                            Intrinsic            intrinsic)
-        : batch_converter(files, t)
-        , intrinsic{std::move(intrinsic)} {}
+        : batch_converter(files)
+        , intrinsic{std::move(intrinsic)}
+        , _input_depth_type{t} {}
 
     batch_sensor_converter(const batch_sensor_converter&) = default;
     batch_sensor_converter(batch_sensor_converter&&)      = default;
@@ -138,6 +137,8 @@ class batch_sensor_converter : public batch_converter {
   protected:
     /// pinhole-camera-model parameters used in the whole conversion.
     Intrinsic intrinsic;
+    /// Discriminate input type of the images.
+    depth_type _input_depth_type;
 
   private:
     /// Convert orthographic depth-images to range images using the pinhole

@@ -1,3 +1,4 @@
+#include "batch_filter.h"
 #include "filter_functor.h"
 
 #include <CLI/CLI.hpp>
@@ -39,6 +40,12 @@ int main(int argc, char** argv) try {
     app.add_option(
            "-o,--output", files.output,
            "Output pattern for filtered images; e.g. \"filtered-{}.png\"")
+        ->required();
+    int start_idx;
+    app.add_option("-s,--start", start_idx, "Start index of batch, inclusive")
+        ->required();
+    int end_idx;
+    app.add_option("-e,--end", end_idx, "End index of batch, inclusive")
         ->required();
 
     CLI::App* bilateral_cmd = app.add_subcommand(
@@ -82,14 +89,14 @@ int main(int argc, char** argv) try {
                 make_unique<apps::bilateral_filter>(sigma_color, sigma_space));
         }
     }
-
     Ensures(!commands.empty());
 
     // Batch-processing will then just execute the functors for each image.
     // It needs to take care, that the elements are moved through.
     // The final step is conversion to U16 and writing to disk.
+    apps::batch_filter process(files);
 
-    return 0;
+    return process.process_batch(start_idx, end_idx) ? 0 : 1;
 
 } catch (const std::exception& e) {
     std::cerr << sens_loc::util::err{}

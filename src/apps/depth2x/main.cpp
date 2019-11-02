@@ -358,8 +358,8 @@ int main(int argc, char** argv) try {
             using namespace apps;
             auto input_enum = apps::str_to_depth_type(input_type);
             if (*scale_cmd)
-                return make_unique<apps::scale_converter>(
-                    files, input_enum, scale_factor, scale_delta);
+                return make_unique<apps::scale_converter>(files, scale_factor,
+                                                          scale_delta);
 
             if (*bearing_cmd)
                 return detail::make_converter<bearing_converter>(

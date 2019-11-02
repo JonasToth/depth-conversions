@@ -50,6 +50,8 @@ add_converter_test(test_depth2x_scale)
 
 configure_file(depth2x/data0-depth.png
                depth_filter/data0-depth.png COPYONLY)
+configure_file(depth2x/data1-depth.png
+               depth_filter/data1-depth.png COPYONLY)
 
 macro (add_filter_test test_name)
     configure_file(depth_filter/${test_name}.sh

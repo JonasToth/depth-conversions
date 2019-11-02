@@ -38,7 +38,10 @@ install(TARGETS depth2x RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 
 add_executable(depth_filter "${CMAKE_CURRENT_LIST_DIR}/depth_filter/main.cpp")
-# target_sources(depth_filter PRIVATE)
+target_sources(depth_filter
+    PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/depth_filter/batch_filter.cpp"
+    )
 target_include_directories(depth_filter PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 target_link_libraries(depth_filter
     PRIVATE
