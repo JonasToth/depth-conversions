@@ -1,6 +1,6 @@
 template <typename Intrinsic>
-bool bearing_converter<Intrinsic>::process_file(math::image<double> depth_image,
-                                                int idx) const noexcept {
+bool bearing_converter<Intrinsic>::process_file(
+    const math::image<double>& depth_image, int idx) const noexcept {
     Expects(!this->_files.horizontal.empty() ||
             !this->_files.vertical.empty() || !this->_files.diagonal.empty() ||
             !this->_files.antidiagonal.empty());

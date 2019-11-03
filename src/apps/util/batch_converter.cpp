@@ -34,9 +34,9 @@ bool batch_converter::process_index(int idx) const noexcept {
 }
 
 std::optional<math::image<double>>
-batch_converter::preprocess_depth(math::image<ushort> depth_image) const
+batch_converter::preprocess_depth(const math::image<ushort>& depth_image) const
     noexcept {
-    return math::convert<double>(std::move(depth_image));
+    return math::convert<double>(depth_image);
 }
 
 bool batch_converter::process_batch(int start, int end) const noexcept {

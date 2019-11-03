@@ -107,13 +107,14 @@ class batch_converter {
     /// Function to potentially convert orthographic images into range images.
     /// \returns \c cv::Mat with proper input data for the conversion process.
     [[nodiscard]] virtual std::optional<math::image<double>>
-    preprocess_depth(math::image<ushort> depth_image) const noexcept;
+    preprocess_depth(const math::image<ushort>& depth_image) const noexcept;
 
     /// Method to process exactly one file. This method is expected to have
     /// no sideeffects and is called in parallel.
     /// \returns \c true on success, otherwise \c false.
-    [[nodiscard]] virtual bool process_file(math::image<double> depth_image,
-                                            int idx) const noexcept = 0;
+    [[nodiscard]] virtual bool
+    process_file(const math::image<double>& depth_image, int idx) const
+        noexcept = 0;
 };
 
 /// This class provides common data and depth-image conversion for all
@@ -146,7 +147,8 @@ class batch_sensor_converter : public batch_converter {
     /// \sa conversion::depth_to_laserscan
     /// \returns \c cv::Mat with one channel and double as data type.
     [[nodiscard]] std::optional<math::image<double>>
-    preprocess_depth(math::image<ushort> depth_image) const noexcept override {
+    preprocess_depth(const math::image<ushort>& depth_image) const
+        noexcept override {
         if ((depth_image.w() != intrinsic.w()) ||
             depth_image.h() != intrinsic.h())
             return std::nullopt;

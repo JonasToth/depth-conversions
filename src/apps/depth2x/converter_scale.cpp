@@ -1,4 +1,4 @@
-#include "converters.h"
+#include "converter_scale.h"
 
 #include <fmt/core.h>
 #include <opencv2/imgcodecs.hpp>
@@ -6,8 +6,8 @@
 
 namespace sens_loc::apps {
 
-bool scale_converter::process_file(math::image<double> depth_image,
-                                   int                 idx) const noexcept {
+bool scale_converter::process_file(const math::image<double>& depth_image,
+                                   int idx) const noexcept {
     Expects(!_files.output.empty());
     using namespace sens_loc::conversion;
     const auto res = depth_scaling(depth_image, _scale, _offset);

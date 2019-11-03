@@ -1,6 +1,6 @@
 template <typename Intrinsic>
-bool flexion_converter<Intrinsic>::process_file(math::image<double> depth_image,
-                                                int idx) const noexcept {
+bool flexion_converter<Intrinsic>::process_file(
+    const math::image<double>& depth_image, int idx) const noexcept {
     Expects(!this->_files.output.empty());
     using namespace conversion;
 

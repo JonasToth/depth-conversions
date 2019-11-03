@@ -1,6 +1,6 @@
 template <typename Intrinsic>
 bool gauss_curv_converter<Intrinsic>::process_file(
-    math::image<double> depth_image, int idx) const noexcept {
+    const math::image<double>& depth_image, int idx) const noexcept {
     Expects(!this->_files.output.empty());
     using namespace conversion;
 
@@ -16,7 +16,7 @@ bool gauss_curv_converter<Intrinsic>::process_file(
 
 template <typename Intrinsic>
 bool mean_curv_converter<Intrinsic>::process_file(
-    math::image<double> depth_image, int idx) const noexcept {
+    const math::image<double>& depth_image, int idx) const noexcept {
     Expects(!this->_files.output.empty());
     using namespace conversion;
 

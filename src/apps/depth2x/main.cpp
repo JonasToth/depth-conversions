@@ -1,4 +1,5 @@
 #include "converters.h"
+#include "converter_scale.h"
 
 #include <CLI/CLI.hpp>
 #include <fstream>

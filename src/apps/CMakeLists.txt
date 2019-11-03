@@ -17,6 +17,7 @@ target_sources(depth2x
     PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converters.h"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_scale.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_scale.h"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_bearing.h.inl"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_curvature.h.inl"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_flexion.h.inl"
