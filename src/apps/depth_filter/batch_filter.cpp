@@ -7,14 +7,16 @@
 namespace sens_loc { namespace apps {
 
 bool batch_filter::process_file(const math::image<float>& depth_image,
-                                int                        idx) const noexcept {
-    auto as_float = math::convert<float>(depth_image);
+                                int                       idx) const noexcept {
+    // Thats a NO-OP because the type already matches, 'convert' short
+    // circuits that.
+    math::image<float> result = math::convert<float>(depth_image);
 
-    for (auto&& op : _operations)
-        as_float = op->filter(as_float);
+    std::for_each(std::begin(_operations), std::end(_operations),
+                  [&](auto&& op) { result = op->filter(result); });
 
     const bool success = cv::imwrite(fmt::format(_files.output, idx),
-                                     math::convert<ushort>(as_float).data());
+                                     math::convert<ushort>(result).data());
     return success;
 }
 
