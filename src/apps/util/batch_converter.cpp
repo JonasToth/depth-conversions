@@ -25,12 +25,12 @@ bool batch_converter::process_index(int idx) const noexcept {
         return false;
 
     std::optional<math::image<double>> pp_image =
-        this->preprocess_depth(std::move(*depth_image));
+        this->preprocess_depth(*depth_image);
 
     if (!pp_image)
         return false;
 
-    return this->process_file(std::move(*pp_image), idx);
+    return this->process_file(*pp_image, idx);
 }
 
 std::optional<math::image<double>>
