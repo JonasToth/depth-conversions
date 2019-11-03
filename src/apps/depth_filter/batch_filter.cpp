@@ -4,7 +4,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <sens_loc/preprocess/filter.h>
 
-namespace sens_loc { namespace apps {
+namespace sens_loc::apps {
 
 bool batch_filter::process_file(const math::image<float>& depth_image,
                                 int                       idx) const noexcept {
@@ -20,4 +20,4 @@ bool batch_filter::process_file(const math::image<float>& depth_image,
     return success;
 }
 
-}}  // namespace sens_loc::apps
+}  // namespace sens_loc::apps

@@ -54,7 +54,7 @@ bilateral_filter(const math::image<PixelType>& input,
     static_assert(std::is_arithmetic_v<PixelType>);
 
     cv::Mat filter_result(input.h(), input.w(),
-                          math::detail::get_opencv_type<float>(), 0.0f);
+                          math::detail::get_opencv_type<float>(), 0.0F);
 
     const auto [distance,
                 sigma_space] = [&proximity]() -> std::pair<int, double> {
@@ -93,7 +93,7 @@ math::image<PixelType> guided_filter(const math::image<PixelType>& input,
 
     cv::Mat filter_result(input.h(), input.w(),
                           math::detail::get_opencv_type<float>());
-    filter_result = 0.0f;
+    filter_result = 0.0F;
 
     if constexpr (std::is_same_v<PixelType, float>) {
         cv::ximgproc::guidedFilter(/*guide=*/input.data(),
@@ -124,7 +124,7 @@ math::image<PixelType> guided_filter(const math::image<PixelType>& input,
 /// If \p sigmaY is 0 the same value as \p sigmaX is used.
 template <typename PixelType>
 math::image<PixelType> gaussian_blur(const math::image<PixelType>& input,
-                                     cv::Size                      ksize,
+                                     const cv::Size&               ksize,
                                      double                        sigmaX,
                                      double sigmaY = 0) noexcept {
     static_assert(std::is_arithmetic_v<PixelType>);

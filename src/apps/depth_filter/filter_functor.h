@@ -4,11 +4,13 @@
 #include <sens_loc/math/image.h>
 #include <sens_loc/preprocess/filter.h>
 
-namespace sens_loc { namespace apps {
+namespace sens_loc::apps {
 
 struct abstract_filter {
     virtual math::image<float>
     filter(const math::image<float>& input) const = 0;
+
+    virtual ~abstract_filter() = default;
 };
 
 struct bilateral_filter : abstract_filter {
@@ -39,6 +41,6 @@ struct median_blur_filter : abstract_filter {
     int _kernel_size;
 };
 
-}}  // namespace sens_loc::apps
+}  // namespace sens_loc::apps
 
 #endif /* end of include guard: FILTER_FUNCTOR_H_ALM7TXD2 */

@@ -50,7 +50,7 @@ int main(int argc, char** argv) try {
 
     CLI::App* bilateral_cmd = app.add_subcommand(
         "bilateral", "Apply the bilateral filter to the input.");
-    double sigma_color = 20.;
+    double sigma_color = 20.;  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
     bilateral_cmd->add_option("-c,--sigma-color", sigma_color,
                               "Defines threshold for color similarity.",
                               /*defaulted=*/true);
@@ -66,16 +66,18 @@ int main(int argc, char** argv) try {
 
     CLI::App* median_blur_cmd = app.add_subcommand(
         "median-blur", "Apply the median-blur filter to the input.");
+    // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     int kernel_size_median = 5;
     median_blur_cmd->add_set(
-        "-d,--distance", kernel_size_median, {3, 5},
+        "-d,--distance", kernel_size_median,
+        {3, 5},  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
         "The distance of pixels that are considered for the median blur.",
         /*defaulted=*/true);
 
     CLI11_PARSE(app, argc, argv);
 
-    if (app.got_subcommand(bilateral_cmd) && distance_option->empty() &&
-        sigma_space_option->empty()) {
+    if (app.got_subcommand(bilateral_cmd) && distance_option->count() == 0U &&
+        sigma_space_option->count() == 0U) {
         cerr << util::err{}
              << "Provide a proximity-measure for the bilateral filter!\n";
         return 1;
@@ -89,7 +91,7 @@ int main(int argc, char** argv) try {
     for (const auto* cmd : app.get_subcommands()) {
         if (cmd == bilateral_cmd) {
             // Got at pixel-distance as argument.
-            if (!distance_option->empty())
+            if (distance_option->count() > 0U)
                 commands.push_back(
                     make_unique<apps::bilateral_filter>(sigma_color, distance));
 

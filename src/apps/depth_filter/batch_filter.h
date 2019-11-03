@@ -7,7 +7,7 @@
 #include <util/batch_converter.h>
 #include <vector>
 
-namespace sens_loc { namespace apps {
+namespace sens_loc::apps {
 
 class batch_filter : public batch_converter {
   public:
@@ -25,6 +25,6 @@ class batch_filter : public batch_converter {
     const std::vector<std::unique_ptr<abstract_filter>>& _operations;
 };
 
-}}  // namespace sens_loc::apps
+}  // namespace sens_loc::apps
 
 #endif /* end of include guard: BATCH_FILTER_H_OBQ32XCZ */

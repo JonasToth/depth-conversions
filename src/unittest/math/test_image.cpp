@@ -85,17 +85,17 @@ TEST_CASE("image access") {
 
 TEST_CASE("image convert") {
     cv::Mat m(20, 20, CV_32F);
-    m = 42.5f;
+    m = 42.5F;
 
     SUBCASE("different types") {
         image<float>         foo(m);
         image<unsigned char> bar = convert<unsigned char>(foo);
-        REQUIRE(bar.at({5, 5}) == 42u);
+        REQUIRE(bar.at({5, 5}) == 42U);
     }
     SUBCASE("same types") {
         image<float> foo(m);
         image<float> bar = convert<float>(foo);
-        REQUIRE(bar.at({5, 5}) == 42.5f);
+        REQUIRE(bar.at({5, 5}) == 42.5F);
     }
 }
 
