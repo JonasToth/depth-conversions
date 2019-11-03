@@ -24,7 +24,7 @@ bool batch_converter::process_index(int idx) const noexcept {
     if (!depth_image)
         return false;
 
-    std::optional<math::image<double>> pp_image =
+    std::optional<math::image<float>> pp_image =
         this->preprocess_depth(*depth_image);
 
     if (!pp_image)
@@ -33,10 +33,10 @@ bool batch_converter::process_index(int idx) const noexcept {
     return this->process_file(*pp_image, idx);
 }
 
-std::optional<math::image<double>>
+std::optional<math::image<float>>
 batch_converter::preprocess_depth(const math::image<ushort>& depth_image) const
     noexcept {
-    return math::convert<double>(depth_image);
+    return math::convert<float>(depth_image);
 }
 
 bool batch_converter::process_batch(int start, int end) const noexcept {

@@ -6,7 +6,7 @@
 
 namespace sens_loc::apps {
 
-bool scale_converter::process_file(const math::image<double>& depth_image,
+bool scale_converter::process_file(const math::image<float>& depth_image,
                                    int idx) const noexcept {
     Expects(!_files.output.empty());
     using namespace sens_loc::conversion;

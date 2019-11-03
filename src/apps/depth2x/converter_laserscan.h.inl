@@ -1,6 +1,6 @@
 template <typename Intrinsic>
 bool range_converter<Intrinsic>::process_file(
-    const math::image<double>& depth_image, int idx) const noexcept {
+    const math::image<float>& depth_image, int idx) const noexcept {
     Expects(!this->_files.output.empty());
     using namespace conversion;
 

@@ -106,14 +106,14 @@ class batch_converter {
 
     /// Function to potentially convert orthographic images into range images.
     /// \returns \c cv::Mat with proper input data for the conversion process.
-    [[nodiscard]] virtual std::optional<math::image<double>>
+    [[nodiscard]] virtual std::optional<math::image<float>>
     preprocess_depth(const math::image<ushort>& depth_image) const noexcept;
 
     /// Method to process exactly one file. This method is expected to have
     /// no sideeffects and is called in parallel.
     /// \returns \c true on success, otherwise \c false.
     [[nodiscard]] virtual bool
-    process_file(const math::image<double>& depth_image, int idx) const
+    process_file(const math::image<float>& depth_image, int idx) const
         noexcept = 0;
 };
 
@@ -146,7 +146,7 @@ class batch_sensor_converter : public batch_converter {
     /// model.
     /// \sa conversion::depth_to_laserscan
     /// \returns \c cv::Mat with one channel and double as data type.
-    [[nodiscard]] std::optional<math::image<double>>
+    [[nodiscard]] std::optional<math::image<float>>
     preprocess_depth(const math::image<ushort>& depth_image) const
         noexcept override {
         if ((depth_image.w() != intrinsic.w()) ||
@@ -155,9 +155,9 @@ class batch_sensor_converter : public batch_converter {
 
         switch (_input_depth_type) {
         case depth_type::orthografic:
-            return conversion::depth_to_laserscan<double, ushort>(depth_image,
-                                                                  intrinsic);
-        case depth_type::euclidean: return math::convert<double>(depth_image);
+            return conversion::depth_to_laserscan<float, ushort>(depth_image,
+                                                                 intrinsic);
+        case depth_type::euclidean: return math::convert<float>(depth_image);
         }
         UNREACHABLE("Switch is exhaustive");  // LCOV_EXCL_LINE
     }

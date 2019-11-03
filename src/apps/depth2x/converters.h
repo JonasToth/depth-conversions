@@ -38,7 +38,7 @@ class bearing_converter : public batch_sensor_converter<Intrinsic> {
     ~bearing_converter() override                     = default;
 
   private:
-    [[nodiscard]] bool process_file(const math::image<double>& depth_image,
+    [[nodiscard]] bool process_file(const math::image<float>& depth_image,
                                     int idx) const noexcept override;
 };
 #include "converter_bearing.h.inl"
@@ -59,7 +59,7 @@ class range_converter : public batch_sensor_converter<Intrinsic> {
     ~range_converter() override                   = default;
 
   private:
-    [[nodiscard]] bool process_file(const math::image<double>& depth_image,
+    [[nodiscard]] bool process_file(const math::image<float>& depth_image,
                                     int idx) const noexcept override;
 };
 #include "converter_laserscan.h.inl"
@@ -87,7 +87,7 @@ class gauss_curv_converter : public batch_sensor_converter<Intrinsic> {
     ~gauss_curv_converter() override                        = default;
 
   private:
-    [[nodiscard]] bool process_file(const math::image<double>& depth_image,
+    [[nodiscard]] bool process_file(const math::image<float>& depth_image,
                                     int idx) const noexcept override;
 
     double lower_bound;
@@ -117,7 +117,7 @@ class mean_curv_converter : public batch_sensor_converter<Intrinsic> {
     ~mean_curv_converter() override                       = default;
 
   private:
-    [[nodiscard]] bool process_file(const math::image<double>& depth_image,
+    [[nodiscard]] bool process_file(const math::image<float>& depth_image,
                                     int idx) const noexcept override;
 
     double lower_bound;
@@ -141,7 +141,7 @@ class max_curve_converter : public batch_sensor_converter<Intrinsic> {
     ~max_curve_converter() override                       = default;
 
   private:
-    [[nodiscard]] bool process_file(const math::image<double>& depth_image,
+    [[nodiscard]] bool process_file(const math::image<float>& depth_image,
                                     int idx) const noexcept override;
 };
 #include "converter_max_curve.h.inl"
@@ -162,7 +162,7 @@ class flexion_converter : public batch_sensor_converter<Intrinsic> {
     ~flexion_converter() override                     = default;
 
   private:
-    [[nodiscard]] bool process_file(const math::image<double>& depth_image,
+    [[nodiscard]] bool process_file(const math::image<float>& depth_image,
                                     int idx) const noexcept override;
 };
 #include "converter_flexion.h.inl"

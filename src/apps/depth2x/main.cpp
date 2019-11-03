@@ -1,5 +1,5 @@
-#include "converters.h"
 #include "converter_scale.h"
+#include "converters.h"
 
 #include <CLI/CLI.hpp>
 #include <fstream>
@@ -23,8 +23,8 @@ template <class T>
 struct always_false : std::false_type {};
 
 using intrinsic_variant =
-    std::variant<sens_loc::camera_models::pinhole<double>,
-                 sens_loc::camera_models::equirectangular<double>>;
+    std::variant<sens_loc::camera_models::pinhole<float>,
+                 sens_loc::camera_models::equirectangular<float>>;
 
 /// This function is a little monster for template reasons.
 /// In order to instantiate all necessary batch conversions
@@ -45,22 +45,22 @@ make_converter(const sens_loc::apps::file_patterns& files,
         [&](auto&& arg) -> std::unique_ptr<batch_converter> {
             using Intrinsic = std::decay_t<decltype(arg)>;
 
-            if constexpr (std::is_same_v<Intrinsic, pinhole<double>>) {
+            if constexpr (std::is_same_v<Intrinsic, pinhole<float>>) {
                 static_assert(
                     std::is_base_of_v<batch_converter,
-                                      Converter<pinhole<double>>>,
+                                      Converter<pinhole<float>>>,
                     "Converter must derive from apps::batch_converter");
 
-                return std::make_unique<Converter<pinhole<double>>>(
+                return std::make_unique<Converter<pinhole<float>>>(
                     files, t, arg, std::forward<Arguments>(args)...);
                 // NOLINTNEXTLINE(readability-misleading-indentation)
             } else if constexpr (std::is_same_v<Intrinsic,
-                                                equirectangular<double>>) {
+                                                equirectangular<float>>) {
                 static_assert(
                     std::is_base_of_v<batch_converter,
-                                      Converter<equirectangular<double>>>,
+                                      Converter<equirectangular<float>>>,
                     "Converter must derive from apps::batch_converter");
-                return std::make_unique<Converter<equirectangular<double>>>(
+                return std::make_unique<Converter<equirectangular<float>>>(
                     files, t, arg, std::forward<Arguments>(args)...);
             } else
                 static_assert(always_false<Intrinsic>::value,
@@ -328,7 +328,7 @@ int main(int argc, char** argv) try {
         // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define LOAD_INTRINSIC(model_name)                                             \
     if (camera_model == #model_name) {                                         \
-        auto r = io<double, model_name>::load_intrinsic(cali_fstream);         \
+        auto r = io<float, model_name>::load_intrinsic(cali_fstream);          \
         if (r)                                                                 \
             return *r;                                                         \
         return nullopt;                                                        \

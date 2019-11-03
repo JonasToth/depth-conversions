@@ -1,6 +1,6 @@
 template <typename Intrinsic>
 bool bearing_converter<Intrinsic>::process_file(
-    const math::image<double>& depth_image, int idx) const noexcept {
+    const math::image<float>& depth_image, int idx) const noexcept {
     Expects(!this->_files.horizontal.empty() ||
             !this->_files.vertical.empty() || !this->_files.diagonal.empty() ||
             !this->_files.antidiagonal.empty());
@@ -10,11 +10,11 @@ bool bearing_converter<Intrinsic>::process_file(
     // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define BEARING_PROCESS(DIRECTION)                                             \
     if (!this->_files.DIRECTION.empty()) {                                     \
-        math::image<double> bearing = depth_to_bearing<direction::DIRECTION>(  \
+        math::image<float> bearing = depth_to_bearing<direction::DIRECTION>(   \
             depth_image, this->intrinsic);                                     \
         bool success =                                                         \
             cv::imwrite(fmt::format(this->_files.DIRECTION, idx),              \
-                        convert_bearing<double, ushort>(bearing).data());      \
+                        convert_bearing<float, ushort>(bearing).data());       \
         final_result &= success;                                               \
     }
 

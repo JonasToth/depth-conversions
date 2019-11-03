@@ -6,7 +6,7 @@
 
 namespace sens_loc { namespace apps {
 
-bool batch_filter::process_file(const math::image<double>& depth_image,
+bool batch_filter::process_file(const math::image<float>& depth_image,
                                 int                        idx) const noexcept {
     auto as_float = math::convert<float>(depth_image);
 

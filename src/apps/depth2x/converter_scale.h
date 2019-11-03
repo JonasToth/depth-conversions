@@ -26,7 +26,7 @@ class scale_converter : public batch_converter {
     double _scale  = 1.0;
     double _offset = 0.0;
 
-    [[nodiscard]] bool process_file(const math::image<double>& depth_image,
+    [[nodiscard]] bool process_file(const math::image<float>& depth_image,
                                     int idx) const noexcept override;
 };
 /// @}
