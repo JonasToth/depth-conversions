@@ -37,5 +37,15 @@ if ! ${exe} \
     exit 1
 fi
 
+# Test an inproper invocation to fail
+if ${exe} \
+    -i "data{}-depth.png" \
+    -o "bilateral-space-{}.png" \
+    -s 0 -e 1 \
+    bilateral --sigma-color 20. ; then
+    print_error "One proxmity measure needs to be provided!"
+    exit 1
+fi
+
 print_info "Test successful!"
 exit 0
