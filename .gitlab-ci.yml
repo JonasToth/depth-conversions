@@ -17,6 +17,7 @@ stages:
     expire_in: 1 week
     paths:
       - build/src/apps/depth2x
+      - build/src/apps/depth_filter
 
 api-documentation:
   image: $CI_REGISTRY_IMAGE/base-image-documentation
@@ -374,6 +375,7 @@ create-production-image:
     - mv ../../build/src/apps/* .
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker run --rm $CI_REGISTRY_IMAGE:latest depth2x -h
+    - docker run --rm $CI_REGISTRY_IMAGE:latest depth_filter -h
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
     refs:
@@ -395,6 +397,7 @@ create-alpine-image:
     - mv ../../build/src/apps/* .
     - docker build --pull -t $CI_REGISTRY_IMAGE:alpine-edge .
     - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge depth2x -h
+    - docker run --rm $CI_REGISTRY_IMAGE:latest depth_filter -h
     - docker push $CI_REGISTRY_IMAGE:alpine-edge
   only:
     refs:
