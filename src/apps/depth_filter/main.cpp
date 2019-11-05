@@ -13,6 +13,7 @@
 #include <util/batch_converter.h>
 #include <vector>
 
+
 int main(int argc, char** argv) try {
     using namespace sens_loc;
     using namespace std;
