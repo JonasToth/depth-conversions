@@ -22,7 +22,7 @@ set -v
 print_info "Clearing test directory from old test result files."
 rm -f batch-scale-*
 
-if ! ${exe} -c "kinect_intrinsic.txt" \
+if ! ${exe} \
     -i "data{}-depth.png" \
     -s 0 -e 1 \
     scale \
@@ -39,7 +39,7 @@ if  [ ! -f batch-scale-0.png ] || \
     exit 1
 fi
 
-if ! ${exe} -c "kinect_intrinsic.txt" \
+if ! ${exe} \
     -i "data{:03d}-depth.png" \
     --start 2 --end 4 \
     scale \
@@ -59,7 +59,7 @@ fi
 
 # Deliberatly convert more then existing files to cover this error path
 # as well.
-if ${exe} -c "kinect_intrinsic.txt" \
+if ${exe} \
     -i "data{:03d}-depth.png" \
     --start 2 --end 10 \
     scale \
