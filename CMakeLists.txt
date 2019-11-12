@@ -32,21 +32,26 @@ option(FORCE_BUNDLED_CV OFF "Force the use of the opencv defined by this project
 option(FORCE_BUNDLED_EIGEN OFF "Force the use of the Eigen3 defined by this project and prohibit the use of a system Eigen")
 
 option(WITH_BENCHMARK ON "Enable benchmarks for this project")
+option(WITH_CONTRACT_EXCEPTION ON "Enable contract throwing exceptions on contract violation")
+option(WITH_DEP_TESTING OFF "Enable tests in thridparty modules")
 option(WITH_IPO OFF "Enable link-time-optimizations if possible")
 option(WITH_TESTING ON "Enable unittests for this project")
-option(WITH_DEP_TESTING OFF "Enable tests in thridparty modules")
-option(WITH_CONTRACT_EXCEPTION ON "Enable contract throwing exceptions on contract violation")
-option(WITH_STATIC_STDCXXLIB OFF "Statically link the C++-standard library to prevent version conflicts due to the very new standard")
+option(WITH_VALGRIND OFF "Enable valgrind runs for tests")
 option(WITH_WERROR ON "Enable -Werror")
 
-option(WITH_MARCH_NATIVE OFF "Enable code generation for the local processor")
-option(WITH_PIC OFF "Enable Position Independent Code")
-option(WITH_FAST_MATH OFF "Enable Fast-Math optimization")
-option(WITH_SSE42 ON "Enable code generation with SSE42 instructions")
 option(WITH_AVX OFF "Enable code generation with AVX instructions")
 option(WITH_AVX2 OFF "Enable code generation with AVX2 instructions")
+option(WITH_FAST_MATH OFF "Enable Fast-Math optimization")
+option(WITH_MARCH_NATIVE OFF "Enable code generation for the local processor")
+option(WITH_PIC OFF "Enable Position Independent Code")
+option(WITH_SSE42 ON "Enable code generation with SSE42 instructions")
+option(WITH_STATIC_STDCXXLIB OFF "Statically link the C++-standard library to prevent version conflicts due to the very new standard")
 
 option(WITH_BENCHMARK_JUNIT_REPORT OFF "Export a JUnit report for the benchmarks, useful for CI")
+
+if (WITH_VALGRIND)
+    find_program(MEMORYCHECK_COMMAND valgrind)
+endif (WITH_VALGRIND)
 
 if (WITH_TESTING)
     find_program(GCOV_PATH gcov)

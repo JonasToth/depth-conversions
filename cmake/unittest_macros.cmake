@@ -8,7 +8,19 @@ macro(create_test name source_file)
                           PRIVATE doctest::doctest sens_loc::sens_loc)
     common_target_properties(test_${name})
 
-    add_test(test_${name} test_${name})
+    if (WITH_VALGRIND)
+        add_test(NAME test_${name}
+            COMMAND ${MEMORYCHECK_COMMAND} --tool=memcheck
+                                           --leak-check=yes
+                                           --show-reachable=yes
+                                           --num-callers=20
+                                           --track-fds=yes
+                                           $<TARGET_FILE:test_${name}>
+                )
+
+    else ()
+        add_test(test_${name} test_${name})
+    endif (WITH_VALGRIND)
 endmacro()
 
 macro(test_add_file test_name file_name)
