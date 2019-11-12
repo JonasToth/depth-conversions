@@ -353,8 +353,6 @@ int main(int argc, char** argv) try {
     }
 
     try {
-        Expects(potential_intrinsic);
-
         auto c = [&]() -> unique_ptr<apps::batch_converter> {
             using namespace apps;
             auto input_enum = apps::str_to_depth_type(input_type);
@@ -362,6 +360,7 @@ int main(int argc, char** argv) try {
                 return make_unique<apps::scale_converter>(files, scale_factor,
                                                           scale_delta);
 
+            Expects(potential_intrinsic);
             if (*bearing_cmd)
                 return detail::make_converter<bearing_converter>(
                     files, input_enum, *potential_intrinsic);
@@ -389,6 +388,10 @@ int main(int argc, char** argv) try {
     } catch (const std::invalid_argument& e) {
         cerr << util::err{} << "Could not initialize the batch process.\n"
              << util::err{} << e.what() << "\n";
+        return 1;
+    } catch (const std::exception& e) {
+        cerr << util::err{} << "Error occured during batch processing.\n"
+             << e.what() << "\n";
         return 1;
     } catch (...) {
         cerr << util::err{}
