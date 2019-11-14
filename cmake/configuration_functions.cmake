@@ -47,6 +47,19 @@ function(common_target_properties target_name)
         target_link_options(${target_name} PUBLIC "-fsanitize=thread")
     endif (WITH_TSAN)
 
+    if (WITH_MSAN)
+        target_compile_options(${target_name}
+            PUBLIC
+            "-fsanitize=memory"
+            "-fsanitize-memory-track-origins"
+            "-fno-omit-frame-pointer")
+        target_link_options(${target_name}
+            PUBLIC
+            "-fsanitize=memory"
+            "-fsanitize-memory-track-origins"
+            "-fno-omit-frame-pointer")
+    endif (WITH_MSAN)
+
     if (WITH_IPO)
         set_target_properties(${target_name}
                               PROPERTIES INTERPROCEDURAL_OPTIMIZATION ON)

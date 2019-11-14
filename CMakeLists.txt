@@ -72,11 +72,13 @@ endif ()
 
 if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
     option(USE_LIBCXX OFF "Use libc++ on clang builds")
-    option(WITH_UBSAN OFF "Enable Undefined Behaviour sanitizer")
-    option(WITH_ASAN OFF "Enable Undefined Behaviour sanitizer")
+    option(WITH_ASAN OFF "Enable Adress Sanitizer (out of bounds, ...)")
     option(WITH_TSAN OFF "Enable Thread Sanitizer (data races)")
+    option(WITH_UBSAN OFF "Enable Undefined Behaviour sanitizer")
 
     if (USE_LIBCXX)
+        option(WITH_MSAN OFF "Enable Memory Sanitizer (uninitialized memory)")
+        set(LIBCXX_MSAN_PATH CACHE PATH "Path to instrumented libc++")
         set(CMAKE_CXX_FLAGS
             "${CMAKE_CXX_FLAGS} -stdlib=libc++")
         set(CMAKE_EXE_LINKER_FLAGS

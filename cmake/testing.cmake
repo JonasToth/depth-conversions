@@ -10,14 +10,12 @@ function(create_test name source_file)
 
     if (WITH_VALGRIND)
         add_test(NAME test_${name}
-            COMMAND ${MEMORYCHECK_COMMAND} --tool=memcheck
-                                           --leak-check=yes
-                                           --show-reachable=yes
-                                           --num-callers=20
-                                           --track-fds=yes
-                                           $<TARGET_FILE:test_${name}>
-                )
-
+                 COMMAND ${MEMORYCHECK_COMMAND} --tool=memcheck
+                                                --leak-check=yes
+                                                --show-reachable=yes
+                                                --num-callers=20
+                                                --track-fds=yes
+                                                $<TARGET_FILE:test_${name}>)
     else ()
         add_test(test_${name} test_${name})
     endif (WITH_VALGRIND)

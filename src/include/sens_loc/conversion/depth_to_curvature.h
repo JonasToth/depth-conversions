@@ -232,6 +232,7 @@ reals_to_image(const math::image<Real>& real_image,
 
     cv::Mat target_image(real_image.h(), real_image.w(),
                          math::detail::get_opencv_type<PixelType>());
+    target_image = PixelType(0);
 
     std::transform(real_image.data().template begin<Real>(),
                    real_image.data().template end<Real>(),
