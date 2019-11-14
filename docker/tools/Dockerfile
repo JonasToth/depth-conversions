@@ -20,6 +20,7 @@ RUN apt-get update \
     libpng-dev \
     libjpeg-dev \
     rsync \
+    valgrind \
     unzip \
  && add-apt-repository ppa:ubuntu-toolchain-r/test \
  && apt-get update \
