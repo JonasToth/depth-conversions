@@ -335,8 +335,6 @@ create-production-image:
     refs:
       - master
     <<: *code_change_filter_definition
-  tags:
-    - docker-in-docker
 
 create-alpine-image:
   stage: images
@@ -357,5 +355,3 @@ create-alpine-image:
     refs:
       - master
     <<: *code_change_filter_definition
-  tags:
-    - docker-in-docker
