@@ -44,8 +44,6 @@ coverage:
     refs:
       - master
       - merge_requests
-  tags:
-    - docker
 
 ubuntu-1804-clang-8:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -60,8 +58,6 @@ ubuntu-1804-clang-8:
     refs:
       - merge_requests
     <<: *code_change_filter_definition
-  tags:
-    - docker
 
 ubuntu-1804-clang-9:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -79,8 +75,6 @@ ubuntu-1804-clang-9:
     refs:
       - merge_requests
     <<: *code_change_filter_definition
-  tags:
-    - docker
 
 ubuntu-1804-clang-9-libcxx:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -105,10 +99,6 @@ ubuntu-1804-clang-9-libcxx:
     refs:
       - master
     <<: *code_change_filter_definition
-  tags:
-    - docker
-    - test
-    - benchmark
 
 ubuntu-1804-clang-9-static-libcxx-lto:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -134,10 +124,6 @@ ubuntu-1804-clang-9-static-libcxx-lto:
       - master
     <<: *code_change_filter_definition
   <<: *binary_artifact_paths
-  tags:
-    - docker
-    - test
-    - benchmark
 
 ubuntu-1804-gcc-7:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -151,8 +137,6 @@ ubuntu-1804-gcc-7:
     refs:
       - merge_requests
     <<: *code_change_filter_definition
-  tags:
-    - docker
 
 ubuntu-1804-gcc-8:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -166,8 +150,6 @@ ubuntu-1804-gcc-8:
     refs:
       - merge_requests
     <<: *code_change_filter_definition
-  tags:
-    - docker
 
 ubuntu-1804-gcc-9:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -183,8 +165,6 @@ ubuntu-1804-gcc-9:
     refs:
       - merge_requests
     <<: *code_change_filter_definition
-  tags:
-    - docker
 
 ubuntu-1804-gcc-9-lto-static:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -208,10 +188,6 @@ ubuntu-1804-gcc-9-lto-static:
       - master
     <<: *code_change_filter_definition
   <<: *binary_artifact_paths
-  tags:
-    - docker
-    - test
-    - benchmark
 
 clang-tidy-analysis:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -226,8 +202,6 @@ clang-tidy-analysis:
       - master
       - merge_requests
     <<: *code_change_filter_definition
-  tags:
-    - docker
 
 .wide_testing_filter: &wide_test_filter_definition
   script:
@@ -248,8 +222,6 @@ ubuntu-1804-asan:
     WITH_ASAN: "ON"
   <<: *wide_test_filter_definition
   dependencies: []
-  tags:
-    - docker
 
 ubuntu-1804-ubsan:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -262,8 +234,6 @@ ubuntu-1804-ubsan:
     WITH_UBSAN: "ON"
   <<: *wide_test_filter_definition
   dependencies: []
-  tags:
-    - docker
 
 ubuntu-1804-tsan:
   image: $CI_REGISTRY_IMAGE/base-image-tools
@@ -277,8 +247,6 @@ ubuntu-1804-tsan:
     WITH_TSAN: "ON"
   <<: *wide_test_filter_definition
   dependencies: []
-  tags:
-    - docker
 
 .platform_build_options: &platform_build_option_variables
   variables:
@@ -303,8 +271,6 @@ old-linux-most-portable:
     BUILD_TYPE: "Release"
   script:
     - ./scripts/ci/normal_build.bash
-  tags:
-    - docker
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
 
@@ -315,9 +281,6 @@ roskinetic-image:
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
   dependencies: []
-  tags:
-    - docker
-    - platform
 
 rosmelodic-image:
   image: $CI_REGISTRY_IMAGE/base-image-rosmelodic
@@ -326,9 +289,6 @@ rosmelodic-image:
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
   dependencies: []
-  tags:
-    - docker
-    - platform
 
 ubuntu-rolling-image:
   image: $CI_REGISTRY_IMAGE/base-image-ubuntu-rolling
@@ -337,9 +297,6 @@ ubuntu-rolling-image:
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
   dependencies: []
-  tags:
-    - docker
-    - platform
 
 alpine-edge-image:
   image: $CI_REGISTRY_IMAGE/base-image-alpine-edge
@@ -356,9 +313,6 @@ alpine-edge-image:
     BUILD_TYPE: "Release"
   script:
     - ./scripts/ci/normal_build.bash
-  tags:
-    - docker
-    - platform
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
 
