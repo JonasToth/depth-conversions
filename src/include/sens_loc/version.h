@@ -21,7 +21,6 @@ inline std::string get_version() {
            std::to_string(SENS_LOC_MINOR) + "." +
            std::to_string(SENS_LOC_PATCH);
 }
-
 /// \returns major version number, https://semver.org/
 inline int get_major_version() {
     return SENS_LOC_MAJOR;
