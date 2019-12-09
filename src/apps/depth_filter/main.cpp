@@ -87,7 +87,6 @@ int main(int argc, char** argv) try {
         "                       --end 100 \\\n"
         "                       --sigma-color 20. \\\n"
         "                       --sigma-space 20. \\\n"
-        "                       --distance 5 \\\n"
         "\n"
         "This will read 'depth_0000.png ...' and filter them with the "
         "bilateral filter, producing the files 'filtered_0000.png ...'\n"
@@ -146,7 +145,7 @@ int main(int argc, char** argv) try {
     for (const auto* cmd : app.get_subcommands()) {
         if (cmd == bilateral_cmd) {
             // Got at pixel-distance as argument.
-            if (distance_option->count() > 0U)
+            if (cmd->get_option_no_throw("distance") != nullptr)
                 commands.push_back(
                     make_unique<apps::bilateral_filter>(sigma_color, distance));
 
