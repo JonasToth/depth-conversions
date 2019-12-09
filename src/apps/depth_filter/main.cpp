@@ -18,6 +18,14 @@ int main(int argc, char** argv) try {
     using namespace sens_loc;
     using namespace std;
 
+    // Explicitly disable threading from OpenCV functions, as the
+    // parallelization is done at a higher level.
+    // That means, that each filter application is not multithreaded, but each
+    // image modification is. This is necessary as "TaskFlow" does not play
+    // nice with OpenCV threading and they introduce data races in the program
+    // because of that.
+    cv::setNumThreads(0);
+
     CLI::App app{"Batch-processing tool to filter depth images and maps"};
     app.require_subcommand();  // Expect one or more filter commands
     app.footer("\n\n"

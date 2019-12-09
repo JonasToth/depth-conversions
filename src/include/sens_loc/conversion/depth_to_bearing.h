@@ -201,11 +201,10 @@ inline void bearing_inner(const RangeLimits&       r,
         const Real d_phi = camera_models::phi(intrinsic, central, prior);
 
         // A depth==0 means there is no measurement at this pixel.
-        const Real angle = (d_i == Real(0.) || d_j == Real(0.))
-                               ? Real(0.)
-                               : math::bearing_angle<Real>(
-                                     depth_image.at(central),
-                                     depth_image.at(prior), std::cos(d_phi));
+        const Real angle =
+            (d_i == Real(0.) || d_j == Real(0.))
+                ? Real(0.)
+                : math::bearing_angle<Real>(d_i, d_j, std::cos(d_phi));
 
         Ensures(angle >= Real(0.));
         Ensures(angle < math::pi<Real>);
