@@ -33,6 +33,7 @@ inline int get_minor_version() {
 inline int get_patch_version() {
     return SENS_LOC_PATCH;
 }
+
 }  // namespace sens_loc
 
 #endif /* end of include guard: PROJECT_VERSION_H_IN_SXCFIRSV */
