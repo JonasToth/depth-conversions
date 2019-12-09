@@ -13,7 +13,15 @@
 #include <util/batch_converter.h>
 #include <vector>
 
+/// \defgroup filter-driver depth-image filtering
+///
+/// All code that is written to use the library and implement a program
+/// that filters sensors input with various filtering techniques.
 
+/// Parallelized driver for depth-image filtering-tool
+/// \sa sens_loc::preprocess
+/// \ingroup filter-driver
+/// \returns 0 if all images could be converted, 1 if any image fails
 int main(int argc, char** argv) try {
     using namespace sens_loc;
     using namespace std;

@@ -42,6 +42,7 @@ $ depth2x <target-format> \
         --output <python-like pattern with integer substitution> \
         --start <index to start with> \
         --end <index to end with, inclusive!>
+> Run-Log and potential errors
 ```
 
 Please consult the help messages for the command itself as well as for each
@@ -58,6 +59,7 @@ $ depth2x flexion \
     --start 0 \
     --end 100 \
     --output flexion_{:04d}.png
+> Run-Log and potential errors
 ```
 
 ### Examplaric scaling of depth-images to better see the content
@@ -66,7 +68,32 @@ The following command convert orthographic depth-maps into flexion images.
 
 ```bash
 $ depth2x scale \
-    --input depth_{:04d}.png \
-    --output scaled_{:04d}.png \
-    --factor 8.0
+          --input depth_{:04d}.png \
+          --output scaled_{:04d}.png \
+          --start 0 \
+          --end 100 \
+          --factor 8.0
+> Run-Log and potential errors
+```
+
+## depth_filter
+
+This tool can apply different filters on the depth image. This is necessary
+as sensor input has different levels of noise. Smoothing this noise results in
+sharper images that in turn might work better for registration.
+
+This process does in general not require an intrinsic as it works only on the
+image itself. The filters are implemented in
+[OpenCV](https://docs.opencv.org/master/d4/d86/group__imgproc__filter.html).
+
+Please note that the filters have different computational complexity that
+depends on the parameters as well. Application is a trade-off.
+
+```bash
+$ depth_filter median-blur --input depth_{:04d}.png \
+                           --output filtered_{:04d}.png \
+                           --start 0 \
+                           --end 100 \
+                           --distance 5
+> Run-Log and potential errors
 ```

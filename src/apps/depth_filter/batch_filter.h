@@ -9,6 +9,8 @@
 
 namespace sens_loc::apps {
 
+/// Base-class for all batch-filter applications on depth images.
+/// \ingroup filter-driver
 class batch_filter : public batch_converter {
   public:
     batch_filter(

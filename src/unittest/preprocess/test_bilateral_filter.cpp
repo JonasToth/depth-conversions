@@ -20,15 +20,14 @@ TEST_CASE("bilateral coverage") {
     SUBCASE("Small distance --> fast filter") {
         auto laser =
             conversion::depth_to_laserscan<double, ushort>(*img, p_double);
-        auto res =
-            bilateral_filter(laser, /*sigma_color=*/25., /*proximity=*/5);
+        auto res = bilateral_filter(laser, /*sigma_color=*/25., /*distance=*/5);
         cv::imwrite("preprocess/test_bilateral_fast.png",
                     math::convert<ushort>(res).data());
     }
 
     SUBCASE("Proximity via sigma value") {
         auto res = bilateral_filter(*img,
-                                    /*sigma_color=*/25., /*proximity=*/10.);
+                                    /*sigma_color=*/25., /*sigma_space=*/10.);
         cv::imwrite("preprocess/test_bilateral_sigma.png", res.data());
     }
 }
