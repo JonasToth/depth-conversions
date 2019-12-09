@@ -245,6 +245,7 @@ ubuntu-1804-tsan:
     LD: "clang++-9"
     BUILD_TYPE: "RelWithDebInfo"
     WITH_TSAN: "ON"
+    TSAN_OPTIONS: "suppressions=/builds/jtoth/master-thesis/scripts/tsan_suppressions"
   <<: *wide_test_filter_definition
   dependencies: []
 

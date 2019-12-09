@@ -1,0 +1,6 @@
+# Suppressions of known and reported races and other concurrency-issues
+# in third-party code.
+# Can not fix them, just wait for updates :/
+
+# TaskFlows work-stealing-queue is buggy, YEAH.
+race:tf::WorkStealingQueue<tf::Node*>::Array::pop(long)
