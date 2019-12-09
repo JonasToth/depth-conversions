@@ -91,10 +91,9 @@ int main(int argc, char** argv) try {
         "This will read 'depth_0000.png ...' and filter them with the "
         "bilateral filter, producing the files 'filtered_0000.png ...'\n"
         " in the working directory");
-    double sigma_color = 20.;  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+    double sigma_color;  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
     bilateral_cmd->add_option("-c,--sigma-color", sigma_color,
-                              "Defines threshold for color similarity.",
-                              /*defaulted=*/true);
+                              "Defines threshold for color similarity.");
     int          distance;
     CLI::Option* distance_option = bilateral_cmd->add_option(
         "-d,--distance", distance,
@@ -145,18 +144,23 @@ int main(int argc, char** argv) try {
     for (const auto* cmd : app.get_subcommands()) {
         if (cmd == bilateral_cmd) {
             // Got at pixel-distance as argument.
-            if (cmd->get_option_no_throw("distance") != nullptr)
+            if (distance_option->count() > 0U) {
                 commands.push_back(
                     make_unique<apps::bilateral_filter>(sigma_color, distance));
-
-            // Otherwise sigma space must be provided.
-            commands.push_back(
-                make_unique<apps::bilateral_filter>(sigma_color, sigma_space));
+            }
+            // Otherwise sigma space must have been provided.
+            else {
+                commands.push_back(make_unique<apps::bilateral_filter>(
+                    sigma_color, sigma_space));
+            }
         }
 
-        if (cmd == median_blur_cmd)
+        else if (cmd == median_blur_cmd)
             commands.push_back(
                 make_unique<apps::median_blur_filter>(kernel_size_median));
+
+        else
+            UNREACHABLE("Unhandled filter-subcommand provided!");
     }
     Ensures(!commands.empty());
 
