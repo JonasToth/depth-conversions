@@ -31,7 +31,17 @@ int main(int argc, char** argv) try {
     app.footer("\n\n"
                "An example invocation of the tool is:\n"
                "\n"
-               "depth_filter ");
+               "depth_filter bilateral --input depth_{:04d}.png \\\n"
+               "                       --output filtered_{:04d}.png \\\n"
+               "                       --start 0 \\\n"
+               "                       --end 100 \\\n"
+               "                       --sigma-color 20. \\\n"
+               "                       --sigma-space 20. \\\n"
+               "                       --distance 5 \\\n"
+               "\n"
+               "This will read 'depth_0000.png ...' and filter them with the "
+               "bilateral filter, producing the files 'filtered_0000.png ...'\n"
+               " in the working directory");
 
     gsl::span<gsl::zstring<>> arguments(argv, argc);
 
@@ -59,6 +69,21 @@ int main(int argc, char** argv) try {
 
     CLI::App* bilateral_cmd = app.add_subcommand(
         "bilateral", "Apply the bilateral filter to the input.");
+    bilateral_cmd->footer(
+        "\n\n"
+        "An example invocation of the tool is:\n"
+        "\n"
+        "depth_filter bilateral --input depth_{:04d}.png \\\n"
+        "                       --output filtered_{:04d}.png \\\n"
+        "                       --start 0 \\\n"
+        "                       --end 100 \\\n"
+        "                       --sigma-color 20. \\\n"
+        "                       --sigma-space 20. \\\n"
+        "                       --distance 5 \\\n"
+        "\n"
+        "This will read 'depth_0000.png ...' and filter them with the "
+        "bilateral filter, producing the files 'filtered_0000.png ...'\n"
+        " in the working directory");
     double sigma_color = 20.;  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
     bilateral_cmd->add_option("-c,--sigma-color", sigma_color,
                               "Defines threshold for color similarity.",
@@ -75,6 +100,19 @@ int main(int argc, char** argv) try {
 
     CLI::App* median_blur_cmd = app.add_subcommand(
         "median-blur", "Apply the median-blur filter to the input.");
+    median_blur_cmd->footer(
+        "\n\n"
+        "An example invocation of the tool is:\n"
+        "\n"
+        "depth_filter median-blur --input depth_{:04d}.png \\\n"
+        "                         --output filtered_{:04d}.png \\\n"
+        "                         --start 0 \\\n"
+        "                         --end 100 \\\n"
+        "                         --distance 5 \\\n"
+        "\n"
+        "This will read 'depth_0000.png ...' and filter them with the "
+        "median-blur filter, producing the files 'filtered_0000.png ...'\n"
+        " in the working directory");
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     int kernel_size_median = 5;
     median_blur_cmd->add_set(
