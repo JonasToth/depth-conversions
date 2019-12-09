@@ -307,7 +307,7 @@ alpine-edge-image:
     CXX: "g++"
     WITH_TESTING: "ON"
     WITH_STATIC_STDCXXLIB: "ON"
-    WITH_IPO: "OFF"
+    WITH_IPO: "ON"
     WITH_SSE42: "ON"
     WITH_AVX2: "OFF"
     BUILD_TYPE: "Release"
