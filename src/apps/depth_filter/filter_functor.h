@@ -57,8 +57,7 @@ struct median_blur_filter : abstract_filter {
     median_blur_filter(int kernel_size)
         : abstract_filter{}
         , _kernel_size{kernel_size} {
-        Expects(kernel_size > 0);
-        Expects(kernel_size % 2 == 1);  // Kernel size is odd.
+        Expects(kernel_size == 3 || kernel_size == 5);
     }
 
     math::image<float> filter(const math::image<float>& input) const override {
