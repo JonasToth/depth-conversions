@@ -11,6 +11,7 @@ using namespace preprocess;
 using namespace std;
 
 TEST_CASE("bilateral coverage") {
+    cv::setNumThreads(0);
     optional<math::image<ushort>> img = io::load_image<ushort>(
         "preprocess/data0-depth.png", cv::IMREAD_UNCHANGED);
     REQUIRE(img);
