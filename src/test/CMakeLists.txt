@@ -47,6 +47,7 @@ add_converter_test(test_depth2x_max_curve)
 add_converter_test(test_depth2x_range)
 add_converter_test(test_depth2x_scale)
 
+################################################################################
 
 configure_file(depth2x/data0-depth.png
                depth_filter/data0-depth.png COPYONLY)
@@ -69,3 +70,23 @@ endmacro(add_filter_test)
 add_filter_test(test_depth_filter)
 add_filter_test(test_depth_filter_bilateral)
 add_filter_test(test_depth_filter_median_blur)
+
+################################################################################
+
+configure_file(feature_extractor/feature_image.png
+               feature_extractor/feature_image.png COPYONLY)
+
+macro (add_extractor_test test_name)
+    configure_file(feature_extractor/${test_name}.sh
+                   feature_extractor/${test_name}.sh COPYONLY)
+
+    add_test(NAME ${test_name}
+        COMMAND
+        sh -c "./${test_name}.sh \
+               $<TARGET_FILE:feature_extractor> \
+               ${PROJECT_SOURCE_DIR}/scripts/log_helpers.sh"
+        WORKING_DIRECTORY
+        "${CMAKE_CURRENT_BINARY_DIR}/feature_extractor"
+        )
+endmacro(add_extractor_test)
+add_extractor_test(test_feature_extractor)

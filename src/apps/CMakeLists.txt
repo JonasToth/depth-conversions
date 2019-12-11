@@ -55,3 +55,24 @@ target_link_libraries(depth_filter
     )
 common_target_properties(depth_filter)
 install(TARGETS depth_filter RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+
+add_executable(feature_extractor
+               "${CMAKE_CURRENT_LIST_DIR}/feature_extractor/main.cpp")
+target_sources(feature_extractor
+    PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/feature_extractor/batch_extractor.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/feature_extractor/batch_extractor.h"
+    )
+target_include_directories(feature_extractor
+    PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
+target_link_libraries(feature_extractor
+    PRIVATE
+    fmt::fmt
+    CLI11::CLI11
+    sens_loc::sens_loc
+    sens_loc::batch_processing
+    )
+common_target_properties(feature_extractor)
+install(TARGETS feature_extractor
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
