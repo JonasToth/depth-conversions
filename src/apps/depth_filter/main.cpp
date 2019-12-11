@@ -86,7 +86,7 @@ int main(int argc, char** argv) try {
         "This will read 'depth_0000.png ...' and filter them with the "
         "bilateral filter, producing the files 'filtered_0000.png ...'\n"
         " in the working directory");
-    double sigma_color;  // NOLINT(cppcoreguidelines-avoid-magic-numbers)
+    double sigma_color;
     bilateral_cmd->add_option("-c,--sigma-color", sigma_color,
                               "Defines threshold for color similarity.");
     int          distance;

@@ -1,6 +1,6 @@
 #include <string_view>
 
-namespace sens_loc { namespace apps {
+namespace sens_loc::apps {
 
 /// Helper Functor to print a consistent version information for each program.
 struct print_version {
@@ -11,4 +11,4 @@ struct print_version {
   private:
     std::string_view program_name;
 };
-}}  // namespace sens_loc::apps
+}  // namespace sens_loc::apps
