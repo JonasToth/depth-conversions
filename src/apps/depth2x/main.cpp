@@ -3,7 +3,6 @@
 
 #include <CLI/CLI.hpp>
 #include <fstream>
-#include <gsl/gsl>
 #include <iostream>
 #include <memory>
 #include <rang.hpp>
@@ -13,6 +12,7 @@
 #include <sens_loc/version.h>
 #include <stdexcept>
 #include <string>
+#include <util/version_printer.h>
 #include <variant>
 
 namespace detail {
@@ -100,13 +100,8 @@ int main(int argc, char** argv) try {
                "'horizontal_0000.png ...' \n"
                "in the working directory");
 
-    gsl::span<gsl::zstring<>> arguments(argv, argc);
-
-    auto print_version = [arguments](int /*count*/) {
-        cout << arguments.at(0) << " " << get_version() << "\n";
-        exit(0);
-    };
-    app.add_flag_function("-v,--version", print_version,
+    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
+    app.add_flag_function("-v,--version", apps::print_version(argv[0]),
                           "Print version and exit");
 
     string calibration_file;

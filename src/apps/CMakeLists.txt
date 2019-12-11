@@ -1,6 +1,8 @@
 add_library(batch_processing
     "${CMAKE_CURRENT_LIST_DIR}/util/batch_converter.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/batch_converter.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/util/version_printer.h"
+    "${CMAKE_CURRENT_LIST_DIR}/util/version_printer.cpp"
     )
 target_link_libraries(batch_processing
     PUBLIC
