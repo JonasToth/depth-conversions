@@ -1,10 +1,13 @@
+#include "batch_extractor.h"
+
 #include <CLI/CLI.hpp>
 #include <iostream>
+#include <opencv2/features2d.hpp>
+#include <opencv2/xfeatures2d.hpp>
 #include <sens_loc/util/console.h>
 #include <sens_loc/util/correctness_util.h>
 #include <stdexcept>
 #include <string>
-#include <util/batch_converter.h>
 #include <util/version_printer.h>
 #include <vector>
 
@@ -20,6 +23,7 @@
 /// \returns 0 if all images could be processed, 1 if any image fails
 int main(int argc, char** argv) try {
     using namespace sens_loc;
+    using namespace apps;
     using namespace std;
 
     // Explicitly disable threading from OpenCV functions, as the
@@ -77,7 +81,11 @@ int main(int argc, char** argv) try {
     std::cout << "SIFT to: " << arg_sift_out << "\n"
               << "SURF to: " << arg_surf_out << "\n";
 
-    return 0;
+    cv::Ptr<cv::Feature2D> feature = cv::xfeatures2d::SURF::create(400);
+    batch_extractor        extractor(feature, arg_input_files, arg_surf_out);
+
+    const bool success = extractor.process_batch(start_idx, end_idx);
+    return success ? 0 : 1;
 } catch (const std::exception& e) {
     std::cerr << sens_loc::util::err{}
               << "Severe problem occured while system-setup.\n"
