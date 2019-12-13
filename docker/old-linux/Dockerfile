@@ -35,6 +35,7 @@ RUN mkdir -p /opencv/build_cv && cd /opencv \
     -DENABLE_LTO=OFF \
     -DOPENCV_PYTHON3_VERSION=OFF \
     -DOPENCV_ENABLE_MEMALIGN=OFF \
+    -DOPENCV_ENABLE_NONFREE=ON \
  && ninja \
  && ninja install \
  && cd / && rm -rf /opencv
@@ -44,6 +45,6 @@ RUN mkdir -p /eigen3 && cd /eigen3 \
  && wget --quiet http://bitbucket.org/eigen/eigen/get/$eigen_version.tar.gz \
  && tar xf $eigen_version.tar.gz && mv eigen* eigen && cd eigen \
  && mkdir build && cd build \
- && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
+ && CC=gcc-9 CXX=g++-9 cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
  && ninja install \
  && cd / && rm -rf /eigen3
