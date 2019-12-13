@@ -20,7 +20,7 @@ std::optional<math::image<uchar>> load_file(const std::string& name) noexcept {
         return {};
 
     return math::convert<uchar>(
-        math::image<ushort>(depth_image->data() / 255.));
+        math::image<ushort>(depth_image->data() / 255.));  // NOLINT
 }
 
 std::pair<std::vector<cv::KeyPoint>, cv::Mat>

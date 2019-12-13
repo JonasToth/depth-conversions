@@ -1,5 +1,5 @@
 ---
-Checks:          'clang-diagnostic-*,clang-analyzer-*,bugprone-*,cert-*,cppcoreguidelines-*,misc-*,modernize-*,performance-*,readability-*,portability-*,-abseil-*,-android-*,-boost-*,-fuchsia-*,-google-*,-hicpp-*,-llvm-*,-mpi-*,-obj-*,-zircon-*,-readability-braces-around-statements,-misc-non-private-member-variables-in-classes,-cppcoreguidelines-non-private-member-variables-in-classes,-modernize-use-trailing-return-type,-readability-magic-numbers'
+Checks:          'clang-diagnostic-*,clang-analyzer-*,bugprone-*,cert-*,cppcoreguidelines-*,misc-*,modernize-*,performance-*,readability-*,portability-*,-abseil-*,-android-*,-boost-*,-fuchsia-*,-google-*,-hicpp-*,-llvm-*,-mpi-*,-obj-*,-zircon-*,-readability-braces-around-statements,-misc-non-private-member-variables-in-classes,-cppcoreguidelines-non-private-member-variables-in-classes,-modernize-use-trailing-return-type,-readability-magic-numbers,-cppcoreguidelines-magic-numbers'
 WarningsAsErrors: '*'
 HeaderFilterRegex: ''
 AnalyzeTemporaryDtors: false
