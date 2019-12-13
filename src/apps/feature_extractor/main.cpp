@@ -36,11 +36,10 @@ struct SURFArgs {
         cmd->add_flag("-e,--extended-descriptor", extended,
                       "Calculate the extended 128-element descriptor instead "
                       "of 64 elements");
-        cmd->add_flag(
-            "-u,--upright", upright,
-            "Don't calculate the orientation of the features which might "
-            "suffice "
-            "in some instances and results in much faster computation");
+        cmd->add_flag("-u,--upright", upright,
+                      "Don't calculate the orientation of the features "
+                      "which might suffice in some instances and results "
+                      "in much faster computation");
     }
 
     std::string out_path;
@@ -59,7 +58,8 @@ struct SIFTArgs {
         cmd->add_option("-c,--feature-count", feature_count,
                         "Number of features to retain after ranking, 0 means "
                         "every feature is kept",
-                        /*defaulted=*/true);
+                        /*defaulted=*/true)
+            ->check(CLI::Range(0, 10'000));
         cmd->add_option("-l,--octave-layers", octave_layers,
                         "Set the number of octaver layers",
                         /*defaulted=*/true)

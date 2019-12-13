@@ -12,19 +12,80 @@ helpers="$2"
 
 print_info "Using \"${exe}\" as driver executable"
 
-if grep --silent "Precise Pangolin" /etc/os-release ; then
-    print_warning "Skipping Tests on old linux - See #8 for more information!"
-    exit 0
-fi
-
 set -v
 
 if ! ${exe} \
-    -i "data{}.png" \
-    -o "bilateral-distance-{}.png" \
+    -i "flexion-{}.png" \
     -s 0 -e 1 \
-    bilateral --sigma-color 20. --distance 5 ; then
-    print_error "Color-similarity and pixel-distance for filter must suffice"
+    surf -o "surf-{}.png" ; then
+    print_error "Default SURF-Detection did not work"
+    exit 1
+fi
+if ! ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   surf -o "surf-extended-{}.png" \
+   --extended-descriptor ; then
+    print_error "Extended SURF descriptor not calculated"
+    exit 1
+fi
+if ! ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   surf -o "surf-upright-{}.png" \
+   --upright ; then
+    print_error "Upright unoriented SURF not calculated"
     exit 1
 fi
 
+# Configuration range need to be validated
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   surf -o "surf-bad-{}.png" \
+   --threshold -1 ; then
+    print_error "Hessian Threshold too low accepted"
+    exit 1
+fi
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   surf -o "surf-bad-{}.png" \
+   --threshold 1501 ; then
+    print_error "Hessian Threshold too high accepted"
+    exit 1
+fi
+
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   surf -o "surf-bad-{}.png" \
+   --n-octaves 0 ; then
+    print_error "Number Octave Layers too low accepted"
+    exit 1
+fi
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   surf -o "surf-bad-{}.png" \
+   --n-octaves 11 ; then
+    print_error "Number Octave Layers too high accepted"
+    exit 1
+fi
+
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   surf -o "surf-bad-{}.png" \
+   --octave-layers 0 ; then
+    print_error "Octave Layers too low accepted"
+    exit 1
+fi
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   surf -o "surf-bad-{}.png" \
+   --octave-layers 11 ; then
+    print_error "Octave Layers too high accepted"
+    exit 1
+fi

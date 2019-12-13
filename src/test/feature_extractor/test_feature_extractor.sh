@@ -17,6 +17,11 @@ if ${exe} ; then
     exit 1
 fi
 
+if ${exe} -i "flexion-{:03d}.png" -s 2 -e 4 ; then
+    print_error "Subcommand required"
+    exit 1
+fi
+
 if ! ${exe} --version ; then
     print_error "Printing the version is required to work"
     exit 1

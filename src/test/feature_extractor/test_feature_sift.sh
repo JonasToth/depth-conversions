@@ -12,19 +12,105 @@ helpers="$2"
 
 print_info "Using \"${exe}\" as driver executable"
 
-if grep --silent "Precise Pangolin" /etc/os-release ; then
-    print_warning "Skipping Tests on old linux - See #8 for more information!"
-    exit 0
-fi
-
 set -v
 
 if ! ${exe} \
-    -i "data{}.png" \
-    -o "bilateral-distance-{}.png" \
+    -i "flexion-{}.png" \
     -s 0 -e 1 \
-    bilateral --sigma-color 20. --distance 5 ; then
-    print_error "Color-similarity and pixel-distance for filter must suffice"
+    sift -o "sift-{}.png" ; then
+    print_error "Default SIFT-Detection did not work"
     exit 1
 fi
 
+# Invalid arguments
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1  sift ; then
+    print_error "SIFT requires output path"
+    exit 1
+fi
+
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   sift -o "sift-bad-{}.png" \
+   --feature-count -1 ; then
+    print_error "Feature-Count negative was accepted"
+    exit 1
+fi
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   sift -o "sift-bad-{}.png" \
+   --feature-count 10001 ; then
+    print_error "Feature-Count too big was accepted"
+    exit 1
+fi
+
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   sift -o "sift-bad-{}.png" \
+   --octave-layers 0 ; then
+    print_error "Layer-Count zero was accepted"
+    exit 1
+fi
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   sift -o "sift-bad-{}.png" \
+   --octave-layers 11 ; then
+    print_error "Layer-Count too big was accepted"
+    exit 1
+fi
+
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   sift -o "sift-bad-{}.png" \
+   --contrast-threshold -0.1 ; then
+    print_error "Negative Contrast Threshold Accepted"
+    exit 1
+fi
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   sift -o "sift-bad-{}.png" \
+   --contrast-threshold 1.1 ; then
+    print_error "Too Big Contrast Threshold Accepted"
+    exit 1
+fi
+
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   sift -o "sift-bad-{}.png" \
+   --edge-threshold -0.1 ; then
+    print_error "Negative Edge Threshold Accepted"
+    exit 1
+fi
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   sift -o "sift-bad-{}.png" \
+   --edge-threshold 101. ; then
+    print_error "Too Big Edge Threshold Accepted"
+    exit 1
+fi
+
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   sift -o "sift-bad-{}.png" \
+   --sigma -0.1 ; then
+    print_error "Negative Sigma Accepted"
+    exit 1
+fi
+if ${exe} \
+   -i "flexion-{}.png" \
+   -s 0 -e 1 \
+   sift -o "sift-bad-{}.png" \
+   --sigma 11. ; then
+    print_error "Too Big Sigma Accepted"
+    exit 1
+fi
