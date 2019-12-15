@@ -83,12 +83,42 @@ struct SIFTArgs {
     }
 
     std::string out_path;
-    int         feature_count = 0;
-    int         octave_layers = 3;
-    // NOLINTNEXTLINE(cppcoreguidelines-magic-numbers)
-    double contrast_threshold = 0.04;
-    double edge_threshold     = 10.;  // NOLINT(cppcoreguidelines-magic-numbers)
-    double sigma              = 1.6;  // NOLINT(cppcoreguidelines-magic-numbers)
+    int         feature_count      = 0;
+    int         octave_layers      = 3;
+    double      contrast_threshold = 0.04;
+    double      edge_threshold     = 10.;
+    double      sigma              = 1.6;
+};
+
+struct ORBArgs {
+    ORBArgs(CLI::App* cmd) {
+        cmd->add_option("-o,--output", out_path,
+                        "Output file-pattern for sift-features")
+            ->required();
+        cmd->add_option("-c,--feature-count", feature_count,
+                        "Number of features to retain after ranking, 0 means "
+                        "every feature is kept",
+                        /*defaulted=*/true)
+            ->check(CLI::Range(0, 10'000));
+        cmd->add_option("-s,--scale-factor", scale_factor,
+                        "Scale-Factor for the image pyramid. Value == 2. means "
+                        "that the size is halfed",
+                        /*defaulted=*/true)
+            ->check(CLI::Range(1., 4.));
+    }
+
+    std::string out_path;
+    int         feature_count = 700;
+    float       scale_factor  = 1.2F;
+};
+
+struct AKAZEArgs {
+    AKAZEArgs(CLI::App* cmd) {
+        cmd->add_option("-o,--output", out_path,
+                        "Output file-pattern for sift-features")
+            ->required();
+    }
+    std::string out_path;
 };
 }  // namespace
 
@@ -124,7 +154,7 @@ int main(int argc, char** argv) try {
                "\n");
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    app.add_flag_function("-v,--version", apps::print_version(argv[0]),
+    app.add_flag_function("-v,--version", apps::print_version(*argv),
                           "Print version and exit");
 
     std::string arg_input_files;
@@ -147,11 +177,18 @@ int main(int argc, char** argv) try {
     surf_cmd->footer("\n\n");
     const SURFArgs surf(surf_cmd);
 
+    CLI::App* orb_cmd = app.add_subcommand("orb", "Detect ORB features");
+    orb_cmd->footer("\n\n");
+    const ORBArgs orb(orb_cmd);
+
+    CLI::App* akaze_cmd = app.add_subcommand("akaze", "Detect AKAZE features");
+    akaze_cmd->footer("\n\n");
+    const AKAZEArgs akaze(akaze_cmd);
+
     CLI11_PARSE(app, argc, argv);
 
     using cv::Feature2D;
     using cv::Ptr;
-
 
     // TODO:
     // - Transform to a vector of commands, {Feature, OutPath}
@@ -162,6 +199,8 @@ int main(int argc, char** argv) try {
     auto [feature, out_path] = [&]() -> pair<Ptr<Feature2D>, string> {
         using cv::xfeatures2d::SIFT;
         using cv::xfeatures2d::SURF;
+        using cv::ORB;
+        using cv::AKAZE;
 
         if (*surf_cmd)
             return make_pair(SURF::create(surf.hessian_threshold,
@@ -175,6 +214,13 @@ int main(int argc, char** argv) try {
                                           sift.contrast_threshold,
                                           sift.edge_threshold, sift.sigma),
                              sift.out_path);
+
+        if (*orb_cmd)
+            return make_pair(ORB::create(orb.feature_count, orb.scale_factor),
+                             orb.out_path);
+
+        if (*akaze_cmd)
+            return make_pair(AKAZE::create(), akaze.out_path);
 
         UNREACHABLE("provided unexpected subcommand");  // LCOV_EXCL_LINE
     }();
