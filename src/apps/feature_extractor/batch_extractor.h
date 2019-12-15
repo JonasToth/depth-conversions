@@ -2,10 +2,29 @@
 #define BATCH_EXTRACTOR_H_IVH3CLLQ
 
 #include <gsl/gsl>
+#include <sens_loc/util/correctness_util.h>
+#include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d.hpp>
 
 namespace sens_loc::apps {
+
+enum class feature_color { green, blue, red, orange, purple, all };
+
+struct color_to_rgb {
+    static cv::Scalar convert(feature_color c) {
+        using cv::Scalar;
+        switch (c) {
+        case feature_color::green: return Scalar(0, 255, 0);
+        case feature_color::blue: return Scalar(255, 0, 0);
+        case feature_color::red: return Scalar(0, 0, 255);
+        case feature_color::orange: return Scalar(0, 255, 255);
+        case feature_color::purple: return Scalar(255, 0, 255);
+        case feature_color::all: return Scalar::all(-1);
+        }
+        UNREACHABLE("Invalid enum-value!");
+    }
+};
 
 /// Helper class that visits a list of images and does some generic
 /// processing on it.
@@ -13,10 +32,12 @@ class batch_extractor {
   public:
     batch_extractor(cv::Ptr<cv::Feature2D> detector,
                     std::string            input_pattern,
-                    std::string            output_pattern)
+                    std::string            output_pattern,
+                    feature_color          keypoint_color)
         : _detector{std::move(detector)}
         , _input_pattern{std::move(input_pattern)}
-        , _output_pattern{std::move(output_pattern)} {
+        , _output_pattern{std::move(output_pattern)}
+        , _color{keypoint_color} {
         Expects(!_input_pattern.empty());
         Expects(!_output_pattern.empty());
     }
@@ -34,6 +55,7 @@ class batch_extractor {
     cv::Ptr<cv::Feature2D> _detector;
     std::string            _input_pattern;
     std::string            _output_pattern;
+    feature_color          _color;
 };
 }  // namespace sens_loc::apps
 

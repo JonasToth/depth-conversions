@@ -3,6 +3,7 @@
 #include <chrono>
 #include <fmt/core.h>
 #include <opencv2/core.hpp>
+#include <opencv2/features2d.hpp>
 #include <sens_loc/io/image.h>
 #include <sens_loc/math/image.h>
 #include <sens_loc/util/console.h>
@@ -40,7 +41,8 @@ compute_features(const math::image<uchar>& img,
 bool process_index(const std::string& in_pattern,
                    const std::string& out_pattern,
                    int                idx,
-                   cv::Feature2D&     detector) noexcept {
+                   cv::Feature2D&     detector,
+                   feature_color      color) noexcept {
     // FIXME: Optimization oppurtinity to reuse the strings here
     const std::string                 f_name = fmt::format(in_pattern, idx);
     std::optional<math::image<uchar>> f      = load_file(f_name);
@@ -52,7 +54,9 @@ bool process_index(const std::string& in_pattern,
     (void) descriptors;
 
     cv::Mat img_features;
-    cv::drawKeypoints(f->data(), keypoints, img_features);
+    cv::drawKeypoints(f->data(), keypoints, img_features,
+                      color_to_rgb::convert(color),
+                      cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
 
     const std::string out_name      = fmt::format(out_pattern, idx);
     const bool        write_success = cv::imwrite(out_name, img_features);
@@ -76,7 +80,7 @@ bool batch_extractor::process_batch(int start, int end) const noexcept {
                         [&cout_mutex, &batch_success, &fails, this](int idx) {
                             const bool success = process_index(
                                 this->_input_pattern, this->_output_pattern,
-                                idx, *this->_detector);
+                                idx, *this->_detector, this->_color);
                             if (!success) {
                                 std::lock_guard l(cout_mutex);
                                 fails++;

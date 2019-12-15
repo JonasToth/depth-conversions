@@ -8,6 +8,7 @@
 #include <sens_loc/util/correctness_util.h>
 #include <stdexcept>
 #include <string>
+#include <tuple>
 #include <util/version_printer.h>
 #include <vector>
 
@@ -196,36 +197,38 @@ int main(int argc, char** argv) try {
     //   In-File(relative path)}
     // - Add Visualizer-Functionality? -> separate program that display
     //   different features on the original image
-    auto [feature, out_path] = [&]() -> pair<Ptr<Feature2D>, string> {
+    auto [feature, out_path,
+          color] = [&]() -> tuple<Ptr<Feature2D>, string, feature_color> {
         using cv::xfeatures2d::SIFT;
         using cv::xfeatures2d::SURF;
         using cv::ORB;
         using cv::AKAZE;
 
         if (*surf_cmd)
-            return make_pair(SURF::create(surf.hessian_threshold,
-                                          surf.n_octaves, surf.octave_layers,
-                                          surf.extended, surf.upright),
-                             surf.out_path);
+            return make_tuple(SURF::create(surf.hessian_threshold,
+                                           surf.n_octaves, surf.octave_layers,
+                                           surf.extended, surf.upright),
+                              surf.out_path, feature_color::orange);
 
         if (*sift_cmd)
-            return make_pair(SIFT::create(sift.feature_count,
-                                          sift.octave_layers,
-                                          sift.contrast_threshold,
-                                          sift.edge_threshold, sift.sigma),
-                             sift.out_path);
+            return make_tuple(SIFT::create(sift.feature_count,
+                                           sift.octave_layers,
+                                           sift.contrast_threshold,
+                                           sift.edge_threshold, sift.sigma),
+                              sift.out_path, feature_color::green);
 
         if (*orb_cmd)
-            return make_pair(ORB::create(orb.feature_count, orb.scale_factor),
-                             orb.out_path);
+            return make_tuple(ORB::create(orb.feature_count, orb.scale_factor),
+                              orb.out_path, feature_color::red);
 
         if (*akaze_cmd)
-            return make_pair(AKAZE::create(), akaze.out_path);
+            return make_tuple(AKAZE::create(), akaze.out_path,
+                              feature_color::blue);
 
         UNREACHABLE("provided unexpected subcommand");  // LCOV_EXCL_LINE
     }();
 
-    batch_extractor extractor(feature, arg_input_files, out_path);
+    batch_extractor extractor(feature, arg_input_files, out_path, color);
     const bool      success = extractor.process_batch(start_idx, end_idx);
 
     return success ? 0 : 1;
