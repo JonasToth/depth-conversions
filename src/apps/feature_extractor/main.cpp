@@ -8,17 +8,24 @@
 #include <sens_loc/util/correctness_util.h>
 #include <stdexcept>
 #include <string>
-#include <tuple>
 #include <util/version_printer.h>
 #include <vector>
 
 namespace {
 
-struct SURFArgs {
-    SURFArgs(CLI::App* cmd) {
+struct CommonArgs {
+    CommonArgs(CLI::App* cmd) {
         cmd->add_option("-o,--output", out_path,
                         "Output file-pattern for sift-features")
             ->required();
+    }
+
+    std::string out_path;
+};
+
+struct SURFArgs : CommonArgs {
+    SURFArgs(CLI::App* cmd)
+        : CommonArgs(cmd) {
         cmd->add_option("-t,--threshold", hessian_threshold,
                         "Control the hessian threshold value, between 300-500 "
                         "might be good",
@@ -43,19 +50,16 @@ struct SURFArgs {
                       "in much faster computation");
     }
 
-    std::string out_path;
-    int         hessian_threshold = 500;
-    int         n_octaves         = 4;
-    int         octave_layers     = 3;
-    bool        extended          = false;
-    bool        upright           = false;
+    int  hessian_threshold = 500;
+    int  n_octaves         = 4;
+    int  octave_layers     = 3;
+    bool extended          = false;
+    bool upright           = false;
 };
 
-struct SIFTArgs {
-    SIFTArgs(CLI::App* cmd) {
-        cmd->add_option("-o,--output", out_path,
-                        "Output file-pattern for sift-features")
-            ->required();
+struct SIFTArgs : CommonArgs {
+    SIFTArgs(CLI::App* cmd)
+        : CommonArgs(cmd) {
         cmd->add_option("-c,--feature-count", feature_count,
                         "Number of features to retain after ranking, 0 means "
                         "every feature is kept",
@@ -83,19 +87,16 @@ struct SIFTArgs {
             ->check(CLI::Range(0., 10.));
     }
 
-    std::string out_path;
-    int         feature_count      = 0;
-    int         octave_layers      = 3;
-    double      contrast_threshold = 0.04;
-    double      edge_threshold     = 10.;
-    double      sigma              = 1.6;
+    int    feature_count      = 0;
+    int    octave_layers      = 3;
+    double contrast_threshold = 0.04;
+    double edge_threshold     = 10.;
+    double sigma              = 1.6;
 };
 
-struct ORBArgs {
-    ORBArgs(CLI::App* cmd) {
-        cmd->add_option("-o,--output", out_path,
-                        "Output file-pattern for sift-features")
-            ->required();
+struct ORBArgs : CommonArgs {
+    ORBArgs(CLI::App* cmd)
+        : CommonArgs(cmd) {
         cmd->add_option("-c,--feature-count", feature_count,
                         "Number of features to retain after ranking, 0 means "
                         "every feature is kept",
@@ -106,20 +107,116 @@ struct ORBArgs {
                         "that the size is halfed",
                         /*defaulted=*/true)
             ->check(CLI::Range(1., 4.));
+        cmd->add_option("-n,--n-levels", n_levels, "Number of pyramid levels",
+                        /*defaulted=*/true);
+        cmd->add_option("-t,--edge-threshold", edge_threshold,
+                        "size of the border where features are not detected, "
+                        "should match patch_size",
+                        /*defaulted=*/true);
+        cmd->add_option(
+            "-l,--first-level", first_level,
+            "Level of the pyramid to put the source image to. Previous layers "
+            "are filled with upscaled versions of the image.",
+            /*defaulted=*/true);
+        cmd->add_option("-w,--wta-k", WTA_K,
+                        "number of points that produce each element of the "
+                        "oriented BRIEF descriptor",
+                        /*defaulted=*/true);
+        cmd->add_set("-m,--score-metric", score_type, {"HARRIS", "FAST"},
+                     "Scoretype that is used as metric", /*defaulted=*/true);
+        cmd->add_option("-p,--patch-size", path_size,
+                        "size of the patch used by the BRIEF descriptor",
+                        /*defaulted=*/true);
+        cmd->add_option("-f,--fast-threshold", fast_threshold,
+                        "the FAST threshold", /*defaulted=*/true);
     }
 
-    std::string out_path;
-    int         feature_count = 700;
-    float       scale_factor  = 1.2F;
+    static cv::ORB::ScoreType
+    string_to_score_type(std::string_view picked) noexcept {
+        if (picked == "HARRIS")
+            return cv::ORB::ScoreType::HARRIS_SCORE;
+        if (picked == "FAST")
+            return cv::ORB::ScoreType::FAST_SCORE;
+        UNREACHABLE("Invalid choice for ScoreType!");
+    }
+
+    int         feature_count  = 700;
+    float       scale_factor   = 1.2F;
+    int         n_levels       = 8;
+    int         edge_threshold = 31;
+    int         first_level    = 0;
+    int         WTA_K          = 2;
+    std::string score_type     = "HARRIS";
+    int         path_size      = 31;
+    int         fast_threshold = 20;
 };
 
-struct AKAZEArgs {
-    AKAZEArgs(CLI::App* cmd) {
-        cmd->add_option("-o,--output", out_path,
-                        "Output file-pattern for sift-features")
-            ->required();
+struct AKAZEArgs : CommonArgs {
+    AKAZEArgs(CLI::App* cmd)
+        : CommonArgs(cmd) {
+        cmd->add_set("-d,--descriptor-type", descriptor_type,
+                     {"KAZE_UPRIGHT", "KAZE", "MLDB_UPRIGHT", "MLDB"},
+                     "Which descriptor to use, upright means that no "
+                     "orientation is computed",
+                     /*defaulted=*/true);
+        cmd->add_option("-s,--descriptor-size", descriptor_size,
+                        "Size of the descriptor in bits, 0 => full size",
+                        /*defaulted=*/true)
+            ->check(CLI::Range(0, 1'000'000));
+        cmd->add_option("-c,--descriptor-channels", descriptor_channels,
+                        "Number of channels in the descriptor",
+                        /*defaulted=*/true)
+            ->check(CLI::Range(1, 3));
+        cmd->add_option("-t,--threshold", threshold,
+                        "Detector reponse threshold to accept point",
+                        /*defaulted=*/true);
+        cmd->add_option("-n,--n-octaves", n_octaves,
+                        "Maximum octave evolution of the image",
+                        /*defaulted=*/true);
+        cmd->add_option("-l,--n-octave-layers", n_octave_layers,
+                        "Default number of sublevels per scale level",
+                        /*defaulted=*/true);
     }
-    std::string out_path;
+
+    static cv::AKAZE::DescriptorType
+    string_to_descriptor(std::string_view picked) noexcept {
+        Expects(!picked.empty());
+#define CHOICE(enumerator)                                                     \
+    if (picked == #enumerator)                                                 \
+        return cv::AKAZE::DescriptorType::DESCRIPTOR_##enumerator;
+
+        CHOICE(KAZE_UPRIGHT)
+        CHOICE(KAZE)
+        CHOICE(MLDB_UPRIGHT)
+        CHOICE(MLDB)
+#undef CHOICE
+
+        UNREACHABLE("Invalid Descriptor Choice detected!");
+    }
+
+    static cv::KAZE::DiffusivityType
+    string_to_diffusivity(std::string_view picked) noexcept {
+        Expects(!picked.empty());
+#define CHOICE(enumerator)                                                     \
+    if (picked == #enumerator)                                                 \
+        return cv::KAZE::DiffusivityType::DIFF_##enumerator;
+
+        CHOICE(PM_G1)
+        CHOICE(PM_G2)
+        CHOICE(WEICKERT)
+        CHOICE(CHARBONNIER)
+#undef CHOICE
+
+        UNREACHABLE("Invalid Diffusivity Choice detected!");
+    }
+
+    std::string descriptor_type     = "MLDB";
+    int         descriptor_size     = 0;
+    int         descriptor_channels = 3;
+    float       threshold           = 0.001F;
+    int         n_octaves           = 4;
+    int         n_octave_layers     = 4;
+    std::string diffusivity         = "PM_G2";
 };
 }  // namespace
 
@@ -188,47 +285,50 @@ int main(int argc, char** argv) try {
 
     CLI11_PARSE(app, argc, argv);
 
-    using cv::Feature2D;
-    using cv::Ptr;
-
     // TODO:
     // - Transform to a vector of commands, {Feature, OutPath}
     // - Write Result Files {Keypoints, Descriptor, Configuration,
     //   In-File(relative path)}
     // - Add Visualizer-Functionality? -> separate program that display
     //   different features on the original image
-    auto [feature, out_path,
-          color] = [&]() -> tuple<Ptr<Feature2D>, string, feature_color> {
+    auto detector = [&]() -> Detector {
         using cv::xfeatures2d::SIFT;
         using cv::xfeatures2d::SURF;
         using cv::ORB;
         using cv::AKAZE;
 
         if (*surf_cmd)
-            return make_tuple(SURF::create(surf.hessian_threshold,
-                                           surf.n_octaves, surf.octave_layers,
-                                           surf.extended, surf.upright),
-                              surf.out_path, feature_color::orange);
+            return {SURF::create(surf.hessian_threshold, surf.n_octaves,
+                                 surf.octave_layers, surf.extended,
+                                 surf.upright),
+                    surf.out_path, feature_color::orange};
 
         if (*sift_cmd)
-            return make_tuple(SIFT::create(sift.feature_count,
-                                           sift.octave_layers,
-                                           sift.contrast_threshold,
-                                           sift.edge_threshold, sift.sigma),
-                              sift.out_path, feature_color::green);
+            return {SIFT::create(sift.feature_count, sift.octave_layers,
+                                 sift.contrast_threshold, sift.edge_threshold,
+                                 sift.sigma),
+                    sift.out_path, feature_color::green};
 
         if (*orb_cmd)
-            return make_tuple(ORB::create(orb.feature_count, orb.scale_factor),
-                              orb.out_path, feature_color::red);
+            return {ORB::create(orb.feature_count, orb.scale_factor,
+                                orb.n_levels, orb.edge_threshold,
+                                orb.first_level, orb.WTA_K,
+                                ORBArgs::string_to_score_type(orb.score_type),
+                                orb.path_size, orb.fast_threshold),
+                    orb.out_path, feature_color::red};
 
         if (*akaze_cmd)
-            return make_tuple(AKAZE::create(), akaze.out_path,
-                              feature_color::blue);
+            return {AKAZE::create(
+                        AKAZEArgs::string_to_descriptor(akaze.descriptor_type),
+                        akaze.descriptor_size, akaze.descriptor_channels,
+                        akaze.threshold, akaze.n_octaves, akaze.n_octave_layers,
+                        AKAZEArgs::string_to_diffusivity(akaze.diffusivity)),
+                    akaze.out_path, feature_color::blue};
 
         UNREACHABLE("provided unexpected subcommand");  // LCOV_EXCL_LINE
     }();
 
-    batch_extractor extractor(feature, arg_input_files, out_path, color);
+    batch_extractor extractor(detector, arg_input_files);
     const bool      success = extractor.process_batch(start_idx, end_idx);
 
     return success ? 0 : 1;

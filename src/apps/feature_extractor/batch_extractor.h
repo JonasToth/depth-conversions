@@ -2,15 +2,14 @@
 #define BATCH_EXTRACTOR_H_IVH3CLLQ
 
 #include <gsl/gsl>
-#include <sens_loc/util/correctness_util.h>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d.hpp>
+#include <sens_loc/util/correctness_util.h>
 
 namespace sens_loc::apps {
 
 enum class feature_color { green, blue, red, orange, purple, all };
-
 struct color_to_rgb {
     static cv::Scalar convert(feature_color c) {
         using cv::Scalar;
@@ -26,20 +25,21 @@ struct color_to_rgb {
     }
 };
 
+struct Detector {
+    cv::Ptr<cv::Feature2D> detector;
+    std::string            output_pattern;
+    feature_color          color = feature_color::all;
+};
+
 /// Helper class that visits a list of images and does some generic
 /// processing on it.
 class batch_extractor {
   public:
-    batch_extractor(cv::Ptr<cv::Feature2D> detector,
-                    std::string            input_pattern,
-                    std::string            output_pattern,
-                    feature_color          keypoint_color)
+    batch_extractor(Detector detector, std::string input_pattern)
         : _detector{std::move(detector)}
-        , _input_pattern{std::move(input_pattern)}
-        , _output_pattern{std::move(output_pattern)}
-        , _color{keypoint_color} {
+        , _input_pattern{std::move(input_pattern)} {
         Expects(!_input_pattern.empty());
-        Expects(!_output_pattern.empty());
+        Expects(!_detector.output_pattern.empty());
     }
 
     batch_extractor(const batch_extractor&) = default;
@@ -52,10 +52,8 @@ class batch_extractor {
     [[nodiscard]] bool process_batch(int start, int end) const noexcept;
 
   private:
-    cv::Ptr<cv::Feature2D> _detector;
-    std::string            _input_pattern;
-    std::string            _output_pattern;
-    feature_color          _color;
+    Detector    _detector;
+    std::string _input_pattern;
 };
 }  // namespace sens_loc::apps
 

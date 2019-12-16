@@ -78,9 +78,11 @@ bool batch_extractor::process_batch(int start, int end) const noexcept {
 
         tf.parallel_for(start, end + 1, 1,
                         [&cout_mutex, &batch_success, &fails, this](int idx) {
-                            const bool success = process_index(
-                                this->_input_pattern, this->_output_pattern,
-                                idx, *this->_detector, this->_color);
+                            const bool success =
+                                process_index(this->_input_pattern,
+                                              this->_detector.output_pattern,
+                                              idx, *this->_detector.detector,
+                                              this->_detector.color);
                             if (!success) {
                                 std::lock_guard l(cout_mutex);
                                 fails++;

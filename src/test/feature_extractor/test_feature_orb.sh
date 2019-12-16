@@ -13,7 +13,7 @@ helpers="$2"
 print_info "Using \"${exe}\" as driver executable"
 
 print_info "Cleaning old artifacts"
-rm orb-*.png
+rm -f orb-*.png
 
 set -v
 
@@ -24,12 +24,22 @@ if ! ${exe} \
     print_error "Default ORB-Detection did not work"
     exit 1
 fi
+if  [ ! -f orb-0.png ] || \
+    [ ! -f orb-1.png ]; then
+    print_error "Did not create expected output files."
+    exit 1
+fi
 if ! ${exe} \
    -i "flexion-{}.png" \
    -s 0 -e 1 \
    orb -o "orb-scale-{}.png" \
    --scale-factor 1.5 ; then
     print_error "ORB Scale factor does not work"
+    exit 1
+fi
+if  [ ! -f orb-scale-0.png ] || \
+    [ ! -f orb-scale-1.png ]; then
+    print_error "Did not create expected output files."
     exit 1
 fi
 
