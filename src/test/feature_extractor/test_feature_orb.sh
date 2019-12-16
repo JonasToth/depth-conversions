@@ -12,6 +12,9 @@ helpers="$2"
 
 print_info "Using \"${exe}\" as driver executable"
 
+print_info "Cleaning old artifacts"
+rm orb-*.png
+
 set -v
 
 if ! ${exe} \

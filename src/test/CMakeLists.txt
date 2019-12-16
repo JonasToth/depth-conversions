@@ -77,12 +77,6 @@ configure_file(feature_extractor/flexion-0.png
                feature_extractor/flexion-0.png COPYONLY)
 configure_file(feature_extractor/flexion-1.png
                feature_extractor/flexion-1.png COPYONLY)
-configure_file(feature_extractor/flexion-002.png
-               feature_extractor/flexion-002.png COPYONLY)
-configure_file(feature_extractor/flexion-003.png
-               feature_extractor/flexion-003.png COPYONLY)
-configure_file(feature_extractor/flexion-004.png
-               feature_extractor/flexion-004.png COPYONLY)
 
 macro (add_extractor_test test_name)
     configure_file(feature_extractor/${test_name}.sh
