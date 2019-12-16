@@ -21,7 +21,7 @@ struct color_to_rgb {
         case feature_color::purple: return Scalar(255, 0, 255);
         case feature_color::all: return Scalar::all(-1);
         }
-        UNREACHABLE("Invalid enum-value!");
+        UNREACHABLE("Invalid enum-value!");  // LCOV_EXCL_LINE
     }
 };
 

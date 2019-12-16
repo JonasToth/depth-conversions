@@ -377,7 +377,7 @@ int main(int argc, char** argv) try {
                 return detail::make_converter<range_converter>(
                     files, input_enum, *potential_intrinsic);
 
-            throw std::invalid_argument{"target type for conversion required!"};
+            UNREACHABLE("unexpected conversion");  // LCOV_EXCL_LINE
         }();
         return c->process_batch(start_idx, end_idx) ? 0 : 1;
     } catch (const std::invalid_argument& e) {

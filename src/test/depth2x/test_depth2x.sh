@@ -58,5 +58,11 @@ if ${exe} flexion -m "scaramuzza" -c "kinect_intrinsic.txt" -i "data0-depth.png"
     exit 1
 fi
 
+# invalid integer range for the images should fail
+if ${exe} flexion -c "kinect_intrinsic.txt" -i "data{}-depth.png" -s 4 -e 7; then
+    print_error "Invalid integer range must fail"
+    exit 1
+fi
+
 print_info "Test successful!"
 exit 0

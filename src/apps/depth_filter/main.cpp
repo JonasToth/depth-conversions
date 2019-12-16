@@ -155,7 +155,7 @@ int main(int argc, char** argv) try {
                 make_unique<apps::median_blur_filter>(kernel_size_median));
 
         else
-            UNREACHABLE("Unhandled filter-subcommand provided!");
+            UNREACHABLE("Unhandled filter provided!");  // LCOV_EXCL_LINE
     }
     Ensures(!commands.empty());
 

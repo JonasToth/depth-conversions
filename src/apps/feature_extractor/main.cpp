@@ -133,11 +133,15 @@ struct ORBArgs : CommonArgs {
 
     static cv::ORB::ScoreType
     string_to_score_type(std::string_view picked) noexcept {
-        if (picked == "HARRIS")
-            return cv::ORB::ScoreType::HARRIS_SCORE;
-        if (picked == "FAST")
-            return cv::ORB::ScoreType::FAST_SCORE;
-        UNREACHABLE("Invalid choice for ScoreType!");
+        Expects(!picked.empty());
+        // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CHOICE(enumerator)                                                     \
+    if (picked == #enumerator)                                                 \
+        return cv::ORB::ScoreType::enumerator##_SCORE;
+        CHOICE(FAST)
+        CHOICE(HARRIS)
+#undef CHOICE
+        UNREACHABLE("Invalid choice for ScoreType!");  // LCOV_EXCL_LINE
     }
 
     int         feature_count  = 700;
@@ -181,33 +185,31 @@ struct AKAZEArgs : CommonArgs {
     static cv::AKAZE::DescriptorType
     string_to_descriptor(std::string_view picked) noexcept {
         Expects(!picked.empty());
+        // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHOICE(enumerator)                                                     \
     if (picked == #enumerator)                                                 \
         return cv::AKAZE::DescriptorType::DESCRIPTOR_##enumerator;
-
         CHOICE(KAZE_UPRIGHT)
         CHOICE(KAZE)
         CHOICE(MLDB_UPRIGHT)
         CHOICE(MLDB)
 #undef CHOICE
-
-        UNREACHABLE("Invalid Descriptor Choice detected!");
+        UNREACHABLE("Invalid Descriptor Choice detected!");  // LCOV_EXCL_LINE
     }
 
     static cv::KAZE::DiffusivityType
     string_to_diffusivity(std::string_view picked) noexcept {
         Expects(!picked.empty());
+        // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define CHOICE(enumerator)                                                     \
     if (picked == #enumerator)                                                 \
         return cv::KAZE::DiffusivityType::DIFF_##enumerator;
-
-        CHOICE(PM_G1)
-        CHOICE(PM_G2)
         CHOICE(WEICKERT)
         CHOICE(CHARBONNIER)
+        CHOICE(PM_G1)
+        CHOICE(PM_G2)
 #undef CHOICE
-
-        UNREACHABLE("Invalid Diffusivity Choice detected!");
+        UNREACHABLE("Invalid Diffusivity Choice detected!");  // LCOV_EXCL_LINE
     }
 
     std::string descriptor_type     = "MLDB";
@@ -330,7 +332,6 @@ int main(int argc, char** argv) try {
 
     batch_extractor extractor(detector, arg_input_files);
     const bool      success = extractor.process_batch(start_idx, end_idx);
-
     return success ? 0 : 1;
 } catch (const std::exception& e) {
     std::cerr << sens_loc::util::err{}
