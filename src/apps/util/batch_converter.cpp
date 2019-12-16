@@ -1,5 +1,7 @@
 #include "batch_converter.h"
 
+#include "parallel_processing.h"
+
 #include <chrono>
 #include <fmt/core.h>
 #include <gsl/gsl>
