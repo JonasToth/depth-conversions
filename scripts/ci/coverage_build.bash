@@ -16,7 +16,7 @@ cd "${SCRIPT_PATH}/../.."
 
 print_info "Build Debug build with coverage instrumentation"
 mkdir -p build && cd build
-cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_TESTING=ON -DWITH_TEST_COVERAGE=ON -DWITH_BENCHMARK=OFF
+CC=gcc-9 CXX=g++-9 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_TESTING=ON -DWITH_TEST_COVERAGE=ON -DWITH_BENCHMARK=OFF
 ninja dependencies
 cmake .
 ninja
