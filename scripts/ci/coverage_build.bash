@@ -12,6 +12,8 @@ SCRIPT_PATH=$(dirname "${SCRIPT_FILE}")
 # shellcheck source=../log_helpers.sh
 . "${SCRIPT_PATH}/../log_helpers.sh"
 
+cd "${SCRIPT_PATH}/../.."
+
 print_info "Build Debug build with coverage instrumentation"
 mkdir -p build && cd build
 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_TESTING=ON -DWITH_TEST_COVERAGE=ON -DWITH_BENCHMARK=OFF
@@ -24,6 +26,8 @@ ctest -j4 --output-on-failure .
 lcov --quiet --no-external --capture --directory ../src/apps --directory ../src/include --directory src/ --output-file test_coverage.info
 lcov --list test_coverage.info
 
-# genhtml test_coverage.info --output-directory coverage/
+if [ $# -ge 1 ]; then
+    genhtml test_coverage.info --output-directory coverage/
+fi
 
 exit 0
