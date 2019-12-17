@@ -34,7 +34,6 @@ struct color_to_rgb {
 struct Detector {
     cv::Ptr<cv::Feature2D> detector;
     std::string            output_pattern;
-    feature_color          color = feature_color::all;
 };
 
 /// Helper class that visits a list of images and does some generic

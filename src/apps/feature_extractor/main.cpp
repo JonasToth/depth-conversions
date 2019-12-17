@@ -307,13 +307,13 @@ int main(int argc, char** argv) try {
             return {SURF::create(surf.hessian_threshold, surf.n_octaves,
                                  surf.octave_layers, surf.extended,
                                  surf.upright),
-                    surf.out_path, feature_color::orange};
+                    surf.out_path};
 
         if (*sift_cmd)
             return {SIFT::create(sift.feature_count, sift.octave_layers,
                                  sift.contrast_threshold, sift.edge_threshold,
                                  sift.sigma),
-                    sift.out_path, feature_color::green};
+                    sift.out_path};
 
         if (*orb_cmd)
             return {ORB::create(orb.feature_count, orb.scale_factor,
@@ -321,7 +321,7 @@ int main(int argc, char** argv) try {
                                 orb.first_level, orb.WTA_K,
                                 ORBArgs::string_to_score_type(orb.score_type),
                                 orb.path_size, orb.fast_threshold),
-                    orb.out_path, feature_color::red};
+                    orb.out_path};
 
         if (*akaze_cmd)
             return {AKAZE::create(
@@ -329,7 +329,7 @@ int main(int argc, char** argv) try {
                         akaze.descriptor_size, akaze.descriptor_channels,
                         akaze.threshold, akaze.n_octaves, akaze.n_octave_layers,
                         AKAZEArgs::string_to_diffusivity(akaze.diffusivity)),
-                    akaze.out_path, feature_color::blue};
+                    akaze.out_path};
 
         UNREACHABLE("provided unexpected subcommand");  // LCOV_EXCL_LINE
     }();
