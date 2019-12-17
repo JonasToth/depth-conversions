@@ -1,4 +1,4 @@
-include(testing)
+include(test_macros)
 
 configure_file(depth2x/kinect_intrinsic.txt
                depth2x/kinect_intrinsic.txt COPYONLY)
