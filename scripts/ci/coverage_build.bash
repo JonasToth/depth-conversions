@@ -16,14 +16,26 @@ cd "${SCRIPT_PATH}/../.."
 
 print_info "Build Debug build with coverage instrumentation"
 mkdir -p build && cd build
-CC=gcc-9 CXX=g++-9 cmake .. -G Ninja -DCMAKE_BUILD_TYPE=RelWithDebInfo -DWITH_TESTING=ON -DWITH_TEST_COVERAGE=ON -DWITH_BENCHMARK=OFF
+cmake .. -G Ninja \
+    -DCMAKE_BUILD_TYPE=RelWithDebInfo \
+    -DWITH_TESTING=ON \
+    -DWITH_TEST_COVERAGE=ON \
+    -DWITH_BENCHMARK=OFF
+
 ninja dependencies
 cmake .
 ninja
 
 print_info "Measure coverage"
 ctest -j4 --output-on-failure .
-lcov --quiet --no-external --capture --directory ../src/apps --directory ../src/include --directory src/ --output-file test_coverage.info
+lcov \
+    --quiet \
+    --no-external \
+    --capture \
+    --directory ../src/apps \
+    --directory ../src/include \
+    --directory src/ \
+    --output-file test_coverage.info
 lcov --list test_coverage.info
 
 if [ $# -ge 1 ]; then
