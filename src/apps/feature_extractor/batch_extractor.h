@@ -1,6 +1,7 @@
 #ifndef BATCH_EXTRACTOR_H_IVH3CLLQ
 #define BATCH_EXTRACTOR_H_IVH3CLLQ
 
+#include <algorithm>
 #include <gsl/gsl>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
@@ -41,11 +42,14 @@ struct Detector {
 /// \ingroup feature-extractor-driver
 class batch_extractor {
   public:
-    batch_extractor(Detector detector, std::string input_pattern)
-        : _detector{std::move(detector)}
-        , _input_pattern{std::move(input_pattern)} {
+    batch_extractor(const std::vector<Detector>& detectors,
+                    const std::string&           input_pattern)
+        : _detectors{detectors}
+        , _input_pattern{input_pattern} {
         Expects(!_input_pattern.empty());
-        Expects(!_detector.output_pattern.empty());
+        Expects(std::none_of(
+            std::begin(detectors), std::end(detectors),
+            [](const Detector& d) { return d.output_pattern.empty(); }));
     }
 
     batch_extractor(const batch_extractor&) = default;
@@ -58,8 +62,8 @@ class batch_extractor {
     [[nodiscard]] bool process_batch(int start, int end) const noexcept;
 
   private:
-    Detector    _detector;
-    std::string _input_pattern;
+    const std::vector<Detector>& _detectors;
+    const std::string&           _input_pattern;
 };
 }  // namespace sens_loc::apps
 

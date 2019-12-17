@@ -291,50 +291,55 @@ int main(int argc, char** argv) try {
 
     CLI11_PARSE(app, argc, argv);
 
-    // TODO:
-    // - Transform to a vector of commands, {Feature, OutPath}
-    // - Write Result Files {Keypoints, Descriptor, Configuration,
-    //   In-File(relative path)}
-    // - Add Visualizer-Functionality? -> separate program that display
-    //   different features on the original image
-    auto detector = [&]() -> Detector {
+    // Create a vector of functors (unique_ptr<filter_interface>) that will
+    // be executed in order.
+    // Each element is created by one subcommand and its parameters.
+    vector<Detector> detectors;
+
+    for (const auto* cmd : app.get_subcommands()) {
+        using cv::AKAZE;
+        using cv::ORB;
         using cv::xfeatures2d::SIFT;
         using cv::xfeatures2d::SURF;
-        using cv::ORB;
-        using cv::AKAZE;
 
-        if (*surf_cmd)
-            return {SURF::create(surf.hessian_threshold, surf.n_octaves,
-                                 surf.octave_layers, surf.extended,
-                                 surf.upright),
-                    surf.out_path};
+        if (cmd->count() != 1U)
+            throw std::invalid_argument{"Apply each detector only once!"};
 
-        if (*sift_cmd)
-            return {SIFT::create(sift.feature_count, sift.octave_layers,
-                                 sift.contrast_threshold, sift.edge_threshold,
-                                 sift.sigma),
-                    sift.out_path};
+        if (cmd == surf_cmd)
+            detectors.emplace_back(Detector{
+                SURF::create(surf.hessian_threshold, surf.n_octaves,
+                             surf.octave_layers, surf.extended, surf.upright),
+                surf.out_path});
 
-        if (*orb_cmd)
-            return {ORB::create(orb.feature_count, orb.scale_factor,
-                                orb.n_levels, orb.edge_threshold,
-                                orb.first_level, orb.WTA_K,
-                                ORBArgs::string_to_score_type(orb.score_type),
-                                orb.path_size, orb.fast_threshold),
-                    orb.out_path};
+        else if (cmd == sift_cmd)
+            detectors.emplace_back(
+                Detector{SIFT::create(sift.feature_count, sift.octave_layers,
+                                      sift.contrast_threshold,
+                                      sift.edge_threshold, sift.sigma),
+                         sift.out_path});
 
-        if (*akaze_cmd)
-            return {AKAZE::create(
-                        AKAZEArgs::string_to_descriptor(akaze.descriptor_type),
-                        akaze.descriptor_size, akaze.descriptor_channels,
-                        akaze.threshold, akaze.n_octaves, akaze.n_octave_layers,
-                        AKAZEArgs::string_to_diffusivity(akaze.diffusivity)),
-                    akaze.out_path};
+        else if (cmd == orb_cmd)
+            detectors.emplace_back(Detector{
+                ORB::create(orb.feature_count, orb.scale_factor, orb.n_levels,
+                            orb.edge_threshold, orb.first_level, orb.WTA_K,
+                            ORBArgs::string_to_score_type(orb.score_type),
+                            orb.path_size, orb.fast_threshold),
+                orb.out_path});
 
-        UNREACHABLE("provided unexpected subcommand");  // LCOV_EXCL_LINE
-    }();
+        else if (cmd == akaze_cmd)
+            detectors.emplace_back(Detector{
+                AKAZE::create(
+                    AKAZEArgs::string_to_descriptor(akaze.descriptor_type),
+                    akaze.descriptor_size, akaze.descriptor_channels,
+                    akaze.threshold, akaze.n_octaves, akaze.n_octave_layers,
+                    AKAZEArgs::string_to_diffusivity(akaze.diffusivity)),
+                akaze.out_path});
 
-    batch_extractor extractor(detector, arg_input_files);
+        else
+            UNREACHABLE("Unhandled detector provided!");  // LCOV_EXCL_LINE
+    }
+
+    batch_extractor extractor(detectors, arg_input_files);
     const bool      success = extractor.process_batch(start_idx, end_idx);
     return success ? 0 : 1;
 } catch (const std::exception& e) {

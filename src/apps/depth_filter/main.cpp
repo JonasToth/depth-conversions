@@ -137,6 +137,9 @@ int main(int argc, char** argv) try {
     vector<unique_ptr<apps::abstract_filter>> commands;
 
     for (const auto* cmd : app.get_subcommands()) {
+        if (cmd->count() != 1U)
+            throw std::invalid_argument{"Apply each filter only once!"};
+
         if (cmd == bilateral_cmd) {
             // Got at pixel-distance as argument.
             if (distance_option->count() > 0U) {
