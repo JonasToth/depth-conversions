@@ -42,6 +42,9 @@ fi
 if [[ -z "$WITH_ASAN" ]]; then
     WITH_ASAN=OFF
 fi
+if [[ -z "$WITH_MSAN" ]]; then
+    WITH_MSAN=OFF
+fi
 if [[ -z "$WITH_UBSAN" ]]; then
     WITH_UBSAN=OFF
 fi
@@ -106,6 +109,7 @@ cmake .. \
  -DWITH_BENCHMARK=${WITH_BENCHMARK} \
  -DWITH_BENCHMARK_JUNIT_REPORT=${WITH_BENCHMARK_JUNIT_REPORT} \
  -DWITH_UBSAN=${WITH_UBSAN} \
+ -DWITH_MSAN=${WITH_MSAN} \
  -DWITH_ASAN=${WITH_ASAN} \
  -DWITH_TSAN=${WITH_TSAN}
 
