@@ -24,17 +24,17 @@ bool parallel_indexed_file_processing(int          start,
     static_assert(std::is_nothrow_invocable_r_v<bool, BoolFunction, int>,
                   "Functor needs to be noexcept callable and return bool!");
 
-    if (start > end)
-        std::swap(start, end);
-
-    bool batch_success = true;
-
-    tf::Executor executor;
-    tf::Taskflow tf;
-    std::mutex   cout_mutex;
-    int          fails = 0;
-
     try {
+        if (start > end)
+            std::swap(start, end);
+
+        bool batch_success = true;
+
+        tf::Executor executor;
+        tf::Taskflow tf;
+        std::mutex   cout_mutex;
+        int          fails = 0;
+
         tf.parallel_for(start, end + 1, 1,
                         [&cout_mutex, &batch_success, &fails, &f](int idx) {
                             const bool success = f(idx);
@@ -55,14 +55,13 @@ bool parallel_indexed_file_processing(int          start,
 
         Ensures(fails >= 0);
 
+        using namespace std::chrono;
         std::cerr << util::info{};
         std::cerr << "Processing " << rang::style::bold
                   << std::abs(end - start) + 1 - fails << rang::style::reset
                   << " images took " << rang::style::bold
-                  << std::chrono::duration_cast<std::chrono::seconds>(after -
-                                                                      before)
-                         .count()
-                  << "" << rang::style::reset << " seconds!\n";
+                  << duration_cast<seconds>(after - before).count()
+                  << rang::style::reset << " seconds!\n";
 
         if (fails > 0)
             std::cerr << util::warn{} << "Encountered " << rang::style::bold

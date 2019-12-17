@@ -339,8 +339,8 @@ int main(int argc, char** argv) try {
             UNREACHABLE("Unhandled detector provided!");  // LCOV_EXCL_LINE
     }
 
-    batch_extractor extractor(detectors, arg_input_files);
-    const bool      success = extractor.process_batch(start_idx, end_idx);
+    const batch_extractor extractor(detectors, arg_input_files);
+    const bool            success = extractor.process_batch(start_idx, end_idx);
     return success ? 0 : 1;
 } catch (const std::exception& e) {
     std::cerr << sens_loc::util::err{}
