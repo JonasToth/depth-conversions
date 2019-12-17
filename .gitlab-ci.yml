@@ -330,6 +330,7 @@ create-production-image:
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker run --rm $CI_REGISTRY_IMAGE:latest depth2x -h
     - docker run --rm $CI_REGISTRY_IMAGE:latest depth_filter -h
+    - docker run --rm $CI_REGISTRY_IMAGE:latest feature_extractor -h
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
     refs:
@@ -352,6 +353,7 @@ create-alpine-image:
     - docker build --pull -t $CI_REGISTRY_IMAGE:alpine-edge .
     - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge depth2x -h
     - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge depth_filter -h
+    - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge feature_extractor -h
     - docker push $CI_REGISTRY_IMAGE:alpine-edge
   only:
     refs:
