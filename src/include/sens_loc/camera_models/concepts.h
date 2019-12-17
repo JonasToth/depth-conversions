@@ -4,7 +4,7 @@
 #include <sens_loc/math/coordinate.h>
 #include <type_traits>
 
-namespace sens_loc { namespace camera_models {
+namespace sens_loc::camera_models {
 
 /// This type_trait checks the requirements on a type that implements
 /// a camera model. These requirements need to be fullfilled in order to
@@ -61,6 +61,6 @@ inline constexpr bool is_intrinsic_v =
                           math::pixel_coord<Real>>;
 // clang-format on
 
-}}  // namespace sens_loc::camera_models
+}  // namespace sens_loc::camera_models
 
 #endif /* end of include guard: CONCEPTS_H_DYRKVMES */

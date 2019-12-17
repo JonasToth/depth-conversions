@@ -3,7 +3,7 @@
 
 #include <sens_loc/math/image.h>
 
-namespace sens_loc { namespace conversion {
+namespace sens_loc::conversion {
 
 /// This function transforms a depth-image to a new depth-image.
 /// The parameters are scaling and adding an offset.
@@ -30,6 +30,6 @@ math::image<PixelType> depth_scaling(const math::image<PixelType>& depth_image,
     return math::image<PixelType>(std::move(img));
 }
 
-}}  // namespace sens_loc::conversion
+}  // namespace sens_loc::conversion
 
 #endif /* end of include guard: DEPTH_SCALING_H_SHNMYLJV */

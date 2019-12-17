@@ -5,7 +5,7 @@
 #include <gsl/gsl>
 #include <type_traits>
 
-namespace sens_loc { namespace math {
+namespace sens_loc::math {
 
 /// This function calculates the gaussian curvature for a function given its
 /// derivatives.
@@ -42,6 +42,6 @@ mean_curvature(Real f_u, Real f_v, Real f_uu, Real f_vv, Real f_uv) noexcept {
            // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
            pow(Real(2.) * sqrt(Real(1.) + f_u * f_u + f_v * f_v), Real(3.));
 }
-}}  // namespace sens_loc::math
+}  // namespace sens_loc::math
 
 #endif /* end of include guard: CURVATURE_H_LSXONAFA */

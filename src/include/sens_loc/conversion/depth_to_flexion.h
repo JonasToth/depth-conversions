@@ -11,7 +11,7 @@
 #include <sens_loc/math/image.h>
 #include <taskflow/taskflow.hpp>
 
-namespace sens_loc { namespace conversion {
+namespace sens_loc::conversion {
 
 /// Convert range image to a flexion-image.
 ///
@@ -214,6 +214,6 @@ convert_flexion(const math::image<Real>& flexion_image) noexcept {
 
     return math::image<PixelType>(std::move(img));
 }
-}}  // namespace sens_loc::conversion
+}  // namespace sens_loc::conversion
 
 #endif /* end of include guard: DEPTH_TO_TRIPLE_H_Y021ENVZ */

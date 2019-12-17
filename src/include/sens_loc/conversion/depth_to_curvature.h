@@ -13,7 +13,7 @@
 #include <sens_loc/math/image.h>
 #include <sens_loc/math/scaling.h>
 
-namespace sens_loc { namespace conversion {
+namespace sens_loc::conversion {
 
 /// Convert the range image \p depth_image to a gaussian curvature image.
 ///
@@ -280,6 +280,6 @@ curvature_to_image(const math::image<Real>&     curvature_img,
     return math::image<PixelType>(std::move(result));
 }
 
-}}  // namespace sens_loc::conversion
+}  // namespace sens_loc::conversion
 
 #endif /* end of include guard: DEPTH_TO_CURVATURE_H_EK8HDTN0 */

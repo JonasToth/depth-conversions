@@ -5,7 +5,7 @@
 #include <tuple>
 #include <type_traits>
 
-namespace sens_loc { namespace math {
+namespace sens_loc::math {
 
 /// Calculate the first derivate with the central differential quotient.
 /// \tparam Real precision of the calculation
@@ -92,6 +92,6 @@ derivatives(Real d__1__1, Real d__1__0, Real d__1_1,
     return std::make_tuple(f_u, f_v, f_uu, f_vv, f_uv);
 };
 // clang-format on
-}}  // namespace sens_loc::math
+}  // namespace sens_loc::math
 
 #endif /* end of include guard: DERIVATIVES_H_5CHQ89V7 */

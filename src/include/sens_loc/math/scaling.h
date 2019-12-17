@@ -6,7 +6,7 @@
 #include <type_traits>
 #include <utility>
 
-namespace sens_loc { namespace math {
+namespace sens_loc::math {
 
 /// This class is a small wrapper to clarify the mathematical notation
 /// of ranges. It does NOT distinguish between \f$[min, max)\f$,
@@ -53,6 +53,6 @@ inline constexpr Real scale(const numeric_range<Real>& source_range,
 
     return target_clamped;
 }
-}}  // namespace sens_loc::math
+}  // namespace sens_loc::math
 
 #endif /* end of include guard: SCALING_H_SAL4XICS */

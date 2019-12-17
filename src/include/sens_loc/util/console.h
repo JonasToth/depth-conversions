@@ -4,7 +4,7 @@
 #include <ostream>
 #include <rang.hpp>
 
-namespace sens_loc { namespace util {
+namespace sens_loc::util {
 /// Tag-type for overload resolution of output operations to signal error
 /// messages.
 struct err {};
@@ -30,7 +30,7 @@ inline std::ostream& operator<<(std::ostream& os, info /*info_tag*/) {
        << " ";
     return os;
 }
-}}  // namespace sens_loc::util
+}  // namespace sens_loc::util
 
 
 #endif /* end of include guard: CONSOLE_H_MZIDGR2K */

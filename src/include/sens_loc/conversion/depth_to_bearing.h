@@ -14,7 +14,7 @@
 #include <sens_loc/util/correctness_util.h>
 #include <taskflow/taskflow.hpp>
 
-namespace sens_loc { namespace conversion {
+namespace sens_loc::conversion {
 
 /// Convert the image \p depth_image to an bearing angle image.
 /// This function returns a new image with the same dimension as \p depth_image.
@@ -299,6 +299,6 @@ convert_bearing(const math::image<Real>& bearing_image) noexcept {
 
     return math::image<PixelType>(std::move(img));
 }
-}}  // namespace sens_loc::conversion
+}  // namespace sens_loc::conversion
 
 #endif /* end of include guard: DEPTH_TO_BEARING_H_ZXFA9HGG */

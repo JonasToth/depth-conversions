@@ -5,7 +5,7 @@
 #include <sens_loc/math/eigen_types.h>
 #include <type_traits>
 
-namespace sens_loc { namespace math {
+namespace sens_loc::math {
 
 /// This enum allows to discrimate in which coordinate system or frame of
 /// reference a vector lives. It is solely for code readability and correctness
@@ -219,6 +219,6 @@ using camera_coord = coordinate<Real, frame::camera>;
 template <typename Real = float>
 using world_coord = coordinate<Real, frame::world>;
 
-}}  // namespace sens_loc::math
+}  // namespace sens_loc::math
 
 #endif /* end of include guard: COORDINATE_H_Y7FJINQO */

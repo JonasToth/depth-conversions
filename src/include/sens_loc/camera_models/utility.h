@@ -5,7 +5,7 @@
 #include <sens_loc/math/coordinate.h>
 #include <type_traits>
 
-namespace sens_loc { namespace camera_models {
+namespace sens_loc::camera_models {
 
 /// This function calculates the angle of the rays between two pixels.
 /// \param calibration projection model for a specific sensor
@@ -44,6 +44,6 @@ Real phi(const Intrinsic<Real>&           calibration,
     return angle;
 }
 
-}}  // namespace sens_loc::camera_models
+}  // namespace sens_loc::camera_models
 
 #endif /* end of include guard: UTILITY_H_SAL9APRW */

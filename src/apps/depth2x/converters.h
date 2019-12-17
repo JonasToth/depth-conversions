@@ -11,7 +11,7 @@
 #include <sens_loc/conversion/depth_to_max_curve.h>
 #include <util/batch_converter.h>
 
-namespace sens_loc { namespace apps {
+namespace sens_loc::apps {
 
 /// \addtogroup conversion-driver
 /// @{
@@ -169,6 +169,6 @@ class flexion_converter : public batch_sensor_converter<Intrinsic> {
 
 /// @}
 
-}}  // namespace sens_loc::apps
+}  // namespace sens_loc::apps
 
 #endif

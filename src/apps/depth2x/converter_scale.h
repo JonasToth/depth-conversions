@@ -3,7 +3,7 @@
 
 #include <util/batch_converter.h>
 
-namespace sens_loc { namespace apps {
+namespace sens_loc::apps {
 
 /// \addtogroup conversion-driver
 /// @{
@@ -30,6 +30,6 @@ class scale_converter : public batch_converter {
                                     int idx) const noexcept override;
 };
 /// @}
-}}  // namespace sens_loc::apps
+}  // namespace sens_loc::apps
 
 #endif /* end of include guard: CONVERTER_SCALE_H_EMX4RQOH */

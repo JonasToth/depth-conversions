@@ -6,7 +6,7 @@
 #include <sens_loc/math/image.h>
 #include <taskflow/taskflow.hpp>
 
-namespace sens_loc { namespace conversion {
+namespace sens_loc::conversion {
 
 /// This function converts an orthographic depth image to an laser-scan like
 /// depth image, aka. range-image.
@@ -119,6 +119,6 @@ par_depth_to_laserscan(const math::image<PixelType>& depth_image,
 
     return sync_points;
 }
-}}  // namespace sens_loc::conversion
+}  // namespace sens_loc::conversion
 
 #endif /* end of include guard: DEPTH_TO_LASERSCAN_H_P8V9HAVF */

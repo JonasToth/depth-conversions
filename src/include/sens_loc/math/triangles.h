@@ -8,7 +8,7 @@
 #include <sens_loc/math/constants.h>
 #include <type_traits>
 
-namespace sens_loc { namespace math {
+namespace sens_loc::math {
 
 /// This function calculates the bearing angle between two neighbouring range
 /// measurements.
@@ -96,6 +96,6 @@ inline Real reference_lin_bearing_angle(const Real b,
     return result;
 }
 
-}}  // namespace sens_loc::math
+}  // namespace sens_loc::math
 
 #endif /* end of include guard: TRIANGLES_H_XWPDRVKT */

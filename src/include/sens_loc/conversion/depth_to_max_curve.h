@@ -10,7 +10,7 @@
 #include <sens_loc/math/image.h>
 #include <sens_loc/math/triangles.h>
 
-namespace sens_loc { namespace conversion {
+namespace sens_loc::conversion {
 
 /// Convert a range image to an image derived from bearing angles.
 ///
@@ -174,6 +174,6 @@ convert_max_curve(const math::image<Real>& max_curve) noexcept {
 
     return math::image<PixelType>(std::move(img));
 }
-}}  // namespace sens_loc::conversion
+}  // namespace sens_loc::conversion
 
 #endif /* end of include guard: DEPTH_TO_MAX_CURVE_H_XO6PUN8H */

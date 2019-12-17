@@ -6,7 +6,7 @@
 #include <sens_loc/math/coordinate.h>
 #include <type_traits>
 
-namespace sens_loc { namespace math {
+namespace sens_loc::math {
 
 namespace detail {
 template <typename Number>  // requires Number<Number>
@@ -127,6 +127,6 @@ image<TargetType> convert(const image<PixelType>& img) noexcept {
     return math::image<TargetType>(std::move(tmp));
 }
 
-}}  // namespace sens_loc::math
+}  // namespace sens_loc::math
 
 #endif /* end of include guard: IMAGE_H_YQCE0AWR */

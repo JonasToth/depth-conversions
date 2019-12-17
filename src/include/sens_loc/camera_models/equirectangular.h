@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <type_traits>
 
-namespace sens_loc { namespace camera_models {
+namespace sens_loc::camera_models {
 
 namespace detail {
 template <typename Real>
@@ -166,6 +166,6 @@ equirectangular<Real>::pixel_to_sphere(const math::pixel_coord<_Real>& p) const
     Ensures(std::abs(s.norm() - Real(1.0)) < 0.000001);
     return s;
 }
-}}  // namespace sens_loc::camera_models
+}  // namespace sens_loc::camera_models
 
 #endif /* end of include guard: LASER_SCANNER_H_WSZJIY40 */
