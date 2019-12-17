@@ -283,7 +283,7 @@ roskinetic-image:
   dependencies: []
 
 rosmelodic-image:
-  allow_failures: true
+  allow_failure: true
   image: $CI_REGISTRY_IMAGE/base-image-rosmelodic
   stage: platforms
   <<: *platform_build_option_variables
