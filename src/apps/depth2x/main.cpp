@@ -12,6 +12,7 @@
 #include <sens_loc/version.h>
 #include <stdexcept>
 #include <string>
+#include <util/colored_parse.h>
 #include <util/version_printer.h>
 #include <variant>
 
@@ -100,8 +101,7 @@ int main(int argc, char** argv) try {
                "'horizontal_0000.png ...' \n"
                "in the working directory");
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    app.add_flag_function("-v,--version", apps::print_version(argv[0]),
+    app.add_flag_function("-v,--version", apps::print_version(*argv),
                           "Print version and exit");
 
     string calibration_file;
@@ -311,7 +311,7 @@ int main(int argc, char** argv) try {
                           "Real number that is added to every depth value.",
                           /*defaulted=*/true);
 
-    CLI11_PARSE(app, argc, argv);
+    COLORED_APP_PARSE(app, argc, argv);
 
     // Options that are always required are checked first.
     ifstream cali_fstream{calibration_file};
@@ -347,54 +347,38 @@ int main(int argc, char** argv) try {
         return 1;
     }
 
-    try {
-        auto c = [&]() -> unique_ptr<apps::batch_converter> {
-            using namespace apps;
-            auto input_enum = apps::str_to_depth_type(input_type);
-            if (*scale_cmd)
-                return make_unique<apps::scale_converter>(files, scale_factor,
-                                                          scale_delta);
+    auto c = [&]() -> unique_ptr<apps::batch_converter> {
+        using namespace apps;
+        auto input_enum = apps::str_to_depth_type(input_type);
+        if (*scale_cmd)
+            return make_unique<apps::scale_converter>(files, scale_factor,
+                                                      scale_delta);
 
-            Expects(potential_intrinsic);
-            if (*bearing_cmd)
-                return detail::make_converter<bearing_converter>(
-                    files, input_enum, *potential_intrinsic);
-            if (*flexion_cmd)
-                return detail::make_converter<flexion_converter>(
-                    files, input_enum, *potential_intrinsic);
-            if (*gauss_curv_cmd)
-                return detail::make_converter<gauss_curv_converter>(
-                    files, input_enum, *potential_intrinsic, lower_bound,
-                    upper_bound);
-            if (*max_curve_cmd)
-                return detail::make_converter<max_curve_converter>(
-                    files, input_enum, *potential_intrinsic);
-            if (*mean_curv_cmd)
-                return detail::make_converter<mean_curv_converter>(
-                    files, input_enum, *potential_intrinsic, lower_bound,
-                    upper_bound);
-            if (*range_cmd)
-                return detail::make_converter<range_converter>(
-                    files, input_enum, *potential_intrinsic);
+        Expects(potential_intrinsic);
+        if (*bearing_cmd)
+            return detail::make_converter<bearing_converter>(
+                files, input_enum, *potential_intrinsic);
+        if (*flexion_cmd)
+            return detail::make_converter<flexion_converter>(
+                files, input_enum, *potential_intrinsic);
+        if (*gauss_curv_cmd)
+            return detail::make_converter<gauss_curv_converter>(
+                files, input_enum, *potential_intrinsic, lower_bound,
+                upper_bound);
+        if (*max_curve_cmd)
+            return detail::make_converter<max_curve_converter>(
+                files, input_enum, *potential_intrinsic);
+        if (*mean_curv_cmd)
+            return detail::make_converter<mean_curv_converter>(
+                files, input_enum, *potential_intrinsic, lower_bound,
+                upper_bound);
+        if (*range_cmd)
+            return detail::make_converter<range_converter>(
+                files, input_enum, *potential_intrinsic);
 
-            UNREACHABLE("unexpected conversion");  // LCOV_EXCL_LINE
-        }();
-        return c->process_batch(start_idx, end_idx) ? 0 : 1;
-    } catch (const std::invalid_argument& e) {
-        cerr << util::err{} << "Could not initialize the batch process.\n"
-             << util::err{} << e.what() << "\n";
-        return 1;
-    } catch (const std::exception& e) {
-        cerr << util::err{} << "Error occured during batch processing.\n"
-             << e.what() << "\n";
-        return 1;
-    } catch (...) {
-        cerr << util::err{}
-             << "Unexpected error occured during batch processing.\n";
-        return 1;
-    }
-
-    UNREACHABLE("All possible options should have terminated already");
+        UNREACHABLE("unexpected conversion");  // LCOV_EXCL_LINE
+    }();
+    return c->process_batch(start_idx, end_idx) ? 0 : 1;
 } catch (const std::exception& e) {
     std::cerr << sens_loc::util::err{}
               << "Severe problem occured while system-setup.\n"

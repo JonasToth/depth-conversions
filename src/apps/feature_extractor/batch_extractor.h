@@ -52,12 +52,6 @@ class batch_extractor {
             [](const Detector& d) { return d.output_pattern.empty(); }));
     }
 
-    batch_extractor(const batch_extractor&) = default;
-    batch_extractor(batch_extractor&&)      = default;
-    batch_extractor& operator=(const batch_extractor&) = default;
-    batch_extractor& operator=(batch_extractor&&) = default;
-    virtual ~batch_extractor()                    = default;
-
     /// Process a whole batch of files in the range [start, end].
     [[nodiscard]] bool process_batch(int start, int end) const noexcept;
 

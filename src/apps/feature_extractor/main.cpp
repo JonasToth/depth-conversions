@@ -8,6 +8,7 @@
 #include <sens_loc/util/correctness_util.h>
 #include <stdexcept>
 #include <string>
+#include <util/colored_parse.h>
 #include <util/version_printer.h>
 #include <vector>
 
@@ -289,7 +290,7 @@ int main(int argc, char** argv) try {
     akaze_cmd->footer("\n\n");
     const AKAZEArgs akaze(akaze_cmd);
 
-    CLI11_PARSE(app, argc, argv);
+    COLORED_APP_PARSE(app, argc, argv);
 
     // Create a vector of functors (unique_ptr<filter_interface>) that will
     // be executed in order.

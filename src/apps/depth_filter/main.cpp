@@ -10,6 +10,7 @@
 #include <sens_loc/version.h>
 #include <stdexcept>
 #include <util/batch_converter.h>
+#include <util/colored_parse.h>
 #include <util/version_printer.h>
 #include <vector>
 
@@ -122,7 +123,7 @@ int main(int argc, char** argv) try {
         "The distance of pixels that are considered for the median blur.",
         /*defaulted=*/true);
 
-    CLI11_PARSE(app, argc, argv);
+    COLORED_APP_PARSE(app, argc, argv);
 
     if (app.got_subcommand(bilateral_cmd) && distance_option->count() == 0U &&
         sigma_space_option->count() == 0U) {
