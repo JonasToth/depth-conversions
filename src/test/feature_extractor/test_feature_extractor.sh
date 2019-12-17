@@ -31,6 +31,14 @@ if ${exe} -i "not-existing-{:03d}.png" -s 0 -e 1 sift -o "foo-{}.png"; then
     print_error "Bad filename needs to fail"
     exit 1
 fi
+if ${exe} -i "flexion-{}.png" -s 0 -e 1 \
+    akaze  -o "multi1-{}.akaze" \
+    akaze ; then
+    print_error "Detecting with same command twice is not supported and should fail!"
+    exit 1
+else
+    print_info "Test Multi-Command identical passed"
+fi
 
 rm -f multi-*
 if ! ${exe} -i "flexion-{}.png" -s 0 -e 1 \

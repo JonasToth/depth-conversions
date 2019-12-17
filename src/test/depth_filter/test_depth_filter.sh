@@ -23,6 +23,15 @@ if ${exe} ; then
     print_error "Not enough arguments calling not checked"
     exit 1
 fi
+if ${exe} \
+    -i "data{}-depth.png" \
+    -o "median-blur-{}.png" \
+    -s 0 -e 1 \
+    median-blur \
+    median-blur --distance 5 ; then
+    print_error "Applying filter twice is not supported"
+    exit 1
+fi
 
 if ! ${exe} --version ; then
     print_error "Printing the version is required to work"

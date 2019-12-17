@@ -22,17 +22,19 @@ bool parallel_indexed_file_processing(int          start,
                                       int          end,
                                       BoolFunction f) noexcept {
     static_assert(std::is_nothrow_invocable_r_v<bool, BoolFunction, int>,
-                  "Function needs to be noexcept callable and return bool!");
+                  "Functor needs to be noexcept callable and return bool!");
+
     if (start > end)
         std::swap(start, end);
 
     bool batch_success = true;
-    try {
-        tf::Executor executor;
-        tf::Taskflow tf;
-        std::mutex   cout_mutex;
-        int          fails = 0;
 
+    tf::Executor executor;
+    tf::Taskflow tf;
+    std::mutex   cout_mutex;
+    int          fails = 0;
+
+    try {
         tf.parallel_for(start, end + 1, 1,
                         [&cout_mutex, &batch_success, &fails, &f](int idx) {
                             const bool success = f(idx);
@@ -65,19 +67,12 @@ bool parallel_indexed_file_processing(int          start,
         if (fails > 0)
             std::cerr << util::warn{} << "Encountered " << rang::style::bold
                       << fails << rang::style::reset << " problematic files!\n";
-    } catch (const std::exception& e) {
-        std::cerr << util::err{} << "Problem occured during batch-processing!\n"
-                  << "Message: " << e.what() << "\n";
-        batch_success = false;
-    } catch (...) {
-        std::cerr << util::err{}
-                  << "Fatal problem occured while batch-processing!\n"
-                  << "Potential exhaustion of resources or an other system "
-                     "problem!\n";
-        batch_success = false;
-    }
 
-    return batch_success;
+        return batch_success;
+    } catch (...) {
+        std::cerr << util::err{} << "System error in batch processing!\n";
+        return false;
+    }
 }
 
 }  // namespace sens_loc::apps

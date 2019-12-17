@@ -398,7 +398,7 @@ int main(int argc, char** argv) try {
 } catch (const std::exception& e) {
     std::cerr << sens_loc::util::err{}
               << "Severe problem occured while system-setup.\n"
-              << "Message:" << e.what();
+              << "Message:" << e.what() << "\n";
     return 1;
 } catch (...) {
     std::cerr << sens_loc::util::err{}
