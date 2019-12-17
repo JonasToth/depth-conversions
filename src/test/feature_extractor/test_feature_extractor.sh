@@ -22,16 +22,29 @@ if ! ${exe} --version ; then
     exit 1
 fi
 
-if ${exe} -i "flexion-{:03d}.png" -s 2 -e 4 ; then
+if ${exe} -i "flexion-{:03d}.png" -s 0 -e 1 ; then
     print_error "Subcommand required"
     exit 1
 fi
 
-if ${exe} -i "not-existing-{:03d}.png" -s 2 -e 4 sift -o "foo-{}.png"; then
+if ${exe} -i "not-existing-{:03d}.png" -s 0 -e 1 sift -o "foo-{}.png"; then
     print_error "Bad filename needs to fail"
     exit 1
 fi
 
+if ! ${exe} -i "flexion-{:03d}.png" -s 0 -e 1 \
+     akaze -o "multi-{}.akaze" \
+     orb -o "multi-{}.orb" ; then
+    print_error "Running multiple detectors with one run failed"
+    exit 1
+fi
+if  [ ! -f multi-0.orb ] || \
+    [ ! -f multi-0.akaze ] \
+    [ ! -f multi-1.orb ] || \
+    [ ! -f multi-1.akaze ] ; then
+    print_error "Did not create expected output files."
+    exit 1
+fi
 
 print_info "Test successful!"
 exit 0

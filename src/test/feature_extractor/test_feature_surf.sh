@@ -13,19 +13,19 @@ helpers="$2"
 print_info "Using \"${exe}\" as driver executable"
 
 print_info "Cleaning old artifacts"
-rm -f surf-*.png
+rm -f surf-*
 
 set -v
 
 if ! ${exe} \
     -i "flexion-{}.png" \
     -s 0 -e 1 \
-    surf -o "surf-{}.png" ; then
+    surf -o "surf-{}.surf" ; then
     print_error "Default SURF-Detection did not work"
     exit 1
 fi
-if  [ ! -f surf-0.png ] || \
-    [ ! -f surf-1.png ]; then
+if  [ ! -f surf-0.surf ] || \
+    [ ! -f surf-1.surf ]; then
     print_error "Did not create expected output files."
     exit 1
 fi
@@ -33,13 +33,13 @@ fi
 if ! ${exe} \
    -i "flexion-{}.png" \
    -s 0 -e 1 \
-   surf -o "surf-extended-{}.png" \
+   surf -o "surf-extended-{}.surf" \
    --extended-descriptor ; then
     print_error "Extended SURF descriptor not calculated"
     exit 1
 fi
-if  [ ! -f surf-extended-0.png ] || \
-    [ ! -f surf-extended-1.png ]; then
+if  [ ! -f surf-extended-0.surf ] || \
+    [ ! -f surf-extended-1.surf ]; then
     print_error "Did not create expected output files."
     exit 1
 fi
@@ -47,13 +47,13 @@ fi
 if ! ${exe} \
    -i "flexion-{}.png" \
    -s 0 -e 1 \
-   surf -o "surf-upright-{}.png" \
+   surf -o "surf-upright-{}.surf" \
    --upright ; then
     print_error "Upright unoriented SURF not calculated"
     exit 1
 fi
-if  [ ! -f surf-upright-0.png ] || \
-    [ ! -f surf-upright-1.png ]; then
+if  [ ! -f surf-upright-0.surf ] || \
+    [ ! -f surf-upright-1.surf ]; then
     print_error "Did not create expected output files."
     exit 1
 fi

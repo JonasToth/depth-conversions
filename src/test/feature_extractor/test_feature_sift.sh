@@ -13,19 +13,19 @@ helpers="$2"
 print_info "Using \"${exe}\" as driver executable"
 
 print_info "Cleaning old artifacts"
-rm -f sift-*.png
+rm -f sift-*
 
 set -v
 
 if ! ${exe} \
     -i "flexion-{}.png" \
     -s 0 -e 1 \
-    sift -o "sift-{}.png" ; then
+    sift -o "sift-{}.sift" ; then
     print_error "Default SIFT-Detection did not work"
     exit 1
 fi
-if  [ ! -f sift-0.png ] || \
-    [ ! -f sift-1.png ]; then
+if  [ ! -f sift-0.sift ] || \
+    [ ! -f sift-1.sift ]; then
     print_error "Did not create expected output files."
     exit 1
 fi
@@ -33,7 +33,7 @@ fi
 # Invalid arguments
 if ${exe} \
    -i "flexion-{}.png" \
-   -s 0 -e 1  sift ; then
+   -s 0 -e 1 sift ; then
     print_error "SIFT requires output path"
     exit 1
 fi

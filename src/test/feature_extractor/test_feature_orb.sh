@@ -13,32 +13,32 @@ helpers="$2"
 print_info "Using \"${exe}\" as driver executable"
 
 print_info "Cleaning old artifacts"
-rm -f orb-*.png
+rm -f orb-*
 
 set -v
 
 if ! ${exe} \
    -i "flexion-{}.png" \
    -s 0 -e 1 \
-   orb -o "orb-{}.png" ; then
+   orb -o "orb-{}.orb" ; then
     print_error "Default ORB-Detection did not work"
     exit 1
 fi
-if  [ ! -f orb-0.png ] || \
-    [ ! -f orb-1.png ]; then
+if  [ ! -f orb-0.orb ] || \
+    [ ! -f orb-1.orb ]; then
     print_error "Did not create expected output files."
     exit 1
 fi
 if ! ${exe} \
    -i "flexion-{}.png" \
    -s 0 -e 1 \
-   orb -o "orb-scale-{}.png" \
+   orb -o "orb-scale-{}.orb" \
    --scale-factor 1.5 ; then
     print_error "ORB Scale factor does not work"
     exit 1
 fi
-if  [ ! -f orb-scale-0.png ] || \
-    [ ! -f orb-scale-1.png ]; then
+if  [ ! -f orb-scale-0.orb ] || \
+    [ ! -f orb-scale-1.orb ]; then
     print_error "Did not create expected output files."
     exit 1
 fi
