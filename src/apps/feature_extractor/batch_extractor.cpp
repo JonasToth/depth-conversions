@@ -67,10 +67,11 @@ bool process_index(const std::string& in_pattern,
 }  // namespace
 
 bool batch_extractor::process_batch(int start, int end) const noexcept {
-    return parallel_indexed_file_processing(start, end, [this](int idx) {
-        return process_index(this->_input_pattern,
-                             this->_detector.output_pattern, idx,
-                             *this->_detector.detector, this->_detector.color);
-    });
+    return parallel_indexed_file_processing(
+        start, end, [this](int idx) noexcept -> bool {
+            return process_index(
+                this->_input_pattern, this->_detector.output_pattern, idx,
+                *this->_detector.detector, this->_detector.color);
+        });
 }
 }  // namespace sens_loc::apps

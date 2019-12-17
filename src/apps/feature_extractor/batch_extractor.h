@@ -9,7 +9,10 @@
 
 namespace sens_loc::apps {
 
+/// \ingroup feature-extractor-driver
 enum class feature_color { green, blue, red, orange, purple, all };
+
+/// \ingroup feature-extractor-driver
 struct color_to_rgb {
     static cv::Scalar convert(feature_color c) {
         using cv::Scalar;
@@ -25,6 +28,9 @@ struct color_to_rgb {
     }
 };
 
+/// Small wrapper-class that encodes the information for detector-configuration
+/// and file-IO configuration in batch processing.
+/// \ingroup feature-extractor-driver
 struct Detector {
     cv::Ptr<cv::Feature2D> detector;
     std::string            output_pattern;
@@ -33,6 +39,7 @@ struct Detector {
 
 /// Helper class that visits a list of images and does some generic
 /// processing on it.
+/// \ingroup feature-extractor-driver
 class batch_extractor {
   public:
     batch_extractor(Detector detector, std::string input_pattern)

@@ -11,8 +11,14 @@
 #include <util/version_printer.h>
 #include <vector>
 
-namespace {
+/// \defgroup feature-extractor-driver feature detection and extraction from
+/// images
+///
+/// This driver utilizes OpenCV for feature detection, extraction and
+/// serialization.
 
+namespace {
+/// \ingroup feature-extractor-driver
 struct CommonArgs {
     CommonArgs(CLI::App* cmd) {
         cmd->add_option("-o,--output", out_path,
@@ -23,6 +29,7 @@ struct CommonArgs {
     std::string out_path;
 };
 
+/// \ingroup feature-extractor-driver
 struct SURFArgs : CommonArgs {
     SURFArgs(CLI::App* cmd)
         : CommonArgs(cmd) {
@@ -57,6 +64,7 @@ struct SURFArgs : CommonArgs {
     bool upright           = false;
 };
 
+/// \ingroup feature-extractor-driver
 struct SIFTArgs : CommonArgs {
     SIFTArgs(CLI::App* cmd)
         : CommonArgs(cmd) {
@@ -94,6 +102,7 @@ struct SIFTArgs : CommonArgs {
     double sigma              = 1.6;
 };
 
+/// \ingroup feature-extractor-driver
 struct ORBArgs : CommonArgs {
     ORBArgs(CLI::App* cmd)
         : CommonArgs(cmd) {
@@ -155,6 +164,7 @@ struct ORBArgs : CommonArgs {
     int         fast_threshold = 20;
 };
 
+/// \ingroup feature-extractor-driver
 struct AKAZEArgs : CommonArgs {
     AKAZEArgs(CLI::App* cmd)
         : CommonArgs(cmd) {
@@ -222,12 +232,6 @@ struct AKAZEArgs : CommonArgs {
 };
 }  // namespace
 
-/// \defgroup feature-extractor-driver feature detection and extraction from
-/// images
-///
-/// This driver utilizes OpenCV for feature detection, extraction and
-/// serialization.
-
 /// Parallelized driver to batch-process images for feature detection and
 /// extraction.
 /// \ingroup feature-extractor-driver
@@ -246,7 +250,7 @@ int main(int argc, char** argv) try {
     cv::setNumThreads(0);
 
     CLI::App app{"Batch-processing tool to extract visual features"};
-    app.require_subcommand(1);  // Expect one or more feature commands
+    app.require_subcommand(1, 1);
     app.footer("\n\n"
                "An example invocation of the tool is:\n"
                "\n"

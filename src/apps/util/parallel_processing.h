@@ -6,6 +6,7 @@
 #include <iostream>
 #include <sens_loc/util/console.h>
 #include <taskflow/taskflow.hpp>
+#include <type_traits>
 
 namespace sens_loc::apps {
 
@@ -20,6 +21,8 @@ template <typename BoolFunction>
 bool parallel_indexed_file_processing(int          start,
                                       int          end,
                                       BoolFunction f) noexcept {
+    static_assert(std::is_nothrow_invocable_r_v<bool, BoolFunction, int>,
+                  "Function needs to be noexcept callable and return bool!");
     if (start > end)
         std::swap(start, end);
 

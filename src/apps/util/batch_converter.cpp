@@ -45,7 +45,7 @@ batch_converter::preprocess_depth(const math::image<ushort>& depth_image) const
 bool batch_converter::process_batch(int start, int end) const noexcept {
     return parallel_indexed_file_processing(
         start, end,
-        [this](int idx) -> bool { return this->process_index(idx); });
+        [this](int idx) noexcept -> bool { return this->process_index(idx); });
 }
 
 }  // namespace sens_loc::apps
