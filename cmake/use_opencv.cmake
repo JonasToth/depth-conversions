@@ -1,5 +1,5 @@
 if (NOT FORCE_BUNDLED_CV)
-    find_package(OpenCV QUIET)
+    find_package(OpenCV 4 QUIET)
 endif (NOT FORCE_BUNDLED_CV)
 
 if (NOT OpenCV_FOUND)
