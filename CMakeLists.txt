@@ -93,6 +93,7 @@ include(GNUInstallDirs)
 
 # Thirdparty dependencies
 include(use_eigen)
+include(use_boost)
 include(use_opencv)
 include(use_rang)
 include(use_cli11)

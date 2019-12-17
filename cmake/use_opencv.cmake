@@ -78,7 +78,7 @@ if (NOT OpenCV_FOUND)
 else ()
     message(STATUS "Found opencv. Assuming it includes non-free features!")
     add_custom_target(opencv)
-    set(opencv_build TRUE)
+    set(opencv_built TRUE)
 endif (NOT OpenCV_FOUND)
 
 message(STATUS "Using OpenCV from ${OpenCV_DIR}")
