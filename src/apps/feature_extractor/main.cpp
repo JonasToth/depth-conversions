@@ -258,7 +258,6 @@ int main(int argc, char** argv) try {
                "feature_extractor \\\n"
                "\n");
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
     app.add_flag_function("-v,--version", apps::print_version(*argv),
                           "Print version and exit");
 
