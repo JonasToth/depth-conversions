@@ -32,14 +32,15 @@ if ${exe} -i "not-existing-{:03d}.png" -s 0 -e 1 sift -o "foo-{}.png"; then
     exit 1
 fi
 
-if ! ${exe} -i "flexion-{:03d}.png" -s 0 -e 1 \
-     akaze -o "multi-{}.akaze" \
-     orb -o "multi-{}.orb" ; then
+rm -f multi-*
+if ! ${exe} -i "flexion-{}.png" -s 0 -e 1 \
+     akaze  -o "multi-{}.akaze" \
+     orb    -o "multi-{}.orb" ; then
     print_error "Running multiple detectors with one run failed"
     exit 1
 fi
 if  [ ! -f multi-0.orb ] || \
-    [ ! -f multi-0.akaze ] \
+    [ ! -f multi-0.akaze ] || \
     [ ! -f multi-1.orb ] || \
     [ ! -f multi-1.akaze ] ; then
     print_error "Did not create expected output files."

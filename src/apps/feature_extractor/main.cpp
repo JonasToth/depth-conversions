@@ -250,7 +250,7 @@ int main(int argc, char** argv) try {
     cv::setNumThreads(0);
 
     CLI::App app{"Batch-processing tool to extract visual features"};
-    app.require_subcommand(1);
+    app.require_subcommand();
     app.footer("\n\n"
                "An example invocation of the tool is:\n"
                "\n"
