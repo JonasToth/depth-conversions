@@ -1,4 +1,4 @@
-include(benchmark_macros)
+include(benchmarking)
 
 configure_file(conversion/data0-depth.png conversion/data0-depth.png COPYONLY)
 configure_file(conversion/laserscan-depth-half.png conversion/laserscan-depth-half.png COPYONLY)

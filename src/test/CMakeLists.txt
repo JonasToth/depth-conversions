@@ -1,8 +1,9 @@
+include(testing)
+
 configure_file(depth2x/kinect_intrinsic.txt
                depth2x/kinect_intrinsic.txt COPYONLY)
 configure_file(depth2x/laser_intrinsic.txt
                depth2x/laser_intrinsic.txt COPYONLY)
-
 configure_file(depth2x/data0-depth.png
                depth2x/data0-depth.png COPYONLY)
 configure_file(depth2x/data1-depth.png
@@ -17,35 +18,18 @@ configure_file(depth2x/data005-depth.png
                depth2x/data005-depth.png COPYONLY)
 configure_file(depth2x/data006-depth.png
                depth2x/data006-depth.png COPYONLY)
-
 configure_file(depth2x/laserscan-0-depth.png
                depth2x/laserscan-0-depth.png COPYONLY)
 configure_file(depth2x/laserscan-1-depth.png
                depth2x/laserscan-1-depth.png COPYONLY)
-
-
-macro (add_converter_test test_name)
-    configure_file(depth2x/${test_name}.sh
-                   depth2x/${test_name}.sh COPYONLY)
-
-    add_test(NAME ${test_name}
-        COMMAND
-        sh -c "./${test_name}.sh \
-               $<TARGET_FILE:depth2x> \
-               ${PROJECT_SOURCE_DIR}/scripts/log_helpers.sh"
-        WORKING_DIRECTORY
-        "${CMAKE_CURRENT_BINARY_DIR}/depth2x"
-        )
-endmacro(add_converter_test)
-
-add_converter_test(test_depth2x)
-add_converter_test(test_depth2x_bearing)
-add_converter_test(test_depth2x_flexion)
-add_converter_test(test_depth2x_gaussian_curvature)
-add_converter_test(test_depth2x_mean_curvature)
-add_converter_test(test_depth2x_max_curve)
-add_converter_test(test_depth2x_range)
-add_converter_test(test_depth2x_scale)
+add_tool_test(depth2x test_depth2x)
+add_tool_test(depth2x test_depth2x_bearing)
+add_tool_test(depth2x test_depth2x_flexion)
+add_tool_test(depth2x test_depth2x_gaussian_curvature)
+add_tool_test(depth2x test_depth2x_mean_curvature)
+add_tool_test(depth2x test_depth2x_max_curve)
+add_tool_test(depth2x test_depth2x_range)
+add_tool_test(depth2x test_depth2x_scale)
 
 ################################################################################
 
@@ -53,23 +37,9 @@ configure_file(depth2x/data0-depth.png
                depth_filter/data0-depth.png COPYONLY)
 configure_file(depth2x/data1-depth.png
                depth_filter/data1-depth.png COPYONLY)
-
-macro (add_filter_test test_name)
-    configure_file(depth_filter/${test_name}.sh
-                   depth_filter/${test_name}.sh COPYONLY)
-
-    add_test(NAME ${test_name}
-        COMMAND
-        sh -c "./${test_name}.sh \
-               $<TARGET_FILE:depth_filter> \
-               ${PROJECT_SOURCE_DIR}/scripts/log_helpers.sh"
-        WORKING_DIRECTORY
-        "${CMAKE_CURRENT_BINARY_DIR}/depth_filter"
-        )
-endmacro(add_filter_test)
-add_filter_test(test_depth_filter)
-add_filter_test(test_depth_filter_bilateral)
-add_filter_test(test_depth_filter_median_blur)
+add_tool_test(depth_filter test_depth_filter)
+add_tool_test(depth_filter test_depth_filter_bilateral)
+add_tool_test(depth_filter test_depth_filter_median_blur)
 
 ################################################################################
 
@@ -77,25 +47,11 @@ configure_file(feature_extractor/flexion-0.png
                feature_extractor/flexion-0.png COPYONLY)
 configure_file(feature_extractor/flexion-1.png
                feature_extractor/flexion-1.png COPYONLY)
-
-macro (add_extractor_test test_name)
-    configure_file(feature_extractor/${test_name}.sh
-                   feature_extractor/${test_name}.sh COPYONLY)
-
-    add_test(NAME ${test_name}
-        COMMAND
-        sh -c "./${test_name}.sh \
-               $<TARGET_FILE:feature_extractor> \
-               ${PROJECT_SOURCE_DIR}/scripts/log_helpers.sh"
-        WORKING_DIRECTORY
-        "${CMAKE_CURRENT_BINARY_DIR}/feature_extractor"
-        )
-endmacro(add_extractor_test)
-add_extractor_test(test_feature_extractor)
-add_extractor_test(test_feature_sift)
-add_extractor_test(test_feature_surf)
-add_extractor_test(test_feature_orb)
-add_extractor_test(test_feature_akaze)
+add_tool_test(feature_extractor test_feature_extractor)
+add_tool_test(feature_extractor test_feature_sift)
+add_tool_test(feature_extractor test_feature_surf)
+add_tool_test(feature_extractor test_feature_orb)
+add_tool_test(feature_extractor test_feature_akaze)
 
 ################################################################################
 
@@ -115,20 +71,6 @@ configure_file(keypoint_plotter/sift-0.sift
                keypoint_plotter/sift-0.sift COPYONLY)
 configure_file(keypoint_plotter/sift-1.sift
                keypoint_plotter/sift-1.sift COPYONLY)
-
-macro (add_plotter_test test_name)
-    configure_file(keypoint_plotter/${test_name}.sh
-                   keypoint_plotter/${test_name}.sh COPYONLY)
-
-    add_test(NAME ${test_name}
-        COMMAND
-        sh -c "./${test_name}.sh \
-               $<TARGET_FILE:keypoint_plotter> \
-               ${PROJECT_SOURCE_DIR}/scripts/log_helpers.sh"
-        WORKING_DIRECTORY
-        "${CMAKE_CURRENT_BINARY_DIR}/keypoint_plotter"
-        )
-endmacro(add_plotter_test)
-add_plotter_test(test_keypoint_plotter)
-add_plotter_test(test_keypoint_plotter_only_feature_files)
-add_plotter_test(test_keypoint_plotter_overwrite_image)
+add_tool_test(keypoint_plotter test_keypoint_plotter)
+add_tool_test(keypoint_plotter test_keypoint_plotter_only_feature_files)
+add_tool_test(keypoint_plotter test_keypoint_plotter_overwrite_image)

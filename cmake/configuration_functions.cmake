@@ -54,4 +54,21 @@ function(common_target_properties target_name)
         set_target_properties(${target_name}
                               PROPERTIES INTERPROCEDURAL_OPTIMIZATION OFF)
     endif (WITH_IPO)
-endfunction()
+endfunction(common_target_properties)
+
+# This function creates an executable with name \c name and links it to
+# common libraries from this project.
+function(add_tool name main_file)
+    add_executable("${name}" "${main_file}")
+    target_include_directories("${name}" PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
+
+    target_link_libraries("${name}"
+        PRIVATE
+        fmt::fmt
+        CLI11::CLI11
+        sens_loc::sens_loc
+        sens_loc::batch_processing
+        )
+    common_target_properties("${name}")
+    install(TARGETS "${name}" RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+endfunction (add_tool)

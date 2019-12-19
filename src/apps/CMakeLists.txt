@@ -11,12 +11,11 @@ target_link_libraries(batch_processing
     sens_loc::sens_loc
     PRIVATE
     taskflow::taskflow
-    fmt::fmt
-    )
-
+    fmt::fmt)
 add_library(sens_loc::batch_processing ALIAS batch_processing)
 
-add_executable(depth2x "${CMAKE_CURRENT_LIST_DIR}/depth2x/main.cpp")
+
+add_tool(depth2x "${CMAKE_CURRENT_LIST_DIR}/depth2x/main.cpp")
 target_sources(depth2x
     PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converters.h"
@@ -28,74 +27,27 @@ target_sources(depth2x
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_laserscan.h.inl"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_max_curve.h.inl"
     )
-target_include_directories(depth2x PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
-target_link_libraries(depth2x
-    PRIVATE
-    fmt::fmt
-    CLI11::CLI11
-    sens_loc::sens_loc
-    sens_loc::batch_processing
-    )
-common_target_properties(depth2x)
-
 configure_file(kinect_intrinsic.txt kinect_intrinsic.txt COPYONLY)
-install(TARGETS depth2x RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
-
-add_executable(depth_filter "${CMAKE_CURRENT_LIST_DIR}/depth_filter/main.cpp")
+add_tool(depth_filter "${CMAKE_CURRENT_LIST_DIR}/depth_filter/main.cpp")
 target_sources(depth_filter
     PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/depth_filter/batch_filter.cpp"
     )
-target_include_directories(depth_filter PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
-target_link_libraries(depth_filter
-    PRIVATE
-    fmt::fmt
-    CLI11::CLI11
-    sens_loc::sens_loc
-    sens_loc::batch_processing
-    )
-common_target_properties(depth_filter)
-install(TARGETS depth_filter RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
 
-add_executable(feature_extractor
-               "${CMAKE_CURRENT_LIST_DIR}/feature_extractor/main.cpp")
+add_tool(feature_extractor
+         "${CMAKE_CURRENT_LIST_DIR}/feature_extractor/main.cpp")
 target_sources(feature_extractor
     PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/feature_extractor/batch_extractor.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_extractor/batch_extractor.h"
     )
-target_include_directories(feature_extractor
-    PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
-target_link_libraries(feature_extractor
-    PRIVATE
-    fmt::fmt
-    CLI11::CLI11
-    sens_loc::sens_loc
-    sens_loc::batch_processing
-    )
-common_target_properties(feature_extractor)
-install(TARGETS feature_extractor
-        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
 
-
-add_executable(keypoint_plotter
-               "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/main.cpp")
+add_tool(keypoint_plotter
+         "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/main.cpp")
 target_sources(keypoint_plotter
     PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/batch_plotter.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/batch_plotter.h"
     )
-target_include_directories(keypoint_plotter
-    PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
-target_link_libraries(keypoint_plotter
-    PRIVATE
-    fmt::fmt
-    CLI11::CLI11
-    sens_loc::sens_loc
-    sens_loc::batch_processing
-    )
-common_target_properties(keypoint_plotter)
-install(TARGETS keypoint_plotter
-        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")

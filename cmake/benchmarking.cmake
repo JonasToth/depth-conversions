@@ -1,4 +1,4 @@
-macro(create_bm name source_file)
+function(create_bm name source_file)
     add_executable(bm_${name} ${source_file})
     target_link_libraries(bm_${name}
                           PRIVATE nonius pthread sens_loc::sens_loc)
@@ -10,4 +10,4 @@ macro(create_bm name source_file)
         add_test(NAME bm_${name}
                  COMMAND bm_${name})
     endif ()
-endmacro()
+endfunction(create_bm)
