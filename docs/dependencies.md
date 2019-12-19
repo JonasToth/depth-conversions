@@ -12,3 +12,4 @@
   formatting
 - `nonius` `v1.20.1b` `9db04b2c6eb5c3ca783c48c774300618a86729a4` benchmarks
 - `Eigen3` `v3.3.0` linear algebra, via ExternalProject_Add
+- `Boost` `v1.72.0` histograms, accumulators and general purpose code
