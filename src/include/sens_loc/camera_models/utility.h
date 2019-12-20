@@ -1,6 +1,7 @@
 #ifndef UTILITY_H_SAL9APRW
 #define UTILITY_H_SAL9APRW
 
+#include <limits>
 #include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/math/coordinate.h>
 #include <type_traits>
@@ -33,9 +34,12 @@ Real phi(const Intrinsic<Real>&           calibration,
     Expects(p2.v() >= 0);
     Expects(p2.v() < calibration.h());
 
-    const auto s1      = calibration.pixel_to_sphere(p1);
-    const auto s2      = calibration.pixel_to_sphere(p2);
-    const auto cos_phi = s1.dot(s2);
+    const auto s1    = calibration.pixel_to_sphere(p1);
+    const auto s2    = calibration.pixel_to_sphere(p2);
+    const Real delta = Real(10.) * std::numeric_limits<Real>::epsilon();
+
+    const Real cos_phi =
+        std::clamp(s1.dot(s2), Real(-1.) + delta, Real(1.) - delta);
 
     Ensures(cos_phi > -1.);
     Ensures(cos_phi < +1.);
