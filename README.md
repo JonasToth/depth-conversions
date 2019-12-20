@@ -6,6 +6,8 @@
 
 # master-thesis
 
+![Feature Images from Depth Images](docs/all-types-labeled.gif)
+
 Repository containing all code and stuff for my master thesis.
 For more specific documentation check the `docs/` directory.
 
