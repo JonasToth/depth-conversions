@@ -13,6 +13,7 @@
 #include <stdexcept>
 #include <string>
 #include <util/colored_parse.h>
+#include <util/tool_macro.h>
 #include <util/version_printer.h>
 #include <variant>
 
@@ -80,12 +81,7 @@ make_converter(const sens_loc::apps::file_patterns& files,
 /// \sa sens_loc::conversion
 /// \ingroup conversion-driver
 /// \returns 0 if all images could be converted, 1 if any image fails
-int main(int argc, char** argv) try {
-    using namespace sens_loc;
-    using namespace std;
-
-    CLI::App app{
-        "Batch-conversion of depth images to various derived image-types."};
+MAIN_HEAD("Batch-conversion of depth images to various derived image-types.") {
     app.require_subcommand(1);
     app.fallthrough();
     app.footer("\n\n"
@@ -101,7 +97,7 @@ int main(int argc, char** argv) try {
                "'horizontal_0000.png ...' \n"
                "in the working directory");
 
-    app.add_flag_function("-v,--version", apps::print_version(*argv),
+    app.add_flag_function("-v,--version", print_version(*argv),
                           "Print version and exit");
 
     string calibration_file;
@@ -116,7 +112,7 @@ int main(int argc, char** argv) try {
                 " file.",
                 /*defaulted=*/true);
 
-    apps::file_patterns files;
+    file_patterns files;
     app.add_option("-i,--input", files.input,
                    "Input pattern for image, e.g. \"depth-{}.png\"")
         ->required();
@@ -347,12 +343,12 @@ int main(int argc, char** argv) try {
         return 1;
     }
 
-    auto c = [&]() -> unique_ptr<apps::batch_converter> {
+    auto c = [&]() -> unique_ptr<batch_converter> {
         using namespace apps;
-        auto input_enum = apps::str_to_depth_type(input_type);
+        auto input_enum = str_to_depth_type(input_type);
         if (*scale_cmd)
-            return make_unique<apps::scale_converter>(files, scale_factor,
-                                                      scale_delta);
+            return make_unique<scale_converter>(files, scale_factor,
+                                                scale_delta);
 
         Expects(potential_intrinsic);
         if (*bearing_cmd)
@@ -379,13 +375,5 @@ int main(int argc, char** argv) try {
         UNREACHABLE("unexpected conversion");  // LCOV_EXCL_LINE
     }();
     return c->process_batch(start_idx, end_idx) ? 0 : 1;
-} catch (const std::exception& e) {
-    std::cerr << sens_loc::util::err{}
-              << "Severe problem occured while system-setup.\n"
-              << "Message:" << e.what() << "\n";
-    return 1;
-} catch (...) {
-    std::cerr << sens_loc::util::err{}
-              << "Severe problem occured while system-setup.\n";
-    return 1;
 }
+MAIN_TAIL

@@ -5,6 +5,7 @@
 #include <stdexcept>
 #include <string>
 #include <util/colored_parse.h>
+#include <util/tool_macro.h>
 #include <util/version_printer.h>
 #include <vector>
 
@@ -16,10 +17,7 @@
 /// plot matches.
 /// \ingroup feature-plotter-driver
 /// \returns 0 if all images could be processed, 1 if any image fails
-int main(int argc, char** argv) try {
-    using namespace sens_loc;
-    using namespace std;
-    CLI::App app{"Batch-processing tool to filter depth images and maps"};
+MAIN_HEAD("Batch-processing tool to plot keypoints and matches") {
     COLORED_APP_PARSE(app, argc, argv);
 
     // Explicitly disable threading from OpenCV functions, as the
@@ -31,13 +29,5 @@ int main(int argc, char** argv) try {
     cv::setNumThreads(0);
 
     return 0;
-} catch (const std::exception& e) {
-    std::cerr << sens_loc::util::err{}
-              << "Severe problem occured while system-setup.\n"
-              << "Message: " << e.what() << "\n";
-    return 1;
-} catch (...) {
-    std::cerr << sens_loc::util::err{}
-              << "Severe problem occured while system-setup.\n";
-    return 1;
 }
+MAIN_TAIL

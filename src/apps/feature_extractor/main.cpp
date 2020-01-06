@@ -9,6 +9,7 @@
 #include <stdexcept>
 #include <string>
 #include <util/colored_parse.h>
+#include <util/tool_macro.h>
 #include <util/version_printer.h>
 #include <vector>
 
@@ -237,10 +238,7 @@ struct AKAZEArgs : CommonArgs {
 /// extraction.
 /// \ingroup feature-extractor-driver
 /// \returns 0 if all images could be processed, 1 if any image fails
-int main(int argc, char** argv) try {
-    using namespace sens_loc;
-    using namespace apps;
-    using namespace std;
+MAIN_HEAD("Batch-processing tool to extract visual features") {
 
     // Explicitly disable threading from OpenCV functions, as the
     // parallelization is done at a higher level.
@@ -250,7 +248,6 @@ int main(int argc, char** argv) try {
     // because of that.
     cv::setNumThreads(0);
 
-    CLI::App app{"Batch-processing tool to extract visual features"};
     app.require_subcommand();
     app.footer("\n\n"
                "An example invocation of the tool is:\n"
@@ -342,13 +339,5 @@ int main(int argc, char** argv) try {
     const batch_extractor extractor(detectors, arg_input_files);
     const bool            success = extractor.process_batch(start_idx, end_idx);
     return success ? 0 : 1;
-} catch (const std::exception& e) {
-    std::cerr << sens_loc::util::err{}
-              << "Severe problem occured while system-setup.\n"
-              << "Message: " << e.what() << "\n";
-    return 1;
-} catch (...) {
-    std::cerr << sens_loc::util::err{}
-              << "Severe problem occured while system-setup.\n";
-    return 1;
 }
+MAIN_TAIL

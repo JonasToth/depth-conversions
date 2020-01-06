@@ -11,6 +11,7 @@
 #include <stdexcept>
 #include <util/batch_converter.h>
 #include <util/colored_parse.h>
+#include <util/tool_macro.h>
 #include <util/version_printer.h>
 #include <vector>
 
@@ -23,9 +24,7 @@
 /// \sa sens_loc::preprocess
 /// \ingroup filter-driver
 /// \returns 0 if all images could be converted, 1 if any image fails
-int main(int argc, char** argv) try {
-    using namespace sens_loc;
-    using namespace std;
+MAIN_HEAD("Batch-processing tool to filter depth images and maps") {
 
     // Explicitly disable threading from OpenCV functions, as the
     // parallelization is done at a higher level.
@@ -35,7 +34,6 @@ int main(int argc, char** argv) try {
     // because of that.
     cv::setNumThreads(0);
 
-    CLI::App app{"Batch-processing tool to filter depth images and maps"};
     app.require_subcommand();  // Expect one or more filter commands
     app.footer("\n\n"
                "An example invocation of the tool is:\n"
@@ -53,10 +51,10 @@ int main(int argc, char** argv) try {
                " in the working directory");
 
     // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    app.add_flag_function("-v,--version", apps::print_version(argv[0]),
+    app.add_flag_function("-v,--version", print_version(argv[0]),
                           "Print version and exit");
 
-    apps::file_patterns files;
+    file_patterns files;
     app.add_option("-i,--input", files.input,
                    "Input pattern for images to filter; e.g. \"depth-{}.png\"")
         ->required();
@@ -135,7 +133,7 @@ int main(int argc, char** argv) try {
     // Create a vector of functors (unique_ptr<filter_interface>) that will
     // be executed in order.
     // Each element is created by one subcommand and its parameters.
-    vector<unique_ptr<apps::abstract_filter>> commands;
+    vector<unique_ptr<abstract_filter>> commands;
 
     for (const auto* cmd : app.get_subcommands()) {
         if (cmd->count() != 1U)
@@ -145,18 +143,18 @@ int main(int argc, char** argv) try {
             // Got at pixel-distance as argument.
             if (distance_option->count() > 0U) {
                 commands.push_back(
-                    make_unique<apps::bilateral_filter>(sigma_color, distance));
+                    make_unique<bilateral_filter>(sigma_color, distance));
             }
             // Otherwise sigma space must have been provided.
             else {
-                commands.push_back(make_unique<apps::bilateral_filter>(
-                    sigma_color, sigma_space));
+                commands.push_back(
+                    make_unique<bilateral_filter>(sigma_color, sigma_space));
             }
         }
 
         else if (cmd == median_blur_cmd)
             commands.push_back(
-                make_unique<apps::median_blur_filter>(kernel_size_median));
+                make_unique<median_blur_filter>(kernel_size_median));
 
         else
             UNREACHABLE("Unhandled filter provided!");  // LCOV_EXCL_LINE
@@ -166,17 +164,8 @@ int main(int argc, char** argv) try {
     // Batch-processing will then just execute the functors for each image.
     // It needs to take care, that the elements are moved through.
     // The final step is conversion to U16 and writing to disk.
-    apps::batch_filter process(files, commands);
+    batch_filter process(files, commands);
 
     return process.process_batch(start_idx, end_idx) ? 0 : 1;
-
-} catch (const std::exception& e) {
-    std::cerr << sens_loc::util::err{}
-              << "Severe problem occured while system-setup.\n"
-              << "Message:" << e.what() << "\n";
-    return 1;
-} catch (...) {
-    std::cerr << sens_loc::util::err{}
-              << "Severe problem occured while system-setup.\n";
-    return 1;
 }
+MAIN_TAIL
