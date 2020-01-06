@@ -96,3 +96,25 @@ add_extractor_test(test_feature_sift)
 add_extractor_test(test_feature_surf)
 add_extractor_test(test_feature_orb)
 add_extractor_test(test_feature_akaze)
+
+################################################################################
+
+# configure_file(keypoint_plotter/flexion-0.png
+# keypoint_plotter/flexion-0.png COPYONLY)
+# configure_file(keypoint_plotter/flexion-1.png
+# keypoint_plotter/flexion-1.png COPYONLY)
+
+macro (add_plotter_test test_name)
+    configure_file(keypoint_plotter/${test_name}.sh
+                   keypoint_plotter/${test_name}.sh COPYONLY)
+
+    add_test(NAME ${test_name}
+        COMMAND
+        sh -c "./${test_name}.sh \
+               $<TARGET_FILE:keypoint_plotter> \
+               ${PROJECT_SOURCE_DIR}/scripts/log_helpers.sh"
+        WORKING_DIRECTORY
+        "${CMAKE_CURRENT_BINARY_DIR}/keypoint_plotter"
+        )
+endmacro(add_plotter_test)
+# add_plotter_test(test_feature_extractor)

@@ -78,3 +78,24 @@ target_link_libraries(feature_extractor
 common_target_properties(feature_extractor)
 install(TARGETS feature_extractor
         RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
+
+
+add_executable(keypoint_plotter
+               "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/main.cpp")
+           # target_sources(keypoint_plotter
+           # PRIVATE
+    # "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/batch_extractor.cpp"
+    # "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/batch_extractor.h"
+    # )
+target_include_directories(keypoint_plotter
+    PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
+target_link_libraries(keypoint_plotter
+    PRIVATE
+    fmt::fmt
+    CLI11::CLI11
+    sens_loc::sens_loc
+    sens_loc::batch_processing
+    )
+common_target_properties(keypoint_plotter)
+install(TARGETS keypoint_plotter
+        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
