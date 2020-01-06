@@ -10,25 +10,6 @@
 
 namespace sens_loc::apps {
 
-/// \ingroup feature-extractor-driver
-enum class feature_color { green, blue, red, orange, purple, all };
-
-/// \ingroup feature-extractor-driver
-struct color_to_rgb {
-    static cv::Scalar convert(feature_color c) {
-        using cv::Scalar;
-        switch (c) {
-        case feature_color::green: return Scalar(0, 255, 0);
-        case feature_color::blue: return Scalar(255, 0, 0);
-        case feature_color::red: return Scalar(0, 0, 255);
-        case feature_color::orange: return Scalar(0, 255, 255);
-        case feature_color::purple: return Scalar(255, 0, 255);
-        case feature_color::all: return Scalar::all(-1);
-        }
-        UNREACHABLE("Invalid enum-value!");  // LCOV_EXCL_LINE
-    }
-};
-
 /// Small wrapper-class that encodes the information for detector-configuration
 /// and file-IO configuration in batch processing.
 /// \ingroup feature-extractor-driver

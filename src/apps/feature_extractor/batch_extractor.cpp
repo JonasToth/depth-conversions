@@ -68,13 +68,6 @@ bool process_detector(const math::image<uchar>& image,
     } catch (...) {
         return false;
     }
-#if 0
-    cv::Mat img_features;
-    cv::drawKeypoints(f->data(), keypoints, img_features,
-                      color_to_rgb::convert(color),
-                      cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS);
-    const bool        write_success = cv::imwrite(out_name, img_features);
-#endif
 }
 
 /// Runs all \c detectors this file identified by \c idx and \c in_pattern.
