@@ -50,10 +50,6 @@ MAIN_HEAD("Batch-processing tool to filter depth images and maps") {
                "bilateral filter, producing the files 'filtered_0000.png ...'\n"
                " in the working directory");
 
-    // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-pointer-arithmetic)
-    app.add_flag_function("-v,--version", print_version(argv[0]),
-                          "Print version and exit");
-
     file_patterns files;
     app.add_option("-i,--input", files.input,
                    "Input pattern for images to filter; e.g. \"depth-{}.png\"")

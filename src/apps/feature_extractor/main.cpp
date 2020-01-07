@@ -255,9 +255,6 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
                "feature_extractor \\\n"
                "\n");
 
-    app.add_flag_function("-v,--version", apps::print_version(*argv),
-                          "Print version and exit");
-
     std::string arg_input_files;
     app.add_option(
            "-i,--input", arg_input_files,

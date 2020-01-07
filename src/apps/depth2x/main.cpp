@@ -97,9 +97,6 @@ MAIN_HEAD("Batch-conversion of depth images to various derived image-types.") {
                "'horizontal_0000.png ...' \n"
                "in the working directory");
 
-    app.add_flag_function("-v,--version", print_version(*argv),
-                          "Print version and exit");
-
     string calibration_file;
     app.add_option("-c,--calibration", calibration_file,
                    "File that contains calibration parameters for the camera")
