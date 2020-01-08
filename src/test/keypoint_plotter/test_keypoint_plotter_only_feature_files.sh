@@ -24,3 +24,17 @@ if [ ! -f keypoints-0.png ] || \
     print_error "Expected files not created"
     exit 1
 fi
+
+if ! ${exe} \
+    --input sift-{}.sift \
+    --output keypoints-blue-{}.png \
+    --color blue \
+    --start 0 --end 1 ; then
+    print_error "Could not plot keypoint in selfincluded feature-file with blue keypoints"
+    exit 1
+fi
+if [ ! -f keypoints-blue-0.png ] || \
+   [ ! -f keypoints-blue-1.png ] ; then
+    print_error "Expected files not created"
+    exit 1
+fi

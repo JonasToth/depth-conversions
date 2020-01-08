@@ -11,6 +11,21 @@ namespace sens_loc::apps {
 /// \ingroup feature-plotter-driver
 enum class feature_color { green, blue, red, orange, purple, all };
 
+inline feature_color string_to_color(std::string_view color_string) noexcept {
+    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define COLOR_SWITCH(COLOR)                                                    \
+    if (color_string == #COLOR)                                                \
+        return feature_color::COLOR;
+    COLOR_SWITCH(green)
+    COLOR_SWITCH(blue)
+    COLOR_SWITCH(red)
+    COLOR_SWITCH(orange)
+    COLOR_SWITCH(purple)
+    COLOR_SWITCH(all)
+
+    UNREACHABLE("Unexpected color to convert");  // LCOV_EXCL_LINE
+}
+
 /// \ingroup feature-plotter-driver
 struct color_to_rgb {
     // Color Space in BGR.
@@ -35,9 +50,11 @@ class batch_plotter {
   public:
     batch_plotter(std::string_view                feature_file_pattern,
                   std::string_view                output_file_pattern,
+                  feature_color                   color,
                   std::optional<std::string_view> target_image_file_pattern)
         : _feature_file_pattern{feature_file_pattern}
         , _ouput_file_pattern{output_file_pattern}
+        , _color{color}
         , _target_image_file_pattern{target_image_file_pattern} {
         Expects(!_feature_file_pattern.empty());
         Expects(!_ouput_file_pattern.empty());
@@ -59,6 +76,9 @@ class batch_plotter {
     /// File pattern for the output image to be written to.
     /// These images are 8-bit RGB images!
     std::string_view _ouput_file_pattern;
+
+    /// Color to draw the keypoints in.
+    feature_color _color;
 
     /// Even though the feature-files should have a path to the original image,
     /// the features were detected on, this path might not be the desired target

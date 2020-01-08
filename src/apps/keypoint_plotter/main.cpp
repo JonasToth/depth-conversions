@@ -44,6 +44,12 @@ MAIN_HEAD("Batch-processing tool to plot keypoints and matches") {
     app.add_option("-e,--end", end_idx, "End index for processing.")
         ->required();
 
+    string color = "orange";
+    app.add_set("-c,--color", color,
+                {"green", "blue", "red", "orange", "purple", "all"},
+                "Define the color that shall be used for keypoint plotting",
+                /*defaulted=*/true);
+
     COLORED_APP_PARSE(app, argc, argv);
 
     // Explicitly disable threading from OpenCV functions, as the
@@ -59,9 +65,8 @@ MAIN_HEAD("Batch-processing tool to plot keypoints and matches") {
         "test_text_out/default-0000.orb";
 
     batch_plotter plotter(feature_file_input_pattern, output_pattern,
-                          original_image_input_pattern);
+                          string_to_color(color), original_image_input_pattern);
 
     return plotter.process_batch(start_idx, end_idx) ? 0 : 1;
-
 }
 MAIN_TAIL

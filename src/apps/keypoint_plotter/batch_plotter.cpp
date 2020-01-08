@@ -78,9 +78,8 @@ bool batch_plotter::process_index(int idx) const noexcept {
             return false;
         }
 
-        const feature_color color = feature_color::orange;
         cv::drawKeypoints(converted_source, keypoints, converted_source,
-                          color_to_rgb::convert(color),
+                          color_to_rgb::convert(_color),
                           cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS |
                               cv::DrawMatchesFlags::DRAW_OVER_OUTIMG);
 
