@@ -53,22 +53,7 @@ target_sources(keypoint_plotter
     )
 
 
-add_executable(feature_performance
-               "${CMAKE_CURRENT_LIST_DIR}/feature_performance/main.cpp")
-target_include_directories(feature_performance
-    PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
-target_include_directories(feature_performance
-    SYSTEM PRIVATE
-    ${Boost_INCLUDE_DIRS}
-    )
+add_tool(feature_performance
+         "${CMAKE_CURRENT_LIST_DIR}/feature_performance/main.cpp")
+target_include_directories(feature_performance SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_directories(feature_performance PRIVATE ${Boost_LIBRARY_DIRS})
-target_link_libraries(feature_performance
-    PRIVATE
-    fmt::fmt
-    CLI11::CLI11
-    sens_loc::sens_loc
-    sens_loc::batch_processing
-    )
-common_target_properties(feature_performance)
-install(TARGETS feature_performance
-        RUNTIME DESTINATION "${CMAKE_INSTALL_BINDIR}")
