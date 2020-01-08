@@ -237,7 +237,7 @@ ubuntu-1804-ubsan:
 
 ubuntu-1804-tsan:
   image: $CI_REGISTRY_IMAGE/base-image-tools
-  allow_failures: true
+  allow_failure: true
   stage: sanitizers
   variables:
     CC: "clang-9"
