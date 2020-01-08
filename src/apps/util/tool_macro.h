@@ -1,7 +1,8 @@
 #ifndef TOOL_MACRO_H_R4SLHAGL
 #define TOOL_MACRO_H_R4SLHAGL
 
-/** @file This file defines a macro to reduce the boiler plate to create a new
+/** @file src/apps/util/tool_macro.h
+ * This file defines a macro to reduce the boiler plate to create a new
  * tool. Use \c MAIN_HEAD and \c MAIN_TAIL to wrap the main-function with
  * proper exception handling for the whole program and to enfore consistent
  * error messages on system failure.
