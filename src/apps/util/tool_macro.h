@@ -12,7 +12,7 @@
         using namespace sens_loc;                                              \
         using namespace sens_loc::apps;                                        \
         using namespace std;                                                   \
-        CLI::App app{#TOOL_DESCRIPTION};                                       \
+        CLI::App app{TOOL_DESCRIPTION};                                        \
         app.add_flag_function("-v,--version", print_version(*argv),            \
                               "Print version and exit");                       \
         do
