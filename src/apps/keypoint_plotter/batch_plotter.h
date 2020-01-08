@@ -16,12 +16,12 @@ inline feature_color string_to_color(std::string_view color_string) noexcept {
 #define COLOR_SWITCH(COLOR)                                                    \
     if (color_string == #COLOR)                                                \
         return feature_color::COLOR;
+    COLOR_SWITCH(all)
     COLOR_SWITCH(green)
     COLOR_SWITCH(blue)
     COLOR_SWITCH(red)
-    COLOR_SWITCH(orange)
     COLOR_SWITCH(purple)
-    COLOR_SWITCH(all)
+    COLOR_SWITCH(orange)
 
     UNREACHABLE("Unexpected color to convert");  // LCOV_EXCL_LINE
 }
@@ -32,12 +32,12 @@ struct color_to_rgb {
     static cv::Scalar convert(feature_color c) {
         using cv::Scalar;
         switch (c) {
+        case feature_color::all: return Scalar::all(-1);
         case feature_color::green: return Scalar(0, 255, 0);
         case feature_color::blue: return Scalar(255, 0, 0);
         case feature_color::red: return Scalar(0, 0, 255);
-        case feature_color::orange: return Scalar(45, 95, 255);
         case feature_color::purple: return Scalar(255, 0, 255);
-        case feature_color::all: return Scalar::all(-1);
+        case feature_color::orange: return Scalar(45, 95, 255);
         }
         UNREACHABLE("Invalid enum-value!");  // LCOV_EXCL_LINE
     }

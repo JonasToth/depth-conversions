@@ -32,10 +32,8 @@ bool batch_plotter::process_index(int idx) const noexcept {
         std::vector<cv::KeyPoint> keypoints;
         read(keypoints_node, keypoints);
 
-        if (keypoints.empty()) {
-            std::cerr << "No keypoints\n";
+        if (keypoints.empty())
             return false;
-        }
 
         std::string    original_image;
         const FileNode file_path_node = fs["source_path"];
@@ -48,17 +46,14 @@ bool batch_plotter::process_index(int idx) const noexcept {
             if (_target_image_file_pattern) {
                 original_image = fmt::format(*_target_image_file_pattern, idx);
             } else {
-                std::cerr << "No Target Path\n";
                 // No image path that can be read as basis for plotting.
                 return false;
             }
         }
         const cv::Mat source_image =
             cv::imread(original_image, cv::IMREAD_UNCHANGED);
-        if (source_image.empty()) {
-            std::cerr << "Reading failed\n";
+        if (source_image.empty())
             return false;
-        }
 
         cv::Mat converted_source;
 
@@ -73,8 +68,6 @@ bool batch_plotter::process_index(int idx) const noexcept {
         } else if (source_image.type() == CV_8UC3) {
             source_image.copyTo(converted_source);
         } else {
-            std::cerr << "Unknown input color space!\n";
-            std::cerr << "Typ is: " << source_image.type() << "\n";
             return false;
         }
 
