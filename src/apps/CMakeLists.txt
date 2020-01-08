@@ -82,11 +82,11 @@ install(TARGETS feature_extractor
 
 add_executable(keypoint_plotter
                "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/main.cpp")
-           # target_sources(keypoint_plotter
-           # PRIVATE
-    # "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/batch_extractor.cpp"
-    # "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/batch_extractor.h"
-    # )
+target_sources(keypoint_plotter
+    PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/batch_plotter.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/batch_plotter.h"
+    )
 target_include_directories(keypoint_plotter
     PRIVATE "${CMAKE_CURRENT_LIST_DIR}")
 target_link_libraries(keypoint_plotter

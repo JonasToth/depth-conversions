@@ -99,10 +99,22 @@ add_extractor_test(test_feature_akaze)
 
 ################################################################################
 
-# configure_file(keypoint_plotter/flexion-0.png
-# keypoint_plotter/flexion-0.png COPYONLY)
-# configure_file(keypoint_plotter/flexion-1.png
-# keypoint_plotter/flexion-1.png COPYONLY)
+configure_file(keypoint_plotter/color-0.png
+               keypoint_plotter/color-0.png COPYONLY)
+configure_file(keypoint_plotter/color-1.png
+               keypoint_plotter/color-1.png COPYONLY)
+configure_file(keypoint_plotter/depth-0.png
+               keypoint_plotter/depth-0.png COPYONLY)
+configure_file(keypoint_plotter/depth-1.png
+               keypoint_plotter/depth-1.png COPYONLY)
+configure_file(keypoint_plotter/flexion-0.png
+               keypoint_plotter/flexion-0.png COPYONLY)
+configure_file(keypoint_plotter/flexion-1.png
+               keypoint_plotter/flexion-1.png COPYONLY)
+configure_file(keypoint_plotter/sift-0.sift
+               keypoint_plotter/sift-0.sift COPYONLY)
+configure_file(keypoint_plotter/sift-1.sift
+               keypoint_plotter/sift-1.sift COPYONLY)
 
 macro (add_plotter_test test_name)
     configure_file(keypoint_plotter/${test_name}.sh
@@ -117,4 +129,6 @@ macro (add_plotter_test test_name)
         "${CMAKE_CURRENT_BINARY_DIR}/keypoint_plotter"
         )
 endmacro(add_plotter_test)
-# add_plotter_test(test_feature_extractor)
+add_plotter_test(test_keypoint_plotter)
+add_plotter_test(test_keypoint_plotter_only_feature_files)
+add_plotter_test(test_keypoint_plotter_overwrite_image)
