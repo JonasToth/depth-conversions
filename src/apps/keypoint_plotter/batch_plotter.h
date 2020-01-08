@@ -18,6 +18,9 @@ enum class feature_color {
     all      ///< Draws all keypoints with different colors.
 };
 
+/// Convert a color name to the corresponding \c feature_color.
+/// The string must match with the enum-value, e.g. "green".
+/// \ingroup feature-plotter-driver
 inline feature_color string_to_color(std::string_view color_string) noexcept {
     // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define COLOR_SWITCH(COLOR)                                                    \
