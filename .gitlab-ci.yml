@@ -18,6 +18,8 @@ stages:
     paths:
       - build/src/apps/depth2x
       - build/src/apps/depth_filter
+      - build/src/apps/feature_extractor
+      - build/src/apps/keypoint_plotter
 
 api-documentation:
   image: $CI_REGISTRY_IMAGE/base-image-documentation
@@ -332,6 +334,7 @@ create-production-image:
     - docker run --rm $CI_REGISTRY_IMAGE:latest depth2x -h
     - docker run --rm $CI_REGISTRY_IMAGE:latest depth_filter -h
     - docker run --rm $CI_REGISTRY_IMAGE:latest feature_extractor -h
+    - docker run --rm $CI_REGISTRY_IMAGE:latest keypoint_plotter -h
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
     refs:
@@ -355,6 +358,7 @@ create-alpine-image:
     - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge depth2x -h
     - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge depth_filter -h
     - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge feature_extractor -h
+    - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge keypoint_plotter -h
     - docker push $CI_REGISTRY_IMAGE:alpine-edge
   only:
     refs:
