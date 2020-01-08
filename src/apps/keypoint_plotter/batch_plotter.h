@@ -9,7 +9,14 @@
 namespace sens_loc::apps {
 
 /// \ingroup feature-plotter-driver
-enum class feature_color { green, blue, red, orange, purple, all };
+enum class feature_color {
+    green,
+    blue,
+    red,
+    orange,
+    purple,  ///< Nice purple.
+    all      ///< Draws all keypoints with different colors.
+};
 
 inline feature_color string_to_color(std::string_view color_string) noexcept {
     // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
@@ -43,9 +50,8 @@ struct color_to_rgb {
     }
 };
 
-/// Helper class that visits a list of images and does some generic
-/// processing on it.
-/// \ingroup feature-extractor-driver
+/// Helper class that visits a list of images plots keypoints onto them.
+/// \ingroup feature-plotter-driver
 class batch_plotter {
   public:
     batch_plotter(std::string_view                feature_file_pattern,
