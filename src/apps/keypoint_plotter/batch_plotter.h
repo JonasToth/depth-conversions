@@ -9,6 +9,8 @@
 namespace sens_loc::apps {
 
 /// \ingroup feature-plotter-driver
+/// Defines a strongly typed switch for the color to use. Will be mapped
+/// to the actual OpenCV-color using \c color_to_bgr.
 enum class feature_color {
     green,
     blue,
@@ -21,7 +23,7 @@ enum class feature_color {
 /// Convert a color name to the corresponding \c feature_color.
 /// The string must match with the enum-value, e.g. "green".
 /// \ingroup feature-plotter-driver
-inline feature_color string_to_color(std::string_view color_string) noexcept {
+inline feature_color str_to_color(std::string_view color_string) noexcept {
     // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define COLOR_SWITCH(COLOR)                                                    \
     if (color_string == #COLOR)                                                \
@@ -36,8 +38,9 @@ inline feature_color string_to_color(std::string_view color_string) noexcept {
     UNREACHABLE("Unexpected color to convert");  // LCOV_EXCL_LINE
 }
 
+/// Provide a conversion from the \¢ feature_color to actual OpenCV colors.
 /// \ingroup feature-plotter-driver
-struct color_to_rgb {
+struct color_to_bgr {
     // Color Space in BGR.
     static cv::Scalar convert(feature_color c) {
         using cv::Scalar;

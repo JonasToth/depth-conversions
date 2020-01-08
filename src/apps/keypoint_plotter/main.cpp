@@ -61,7 +61,7 @@ MAIN_HEAD("Batch-processing tool to plot keypoints and matches") {
     cv::setNumThreads(0);
 
     batch_plotter plotter(feature_file_input_pattern, output_pattern,
-                          string_to_color(color), original_image_input_pattern);
+                          str_to_color(color), original_image_input_pattern);
 
     return plotter.process_batch(start_idx, end_idx) ? 0 : 1;
 }

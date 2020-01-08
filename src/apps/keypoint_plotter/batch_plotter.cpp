@@ -72,7 +72,7 @@ bool batch_plotter::process_index(int idx) const noexcept {
         }
 
         cv::drawKeypoints(converted_source, keypoints, converted_source,
-                          color_to_rgb::convert(_color),
+                          color_to_bgr::convert(_color),
                           cv::DrawMatchesFlags::DRAW_RICH_KEYPOINTS |
                               cv::DrawMatchesFlags::DRAW_OVER_OUTIMG);
 
