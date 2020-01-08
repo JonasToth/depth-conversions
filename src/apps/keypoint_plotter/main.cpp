@@ -60,10 +60,6 @@ MAIN_HEAD("Batch-processing tool to plot keypoints and matches") {
     // because of that.
     cv::setNumThreads(0);
 
-    std::string input_file =
-        "/home/jonas/owncloud/Freiberg/Masterarbeit/full_data_sets/lehrpfad/"
-        "test_text_out/default-0000.orb";
-
     batch_plotter plotter(feature_file_input_pattern, output_pattern,
                           string_to_color(color), original_image_input_pattern);
 
