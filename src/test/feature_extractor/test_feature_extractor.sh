@@ -32,7 +32,7 @@ if ${exe} -i "not-existing-{:03d}.png" -s 0 -e 1 sift -o "foo-{}.png"; then
     exit 1
 fi
 if ${exe} -i "flexion-{}.png" -s 0 -e 1 \
-    akaze  -o "multi1-{}.akaze" \
+    akaze  -o "multi1-{}.feature" \
     akaze ; then
     print_error "Detecting with same command twice is not supported and should fail!"
     exit 1
@@ -42,15 +42,15 @@ fi
 
 rm -f multi-*
 if ! ${exe} -i "flexion-{}.png" -s 0 -e 1 \
-     akaze  -o "multi-{}.akaze" \
-     orb    -o "multi-{}.orb" ; then
+     akaze  -o "multi-akaze-{}.feature" \
+     orb    -o "multi-orb-{}.feature" ; then
     print_error "Running multiple detectors with one run failed"
     exit 1
 fi
-if  [ ! -f multi-0.orb ] || \
-    [ ! -f multi-0.akaze ] || \
-    [ ! -f multi-1.orb ] || \
-    [ ! -f multi-1.akaze ] ; then
+if  [ ! -f multi-akaze-0.feature ] || \
+    [ ! -f multi-orb-0.feature ] || \
+    [ ! -f multi-akaze-1.feature ] || \
+    [ ! -f multi-orb-1.feature ] ; then
     print_error "Did not create expected output files."
     exit 1
 fi

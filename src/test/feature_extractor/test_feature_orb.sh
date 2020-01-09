@@ -20,25 +20,25 @@ set -v
 if ! ${exe} \
    -i "flexion-{}.png" \
    -s 0 -e 1 \
-   orb -o "orb-{}.orb" ; then
+   orb -o "orb-{}.feature" ; then
     print_error "Default ORB-Detection did not work"
     exit 1
 fi
-if  [ ! -f orb-0.orb ] || \
-    [ ! -f orb-1.orb ]; then
+if  [ ! -f orb-0.feature ] || \
+    [ ! -f orb-1.feature ]; then
     print_error "Did not create expected output files."
     exit 1
 fi
 if ! ${exe} \
    -i "flexion-{}.png" \
    -s 0 -e 1 \
-   orb -o "orb-scale-{}.orb" \
+   orb -o "orb-scale-{}.feature" \
    --scale-factor 1.5 ; then
     print_error "ORB Scale factor does not work"
     exit 1
 fi
-if  [ ! -f orb-scale-0.orb ] || \
-    [ ! -f orb-scale-1.orb ]; then
+if  [ ! -f orb-scale-0.feature ] || \
+    [ ! -f orb-scale-1.feature ]; then
     print_error "Did not create expected output files."
     exit 1
 fi
@@ -47,7 +47,7 @@ fi
 if ${exe} \
    -i "flexion-{}.png" \
    -s 0 -e 1 \
-   orb -o "orb-bad-{}.png" \
+   orb -o "orb-bad-{}.feature" \
    --scale-factor 0.8 ; then
     print_error "Scale factor to low accepted"
     exit 1
@@ -55,7 +55,7 @@ fi
 if ${exe} \
    -i "flexion-{}.png" \
    -s 0 -e 1 \
-   orb -o "orb-bad-{}.png" \
+   orb -o "orb-bad-{}.feature" \
    --scale-factor 4.1 ; then
     print_error "Scale factor to high accepted"
     exit 1
