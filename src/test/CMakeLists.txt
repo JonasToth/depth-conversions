@@ -48,6 +48,7 @@ configure_file(feature_extractor/flexion-0.png
 configure_file(feature_extractor/flexion-1.png
                feature_extractor/flexion-1.png COPYONLY)
 add_tool_test(feature_extractor test_feature_extractor)
+add_tool_test(feature_extractor test_feature_freak)
 add_tool_test(feature_extractor test_feature_sift)
 add_tool_test(feature_extractor test_feature_surf)
 add_tool_test(feature_extractor test_feature_orb)

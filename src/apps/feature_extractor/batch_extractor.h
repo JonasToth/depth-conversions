@@ -15,7 +15,27 @@ namespace sens_loc::apps {
 /// \ingroup feature-extractor-driver
 struct Detector {
     cv::Ptr<cv::Feature2D> detector;
-    std::string            output_pattern;
+    cv::Ptr<cv::Feature2D> descriptor;
+    std::string_view       output_pattern;
+
+    Detector(cv::Ptr<cv::Feature2D> detecta_and_descripta,
+             std::string_view       output_pattern)
+        : detector{std::move(detecta_and_descripta)}
+        , descriptor{nullptr}
+        , output_pattern{output_pattern} {
+        Expects(!detector.empty());
+        Expects(descriptor.empty());
+    }
+
+    Detector(cv::Ptr<cv::Feature2D> detecta,
+             cv::Ptr<cv::Feature2D> descripta,
+             std::string_view       output_pattern)
+        : detector{std::move(detecta)}
+        , descriptor{std::move(descripta)}
+        , output_pattern{output_pattern} {
+        Expects(!detector.empty());
+        Expects(!descriptor.empty());
+    }
 };
 
 /// Helper class that visits a list of images and does some generic
@@ -24,13 +44,14 @@ struct Detector {
 class batch_extractor {
   public:
     batch_extractor(const std::vector<Detector>& detectors,
-                    const std::string&           input_pattern)
+                    std::string_view             input_pattern)
         : _detectors{detectors}
         , _input_pattern{input_pattern} {
         Expects(!_input_pattern.empty());
         Expects(std::none_of(
-            std::begin(detectors), std::end(detectors),
-            [](const Detector& d) { return d.output_pattern.empty(); }));
+            std::begin(detectors), std::end(detectors), [](const Detector& d) {
+                return d.output_pattern.empty() || d.detector.empty();
+            }));
     }
 
     /// Process a whole batch of files in the range [start, end].
@@ -38,7 +59,7 @@ class batch_extractor {
 
   private:
     const std::vector<Detector>& _detectors;
-    const std::string&           _input_pattern;
+    std::string_view             _input_pattern;
 };
 }  // namespace sens_loc::apps
 
