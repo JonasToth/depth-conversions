@@ -24,7 +24,7 @@ namespace {
 struct CommonArgs {
     CommonArgs(CLI::App* cmd) {
         cmd->add_option("-o,--output", out_path,
-                        "Output file-pattern for extracted features")
+                        "Output file-pattern for sift-features")
             ->required();
     }
 
@@ -232,29 +232,6 @@ struct AKAZEArgs : CommonArgs {
     int         n_octave_layers     = 4;
     std::string diffusivity         = "PM_G2";
 };
-
-/// \ingroup feature-extractor-driver
-struct AgastFREAKArgs : CommonArgs {
-    AgastFREAKArgs(CLI::App* cmd)
-        : CommonArgs(cmd) {
-        cmd->add_flag("-n,--no-normalize-orientation",
-                      no_orientation_normalized,
-                      "Do not normalize the orientation");
-        cmd->add_flag("-s,--no-scale-orientation", no_scale_normalized,
-                      "Do not normalize the scale");
-        cmd->add_option("-p,--pattern-scale", pattern_scale,
-                        "Scale of the FREAK retina-response pattern",
-                        /*defaulted=*/true);
-        cmd->add_option("--n-freak-octaves", n_octaves,
-                        "Maximum octave evolution of the image",
-                        /*defaulted=*/true);
-    }
-
-    bool  no_orientation_normalized = false;
-    bool  no_scale_normalized       = false;
-    float pattern_scale             = 22.0F;
-    int   n_octaves                 = 4;
-};
 }  // namespace
 
 /// Parallelized driver to batch-process images for feature detection and
@@ -306,11 +283,6 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     akaze_cmd->footer("\n\n");
     const AKAZEArgs akaze(akaze_cmd);
 
-    CLI::App* agast_freak_cmd = app.add_subcommand(
-        "agastfreak", "Detect with AGAST, describe with FREAK features");
-    agast_freak_cmd->footer("\n\n");
-    const AgastFREAKArgs freak(agast_freak_cmd);
-
     COLORED_APP_PARSE(app, argc, argv);
 
     // Create a vector of functors (unique_ptr<filter_interface>) that will
@@ -319,10 +291,8 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     vector<Detector> detectors;
 
     for (const auto* cmd : app.get_subcommands()) {
-        using cv::AgastFeatureDetector;
         using cv::AKAZE;
         using cv::ORB;
-        using cv::xfeatures2d::FREAK;
         using cv::xfeatures2d::SIFT;
         using cv::xfeatures2d::SURF;
 
@@ -358,15 +328,6 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
                     akaze.threshold, akaze.n_octaves, akaze.n_octave_layers,
                     AKAZEArgs::string_to_diffusivity(akaze.diffusivity)),
                 akaze.out_path});
-
-        else if (cmd == agast_freak_cmd) {
-            detectors.emplace_back(
-                Detector{AgastFeatureDetector::create(),
-                         FREAK::create(!freak.no_orientation_normalized,
-                                       !freak.no_scale_normalized,
-                                       freak.pattern_scale, freak.n_octaves),
-                         freak.out_path});
-        }
 
         else
             UNREACHABLE("Unhandled detector provided!");  // LCOV_EXCL_LINE
