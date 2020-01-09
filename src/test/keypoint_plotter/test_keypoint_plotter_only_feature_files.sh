@@ -13,7 +13,7 @@ helpers="$2"
 print_info "Using \"${exe}\" as driver executable"
 
 if ! ${exe} \
-    --input sift-{}.sift \
+    --input sift-{}.feature \
     --output keypoints-{}.png \
     --start 0 --end 1 ; then
     print_error "Could not plot keypoint in selfincluded feature-file (8bit gray, 16bit gray)"
@@ -26,7 +26,7 @@ if [ ! -f keypoints-0.png ] || \
 fi
 
 if ! ${exe} \
-    --input sift-{}.sift \
+    --input sift-{}.feature \
     --output keypoints-blue-{}.png \
     --color blue \
     --start 0 --end 1 ; then
