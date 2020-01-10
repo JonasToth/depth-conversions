@@ -50,10 +50,18 @@ RUN mkdir -p /eigen3 && cd /eigen3 \
  && ninja install \
  && cd / && rm -rf /eigen3
 
+
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 10 \
+ && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 10 \
+ && update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 20 \
+ && update-alternatives --set cc /usr/bin/gcc \
+ && update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 20 \
+ && update-alternatives --set c++ /usr/bin/g++
+
 ARG boost_version="1.72.0"
 ARG boost_version_string="1_72_0"
 RUN mkdir -p /boost cd /boost \
  && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
- && tar xf boost_$boost_version_string.tar.gz && mv boost* boost && cd boost \
+ && tar xf boost_$boost_version_string.tar.gz && cd boost_${boost_version_string} \
  && ./bootstrap.sh --prefix=/usr \
  && ./b2 install link=static variant=release

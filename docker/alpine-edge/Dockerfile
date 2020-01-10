@@ -10,7 +10,8 @@ RUN apk update \
             linux-headers \
             wget \
             unzip \
-            rsync
+            rsync \
+            boost
 
 ARG cv_version="4.2.0"
 RUN mkdir -p /opencv/build_cv && cd /opencv \
@@ -49,11 +50,3 @@ RUN mkdir -p /eigen3 && cd /eigen3 \
  && mkdir build && cd build \
  && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
  && ninja install
-
-ARG boost_version="1.72.0"
-ARG boost_version_string="1_72_0"
-RUN mkdir -p /boost cd /boost \
- && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
- && tar xf boost_$boost_version_string.tar.gz && mv boost* boost && cd boost \
- && ./bootstrap.sh --prefix=/usr \
- && ./b2 install link=static variant=release
