@@ -18,7 +18,7 @@ RUN apt-get update \
  && pip3 install --upgrade pip \
  && pip install cmake
 
-ARG cv_version="4.1.2"
+ARG cv_version="4.2.0"
 RUN mkdir -p /opencv/build_cv && cd /opencv \
  && wget --quiet https://github.com/opencv/opencv/archive/$cv_version.zip \
  && unzip $cv_version.zip && mv opencv-$cv_version opencv && rm $cv_version.zip \
