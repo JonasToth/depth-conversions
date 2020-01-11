@@ -1,7 +1,7 @@
 FROM ubuntu:18.04
 LABEL maintainer="jonas.toth@student.tu-freiberg.de"
 
-ARG cmake_version="3.15.5"
+ARG cmake_version="3.16.2"
 RUN apt-get update \
  && apt-get install -y wget gnupg2 \
  && wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
@@ -16,9 +16,9 @@ RUN apt-get update \
     unzip \
     rsync \
  && mkdir /cmake && cd /cmake \
- && wget https://github.com/Kitware/CMake/releases/download/v3.15.5/cmake-3.15.5-Linux-x86_64.sh \
+ && wget https://github.com/Kitware/CMake/releases/download/v$cmake_version/cmake-$cmake_version-Linux-x86_64.sh \
  && chmod +x cmake-*.sh \
- && ./cmake-3.15.5-Linux-x86_64.sh --prefix=/usr --skip-license \
+ && ./cmake-$cmake_version-Linux-x86_64.sh --prefix=/usr --skip-license \
  && rm -rf * && cd /
 
 WORKDIR /llvm
@@ -42,7 +42,7 @@ RUN ninja cxx \
 ENV LD_LIBRARY_PATH="/usr/local/lib/"
 
 WORKDIR /opencv
-ARG cv_version="4.1.2"
+ARG cv_version="4.2.0"
 RUN mkdir -p build_cv \
  && wget --quiet https://github.com/opencv/opencv/archive/$cv_version.zip \
  && unzip $cv_version.zip && mv opencv-$cv_version opencv && rm $cv_version.zip \
@@ -99,3 +99,11 @@ RUN mkdir -p /eigen3 && cd /eigen3 \
  && mkdir build && cd build \
  && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
  && ninja install
+
+ARG boost_version="1.72.0"
+ARG boost_version_string="1_72_0"
+RUN mkdir -p /boost cd /boost \
+ && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
+ && tar xf boost_$boost_version_string.tar.gz && cd boost_$boost_version_string \
+ && ./bootstrap.sh --prefix=/usr \
+ && ./b2 install link=static variant=release
