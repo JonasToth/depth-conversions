@@ -100,10 +100,21 @@ RUN mkdir -p /eigen3 && cd /eigen3 \
  && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
  && ninja install
 
+RUN update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-9/bin/clang 10 \
+ && update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-9/bin/clang++ 10 \
+ && update-alternatives --install /usr/bin/cc cc /usr/bin/clang 20 \
+ && update-alternatives --set cc /usr/bin/clang \
+ && update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 20 \
+ && update-alternatives --set c++ /usr/bin/clang++
 ARG boost_version="1.72.0"
 ARG boost_version_string="1_72_0"
 RUN mkdir -p /boost cd /boost \
  && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
  && tar xf boost_$boost_version_string.tar.gz && cd boost_$boost_version_string \
- && ./bootstrap.sh --prefix=/usr \
- && ./b2 install link=static variant=release
+ && CC=clang-9 CXX=clang++-9 \
+    ./bootstrap.sh --prefix=/usr --with-toolset=clang \
+ && ./b2 install link=static variant=release \
+    cxxflags="-stdlib=libc++ -fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer" \
+    linkflags="-lc++abi -stdlib=libc++" \
+    --without-python \
+ && cd / && rm -rf /boost
