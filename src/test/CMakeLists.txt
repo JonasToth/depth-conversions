@@ -67,10 +67,10 @@ configure_file(keypoint_plotter/flexion-0.png
                keypoint_plotter/flexion-0.png COPYONLY)
 configure_file(keypoint_plotter/flexion-1.png
                keypoint_plotter/flexion-1.png COPYONLY)
-configure_file(keypoint_plotter/sift-0.sift
-               keypoint_plotter/sift-0.sift COPYONLY)
-configure_file(keypoint_plotter/sift-1.sift
-               keypoint_plotter/sift-1.sift COPYONLY)
+configure_file(keypoint_plotter/sift-0.feature
+               keypoint_plotter/sift-0.feature COPYONLY)
+configure_file(keypoint_plotter/sift-1.feature
+               keypoint_plotter/sift-1.feature COPYONLY)
 add_tool_test(keypoint_plotter test_keypoint_plotter)
 add_tool_test(keypoint_plotter test_keypoint_plotter_only_feature_files)
 add_tool_test(keypoint_plotter test_keypoint_plotter_overwrite_image)
