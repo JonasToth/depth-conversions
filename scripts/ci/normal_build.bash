@@ -117,8 +117,18 @@ print_info "Building project"
 ninja dependencies
 cmake .
 
+print_info "What say the configure log for opencv?"
+cat /builds/jtoth/master-thesis/build/third_party/opencv/src/opencv-stamp/opencv-configure-*.log
+
+print_info "What say the build log for opencv?"
+cat /builds/jtoth/master-thesis/build/third_party/opencv/src/opencv-stamp/opencv-build-*.log
+
+print_info "What say the install log for opencv?"
+cat /builds/jtoth/master-thesis/build/third_party/opencv/src/opencv-stamp/opencv-install-*.log
+
 print_info "What lives in opencvs-include dir?"
 ls -la third_party/opencv-install/usr/include/opencv4/opencv2
+
 ninja
 
 if [ "${WITH_TESTING}" == "ON" ]; then
