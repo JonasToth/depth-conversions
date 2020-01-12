@@ -118,7 +118,7 @@ ninja dependencies
 cmake .
 
 print_info "What lives in opencvs-include dir?"
-ls -la third_party/opencv-install/usr/include/opencv4
+ls -la third_party/opencv-install/usr/include/opencv4/opencv2
 ninja
 
 if [ "${WITH_TESTING}" == "ON" ]; then
