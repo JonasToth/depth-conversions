@@ -9,7 +9,7 @@ RUN apt-get update \
  && rm cmake-$cmake_version* \
  && add-apt-repository -y ppa:ubuntu-toolchain-r/test \
  && apt-get update \
- && apt-get install -y g++-9 gcc-9 ninja-build extra-cmake-modules
+ && apt-get install -y g++-9 gcc-9 ninja-build
 
 ARG cv_version="4.2.0"
 RUN mkdir -p /opencv/build_cv && cd /opencv \
