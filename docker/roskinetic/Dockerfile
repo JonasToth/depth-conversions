@@ -59,4 +59,5 @@ RUN mkdir -p /boost cd /boost \
  && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
  && tar xf boost_$boost_version_string.tar.gz && cd boost_$boost_version_string \
  && ./bootstrap.sh --prefix=/usr \
- && ./b2 install link=static variant=release
+ && ./b2 install link=static variant=release --without-python \
+ && cd / && rm -rf /boost

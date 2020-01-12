@@ -19,7 +19,7 @@ if (NOT Boost_FOUND)
       SOURCE_DIR ${BOOST_SOURCE}
       CONFIGURE_COMMAND ${BOOST_SOURCE}/bootstrap.sh
         --prefix=${CMAKE_CURRENT_BINARY_DIR}/third_party/boost-install
-      BUILD_COMMAND ./b2 install link=static variant=release
+      BUILD_COMMAND ./b2 install link=static variant=release --without-python
 
       INSTALL_COMMAND ""
       INSTALL_DIR ""
