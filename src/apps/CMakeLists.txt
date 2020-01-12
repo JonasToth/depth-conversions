@@ -29,6 +29,7 @@ target_sources(depth2x
     )
 configure_file(kinect_intrinsic.txt kinect_intrinsic.txt COPYONLY)
 
+
 add_tool(depth_filter "${CMAKE_CURRENT_LIST_DIR}/depth_filter/main.cpp")
 target_sources(depth_filter
     PRIVATE
@@ -44,6 +45,7 @@ target_sources(feature_extractor
     "${CMAKE_CURRENT_LIST_DIR}/feature_extractor/batch_extractor.h"
     )
 
+
 add_tool(keypoint_plotter
          "${CMAKE_CURRENT_LIST_DIR}/keypoint_plotter/main.cpp")
 target_sources(keypoint_plotter
@@ -53,7 +55,7 @@ target_sources(keypoint_plotter
     )
 
 
-add_tool(feature_performance
-         "${CMAKE_CURRENT_LIST_DIR}/feature_performance/main.cpp")
-target_include_directories(feature_performance SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_directories(feature_performance PRIVATE ${Boost_LIBRARY_DIRS})
+# add_tool(feature_performance
+# "${CMAKE_CURRENT_LIST_DIR}/feature_performance/main.cpp")
+# target_include_directories(feature_performance SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+# target_link_directories(feature_performance PRIVATE ${Boost_LIBRARY_DIRS})

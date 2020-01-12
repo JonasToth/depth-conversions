@@ -3,7 +3,6 @@ if (NOT FORCE_BUNDLED_CV)
 endif (NOT FORCE_BUNDLED_CV)
 
 if (NOT OpenCV_FOUND)
-
     set(CUSTOM_OPENCV_SOURCE "" CACHE PATH
         "Custom directory for downloaded opencv source code")
     set(CUSTOM_OPENCV_CONTRIB_SOURCE "" CACHE PATH
