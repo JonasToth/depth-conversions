@@ -227,6 +227,7 @@ ubuntu-1804-asan:
 
 ubuntu-1804-msan:
   image: $CI_REGISTRY_IMAGE/base-image-msan
+  allow_failure: true
   stage: sanitizers
   variables:
     CC: "clang-9"
