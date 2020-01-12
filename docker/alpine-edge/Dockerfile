@@ -11,7 +11,7 @@ RUN apk update \
             wget \
             unzip \
             rsync \
-            boost \
+            boost boost-dev \
             eigen
 
 ARG cv_version="4.2.0"
