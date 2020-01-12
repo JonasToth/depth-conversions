@@ -11,12 +11,10 @@ RUN apt-get update \
  && apt-get install -y \
     build-essential \
     git \
-    ninja-build \
+    ninja-build extra-cmake-modules \
     software-properties-common \
     unzip \
     python3-pip \
-    libeigen3-dev \
-    libboost-all-dev \
     libpng-dev \
     libjpeg-dev \
     rsync \
