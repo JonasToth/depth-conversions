@@ -86,7 +86,7 @@ list(APPEND opencv_options
     -DBUILD_opencv_text:BOOL=OFF
     -DBUILD_opencv_tracking:BOOL=OFF
     -DBUILD_opencv_ts:BOOL=OFF
-    -DBUILD_opencv_video:BOOL=OFF
+    -DBUILD_opencv_video:BOOL=ON
     -DBUILD_opencv_videoio:BOOL=OFF
     -DBUILD_opencv_videostab:BOOL=OFF
     -DBUILD_opencv_world:BOOL=OFF
