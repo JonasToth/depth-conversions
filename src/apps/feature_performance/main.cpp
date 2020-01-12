@@ -1,4 +1,5 @@
 // #include <boost/histogram.hpp>
+#include <boost/outcome.hpp>
 
 int main() {
 
