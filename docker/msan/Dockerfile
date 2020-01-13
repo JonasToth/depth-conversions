@@ -108,7 +108,7 @@ RUN update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-9/bin/clang
  && update-alternatives --set c++ /usr/bin/clang++
 ARG boost_version="1.72.0"
 ARG boost_version_string="1_72_0"
-RUN mkdir -p /boost cd /boost \
+RUN mkdir -p /boost && cd /boost \
  && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
  && tar xf boost_$boost_version_string.tar.gz && cd boost_$boost_version_string \
  && CC=clang-9 CXX=clang++-9 \
