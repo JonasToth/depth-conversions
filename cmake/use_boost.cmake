@@ -1,6 +1,6 @@
 set(BOOST_VERSION "1.72.0")
 set(BOOST_VERSION_STRING "1_72_0")
-find_package(Boost ${BOOST_VERSION} QUIET)
+find_package(Boost ${BOOST_VERSION} EXACT QUIET)
 
 if (NOT Boost_FOUND)
     include(ExternalProject)
@@ -38,7 +38,9 @@ if (NOT Boost_FOUND)
         set(boost_built TRUE)
         find_package(Boost ${BOOST_VERSION} REQUIRED
                      PATHS "${CMAKE_CURRENT_BINARY_DIR}/third_party/boost-install/lib/cmake"
-                     NO_DEFAULT_PATH)
+                     NO_DEFAULT_PATH
+                     NO_SYSTEM_ENVIRONMENT_PATH
+                     )
 
         # Hide this variable in cmake-gui.
         mark_as_advanced(FORCE Boost_DIR)
