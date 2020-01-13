@@ -1,0 +1,12 @@
+--- a/span.hpp	2019-12-10 01:19:10.000000000 +0100
++++ b/span.hpp	2020-01-13 12:20:57.328384123 +0100
+@@ -7,8 +7,7 @@
+ #ifndef BOOST_HISTOGRAM_DETAIL_SPAN_HPP
+ #define BOOST_HISTOGRAM_DETAIL_SPAN_HPP
+ 
+-#if __cpp_constexpr >= 201603 && __cpp_deduction_guides >= 201703 && \
+-    __cpp_lib_nonmember_container_access >= 201411 && __has_include(<span>)
++#if 0
+ #include <span>
+ 
+ namespace boost {

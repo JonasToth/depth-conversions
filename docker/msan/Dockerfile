@@ -118,3 +118,10 @@ RUN mkdir -p /boost && cd /boost \
     linkflags="-lc++abi -stdlib=libc++" \
     --without-python \
  && cd / && rm -rf /boost
+
+COPY histogram_remove_std_span.patch /histogram_remove_std_span.patch
+RUN cd /usr/include/boost/histogram/detail \
+ && patch -p1 < /histogram_remove_std_span.patch
+
+# pthread is not found properly by cmake - this solves it
+RUN apt-get install -y --reinstall libc6-dev
