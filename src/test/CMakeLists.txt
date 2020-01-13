@@ -78,3 +78,16 @@ configure_file(keypoint_plotter/compressed-1.feature.gz
 add_tool_test(keypoint_plotter test_keypoint_plotter)
 add_tool_test(keypoint_plotter test_keypoint_plotter_only_feature_files)
 add_tool_test(keypoint_plotter test_keypoint_plotter_overwrite_image)
+
+################################################################################
+
+configure_file(feature_performance/sift-0.feature
+               feature_performance/sift-0.feature COPYONLY)
+configure_file(feature_performance/sift-1.feature
+               feature_performance/sift-1.feature COPYONLY)
+configure_file(feature_performance/orb-0.feature
+               feature_performance/orb-0.feature COPYONLY)
+configure_file(feature_performance/orb-1.feature
+               feature_performance/orb-1.feature COPYONLY)
+add_tool_test(feature_performance test_feature_performance)
+add_tool_test(feature_performance test_feature_performance_min_distance)

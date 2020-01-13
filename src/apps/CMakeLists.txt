@@ -56,7 +56,13 @@ target_sources(keypoint_plotter
     )
 
 
-# add_tool(feature_performance
-# "${CMAKE_CURRENT_LIST_DIR}/feature_performance/main.cpp")
-# target_include_directories(feature_performance SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-# target_link_directories(feature_performance PRIVATE ${Boost_LIBRARY_DIRS})
+add_tool(feature_performance
+         "${CMAKE_CURRENT_LIST_DIR}/feature_performance/main.cpp")
+target_sources(feature_performance
+    PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/descriptor_characteristica.h"
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.h"
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.cpp"
+    )
+target_include_directories(feature_performance SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
+target_link_directories(feature_performance PRIVATE ${Boost_LIBRARY_DIRS})
