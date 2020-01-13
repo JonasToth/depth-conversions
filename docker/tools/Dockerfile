@@ -76,3 +76,7 @@ RUN mkdir -p /boost cd /boost \
  && ./bootstrap.sh --prefix=/usr \
  && ./b2 install link=static variant=release --without-python \
  && cd / && rm -rf /boost
+
+COPY histogram_remove_std_span.patch /histogram_remove_std_span.patch
+RUN cd /usr/include/boost/histogram/detail \
+ && patch -p1 < /histogram_remove_std_span.patch
