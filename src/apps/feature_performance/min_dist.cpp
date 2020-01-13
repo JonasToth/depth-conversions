@@ -1,6 +1,8 @@
 #include "min_dist.h"
 
 #include <algorithm>
+#include <boost/histogram.hpp>
+#include <boost/histogram/ostream.hpp>
 #include <cstdint>
 #include <fmt/core.h>
 #include <iomanip>
@@ -42,14 +44,21 @@ int analyze_min_distance_impl(std::string_view input_pattern,
     using T         = typename element_access<NT>::type;
     const int dtype = element_access<NT>::dtype;
 
+    std::vector<float> min_distances;
+    // Optimization, it is expected, that many minimal distances are inserted.
+    // This will save multiple small allocations in the early growing stage.
+    min_distances.reserve(1000);
+
     for (int i = start_idx; i < end_inclusive; ++i) {
+        if (i % 50 == 0)
+            std::cout << "Processing Img: " << i << "\n";
+
         try {
             using cv::FileNode;
             using cv::FileStorage;
             using cv::read;
 
             const std::string input_file = fmt::format(input_pattern, i);
-
             const FileStorage fs{input_file,
                                  FileStorage::READ | FileStorage::FORMAT_YAML};
 
@@ -61,7 +70,6 @@ int analyze_min_distance_impl(std::string_view input_pattern,
             if (descriptors.empty())
                 throw std::invalid_argument{"no keypoints in this file"};
 
-            std::cout << "Columns: " << descriptors.cols << "\n";
             cv::Mat distances;
             cv::batchDistance(descriptors, descriptors, distances, dtype,
                               cv::noArray(), /*normType=*/NT);
@@ -72,17 +80,14 @@ int analyze_min_distance_impl(std::string_view input_pattern,
                 distances.at<T>(row, row) = std::numeric_limits<T>::max();
 
                 cv::Mat r        = distances.row(row);
-                float   min_dist = *std::min_element(r.begin<T>(), r.end<T>());
+                auto    min_dist = gsl::narrow<float>(
+                    *std::min_element(r.begin<T>(), r.end<T>()));
+
+                min_distances.push_back(min_dist);
+#if 0
                 std::cout << "Minimal Distance for Descriptor   # " << row
                           << " = " << min_dist << "\n";
-
-                if (min_dist == 0.) {
-                    for (int c = 0; c < distances.cols; ++c) {
-                        std::cout << std::setw(4)
-                                  << (int) distances.at<T>(row, c);
-                    }
-                    std::cout << "\n";
-                }
+#endif
             }
         } catch (const std::exception& e) {
             std::cout << "Problemo!\n" << e.what() << "\n";
@@ -92,6 +97,23 @@ int analyze_min_distance_impl(std::string_view input_pattern,
             overall_success = 1;
         }
     }
+    auto [min_it, max_it] =
+        std::minmax_element(std::begin(min_distances), std::end(min_distances));
+
+    std::cout << "Minimum distance: " << *min_it << "\n"
+              << "Maximum distance: " << *max_it << "\n";
+
+
+    std::cout << "Creating Histogram\n";
+    // Histogramming
+    using namespace boost::histogram;
+    const int bin_count  = 50;
+    auto      min_dist_h = make_histogram(
+        axis::regular<float>(bin_count, 0.0, *max_it + (*max_it / bin_count)));
+    min_dist_h.fill(min_distances);
+
+    std::cout << min_dist_h << "\n";
+
     return overall_success;
 }
 }  // namespace
