@@ -10,6 +10,17 @@ Given this good coverage changes are, that you can compile the code on your
 system with a modern toolchain. The project relies on **C++17** and does not
 attempt to be backwards compatible.
 
+## Don't
+
+The project provide `docker` images with the binaries included. You can
+download prebuilt binaries as well, they do not rely on any dynamic
+dependencies except the system libraries. If you `libc` is new enough, they
+should work out of the box!
+
+This is not the case for `RedHat Enterprise 5` (or `centos 5`).
+
+## But I need to build from source
+
 You can try `./scripts/ci/normal_build.bash` for building, it will create the
 directory `build` inside the root of you repository and build there.
 This script is controlled via environment variables and fairly easy to
@@ -25,7 +36,7 @@ The following tools are required for building:
 - a modern C++ compiler with C++17 support (`gcc/g++ >= 7.x`; `clang >= 8`;
   theoretically `Visual Studio >= 2019`, but its not tested)
 - the sytem linker works, but you can use `lld` for linking as well
-- **Optional**: `ninja` as build-tool. `make` works as well, but is not as nice
+- **Optional**: `ninja` as build-tool. `make` works as well, but is not as fast
 
 Other dependencies are optional as there is always a fallback to bundled
 software versions.
@@ -45,6 +56,13 @@ As `Eigen3` itself is a header-only C++-library it is not that complicated as
 with `libeigen3-dev` - version 3.3 is required.
 You can fallback to the bundled version as well, it does not require
 compilation.
+
+### Boost
+
+Because the project requires a very new `Boost` (see `dependencies.md`) the
+version provided by your package manager might be outdated.
+The project has custom building included. But you can of course build your
+own boost and install it into your system.
 
 ## Build with everything included
 

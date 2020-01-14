@@ -16,6 +16,8 @@
 namespace sens_loc::apps {
 
 namespace {
+/// Expects to load a 16bit grayscale image.
+/// It converts those images to 8bit grayscale images that will be processed.
 std::optional<math::image<uchar>> load_file(const std::string& name) noexcept {
     std::optional<math::image<ushort>> depth_image =
         io::load_image<ushort>(name, cv::IMREAD_UNCHANGED);
@@ -27,6 +29,8 @@ std::optional<math::image<uchar>> load_file(const std::string& name) noexcept {
         math::image<ushort>(depth_image->data() / 255.));  // NOLINT
 }
 
+/// Computes both keypoints and corresponding descriptors and returns them
+/// as pair.
 std::pair<std::vector<cv::KeyPoint>, cv::Mat>
 compute_features(const math::image<uchar>& img,
                  cv::Feature2D&            detector) noexcept {

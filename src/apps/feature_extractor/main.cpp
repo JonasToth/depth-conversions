@@ -252,7 +252,11 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     app.footer("\n\n"
                "An example invocation of the tool is:\n"
                "\n"
-               "feature_extractor \\\n"
+               "feature_extractor --input 'flexion-{}.png'                 \\\n"
+               "                  --start 0                                \\\n"
+               "                  --end 100                                \\\n"
+               "                  akaze --output akaza-{:04d}.feature[.gz] \\\n"
+               "                  sift --output sift-{:04d}.feature[.gz]"
                "\n");
 
     std::string arg_input_files;

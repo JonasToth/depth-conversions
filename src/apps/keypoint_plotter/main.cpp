@@ -20,6 +20,14 @@
 /// \ingroup feature-plotter-driver
 /// \returns 0 if all images could be processed, 1 if any image fails
 MAIN_HEAD("Batch-processing tool to plot keypoints and matches") {
+    app.footer("$ keypoint_plotter --input akaze-{:04d}.feature[.gz] \\\n"
+               "                   --original-file depth-{}.png      \\\n"
+               "                   --output keypoints-depth-{}.png   \\\n"
+               "                   --start 0 --end 100 ;\n"
+               "> Overwrite the 'source_path' do use a different file then "
+               "specified in the"
+               "> feature file.");
+
     string feature_file_input_pattern;
     app.add_option("-i,--input", feature_file_input_pattern,
                    "Define file-pattern for the feature files to be plotted")

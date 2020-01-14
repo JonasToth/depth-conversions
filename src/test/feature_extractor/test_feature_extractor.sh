@@ -55,5 +55,17 @@ if  [ ! -f multi-akaze-0.feature ] || \
     exit 1
 fi
 
+rm -f compressed-*
+if ! ${exe} -i "flexion-{}.png" -s 0 -e 1 \
+     akaze  -o "compressed-{}.feature.gz" ; then
+    print_error "Writing compressed files failed"
+    exit 1
+fi
+if  [ ! -f compressed-0.feature.gz ] || \
+    [ ! -f compressed-1.feature.gz ] ; then
+    print_error "Did not create expected output files."
+    exit 1
+fi
+
 print_info "Test successful!"
 exit 0

@@ -97,3 +97,58 @@ $ depth_filter median-blur --input depth_{:04d}.png \
                            --distance 5
 > Run-Log and potential errors
 ```
+
+## feature_extractor
+
+This tools reads in the generated and/or filtered feature images and runs
+different keypoint detectors and feature descriptors of these images.
+The input is expected to be **16 bit grayscale png**.
+
+The executable wraps only the
+[OpenCV Features Module](https://docs.opencv.org/master/da/d9b/group__features2d.html)
+and their
+[OpenCV XFeatures](https://docs.opencv.org/master/d1/db4/group__xfeatures2d.html).
+Not every feature detector and descriptor is used, but every one could be
+added.
+
+The output are `.feature` files, that are written with
+[OpenCV Filestorage](https://docs.opencv.org/master/da/d56/classcv_1_1FileStorage.html).
+The output is `YAML`. Appending `.gz` to the file-name will compress those files
+as well.
+
+Each file consists of the nodes `source_path` (the provided path while feature
+extractions), `keypoints` (array of the detected keypoints) and `descriptors`
+(matrix where each row is the extracted feature descriptor and for the n'th
+keypoint). Optionally the used detector configuration is written, but that
+depends on the implementation support for that.
+
+```
+$ feature_extractor --input "flexion-{}.png" \
+                    --start 0                \
+                    --end 100                \
+                    akaze --output akaza-{:04d}.feature[.gz]
+> Run-Log and potential Errors
+> .feature-files are in the local directory
+```
+
+## keypoint_plotter
+
+This tool is a little utility to plot the detected keypoints on the actual
+images. It does no further processing, but only reads in files generated
+with `feature_extractor` and plots them.
+It tries to use the `source_path`, but that can be overwritten with the
+`--original-file` option.
+
+```
+$ keypoint_plotter --input akaze-{}.feature[.gz] \
+                   --output keypoints-{}.png     \
+                   --start 0 --end 100
+> Uses the paths from the feature file to plot the keypoints on.
+
+$ keypoint_plotter --input akaze-{:04d}.feature[.gz] \
+                   --original-file depth-{}.png      \
+                   --output keypoints-depth-{}.png   \
+                   --start 0 --end 100 ;
+> Overwrite the 'source_path' do use a different file then specified in the
+> feature file.
+```

@@ -71,6 +71,10 @@ configure_file(keypoint_plotter/sift-0.feature
                keypoint_plotter/sift-0.feature COPYONLY)
 configure_file(keypoint_plotter/sift-1.feature
                keypoint_plotter/sift-1.feature COPYONLY)
+configure_file(keypoint_plotter/compressed-0.feature.gz
+               keypoint_plotter/compressed-0.feature.gz COPYONLY)
+configure_file(keypoint_plotter/compressed-1.feature.gz
+               keypoint_plotter/compressed-1.feature.gz COPYONLY)
 add_tool_test(keypoint_plotter test_keypoint_plotter)
 add_tool_test(keypoint_plotter test_keypoint_plotter_only_feature_files)
 add_tool_test(keypoint_plotter test_keypoint_plotter_overwrite_image)

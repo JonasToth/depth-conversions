@@ -18,8 +18,8 @@ struct Detector {
     std::string            output_pattern;
 };
 
-/// Helper class that visits a list of images and does some generic
-/// processing on it.
+/// Helper class that visits a list of images and extracts features with the
+/// provided detectors.
 /// \ingroup feature-extractor-driver
 class batch_extractor {
   public:
