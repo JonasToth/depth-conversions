@@ -51,7 +51,7 @@ function(common_target_properties target_name)
         target_compile_options(${target_name}
             PUBLIC
             "-fsanitize=memory"
-            "-fsanitize-blacklist=${CMAKE_SOURCE_DIR}/scripts/msan_suppressions"
+            "-fsanitize-blacklist=${CMAKE_PROJECT_DIR}/scripts/msan_suppressions"
             "-fsanitize-memory-track-origins"
             "-fno-omit-frame-pointer")
         target_link_options(${target_name}
