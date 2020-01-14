@@ -45,7 +45,9 @@ if [[ -z "$WITH_ASAN" ]]; then
 fi
 if [[ -z "$WITH_MSAN" ]]; then
     WITH_MSAN=OFF
-    LINKER_FLAGS="-fsanitize=memory"
+fi
+if [ "$WITH_MSAN" = "ON" ]; then
+    LINKER_FLAGS="${LINKER_FLAGS} -fsanitize=memory"
 fi
 if [[ -z "$WITH_UBSAN" ]]; then
     WITH_UBSAN=OFF
