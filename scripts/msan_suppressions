@@ -98,30 +98,3 @@ fun:cv::findDecoder(std::__1::basic_string<char, std::__1::char_traits<char>, st
 #2 0x164fdc3 in cv::FileStorage::Impl::open(char const*, int, char const*) /opencv/opencv/modules/core/src/persistence.cpp:468:32
 #3 0x164f0eb in cv::FileStorage::FileStorage(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) /opencv/opencv/modules/core/src/persistence.cpp:1797:18
 fun:std::__1::char_traits<char>::length(char const*)
-
-#0 0x16b2dff in cv::hal_AVX2::v_cvt_f32(cv::hal_AVX2::v_float64x4 const&, cv::hal_AVX2::v_float64x4 const&) /opencv/opencv/modules/core/include/opencv2/core/hal/intrin_avx.hpp:1510:17
-#1 0x16b2dff in cv::vx_load_pair_as(double const*, cv::hal_AVX2::v_float32x8&, cv::hal_AVX2::v_float32x8&) /opencv/opencv/modules/core/src/convert.hpp:245:9
-#2 0x16b2dff in void cv::opt_AVX2::cvt_32f<double, unsigned char>(double const*, unsigned long, unsigned char*, unsigned long, cv::Size_<int>, float, float) /opencv/opencv/modules/core/src/convert_scale.simd.hpp:115:13
-#3 0x16b2dff in cv::opt_AVX2::cvtScale64f8u(unsigned char const*, unsigned long, unsigned char const*, unsigned long, unsigned char*, unsigned long, cv::Size_<int>, void*) /opencv/opencv/modules/core/src/convert_scale.simd.hpp:234:1
-#4 0x118a48a in cv::Mat::convertTo(cv::_OutputArray const&, int, double, double) const /opencv/opencv/modules/core/src/convert.dispatch.cpp:213:9
-#5 0x5543e0 in sens_loc::math::image<unsigned char> sens_loc::conversion::convert_bearing<double, unsigned char>(sens_loc::math::image<double> const&) /builds/jtoth/master-thesis/build/../src/include/sens_loc/conversion/depth_to_bearing.h:292:26
-#6 0x4f1a47 in _DOCTEST_ANON_FUNC_20() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_bearing.cpp:115:22
-#7 0x4d1baa in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
-#8 0x4d7980 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
-#9 0x7fb0f416db96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
-#10 0x42a139 in _start (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_bearing+0x42a139)
-#
-#
-# Uninitialized value was created by a heap allocation
-#0 0x4301b5 in posix_memalign (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_bearing+0x4301b5)
-#1 0x1124fe3 in cv::fastMalloc(unsigned long) /opencv/opencv/modules/core/src/alloc.cpp:135:12
-#2 0x12abcf0 in cv::StdMatAllocator::allocate(int, int const*, int, void*, unsigned long*, cv::AccessFlag, cv::UMatUsageFlags) const /opencv/opencv/modules/core/src/matrix.cpp:147:55
-#3 0x12902d9 in cv::Mat::create(int, int const*, int) /opencv/opencv/modules/core/src/matrix.cpp:360:20
-#4 0x4f17dc in cv::Mat::create(int, int, int) /usr/local/include/opencv4/opencv2/core/mat.inl.hpp:831:5
-#5 0x4f17dc in cv::Mat::Mat(int, int, int) /usr/local/include/opencv4/opencv2/core/mat.inl.hpp:460:5
-#6 0x4f17dc in _DOCTEST_ANON_FUNC_20() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_bearing.cpp:107:25
-#7 0x4d1baa in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
-#8 0x4d7980 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
-#9 0x7fb0f416db96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
-# SUMMARY: MemorySanitizer: use-of-uninitialized-value /opencv/opencv/modules/core/include/opencv2/core/hal/intrin_avx.hpp:1510:17 in cv::hal_AVX2::v_cvt_f32(cv::hal_AVX2::v_float64x4 const&, cv::hal_AVX2::v_float64x4 const&)
-fun:cv::hal_AVX2::v_cvt_f32(cv::hal_AVX2::v_float64x4 const&, cv::hal_AVX2::v_float64x4 const&)
