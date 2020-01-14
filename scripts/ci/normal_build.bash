@@ -12,6 +12,7 @@ SCRIPT_PATH=$(dirname "${SCRIPT_FILE}")
 # shellcheck source=../log_helpers.sh
 . "${SCRIPT_PATH}/../log_helpers.sh"
 
+LINKER_FLAGS=""
 if [[ -z "$BUILD_TYPE" ]]; then
     BUILD_TYPE="RelWithDebInfo"
 fi
@@ -44,6 +45,7 @@ if [[ -z "$WITH_ASAN" ]]; then
 fi
 if [[ -z "$WITH_MSAN" ]]; then
     WITH_MSAN=OFF
+    LINKER_FLAGS="-fsanitize=memory"
 fi
 if [[ -z "$WITH_UBSAN" ]]; then
     WITH_UBSAN=OFF
@@ -92,6 +94,7 @@ print_info "Configuring project"
 cmake .. \
  -G Ninja \
  -DCMAKE_LINKER=${LD} \
+ -DCMAKE_EXE_LINKER_FLAGS=${LINKER_FLAGS} \
  -DCMAKE_BUILD_TYPE=${BUILD_TYPE} \
  -DUSE_LIBCXX=${USE_LIBCXX} \
  -DBUILD_TESTING=${WITH_TESTING} \
