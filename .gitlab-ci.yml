@@ -236,6 +236,7 @@ ubuntu-1804-msan:
     USE_LIBCXX: "ON"
     BUILD_TYPE: "RelWithDebInfo"
     WITH_MSAN: "ON"
+    MSAN_OPTIONS: "suppressions=/builds/jtoth/master-thesis/scripts/msan_suppressions"
   <<: *wide_test_filter_definition
   dependencies: []
 

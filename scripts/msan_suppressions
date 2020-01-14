@@ -1,0 +1,145 @@
+# Random number generator confused MSAN
+fun:std::__1::random_device::operator()()
+fun:std::__1::thread::~thread()
+
+
+# OpenCV 4.2.0
+#0 0x6a339c in cv::findDecoder(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:215:14
+#1 0x6892a3 in cv::imread_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int, cv::Mat&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:409:19
+#2 0x6892a3 in cv::imread(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:624:5
+#3 0x5db26d in std::__1::optional<sens_loc::math::image<unsigned short> > sens_loc::io::load_image<unsigned short, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::ImreadModes>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::ImreadModes&&) /builds/jtoth/master-thesis/build/../src/include/sens_loc/io/image.h:24:22
+fun:cv::findDecoder(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
+
+# OpenCV 4.2.0
+#0 0x164fdc3 in std::__1::char_traits<char>::length(char const*) /usr/local/include/c++/v1/__string:217:53
+#1 0x164fdc3 in std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >::basic_string(char const*) /usr/local/include/c++/v1/string:821:19
+#2 0x164fdc3 in cv::FileStorage::Impl::open(char const*, int, char const*) /opencv/opencv/modules/core/src/persistence.cpp:468:32
+#3 0x164f0eb in cv::FileStorage::FileStorage(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) /opencv/opencv/modules/core/src/persistence.cpp:1797:18
+fun:std::__1::char_traits<char>::length(char const*)
+
+#0 0x16b2dff in cv::hal_AVX2::v_cvt_f32(cv::hal_AVX2::v_float64x4 const&, cv::hal_AVX2::v_float64x4 const&) /opencv/opencv/modules/core/include/opencv2/core/hal/intrin_avx.hpp:1510:17
+#1 0x16b2dff in cv::vx_load_pair_as(double const*, cv::hal_AVX2::v_float32x8&, cv::hal_AVX2::v_float32x8&) /opencv/opencv/modules/core/src/convert.hpp:245:9
+#2 0x16b2dff in void cv::opt_AVX2::cvt_32f<double, unsigned char>(double const*, unsigned long, unsigned char*, unsigned long, cv::Size_<int>, float, float) /opencv/opencv/modules/core/src/convert_scale.simd.hpp:115:13
+#3 0x16b2dff in cv::opt_AVX2::cvtScale64f8u(unsigned char const*, unsigned long, unsigned char const*, unsigned long, unsigned char*, unsigned long, cv::Size_<int>, void*) /opencv/opencv/modules/core/src/convert_scale.simd.hpp:234:1
+#4 0x118a48a in cv::Mat::convertTo(cv::_OutputArray const&, int, double, double) const /opencv/opencv/modules/core/src/convert.dispatch.cpp:213:9
+#5 0x5543e0 in sens_loc::math::image<unsigned char> sens_loc::conversion::convert_bearing<double, unsigned char>(sens_loc::math::image<double> const&) /builds/jtoth/master-thesis/build/../src/include/sens_loc/conversion/depth_to_bearing.h:292:26
+#6 0x4f1a47 in _DOCTEST_ANON_FUNC_20() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_bearing.cpp:115:22
+#7 0x4d1baa in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
+#8 0x4d7980 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
+#9 0x7fb0f416db96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+#10 0x42a139 in _start (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_bearing+0x42a139)
+#
+#
+# Uninitialized value was created by a heap allocation
+#0 0x4301b5 in posix_memalign (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_bearing+0x4301b5)
+#1 0x1124fe3 in cv::fastMalloc(unsigned long) /opencv/opencv/modules/core/src/alloc.cpp:135:12
+#2 0x12abcf0 in cv::StdMatAllocator::allocate(int, int const*, int, void*, unsigned long*, cv::AccessFlag, cv::UMatUsageFlags) const /opencv/opencv/modules/core/src/matrix.cpp:147:55
+#3 0x12902d9 in cv::Mat::create(int, int const*, int) /opencv/opencv/modules/core/src/matrix.cpp:360:20
+#4 0x4f17dc in cv::Mat::create(int, int, int) /usr/local/include/opencv4/opencv2/core/mat.inl.hpp:831:5
+#5 0x4f17dc in cv::Mat::Mat(int, int, int) /usr/local/include/opencv4/opencv2/core/mat.inl.hpp:460:5
+#6 0x4f17dc in _DOCTEST_ANON_FUNC_20() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_bearing.cpp:107:25
+#7 0x4d1baa in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
+#8 0x4d7980 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
+#9 0x7fb0f416db96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+# SUMMARY: MemorySanitizer: use-of-uninitialized-value /opencv/opencv/modules/core/include/opencv2/core/hal/intrin_avx.hpp:1510:17 in cv::hal_AVX2::v_cvt_f32(cv::hal_AVX2::v_float64x4 const&, cv::hal_AVX2::v_float64x4 const&)
+fun:cv::hal_AVX2::v_cvt_f32(cv::hal_AVX2::v_float64x4 const&, cv::hal_AVX2::v_float64x4 const&)
+
+#0 0x1e426fd in deflate_rle /opencv/opencv/3rdparty/zlib/deflate.c:2083:33
+#1 0x1e426fd in deflate /opencv/opencv/3rdparty/zlib/deflate.c:1002:41
+#2 0x8d5552 in png_compress_IDAT /opencv/opencv/3rdparty/libpng/pngwutil.c:981:13
+#3 0x8f0497 in png_write_filtered_row /opencv/opencv/3rdparty/libpng/pngwutil.c:2754:4
+#4 0x8f0497 in png_write_find_filter /opencv/opencv/3rdparty/libpng/pngwutil.c:2739:4
+#5 0x8c34d7 in png_write_row /opencv/opencv/3rdparty/libpng/pngwrite.c:899:4
+#6 0x8c3c60 in png_write_image /opencv/opencv/3rdparty/libpng/pngwrite.c:626:10
+#7 0x5dc7e1 in cv::PngEncoder::write(cv::Mat const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/grfmt_png.cpp:429:21
+#8 0x57ab96 in cv::imwrite_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<cv::Mat, std::__1::allocator<cv::Mat> > const&, std::__1::vector<int, std::__1::allocator<int> > const&, bool) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:693:29
+#9 0x57ab96 in cv::imwrite(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::_InputArray const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:724:12
+#10 0x4d60df in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:25:5
+#11 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
+#12 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
+#13 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+#14 0x427859 in _start (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_curvature+0x427859)
+#
+# Uninitialized value was stored to memory at
+#0 0x42d4f6 in __msan_memcpy (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_curvature+0x42d4f6)
+#1 0x1e33173 in read_buf /opencv/opencv/3rdparty/zlib/deflate.c:1176:5
+#2 0x1e33173 in fill_window /opencv/opencv/3rdparty/zlib/deflate.c:1534:13
+#3 0x1e3c6a9 in deflate_rle /opencv/opencv/3rdparty/zlib/deflate.c:2071:13
+#4 0x1e3c6a9 in deflate /opencv/opencv/3rdparty/zlib/deflate.c:1002:41
+#5 0x8d5552 in png_compress_IDAT /opencv/opencv/3rdparty/libpng/pngwutil.c:981:13
+#6 0x8f0497 in png_write_filtered_row /opencv/opencv/3rdparty/libpng/pngwutil.c:2754:4
+#7 0x8f0497 in png_write_find_filter /opencv/opencv/3rdparty/libpng/pngwutil.c:2739:4
+#8 0x8c34d7 in png_write_row /opencv/opencv/3rdparty/libpng/pngwrite.c:899:4
+#9 0x8c3c60 in png_write_image /opencv/opencv/3rdparty/libpng/pngwrite.c:626:10
+#10 0x5dc7e1 in cv::PngEncoder::write(cv::Mat const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/grfmt_png.cpp:429:21
+#11 0x57ab96 in cv::imwrite_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<cv::Mat, std::__1::allocator<cv::Mat> > const&, std::__1::vector<int, std::__1::allocator<int> > const&, bool) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:693:29
+#12 0x57ab96 in cv::imwrite(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::_InputArray const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:724:12
+#13 0x4d60df in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:25:5
+#14 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
+#15 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
+#16 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+#
+# Uninitialized value was stored to memory at
+#0 0x8e8f64 in png_setup_sub_row_only /opencv/opencv/3rdparty/libpng/pngwutil.c:2335:11
+#1 0x8e8f64 in png_write_find_filter /opencv/opencv/3rdparty/libpng/pngwutil.c:2638:7
+#2 0x8c34d7 in png_write_row /opencv/opencv/3rdparty/libpng/pngwrite.c:899:4
+#3 0x8c3c60 in png_write_image /opencv/opencv/3rdparty/libpng/pngwrite.c:626:10
+#4 0x5dc7e1 in cv::PngEncoder::write(cv::Mat const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/grfmt_png.cpp:429:21
+#5 0x57ab96 in cv::imwrite_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<cv::Mat, std::__1::allocator<cv::Mat> > const&, std::__1::vector<int, std::__1::allocator<int> > const&, bool) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:693:29
+#6 0x57ab96 in cv::imwrite(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::_InputArray const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:724:12
+#7 0x4d60df in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:25:5
+#8 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
+#9 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
+#10 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+#
+# Uninitialized value was stored to memory at
+#0 0x8ba2be in png_do_swap /opencv/opencv/3rdparty/libpng/pngtrans.c:338:14
+#1 0x8cdc30 in png_do_write_transformations /opencv/opencv/3rdparty/libpng/pngwtran.c:544:7
+#2 0x8c293e in png_write_row /opencv/opencv/3rdparty/libpng/pngwrite.c:862:7
+#3 0x8c3c60 in png_write_image /opencv/opencv/3rdparty/libpng/pngwrite.c:626:10
+#4 0x5dc7e1 in cv::PngEncoder::write(cv::Mat const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/grfmt_png.cpp:429:21
+#5 0x57ab96 in cv::imwrite_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<cv::Mat, std::__1::allocator<cv::Mat> > const&, std::__1::vector<int, std::__1::allocator<int> > const&, bool) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:693:29
+#6 0x57ab96 in cv::imwrite(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::_InputArray const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:724:12
+#7 0x4d60df in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:25:5
+#8 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
+#9 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
+#10 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+#
+# Uninitialized value was stored to memory at
+#0 0x42d4f6 in __msan_memcpy (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_curvature+0x42d4f6)
+#1 0x8c27c1 in png_write_row /opencv/opencv/3rdparty/libpng/pngwrite.c:842:4
+#2 0x8c3c60 in png_write_image /opencv/opencv/3rdparty/libpng/pngwrite.c:626:10
+#3 0x5dc7e1 in cv::PngEncoder::write(cv::Mat const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/grfmt_png.cpp:429:21
+#4 0x57ab96 in cv::imwrite_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<cv::Mat, std::__1::allocator<cv::Mat> > const&, std::__1::vector<int, std::__1::allocator<int> > const&, bool) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:693:29
+#5 0x57ab96 in cv::imwrite(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::_InputArray const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:724:12
+#6 0x4d60df in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:25:5
+#7 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
+#8 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
+#9 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+
+# Uninitialized value was stored to memory at
+#0 0x117a35a in cv::hal_baseline::v_store(unsigned short*, cv::hal_baseline::v_uint16x8 const&) /opencv/opencv/modules/core/include/opencv2/core/hal/intrin_sse.hpp:1555:1
+#1 0x117a35a in void cv::copyMask_<unsigned short>(unsigned char const*, unsigned long, unsigned char const*, unsigned long, unsigned char*, unsigned long, cv::Size_<int>) /opencv/opencv/modules/core/src/copy.cpp:140:17
+#2 0x117a35a in cv::copyMask16u(unsigned char const*, unsigned long, unsigned char const*, unsigned long, unsigned char*, unsigned long, cv::Size_<int>, void*) /opencv/opencv/modules/core/src/copy.cpp:204:1
+#3 0x1185fa5 in cv::Mat::copyTo(cv::_OutputArray const&, cv::_InputArray const&) const /opencv/opencv/modules/core/src/copy.cpp:404:9
+#4 0x53153b in sens_loc::math::image<unsigned short> sens_loc::conversion::curvature_to_image<unsigned short, double, unsigned short>(sens_loc::math::image<double> const&, sens_loc::math::image<unsigned short> const&, std::__1::optional<double>, std::__1::optional<double>) /builds/jtoth/master-thesis/build/../src/include/sens_loc/conversion/depth_to_curvature.h:274:25
+#5 0x4d5f97 in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:24:9
+#6 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
+#7 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
+#8 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+#
+# Uninitialized value was created by a heap allocation
+#0 0x42d8d5 in posix_memalign (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_curvature+0x42d8d5)
+#1 0x10d98c3 in cv::fastMalloc(unsigned long) /opencv/opencv/modules/core/src/alloc.cpp:135:12
+#2 0x12605d0 in cv::StdMatAllocator::allocate(int, int const*, int, void*, unsigned long*, cv::AccessFlag, cv::UMatUsageFlags) const /opencv/opencv/modules/core/src/matrix.cpp:147:55
+#3 0x1244bb9 in cv::Mat::create(int, int const*, int) /opencv/opencv/modules/core/src/matrix.cpp:360:20
+#4 0x531457 in cv::Mat::create(int, int, int) /usr/local/include/opencv4/opencv2/core/mat.inl.hpp:831:5
+#5 0x531457 in cv::Mat::Mat(int, int, int) /usr/local/include/opencv4/opencv2/core/mat.inl.hpp:460:5
+#6 0x531457 in sens_loc::math::image<unsigned short> sens_loc::conversion::curvature_to_image<unsigned short, double, unsigned short>(sens_loc::math::image<double> const&, sens_loc::math::image<unsigned short> const&, std::__1::optional<double>, std::__1::optional<double>) /builds/jtoth/master-thesis/build/../src/include/sens_loc/conversion/depth_to_curvature.h:272:13
+#7 0x4d5f97 in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:24:9
+#8 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
+#9 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
+#10 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+#
+# SUMMARY: MemorySanitizer: use-of-uninitialized-value /opencv/opencv/3rdparty/zlib/deflate.c:2083:33 in deflate_rle
+fun:deflate_rle
