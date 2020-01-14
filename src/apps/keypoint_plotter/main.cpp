@@ -12,7 +12,6 @@
 #include <vector>
 
 /// \defgroup feature-plotter-driver Plot detected keypoints
-///
 /// This driver utilizes OpenCV for keypoint and matching plotting.
 
 /// Parallelized driver to batch-process images for keypoint plotting and to
