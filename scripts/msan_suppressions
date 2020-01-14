@@ -2,12 +2,37 @@
 fun:std::__1::random_device::operator()()
 fun:std::__1::thread::~thread()
 
-
 # OpenCV 4.2.0
 #0 0x6a339c in cv::findDecoder(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:215:14
 #1 0x6892a3 in cv::imread_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int, cv::Mat&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:409:19
 #2 0x6892a3 in cv::imread(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, int) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:624:5
 #3 0x5db26d in std::__1::optional<sens_loc::math::image<unsigned short> > sens_loc::io::load_image<unsigned short, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::ImreadModes>(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::ImreadModes&&) /builds/jtoth/master-thesis/build/../src/include/sens_loc/io/image.h:24:22
+#4 0x5bfc37 in sens_loc::apps::(anonymous namespace)::load_file(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) /builds/jtoth/master-thesis/build/../src/apps/feature_extractor/batch_extractor.cpp:23:9
+#5 0x5bfc37 in sens_loc::apps::(anonymous namespace)::process_index(int, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<sens_loc::apps::Detector, std::__1::allocator<sens_loc::apps::Detector> > const&) /builds/jtoth/master-thesis/build/../src/apps/feature_extractor/batch_extractor.cpp:82:48
+#6 0x5bfc37 in sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0::operator()(int) const /builds/jtoth/master-thesis/build/../src/apps/feature_extractor/batch_extractor.cpp:99:20
+#7 0x5bfc37 in bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int)::operator()(int) const /builds/jtoth/master-thesis/build/../src/apps/util/parallel_processing.h:40:50
+#8 0x5bf588 in std::__1::pair<tf::Task, tf::Task> tf::FlowBuilder::parallel_for<int, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int), (void*)0>(sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int)&&, unsigned long)::'lambda'()::operator()() /builds/jtoth/master-thesis/build/../third_party/cpp-taskflow/taskflow/core/flow_builder.hpp:472:13
+#9 0x5bf588 in decltype(std::__1::forward<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(fp)()) std::__1::__invoke<std::__1::pair<tf::Task, tf::Task> tf::FlowBuilder::parallel_for<int, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int), (void*)0>(sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int)&&, unsigned long)::'lambda'()&>(sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0&&) /usr/local/include/c++/v1/type_traits:3530:1
+#10 0x5bf588 in void std::__1::__invoke_void_return_wrapper<void>::__call<std::__1::pair<tf::Task, tf::Task> tf::FlowBuilder::parallel_for<int, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int), (void*)0>(sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int)&&, unsigned long)::'lambda'()&>(std::__1::pair<tf::Task, tf::Task> tf::FlowBuilder::parallel_for<int, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int), (void*)0>(sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int)&&, unsigned long)::'lambda'()&) /usr/local/include/c++/v1/__functional_base:348:9
+#11 0x5bf588 in std::__1::__function::__alloc_func<std::__1::pair<tf::Task, tf::Task> tf::FlowBuilder::parallel_for<int, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int), (void*)0>(sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int)&&, unsigned long)::'lambda'(), std::__1::allocator<std::__1::pair<tf::Task, tf::Task> tf::FlowBuilder::parallel_for<int, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int), (void*)0>(sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int)&&, unsigned long)::'lambda'()>, void ()>::operator()() /usr/local/include/c++/v1/functional:1533:16
+#12 0x5bf588 in std::__1::__function::__func<std::__1::pair<tf::Task, tf::Task> tf::FlowBuilder::parallel_for<int, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int), (void*)0>(sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int)&&, unsigned long)::'lambda'(), std::__1::allocator<std::__1::pair<tf::Task, tf::Task> tf::FlowBuilder::parallel_for<int, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int), (void*)0>(sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0, bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int)&&, unsigned long)::'lambda'()>, void ()>::operator()() /usr/local/include/c++/v1/functional:1707:12
+#13 0x5cf633 in std::__1::__function::__value_func<void ()>::operator()() const /usr/local/include/c++/v1/functional:1860:16
+#14 0x5cf633 in std::__1::function<void ()>::operator()() const /usr/local/include/c++/v1/functional:2419:12
+#15 0x5cf633 in decltype(std::__1::forward<std::__1::function<void ()>&>(fp)()) std::__1::__invoke<std::__1::function<void ()>&>(std::__1::function<void ()>&) /usr/local/include/c++/v1/type_traits:3530:1
+#16 0x5cf633 in std::__1::invoke_result<std::__1::function<void ()>&>::type std::__1::invoke<std::__1::function<void ()>&>(std::__1::function<void ()>&) /usr/local/include/c++/v1/functional:2848:12
+#17 0x5cf633 in tf::Executor::_invoke_static_work(unsigned int, tf::Node*) /builds/jtoth/master-thesis/build/../third_party/cpp-taskflow/taskflow/core/executor.hpp:799:5
+#18 0x5cf633 in tf::Executor::_invoke(unsigned int, tf::Node*) /builds/jtoth/master-thesis/build/../third_party/cpp-taskflow/taskflow/core/executor.hpp:700:7
+#19 0x5cc751 in tf::Executor::_exploit_task(unsigned int, std::__1::optional<tf::Node*>&) /builds/jtoth/master-thesis/build/../third_party/cpp-taskflow/taskflow/core/executor.hpp:420:7
+#20 0x5cc751 in tf::Executor::_spawn(unsigned int)::'lambda'()::operator()() const /builds/jtoth/master-thesis/build/../third_party/cpp-taskflow/taskflow/core/executor.hpp:312:9
+#21 0x5cc751 in decltype(std::__1::forward<tf::Executor::_spawn(unsigned int)::'lambda'()>(fp)()) std::__1::__invoke<tf::Executor::_spawn(unsigned int)::'lambda'()>(tf::Executor::_spawn(unsigned int)::'lambda'()&&) /usr/local/include/c++/v1/type_traits:3530:1
+#22 0x5cc751 in void std::__1::__thread_execute<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct> >, tf::Executor::_spawn(unsigned int)::'lambda'()>(std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct> >, tf::Executor::_spawn(unsigned int)::'lambda'()>&, std::__1::__tuple_indices<>) /usr/local/include/c++/v1/thread:277:5
+#23 0x5cc751 in void* std::__1::__thread_proxy<std::__1::tuple<std::__1::unique_ptr<std::__1::__thread_struct, std::__1::default_delete<std::__1::__thread_struct> >, tf::Executor::_spawn(unsigned int)::'lambda'()> >(void*) /usr/local/include/c++/v1/thread:287:5
+#24 0x7f231db676da in start_thread (/lib/x86_64-linux-gnu/libpthread.so.0+0x76da)
+#25 0x7f231d0c388e in clone (/lib/x86_64-linux-gnu/libc.so.6+0x12188e)
+#
+#  Uninitialized value was created by an allocation of 'f_name.i.i' in the stack frame of function '_ZZN8sens_loc4apps32parallel_indexed_file_processingIZNKS0_15batch_extractor13process_batchEiiE3$_0EEbiiT_ENKUliE_clEi'
+#0 0x5bf720 in bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_extractor::process_batch(int, int) const::$_0)::'lambda'(int)::operator()(int) const /builds/jtoth/master-thesis/build/../src/apps/util/parallel_processing.h:39
+# SUMMARY: MemorySanitizer: use-of-uninitialized-value /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:215:14 in cv::findDecoder(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
 fun:cv::findDecoder(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&)
 
 # OpenCV 4.2.0
@@ -43,103 +68,3 @@ fun:std::__1::char_traits<char>::length(char const*)
 #9 0x7fb0f416db96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
 # SUMMARY: MemorySanitizer: use-of-uninitialized-value /opencv/opencv/modules/core/include/opencv2/core/hal/intrin_avx.hpp:1510:17 in cv::hal_AVX2::v_cvt_f32(cv::hal_AVX2::v_float64x4 const&, cv::hal_AVX2::v_float64x4 const&)
 fun:cv::hal_AVX2::v_cvt_f32(cv::hal_AVX2::v_float64x4 const&, cv::hal_AVX2::v_float64x4 const&)
-
-#0 0x1e426fd in deflate_rle /opencv/opencv/3rdparty/zlib/deflate.c:2083:33
-#1 0x1e426fd in deflate /opencv/opencv/3rdparty/zlib/deflate.c:1002:41
-#2 0x8d5552 in png_compress_IDAT /opencv/opencv/3rdparty/libpng/pngwutil.c:981:13
-#3 0x8f0497 in png_write_filtered_row /opencv/opencv/3rdparty/libpng/pngwutil.c:2754:4
-#4 0x8f0497 in png_write_find_filter /opencv/opencv/3rdparty/libpng/pngwutil.c:2739:4
-#5 0x8c34d7 in png_write_row /opencv/opencv/3rdparty/libpng/pngwrite.c:899:4
-#6 0x8c3c60 in png_write_image /opencv/opencv/3rdparty/libpng/pngwrite.c:626:10
-#7 0x5dc7e1 in cv::PngEncoder::write(cv::Mat const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/grfmt_png.cpp:429:21
-#8 0x57ab96 in cv::imwrite_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<cv::Mat, std::__1::allocator<cv::Mat> > const&, std::__1::vector<int, std::__1::allocator<int> > const&, bool) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:693:29
-#9 0x57ab96 in cv::imwrite(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::_InputArray const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:724:12
-#10 0x4d60df in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:25:5
-#11 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
-#12 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
-#13 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
-#14 0x427859 in _start (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_curvature+0x427859)
-#
-# Uninitialized value was stored to memory at
-#0 0x42d4f6 in __msan_memcpy (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_curvature+0x42d4f6)
-#1 0x1e33173 in read_buf /opencv/opencv/3rdparty/zlib/deflate.c:1176:5
-#2 0x1e33173 in fill_window /opencv/opencv/3rdparty/zlib/deflate.c:1534:13
-#3 0x1e3c6a9 in deflate_rle /opencv/opencv/3rdparty/zlib/deflate.c:2071:13
-#4 0x1e3c6a9 in deflate /opencv/opencv/3rdparty/zlib/deflate.c:1002:41
-#5 0x8d5552 in png_compress_IDAT /opencv/opencv/3rdparty/libpng/pngwutil.c:981:13
-#6 0x8f0497 in png_write_filtered_row /opencv/opencv/3rdparty/libpng/pngwutil.c:2754:4
-#7 0x8f0497 in png_write_find_filter /opencv/opencv/3rdparty/libpng/pngwutil.c:2739:4
-#8 0x8c34d7 in png_write_row /opencv/opencv/3rdparty/libpng/pngwrite.c:899:4
-#9 0x8c3c60 in png_write_image /opencv/opencv/3rdparty/libpng/pngwrite.c:626:10
-#10 0x5dc7e1 in cv::PngEncoder::write(cv::Mat const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/grfmt_png.cpp:429:21
-#11 0x57ab96 in cv::imwrite_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<cv::Mat, std::__1::allocator<cv::Mat> > const&, std::__1::vector<int, std::__1::allocator<int> > const&, bool) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:693:29
-#12 0x57ab96 in cv::imwrite(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::_InputArray const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:724:12
-#13 0x4d60df in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:25:5
-#14 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
-#15 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
-#16 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
-#
-# Uninitialized value was stored to memory at
-#0 0x8e8f64 in png_setup_sub_row_only /opencv/opencv/3rdparty/libpng/pngwutil.c:2335:11
-#1 0x8e8f64 in png_write_find_filter /opencv/opencv/3rdparty/libpng/pngwutil.c:2638:7
-#2 0x8c34d7 in png_write_row /opencv/opencv/3rdparty/libpng/pngwrite.c:899:4
-#3 0x8c3c60 in png_write_image /opencv/opencv/3rdparty/libpng/pngwrite.c:626:10
-#4 0x5dc7e1 in cv::PngEncoder::write(cv::Mat const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/grfmt_png.cpp:429:21
-#5 0x57ab96 in cv::imwrite_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<cv::Mat, std::__1::allocator<cv::Mat> > const&, std::__1::vector<int, std::__1::allocator<int> > const&, bool) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:693:29
-#6 0x57ab96 in cv::imwrite(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::_InputArray const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:724:12
-#7 0x4d60df in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:25:5
-#8 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
-#9 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
-#10 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
-#
-# Uninitialized value was stored to memory at
-#0 0x8ba2be in png_do_swap /opencv/opencv/3rdparty/libpng/pngtrans.c:338:14
-#1 0x8cdc30 in png_do_write_transformations /opencv/opencv/3rdparty/libpng/pngwtran.c:544:7
-#2 0x8c293e in png_write_row /opencv/opencv/3rdparty/libpng/pngwrite.c:862:7
-#3 0x8c3c60 in png_write_image /opencv/opencv/3rdparty/libpng/pngwrite.c:626:10
-#4 0x5dc7e1 in cv::PngEncoder::write(cv::Mat const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/grfmt_png.cpp:429:21
-#5 0x57ab96 in cv::imwrite_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<cv::Mat, std::__1::allocator<cv::Mat> > const&, std::__1::vector<int, std::__1::allocator<int> > const&, bool) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:693:29
-#6 0x57ab96 in cv::imwrite(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::_InputArray const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:724:12
-#7 0x4d60df in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:25:5
-#8 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
-#9 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
-#10 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
-#
-# Uninitialized value was stored to memory at
-#0 0x42d4f6 in __msan_memcpy (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_curvature+0x42d4f6)
-#1 0x8c27c1 in png_write_row /opencv/opencv/3rdparty/libpng/pngwrite.c:842:4
-#2 0x8c3c60 in png_write_image /opencv/opencv/3rdparty/libpng/pngwrite.c:626:10
-#3 0x5dc7e1 in cv::PngEncoder::write(cv::Mat const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/grfmt_png.cpp:429:21
-#4 0x57ab96 in cv::imwrite_(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, std::__1::vector<cv::Mat, std::__1::allocator<cv::Mat> > const&, std::__1::vector<int, std::__1::allocator<int> > const&, bool) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:693:29
-#5 0x57ab96 in cv::imwrite(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&, cv::_InputArray const&, std::__1::vector<int, std::__1::allocator<int> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:724:12
-#6 0x4d60df in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:25:5
-#7 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
-#8 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
-#9 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
-
-# Uninitialized value was stored to memory at
-#0 0x117a35a in cv::hal_baseline::v_store(unsigned short*, cv::hal_baseline::v_uint16x8 const&) /opencv/opencv/modules/core/include/opencv2/core/hal/intrin_sse.hpp:1555:1
-#1 0x117a35a in void cv::copyMask_<unsigned short>(unsigned char const*, unsigned long, unsigned char const*, unsigned long, unsigned char*, unsigned long, cv::Size_<int>) /opencv/opencv/modules/core/src/copy.cpp:140:17
-#2 0x117a35a in cv::copyMask16u(unsigned char const*, unsigned long, unsigned char const*, unsigned long, unsigned char*, unsigned long, cv::Size_<int>, void*) /opencv/opencv/modules/core/src/copy.cpp:204:1
-#3 0x1185fa5 in cv::Mat::copyTo(cv::_OutputArray const&, cv::_InputArray const&) const /opencv/opencv/modules/core/src/copy.cpp:404:9
-#4 0x53153b in sens_loc::math::image<unsigned short> sens_loc::conversion::curvature_to_image<unsigned short, double, unsigned short>(sens_loc::math::image<double> const&, sens_loc::math::image<unsigned short> const&, std::__1::optional<double>, std::__1::optional<double>) /builds/jtoth/master-thesis/build/../src/include/sens_loc/conversion/depth_to_curvature.h:274:25
-#5 0x4d5f97 in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:24:9
-#6 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
-#7 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
-#8 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
-#
-# Uninitialized value was created by a heap allocation
-#0 0x42d8d5 in posix_memalign (/builds/jtoth/master-thesis/build/src/unittest/test_conversion_curvature+0x42d8d5)
-#1 0x10d98c3 in cv::fastMalloc(unsigned long) /opencv/opencv/modules/core/src/alloc.cpp:135:12
-#2 0x12605d0 in cv::StdMatAllocator::allocate(int, int const*, int, void*, unsigned long*, cv::AccessFlag, cv::UMatUsageFlags) const /opencv/opencv/modules/core/src/matrix.cpp:147:55
-#3 0x1244bb9 in cv::Mat::create(int, int const*, int) /opencv/opencv/modules/core/src/matrix.cpp:360:20
-#4 0x531457 in cv::Mat::create(int, int, int) /usr/local/include/opencv4/opencv2/core/mat.inl.hpp:831:5
-#5 0x531457 in cv::Mat::Mat(int, int, int) /usr/local/include/opencv4/opencv2/core/mat.inl.hpp:460:5
-#6 0x531457 in sens_loc::math::image<unsigned short> sens_loc::conversion::curvature_to_image<unsigned short, double, unsigned short>(sens_loc::math::image<double> const&, sens_loc::math::image<unsigned short> const&, std::__1::optional<double>, std::__1::optional<double>) /builds/jtoth/master-thesis/build/../src/include/sens_loc/conversion/depth_to_curvature.h:272:13
-#7 0x4d5f97 in _DOCTEST_ANON_FUNC_6() /builds/jtoth/master-thesis/build/../src/unittest/conversion/test_conversion_curvature.cpp:24:9
-#8 0x4cf2ca in doctest::Context::run() /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5847:21
-#9 0x4d50a0 in main /builds/jtoth/master-thesis/build/../third_party/doctest/doctest/doctest.h:5930:71
-#10 0x7f0c7dd32b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
-#
-# SUMMARY: MemorySanitizer: use-of-uninitialized-value /opencv/opencv/3rdparty/zlib/deflate.c:2083:33 in deflate_rle
-fun:deflate_rle

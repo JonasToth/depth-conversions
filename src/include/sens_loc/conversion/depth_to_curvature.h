@@ -271,6 +271,7 @@ curvature_to_image(const math::image<Real>&     curvature_img,
 
     cv::Mat result(curvature_img.h(), curvature_img.w(),
                    math::detail::get_opencv_type<PixelType>());
+    result = PixelType(0);
     intermediate.data().copyTo(result, mask_from_depth);
 
     Ensures(result.cols == curvature_img.w());
