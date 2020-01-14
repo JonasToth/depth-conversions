@@ -220,7 +220,7 @@ ubuntu-1804-asan:
     CC: "clang-9"
     CXX: "clang++-9"
     LD: "clang++-9"
-    BUILD_TYPE: "RelWithDebInfo"
+    BUILD_TYPE: "Debug"
     WITH_ASAN: "ON"
   <<: *wide_test_filter_definition
   dependencies: []
@@ -234,9 +234,8 @@ ubuntu-1804-msan:
     CXX: "clang++-9"
     LD: "clang++-9"
     USE_LIBCXX: "ON"
-    BUILD_TYPE: "RelWithDebInfo"
+    BUILD_TYPE: "Debug"
     WITH_MSAN: "ON"
-    MSAN_OPTIONS: "suppressions=/builds/jtoth/master-thesis/scripts/msan_suppressions"
   <<: *wide_test_filter_definition
   dependencies: []
 
@@ -247,7 +246,7 @@ ubuntu-1804-ubsan:
     CC: "clang-9"
     CXX: "clang++-9"
     LD: "clang++-9"
-    BUILD_TYPE: "RelWithDebInfo"
+    BUILD_TYPE: "Debug"
     WITH_UBSAN: "ON"
   <<: *wide_test_filter_definition
   dependencies: []
@@ -260,7 +259,7 @@ ubuntu-1804-tsan:
     CC: "clang-9"
     CXX: "clang++-9"
     LD: "clang++-9"
-    BUILD_TYPE: "RelWithDebInfo"
+    BUILD_TYPE: "Debug"
     WITH_TSAN: "ON"
     TSAN_OPTIONS: "suppressions=/builds/jtoth/master-thesis/scripts/tsan_suppressions"
   <<: *wide_test_filter_definition

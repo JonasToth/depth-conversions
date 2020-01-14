@@ -1,6 +1,63 @@
 # Random number generator confused MSAN
 fun:std::__1::random_device::operator()()
+
+# ==393==WARNING: MemorySanitizer: use-of-uninitialized-value
+#0 0x7fa12b4d45dc in std::__1::thread::~thread() /llvm/llvm-project/libcxx/src/thread.cpp:46:9
+#1 0x630ecb in std::__1::allocator<std::__1::thread>::destroy(std::__1::thread*) /usr/local/include/c++/v1/memory:1880:64
+#2 0x630ecb in void std::__1::allocator_traits<std::__1::allocator<std::__1::thread> >::__destroy<std::__1::thread>(std::__1::integral_constant<bool, true>, std::__1::allocator<std::__1::thread>&, std::__1::thread*) /usr/local/include/c++/v1/memory:1742:18
+#3 0x630ecb in void std::__1::allocator_traits<std::__1::allocator<std::__1::thread> >::destroy<std::__1::thread>(std::__1::allocator<std::__1::thread>&, std::__1::thread*) /usr/local/include/c++/v1/memory:1595:14
+#4 0x630ecb in std::__1::__split_buffer<std::__1::thread, std::__1::allocator<std::__1::thread>&>::__destruct_at_end(std::__1::thread*, std::__1::integral_constant<bool, false>) /usr/local/include/c++/v1/__split_buffer:296:9
+#5 0x630ecb in std::__1::__split_buffer<std::__1::thread, std::__1::allocator<std::__1::thread>&>::__destruct_at_end(std::__1::thread*) /usr/local/include/c++/v1/__split_buffer:141:10
+#6 0x630ecb in std::__1::__split_buffer<std::__1::thread, std::__1::allocator<std::__1::thread>&>::clear() /usr/local/include/c++/v1/__split_buffer:88:10
+#7 0x630ecb in std::__1::__split_buffer<std::__1::thread, std::__1::allocator<std::__1::thread>&>::~__split_buffer() /usr/local/include/c++/v1/__split_buffer:341:5
+#8 0x630ecb in void std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread> >::__emplace_back_slow_path<tf::Executor::_spawn(unsigned int)::'lambda'()>(tf::Executor::_spawn(unsigned int)::'lambda'()&&) /usr/local/include/c++/v1/vector:1677:1
+#9 0x63015a in std::__1::thread& std::__1::vector<std::__1::thread, std::__1::allocator<std::__1::thread> >::emplace_back<tf::Executor::_spawn(unsigned int)::'lambda'()>(tf::Executor::_spawn(unsigned int)::'lambda'()&&) /usr/local/include/c++/v1/vector:1699:9
+#10 0x63015a in tf::Executor::_spawn(unsigned int) /builds/jtoth/master-thesis/build/../third_party/cpp-taskflow/taskflow/core/executor.hpp:300:14
+#11 0x63015a in tf::Executor::Executor(unsigned int) /builds/jtoth/master-thesis/build/../third_party/cpp-taskflow/taskflow/core/executor.hpp:266:3
+#12 0x62e58a in bool sens_loc::apps::parallel_indexed_file_processing<sens_loc::apps::batch_converter::process_batch(int, int) const::$_0>(int, int, sens_loc::apps::batch_converter::process_batch(int, int) const::$_0) /builds/jtoth/master-thesis/build/../src/apps/util/parallel_processing.h:33:22
+#13 0x62e58a in sens_loc::apps::batch_converter::process_batch(int, int) const /builds/jtoth/master-thesis/build/../src/apps/util/batch_converter.cpp:46:12
+#14 0x4aa1e6 in main /builds/jtoth/master-thesis/build/../src/apps/depth2x/main.cpp:374:15
+#15 0x7fa12ad90b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+#16 0x426c39 in _start (/builds/jtoth/master-thesis/build/src/apps/depth2x+0x426c39)
+#
+# SUMMARY: MemorySanitizer: use-of-uninitialized-value /llvm/llvm-project/libcxx/src/thread.cpp:46:9 in std::__1::thread::~thread()
+# ORIGIN: invalid (0). Might be a bug in MemorySanitizer origin tracking.
+#   This could still be a bug in your code, too!
 fun:std::__1::thread::~thread()
+
+# Uninitialized bytes in __interceptor_fwrite at offset 0 inside [0x7ffe9404c6d9, 5)
+# ==505==WARNING: MemorySanitizer: use-of-uninitialized-value
+#0 0x7f792ab7419a in std::__1::__stdoutbuf<char>::xsputn(char const*, long) /llvm/llvm-project/libcxx/include/__std_stream:317:16
+#1 0x4e6dd6 in std::__1::basic_streambuf<char, std::__1::char_traits<char> >::sputn(char const*, long) /usr/local/include/c++/v1/streambuf:229:14
+#2 0x4e6dd6 in std::__1::ostreambuf_iterator<char, std::__1::char_traits<char> > std::__1::__pad_and_output<char, std::__1::char_traits<char> >(std::__1::ostreambuf_iterator<char, std::__1::char_traits<char> >, char const*, char const*, char const*, std::__1::ios_base&, char) /usr/local/include/c++/v1/locale:1411:26
+#3 0x4e64e0 in std::__1::basic_ostream<char, std::__1::char_traits<char> >& std::__1::__put_character_sequence<char, std::__1::char_traits<char> >(std::__1::basic_ostream<char, std::__1::char_traits<char> >&, char const*, unsigned long) /usr/local/include/c++/v1/ostream:730:17
+#4 0x5dd34a in std::__1::basic_ostream<char, std::__1::char_traits<char> >& std::__1::operator<<<char, std::__1::char_traits<char>, std::__1::allocator<char> >(std::__1::basic_ostream<char, std::__1::char_traits<char> >&, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) /usr/local/include/c++/v1/ostream:1052:12
+#5 0x5dd34a in sens_loc::apps::print_version::operator()(int) /builds/jtoth/master-thesis/build/../src/apps/util/version_printer.cpp:10:38
+#6 0x588b0c in decltype(std::__1::forward<sens_loc::apps::print_version&>(fp)(std::__1::forward<long>(fp0))) std::__1::__invoke<sens_loc::apps::print_version&, long>(sens_loc::apps::print_version&, long&&) /usr/local/include/c++/v1/type_traits:3530:1
+#7 0x588b0c in void std::__1::__invoke_void_return_wrapper<void>::__call<sens_loc::apps::print_version&, long>(sens_loc::apps::print_version&, long&&) /usr/local/include/c++/v1/__functional_base:348:9
+#8 0x588b0c in std::__1::__function::__alloc_func<sens_loc::apps::print_version, std::__1::allocator<sens_loc::apps::print_version>, void (long)>::operator()(long&&) /usr/local/include/c++/v1/functional:1533:16
+#9 0x588b0c in std::__1::__function::__func<sens_loc::apps::print_version, std::__1::allocator<sens_loc::apps::print_version>, void (long)>::operator()(long&&) /usr/local/include/c++/v1/functional:1707:12
+#10 0x520157 in std::__1::__function::__value_func<void (long)>::operator()(long&&) const /usr/local/include/c++/v1/functional:1860:16
+#11 0x520157 in std::__1::function<void (long)>::operator()(long) const /usr/local/include/c++/v1/functional:2419:12
+#12 0x520157 in CLI::App::add_flag_function(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::function<void (long)>, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >)::'lambda'(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >)::operator()(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >) const /builds/jtoth/master-thesis/build/../third_party/cli11/include/CLI/App.hpp:740:13
+#13 0x520157 in decltype(std::__1::forward<CLI::App::add_flag_function(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::function<void (long)>, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >)::'lambda'(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >)&>(fp)(std::__1::forward<std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > >(fp0))) std::__1::__invoke<CLI::App::add_flag_function(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::function<void (long)>, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >)::'lambda'(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >)&, std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > > >(CLI::App::add_flag_function(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::function<void (long)>, std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >)::'lambda'(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >)&, std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >&&) /usr/local/include/c++/v1/type_traits:3530:1
+#14 0x54a3fb in std::__1::__function::__value_func<bool (std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >)>::operator()(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >&&) const /usr/local/include/c++/v1/functional:1860:16
+#15 0x54a3fb in std::__1::function<bool (std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >)>::operator()(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >) const /usr/local/include/c++/v1/functional:2419:12
+#16 0x54a3fb in CLI::Option::run_callback() /builds/jtoth/master-thesis/build/../third_party/cli11/include/CLI/Option.hpp:728:29
+#17 0x540170 in CLI::App::_process_callbacks() /builds/jtoth/master-thesis/build/../third_party/cli11/include/CLI/App.hpp:1977:22
+#18 0x52bee7 in CLI::App::_process() /builds/jtoth/master-thesis/build/../third_party/cli11/include/CLI/App.hpp:2125:9
+#19 0x52bee7 in CLI::App::_parse(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >&&) /builds/jtoth/master-thesis/build/../third_party/cli11/include/CLI/App.hpp:2210:9
+#20 0x4bd773 in CLI::App::parse(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >&&) /builds/jtoth/master-thesis/build/../third_party/cli11/include/CLI/App.hpp:1362:9
+#21 0x4bd773 in CLI::App::parse(int, char const* const*) /builds/jtoth/master-thesis/build/../third_party/cli11/include/CLI/App.hpp:1292:9
+#22 0x4a4a63 in main /builds/jtoth/master-thesis/build/../src/apps/depth_filter/main.cpp:120:5
+#23 0x7f792a500b96 in __libc_start_main (/lib/x86_64-linux-gnu/libc.so.6+0x21b96)
+#24 0x426b09 in _start (/builds/jtoth/master-thesis/build/src/apps/depth_filter+0x426b09)
+#
+# Uninitialized value was created by an allocation of 'agg.tmp262' in the stack frame of function '_ZN3CLI3App10_parse_argERNSt3__16vectorINS1_12basic_stringIcNS1_11char_traitsIcEENS1_9allocatorIcEEEENS6_IS8_EEEENS_6detail10ClassifierE'
+    #0 0x531560 in CLI::App::_parse_arg(std::__1::vector<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> >, std::__1::allocator<std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > > >&, CLI::detail::Classifier) /builds/jtoth/master-thesis/build/../third_party/cli11/include/CLI/App.hpp:2455
+#
+# SUMMARY: MemorySanitizer: use-of-uninitialized-value /llvm/llvm-project/libcxx/include/__std_stream:317:16 in std::__1::__stdoutbuf<char>::xsputn(char const*, long)
+fun:std::__1::__stdoutbuf<char>::xsputn(char const*, long)
 
 # OpenCV 4.2.0
 #0 0x6a339c in cv::findDecoder(std::__1::basic_string<char, std::__1::char_traits<char>, std::__1::allocator<char> > const&) /opencv/opencv/modules/imgcodecs/src/loadsave.cpp:215:14
