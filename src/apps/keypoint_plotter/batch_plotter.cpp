@@ -81,10 +81,14 @@ bool batch_plotter::process_index(int idx) const noexcept {
 
         return write_success;
     } catch (const std::exception& e) {
-        std::cerr << "Shit happens\n" << e.what() << "\n";
+        std::cerr << util::err{} << "Error occured while processing index "
+                  << idx << "!\n"
+                  << e.what() << "\n";
         return false;
     } catch (...) {
-        std::cerr << "Shit happens\n";
+        std::cerr << util::err{}
+                  << "Unspecified error occured while processing index " << idx
+                  << "!\n";
         return false;
     }
 }  // namespace sens_loc::apps

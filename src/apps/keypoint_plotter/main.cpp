@@ -11,7 +11,7 @@
 #include <util/version_printer.h>
 #include <vector>
 
-/// \defgroup feature-plotter-driver plot detectede keypoints and matches.
+/// \defgroup feature-plotter-driver Plot detected keypoints.
 ///
 /// This driver utilizes OpenCV for keypoint and matching plotting.
 

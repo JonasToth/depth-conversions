@@ -13,8 +13,7 @@
 #include <util/version_printer.h>
 #include <vector>
 
-/// \defgroup feature-extractor-driver feature detection and extraction from
-/// images
+/// \defgroup feature-extractor-driver Feature detection and extraction from Images
 ///
 /// This driver utilizes OpenCV for feature detection, extraction and
 /// serialization.
