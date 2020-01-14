@@ -238,7 +238,6 @@ struct AKAZEArgs : CommonArgs {
 /// \ingroup feature-extractor-driver
 /// \returns 0 if all images could be processed, 1 if any image fails
 MAIN_HEAD("Batch-processing tool to extract visual features") {
-
     // Explicitly disable threading from OpenCV functions, as the
     // parallelization is done at a higher level.
     // That means, that each filter application is not multithreaded, but each
