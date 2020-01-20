@@ -11,6 +11,13 @@ RUN apt-get update \
  && apt-get update \
  && apt-get install -y g++-9 gcc-9 make
 
+RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 10 \
+ && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 10 \
+ && update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 20 \
+ && update-alternatives --set cc /usr/bin/gcc \
+ && update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 20 \
+ && update-alternatives --set c++ /usr/bin/g++
+
 ARG ninja_version="1.9.0"
 WORKDIR /ninja
 RUN wget --quiet https://github.com/ninja-build/ninja/archive/v$ninja_version.tar.gz \
@@ -58,14 +65,6 @@ RUN mkdir -p /eigen3 && cd /eigen3 \
  && CC=gcc-9 CXX=g++-9 cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
  && ninja install \
  && cd / && rm -rf /eigen3
-
-
-RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 10 \
- && update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-9 10 \
- && update-alternatives --install /usr/bin/cc cc /usr/bin/gcc 20 \
- && update-alternatives --set cc /usr/bin/gcc \
- && update-alternatives --install /usr/bin/c++ c++ /usr/bin/g++ 20 \
- && update-alternatives --set c++ /usr/bin/g++
 
 ARG boost_version="1.72.0"
 ARG boost_version_string="1_72_0"
