@@ -104,8 +104,6 @@ include(use_doctest)
 include(use_taskflow)
 include(use_gsl)
 include(use_fmtlib)
-sanitizer_config(fmt)
-
 include(use_nonius)
 
 # cmake utility code for the repository

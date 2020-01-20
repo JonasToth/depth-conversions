@@ -43,12 +43,11 @@ bool batch_plotter::process_index(int idx) const noexcept {
             // If the feature file does not contain a path to file the features
             // were detected on (it should always) or if it was explicitly
             // overwritten, then this specified path must be used instead.
-            if (_target_image_file_pattern) {
+            if (_target_image_file_pattern)
                 original_image = fmt::format(*_target_image_file_pattern, idx);
-            } else {
-                // No image path that can be read as basis for plotting.
+            // No image path that can be read as basis for plotting.
+            else
                 return false;
-            }
         }
         Ensures(!original_image.empty());
 
