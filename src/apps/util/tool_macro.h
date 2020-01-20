@@ -14,6 +14,8 @@
         using namespace sens_loc::apps;                                        \
         using namespace std;                                                   \
         CLI::App app{TOOL_DESCRIPTION};                                        \
+        auto     reset_terminal =                                              \
+            gsl::finally([] { cout << rang::style::reset << flush; });         \
         app.add_flag_function("-v,--version", print_version(*argv),            \
                               "Print version and exit");                       \
         do
