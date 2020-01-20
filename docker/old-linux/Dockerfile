@@ -23,7 +23,7 @@ WORKDIR /ninja
 RUN wget --quiet https://github.com/ninja-build/ninja/archive/v$ninja_version.tar.gz \
  && tar xf v$ninja_version.tar.gz && cd ninja-$ninja_version \
  && ./configure.py --bootstrap \
- && ninja \
+ && ./ninja \
  && mv ninja /usr/bin/ \
  && cd / \
  && rm -rf /ninja

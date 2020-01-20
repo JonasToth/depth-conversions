@@ -44,6 +44,7 @@ target_link_libraries(sens_loc
     ${OpenCV_LIBS}
     )
 target_compile_features(sens_loc INTERFACE cxx_std_17)
+add_dependencies(sens_loc dependencies)
 
 install(TARGETS sens_loc
         EXPORT sens_loc

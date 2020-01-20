@@ -30,7 +30,6 @@ function(sanitizer_config target_name)
 endfunction(sanitizer_config)
 
 function(common_target_properties target_name)
-    add_dependencies(${target_name} dependencies)
     set_target_properties(${target_name}
         PROPERTIES
         CXX_STANDARD 17
@@ -39,7 +38,7 @@ function(common_target_properties target_name)
         POSITION_INDEPENDENT_CODE ${WITH_PIC}
         )
     if (WITH_TEST_COVERAGE)
-        target_compile_options(${target_name} 
+        target_compile_options(${target_name}
             PRIVATE "--coverage" "-fprofile-arcs" "-ftest-coverage")
         target_link_options(${target_name} PRIVATE "--coverage")
     endif (WITH_TEST_COVERAGE)
@@ -62,6 +61,7 @@ function(common_target_properties target_name)
             "$<$<BOOL:${WITH_AVX}>:-mavx>"
             "$<$<BOOL:${WITH_AVX2}>:-mavx2>"
             )
+
     sanitizer_config(${target_name})
 
     if (WITH_IPO)
