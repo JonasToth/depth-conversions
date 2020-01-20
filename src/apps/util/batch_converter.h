@@ -162,7 +162,6 @@ class batch_sensor_converter : public batch_converter {
         UNREACHABLE("Switch is exhaustive");  // LCOV_EXCL_LINE
     }
 };
-
 /// @}
 
 }  // namespace apps
