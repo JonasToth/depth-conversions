@@ -19,7 +19,6 @@ namespace sens_loc::apps {
 
 bool batch_converter::process_index(int idx) const noexcept {
     Expects(!_files.input.empty());
-
     const std::string input_file = fmt::format(_files.input, idx);
     std::optional<math::image<ushort>> depth_image =
         io::load_image<ushort>(input_file, cv::IMREAD_UNCHANGED);
