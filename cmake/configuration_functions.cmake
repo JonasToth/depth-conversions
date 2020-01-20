@@ -1,3 +1,34 @@
+function(sanitizer_config target_name)
+    if (WITH_UBSAN)
+        target_compile_options(${target_name} PUBLIC "-fsanitize=undefined")
+        target_link_options(${target_name} PUBLIC "-fsanitize=undefined")
+    endif (WITH_UBSAN)
+
+    if (WITH_ASAN)
+        target_compile_options(${target_name} PUBLIC "-fsanitize=address")
+        target_link_options(${target_name} PUBLIC "-fsanitize=address")
+    endif (WITH_ASAN)
+
+    if (WITH_TSAN)
+        target_compile_options(${target_name} PUBLIC "-fsanitize=thread")
+        target_link_options(${target_name} PUBLIC "-fsanitize=thread")
+    endif (WITH_TSAN)
+
+    if (WITH_MSAN)
+        target_compile_options(${target_name}
+            PUBLIC
+            "-fsanitize=memory"
+            "-fsanitize-blacklist=${PROJECT_SOURCE_DIR}/scripts/msan_suppressions"
+            "-fsanitize-memory-track-origins"
+            "-fno-omit-frame-pointer")
+        target_link_options(${target_name}
+            PUBLIC
+            "-fsanitize=memory"
+            "-fsanitize-memory-track-origins"
+            "-fno-omit-frame-pointer")
+    endif (WITH_MSAN)
+endfunction(sanitizer_config)
+
 function(common_target_properties target_name)
     add_dependencies(${target_name} dependencies)
     set_target_properties(${target_name}
@@ -31,35 +62,7 @@ function(common_target_properties target_name)
             "$<$<BOOL:${WITH_AVX}>:-mavx>"
             "$<$<BOOL:${WITH_AVX2}>:-mavx2>"
             )
-
-    if (WITH_UBSAN)
-        target_compile_options(${target_name} PUBLIC "-fsanitize=undefined")
-        target_link_options(${target_name} PUBLIC "-fsanitize=undefined")
-    endif (WITH_UBSAN)
-
-    if (WITH_ASAN)
-        target_compile_options(${target_name} PUBLIC "-fsanitize=address")
-        target_link_options(${target_name} PUBLIC "-fsanitize=address")
-    endif (WITH_ASAN)
-
-    if (WITH_TSAN)
-        target_compile_options(${target_name} PUBLIC "-fsanitize=thread")
-        target_link_options(${target_name} PUBLIC "-fsanitize=thread")
-    endif (WITH_TSAN)
-
-    if (WITH_MSAN)
-        target_compile_options(${target_name}
-            PUBLIC
-            "-fsanitize=memory"
-            "-fsanitize-blacklist=${PROJECT_SOURCE_DIR}/scripts/msan_suppressions"
-            "-fsanitize-memory-track-origins"
-            "-fno-omit-frame-pointer")
-        target_link_options(${target_name}
-            PUBLIC
-            "-fsanitize=memory"
-            "-fsanitize-memory-track-origins"
-            "-fno-omit-frame-pointer")
-    endif (WITH_MSAN)
+    sanitizer_config(${target_name})
 
     if (WITH_IPO)
         set_target_properties(${target_name}

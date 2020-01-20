@@ -50,6 +50,8 @@ bool batch_plotter::process_index(int idx) const noexcept {
                 return false;
             }
         }
+        Ensures(!original_image.empty());
+
         const cv::Mat source_image =
             cv::imread(original_image, cv::IMREAD_UNCHANGED);
         if (source_image.empty())

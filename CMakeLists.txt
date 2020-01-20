@@ -92,6 +92,7 @@ if (WITH_TESTING OR WITH_BENCHMARK)
 endif ()
 
 include(GNUInstallDirs)
+include(configuration_functions)
 
 # Thirdparty dependencies
 include(use_eigen)
@@ -103,11 +104,12 @@ include(use_doctest)
 include(use_taskflow)
 include(use_gsl)
 include(use_fmtlib)
+sanitizer_config(fmt::fmt)
+
 include(use_nonius)
 
 # cmake utility code for the repository
 include(check_dependencies_built)
-include(configuration_functions)
 if (${DEPENDENCIES_BUILT})
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
 endif (${DEPENDENCIES_BUILT})
