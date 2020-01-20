@@ -234,7 +234,7 @@ ubuntu-1804-msan:
     CXX: "clang++-9"
     LD: "clang++-9"
     USE_LIBCXX: "ON"
-    BUILD_TYPE: "Debug"
+    BUILD_TYPE: "RelWithDebInfo"
     WITH_MSAN: "ON"
   <<: *wide_test_filter_definition
   dependencies: []
@@ -259,7 +259,7 @@ ubuntu-1804-tsan:
     CC: "clang-9"
     CXX: "clang++-9"
     LD: "clang++-9"
-    BUILD_TYPE: "Debug"
+    BUILD_TYPE: "RelWithDebInfo"
     WITH_TSAN: "ON"
     TSAN_OPTIONS: "suppressions=/builds/jtoth/master-thesis/scripts/tsan_suppressions"
   <<: *wide_test_filter_definition
