@@ -30,6 +30,7 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
 
 option(FORCE_BUNDLED_CV OFF "Force the use of the opencv defined by this project and prohibit the use of a system opencv")
 option(FORCE_BUNDLED_EIGEN OFF "Force the use of the Eigen3 defined by this project and prohibit the use of a system Eigen")
+option(FORCE_BUNDLED_FMT OFF "Force the use of the bundled libfmt-library")
 
 option(WITH_BENCHMARK ON "Enable benchmarks for this project")
 option(WITH_CONTRACT_EXCEPTION ON "Enable contract throwing exceptions on contract violation")

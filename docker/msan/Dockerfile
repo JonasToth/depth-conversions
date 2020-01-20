@@ -121,3 +121,16 @@ RUN mkdir -p /boost && cd /boost \
 COPY histogram_remove_std_span.patch /histogram_remove_std_span.patch
 RUN cd /usr/include/boost/histogram/detail \
  && patch -p1 < /histogram_remove_std_span.patch
+
+ARG fmt_version="6.1.2"
+RUN mkdir -p /fmtlib && cd /fmtlib \
+ && wget --quiet https://github.com/fmtlib/fmt/archive/${fmt_version}.tar.gz \
+ && tar xf $fmt_version.tar.gz && mv fmt-${fmt_version} fmt \
+ && mkdir build && cd build \
+ && cd /fmtlib/build \
+ && CC=clang-9 CXX=clang++-9 \
+    CFLAGS="-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer" \
+    CXXFLAGS="-stdlib=libc++ -fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer" \
+    LDFLAGS="-lc++abi -stdlib=libc++" \
+    cmake /fmtlib/fmt/ -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
+ && ninja install
