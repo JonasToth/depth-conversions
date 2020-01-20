@@ -12,9 +12,14 @@ RUN apt-get update \
  && apt-get install -y g++-9 gcc-9
 
 ARG ninja_version="1.9.0"
-RUN wget --quiet https://github.com/ninja-build/ninja/releases/download/v$ninja_version/ninja-linux.zip \
- && unzip ninja-linux.zip \
- && mv ninja /usr/bin/
+WORKDIR /ninja
+RUN wget --quiet https://github.com/ninja-build/ninja/archive/v$ninja_version.tar.gz \
+ && tar xf v$ninja_version.tar.gz && cd ninja-$ninja_version \
+ && cmake -Bbuild-cmake -H. \
+ && cmake --build build-cmake \
+ && mv build-cmake/ninja /usr/bin/ \
+ && cd / \
+ && rm -rf /ninja
 
 ARG cv_version="4.2.0"
 RUN mkdir -p /opencv/build_cv && cd /opencv \
