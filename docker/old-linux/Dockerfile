@@ -15,9 +15,9 @@ ARG ninja_version="1.9.0"
 WORKDIR /ninja
 RUN wget --quiet https://github.com/ninja-build/ninja/archive/v$ninja_version.tar.gz \
  && tar xf v$ninja_version.tar.gz && cd ninja-$ninja_version \
- && cmake -Bbuild-cmake -H. \
- && cmake --build build-cmake \
- && mv build-cmake/ninja /usr/bin/ \
+ && ./configure.py --bootstrap \
+ && ninja \
+ && mv ninja /usr/bin/ \
  && cd / \
  && rm -rf /ninja
 
