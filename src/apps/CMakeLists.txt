@@ -13,7 +13,7 @@ target_link_libraries(batch_processing
     taskflow::taskflow
     fmt::fmt)
 add_library(sens_loc::batch_processing ALIAS batch_processing)
-
+common_target_properties(batch_processing)
 
 add_tool(depth2x "${CMAKE_CURRENT_LIST_DIR}/depth2x/main.cpp")
 target_sources(depth2x
