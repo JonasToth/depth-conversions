@@ -9,7 +9,12 @@ RUN apt-get update \
  && rm cmake-$cmake_version* \
  && add-apt-repository -y ppa:ubuntu-toolchain-r/test \
  && apt-get update \
- && apt-get install -y g++-9 gcc-9 ninja-build
+ && apt-get install -y g++-9 gcc-9
+
+ARG ninja_version="1.9.0"
+RUN wget --quiet https://github.com/ninja-build/ninja/releases/download/v$ninja_version/ninja-linux.zip \
+ && unzip ninja-linux.zip \
+ && mv ninja /usr/bin/
 
 ARG cv_version="4.2.0"
 RUN mkdir -p /opencv/build_cv && cd /opencv \
