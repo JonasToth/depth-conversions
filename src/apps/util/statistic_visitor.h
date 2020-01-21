@@ -42,7 +42,7 @@ constexpr required_data operator&(required_data element1,
 /// within that functor.
 /// \tparam data_elements bitflags to signal what to load. Saves significant IO.
 /// This configuration will be different for each \c Analysor.
-/// \warn \c Analysor must be thread safe!
+/// \warning \c Analysor must be thread safe!
 template <typename Analysor, required_data data_elements>
 struct statistic_visitor : Analysor {
     static_assert(data_elements != required_data::none,
