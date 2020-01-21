@@ -20,6 +20,7 @@ stages:
       - build/src/apps/depth_filter
       - build/src/apps/feature_extractor
       - build/src/apps/keypoint_plotter
+      - build/src/apps/feature_performance
 
 api-documentation:
   image: $CI_REGISTRY_IMAGE/base-image-documentation

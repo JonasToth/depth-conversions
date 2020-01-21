@@ -5,3 +5,4 @@ COPY depth2x /usr/bin/depth2x
 COPY depth_filter /usr/bin/depth_filter
 COPY feature_extractor /usr/bin/feature_extractor
 COPY keypoint_plotter /usr/bin/keypoint_plotter
+COPY feature_performance /usr/bin/feature_performance
