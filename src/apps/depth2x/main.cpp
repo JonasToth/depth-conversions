@@ -1,7 +1,10 @@
 #include "converter_scale.h"
 #include "converters.h"
 
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define CLI11_HAS_FILESYSTEM 0
 #include <CLI/CLI.hpp>
+
 #include <fstream>
 #include <iostream>
 #include <memory>

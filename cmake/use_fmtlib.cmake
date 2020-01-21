@@ -13,7 +13,7 @@ if (NOT TARGET fmt::fmt)
 
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/third_party/fmt")
     mark_as_advanced(FORCE FMT_DOC FMT_FUZZ FMT_INSTALL FMT_PEDANTIC FMT_TEST
-                           FMT_WERROR)
+                           FMT_WERROR FMT_CUDA_TEST fmt_DIR)
 else ()
     message(STATUS "Found libfmt in the system")
 endif (NOT TARGET fmt::fmt)
