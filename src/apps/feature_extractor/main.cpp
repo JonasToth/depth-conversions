@@ -144,7 +144,7 @@ struct ORBArgs : CommonArgs {
     static cv::ORB::ScoreType
     string_to_score_type(std::string_view picked) noexcept {
         Expects(!picked.empty());
-        // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+
 #define CHOICE(enumerator)                                                     \
     if (picked == #enumerator)                                                 \
         return cv::ORB::ScoreType::enumerator##_SCORE;
@@ -196,7 +196,7 @@ struct AKAZEArgs : CommonArgs {
     static cv::AKAZE::DescriptorType
     string_to_descriptor(std::string_view picked) noexcept {
         Expects(!picked.empty());
-        // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+
 #define CHOICE(enumerator)                                                     \
     if (picked == #enumerator)                                                 \
         return cv::AKAZE::DescriptorType::DESCRIPTOR_##enumerator;
@@ -211,7 +211,7 @@ struct AKAZEArgs : CommonArgs {
     static cv::KAZE::DiffusivityType
     string_to_diffusivity(std::string_view picked) noexcept {
         Expects(!picked.empty());
-        // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+
 #define CHOICE(enumerator)                                                     \
     if (picked == #enumerator)                                                 \
         return cv::KAZE::DiffusivityType::DIFF_##enumerator;

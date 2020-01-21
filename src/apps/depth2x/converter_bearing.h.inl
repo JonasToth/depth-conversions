@@ -7,7 +7,7 @@ bool bearing_converter<Intrinsic>::process_file(
     using namespace sens_loc::conversion;
 
     bool final_result = true;
-    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+
 #define BEARING_PROCESS(DIRECTION)                                             \
     if (!this->_files.DIRECTION.empty()) {                                     \
         math::image<float> bearing = depth_to_bearing<direction::DIRECTION>(   \

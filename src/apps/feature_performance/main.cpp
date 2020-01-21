@@ -14,7 +14,7 @@
 #include <util/version_printer.h>
 
 static cv::NormTypes str_to_norm(std::string_view n) {
-    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+
 #define SWITCH_CV_NORM(NORM_NAME)                                              \
     if (n == #NORM_NAME)                                                       \
         return cv::NormTypes::NORM_##NORM_NAME;

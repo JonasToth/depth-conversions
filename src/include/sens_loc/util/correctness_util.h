@@ -14,7 +14,7 @@ namespace sens_loc {
 /// This namespace is purely for programming utility.
 namespace util {
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+
 #define UNREACHABLE(msg) ::sens_loc::util::unreachable(msg, __FILE__, __LINE__)
 
 /// This function is used with the \c UNREACHABLE macro to symbol unreachable

@@ -93,7 +93,7 @@ curvature_to_image(const math::image<Real>&     curvature_img,
 
 namespace detail {
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+
 #define DIFF_STAR(depth_image, curv_image)                                     \
     const Real d__1__1 = (depth_image).at({u - 1, v - 1});                     \
     const Real d__1__0 = (depth_image).at({u, v - 1});                         \

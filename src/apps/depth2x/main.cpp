@@ -1,7 +1,7 @@
 #include "converter_scale.h"
 #include "converters.h"
 
-// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+
 #define CLI11_HAS_FILESYSTEM 0
 #include <CLI/CLI.hpp>
 
@@ -316,7 +316,7 @@ MAIN_HEAD("Batch-conversion of depth images to various derived image-types.") {
         [&]() -> optional<detail::intrinsic_variant> {
         using camera_models::equirectangular;
         using camera_models::pinhole;
-        // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+
 #define LOAD_INTRINSIC(model_name)                                             \
     if (camera_model == #model_name) {                                         \
         auto r = io<float, model_name>::load_intrinsic(cali_fstream);          \

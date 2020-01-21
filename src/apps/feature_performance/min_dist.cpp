@@ -43,7 +43,7 @@ int analyze_min_distance(std::string_view input_pattern,
                          int              start_idx,
                          int              end_idx,
                          cv::NormTypes    norm_to_use) {
-    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+
 #define SWITCH_CV_NORM(NORM_NAME)                                              \
     if (norm_to_use == cv::NormTypes::NORM_##NORM_NAME)                        \
         return analyze_min_distance_impl<cv::NormTypes::NORM_##NORM_NAME>(     \
