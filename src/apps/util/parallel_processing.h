@@ -39,7 +39,7 @@ bool parallel_indexed_file_processing(int          start,
                         [&cout_mutex, &batch_success, &fails, &f](int idx) {
                             const bool success = f(idx);
                             if (!success) {
-                                std::lock_guard l(cout_mutex);
+                                std::lock_guard l{cout_mutex};
                                 fails++;
                                 std::cerr << util::err{};
                                 std::cerr << "Could not process index \""

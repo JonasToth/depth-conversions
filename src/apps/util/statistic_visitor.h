@@ -3,6 +3,7 @@
 
 #include <cstdint>
 #include <fmt/core.h>
+#include <iostream>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/persistence.hpp>
 #include <optional>
@@ -51,7 +52,7 @@ struct statistic_visitor : Analysor {
 
     template <typename... Args>
     statistic_visitor(std::string_view input_pattern, Args&&... args)
-        : Analysor(std::forward<Args>(args)...)
+        : Analysor{std::forward<Args>(args)...}
         , input_pattern{input_pattern} {}
 
     void operator()(int i) noexcept {
@@ -72,7 +73,7 @@ struct statistic_visitor : Analysor {
 
             std::vector<cv::KeyPoint> k;
             read(descriptors_node, k);
-            keypoints = k;
+            keypoints = std::move(k);
         }
 
         if constexpr ((data_elements & required_data::descriptors) !=
@@ -81,9 +82,11 @@ struct statistic_visitor : Analysor {
 
             cv::Mat d;
             read(descriptors_node, d);
-            descriptors = d;
+            descriptors = std::move(d);
         }
 
+        // Call the base-classes analysis operator to actually analyse the
+        // data.
         Analysor::operator()(i, std::move(keypoints), std::move(descriptors));
     }
 };

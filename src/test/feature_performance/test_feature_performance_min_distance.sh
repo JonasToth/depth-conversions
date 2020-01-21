@@ -21,7 +21,7 @@ fi
 
 if ! ${exe} --input "orb-{}.feature" \
     --start 0 --end 1 \
-    min-distance --norm HAMMING2 ; then
+    min-distance --norm HAMMING ; then
     print_error "Could not analyze orb features under Hamming norm"
     exit 1
 fi

@@ -3,19 +3,18 @@
 #include <CLI/CLI.hpp>
 #include <boost/histogram.hpp>
 #include <iostream>
-#include <opencv2/core.hpp>
 #include <opencv2/core/base.hpp>
 #include <sens_loc/util/console.h>
 #include <sens_loc/util/correctness_util.h>
 #include <stdexcept>
 #include <string>
+#include <util/batch_visitor.h>
 #include <util/colored_parse.h>
 #include <util/tool_macro.h>
 #include <util/version_printer.h>
-#include <vector>
 
 static cv::NormTypes str_to_norm(std::string_view n) {
-    // NOLINT-NEXTLINE(cppcoreguidelines-macro-usage)
+    // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define SWITCH_CV_NORM(NORM_NAME)                                              \
     if (n == #NORM_NAME)                                                       \
         return cv::NormTypes::NORM_##NORM_NAME;

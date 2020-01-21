@@ -1,8 +1,10 @@
 add_library(batch_processing
     "${CMAKE_CURRENT_LIST_DIR}/util/batch_converter.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/batch_converter.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/util/batch_visitor.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/colored_parse.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/parallel_processing.h"
+    "${CMAKE_CURRENT_LIST_DIR}/util/statistic_visitor.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/tool_macro.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/version_printer.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/version_printer.cpp"
@@ -63,6 +65,7 @@ target_sources(feature_performance
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/descriptor_characteristica.h"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.h"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/minimal_descriptor_distance.h"
     )
 target_include_directories(feature_performance SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
 target_link_directories(feature_performance PRIVATE ${Boost_LIBRARY_DIRS})

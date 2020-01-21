@@ -13,7 +13,7 @@ namespace sens_loc::apps {
 /// \param start,end inclusive range of integers for the files to be accessed.
 /// \param f functor that is applied for each index
 template <typename Functor>
-Functor parallel_visitation(int start, int end, Functor f) noexcept {
+Functor parallel_visitation(int start, int end, Functor&& f) noexcept {
     static_assert(std::is_nothrow_invocable_r_v<void, Functor, int>,
                   "Functor needs to be noexcept callable with an 'int' and "
                   "return nothing!");
@@ -23,10 +23,10 @@ Functor parallel_visitation(int start, int end, Functor f) noexcept {
 
     tf::Executor executor;
     tf::Taskflow tf;
-    tf.parallel_for(start, end + 1, 1, f);
+    tf.parallel_for(start, end + 1, 1, std::forward<Functor>(f));
     executor.run(tf).wait();
 
-    return f;
+    return std::forward<Functor>(f);
 }
 
 }  // namespace sens_loc::apps
