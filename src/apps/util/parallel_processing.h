@@ -28,12 +28,12 @@ bool parallel_indexed_file_processing(int          start,
         if (start > end)
             std::swap(start, end);
 
-        bool batch_success = true;
-
         tf::Executor executor;
         tf::Taskflow tf;
-        std::mutex   cout_mutex;
-        int          fails = 0;
+
+        std::mutex cout_mutex;
+        bool       batch_success = true;
+        int        fails         = 0;
 
         tf.parallel_for(start, end + 1, 1,
                         [&cout_mutex, &batch_success, &fails, &f](int idx) {

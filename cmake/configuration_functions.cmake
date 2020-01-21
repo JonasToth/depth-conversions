@@ -14,7 +14,7 @@ function(sanitizer_config target_name)
         target_link_options(${target_name} PUBLIC "-fsanitize=thread")
     endif (WITH_TSAN)
 
-    if (WITH_MSAN)
+    if (WITH_MSAN AND USE_LIBCXX)
         target_compile_options(${target_name}
             PUBLIC
             "-fsanitize=memory"
@@ -26,7 +26,7 @@ function(sanitizer_config target_name)
             "-fsanitize=memory"
             "-fsanitize-memory-track-origins"
             "-fno-omit-frame-pointer")
-    endif (WITH_MSAN)
+    endif (WITH_MSAN AND USE_LIBCXX)
 endfunction(sanitizer_config)
 
 function(common_target_properties target_name)
@@ -63,6 +63,10 @@ function(common_target_properties target_name)
             )
 
     sanitizer_config(${target_name})
+
+    if (WITH_THREAD_SAFETY_ANALYSIS AND USE_LIBCXX)
+        target_compile_options(${target_name} PRIVATE "-Wthread-safety")
+    endif (WITH_THREAD_SAFETY_ANALYSIS AND USE_LIBCXX)
 
     if (WITH_IPO)
         set_target_properties(${target_name}

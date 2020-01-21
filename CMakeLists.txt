@@ -84,6 +84,8 @@ if (CMAKE_CXX_COMPILER_ID MATCHES "Clang")
             "${CMAKE_CXX_FLAGS} -stdlib=libc++")
         set(CMAKE_EXE_LINKER_FLAGS
             "${CMAKE_EXE_LINKER_FLAGS} -lc++abi -stdlib=libc++")
+
+        option(WITH_THREAD_SAFETY_ANALYSIS ON "Enable Thread Safety Analysis")
     endif ()
 endif ()
 

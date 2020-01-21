@@ -14,6 +14,7 @@
 #include <opencv2/core/types.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <optional>
+#include <sens_loc/util/thread_analysis.h>
 #include <type_traits>
 
 namespace sens_loc::apps {
@@ -99,12 +100,11 @@ class min_descriptor_distance {
     /// a coherent statistical finding. This will overwrite previous analysis
     /// and should only be called once.
     [[nodiscard]] auto postprocess(int bins) noexcept {
-        Expects(!global_min_distances->empty());
-
         // Lock the mutex, just in case. This method is not expected to be
         // run in parallel, but it could.
         std::lock_guard guard{*process_mutex};
 
+        Expects(!global_min_distances->empty());
         auto [_, max_it] = std::minmax_element(
             std::begin(*global_min_distances), std::end(*global_min_distances));
 
@@ -121,8 +121,8 @@ class min_descriptor_distance {
 
   private:
     // Data required for the parallel processing.
-    std::mutex*         process_mutex;
-    std::vector<float>* global_min_distances;
+    std::mutex*                              process_mutex;
+    std::vector<float>* global_min_distances PT_GUARDED_BY(*process_mutex);
 };
 
 }  // namespace sens_loc::apps
