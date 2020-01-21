@@ -4,5 +4,6 @@
 
 # TaskFlows work-stealing-queue is buggy, YEAH.
 race:tf::WorkStealingQueue<tf::Node*>::Array::pop(long)
+race:tf::Executor::_invoke(unsigned int, tf::Node*)
 
 race:operator delete(void*)
