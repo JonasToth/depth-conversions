@@ -1,6 +1,7 @@
 #ifndef MINIMAL_DESCRIPTOR_DISTANCE_H_EMR0VAQO
 #define MINIMAL_DESCRIPTOR_DISTANCE_H_EMR0VAQO
 
+#define _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS
 #include <algorithm>
 #include <boost/histogram.hpp>
 #include <gsl/gsl>
@@ -121,8 +122,8 @@ class min_descriptor_distance {
 
   private:
     // Data required for the parallel processing.
-    std::mutex*                              process_mutex;
-    std::vector<float>* global_min_distances PT_GUARDED_BY(*process_mutex);
+    std::mutex*         process_mutex;
+    std::vector<float>* global_min_distances;
 };
 
 }  // namespace sens_loc::apps

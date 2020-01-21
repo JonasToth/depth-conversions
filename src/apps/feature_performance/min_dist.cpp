@@ -10,6 +10,7 @@
 #include <iostream>
 #include <limits>
 #include <sens_loc/util/correctness_util.h>
+#include <sens_loc/util/thread_analysis.h>
 #include <stdexcept>
 #include <string_view>
 #include <util/batch_visitor.h>
@@ -25,9 +26,11 @@ int analyze_min_distance_impl(std::string_view input_pattern,
     std::mutex process_mutex;
     /// contains all minimal distances of each descriptor within an image.
     std::vector<float> global_min_distances;
+
     using visitor = statistic_visitor<min_descriptor_distance<NT>,
                                       required_data::descriptors>;
-    auto f        = parallel_visitation(
+
+    auto f = parallel_visitation(
         start_idx, end_idx,
         visitor{input_pattern, &process_mutex, &global_min_distances});
     auto histogram = f.postprocess(50);
