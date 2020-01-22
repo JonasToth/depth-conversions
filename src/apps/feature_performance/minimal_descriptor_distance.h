@@ -3,6 +3,12 @@
 
 #define _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS
 #include <algorithm>
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/median.hpp>
+#include <boost/accumulators/statistics/skewness.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
 #include <boost/histogram.hpp>
 #include <gsl/gsl>
 #include <iostream>
@@ -107,6 +113,7 @@ class min_descriptor_distance {
         std::lock_guard guard{*process_mutex};
 
         Expects(!global_min_distances->empty());
+
         auto [_, max_it] = std::minmax_element(
             std::begin(*global_min_distances), std::end(*global_min_distances));
 
@@ -118,7 +125,18 @@ class min_descriptor_distance {
             axis::regular<float, use_default, axis::option::none_t>(
                 bins, 0.0F, *max_it + 0.01F));
         dist_histo.fill(*global_min_distances);
-        return dist_histo;
+
+        using namespace boost::accumulators;
+        accumulator_set<float, stats<tag::mean, tag::median,
+                                     tag::variance(lazy), tag::skewness>>
+            stat;
+
+        std::for_each(std::begin(*global_min_distances),
+                      std::end(*global_min_distances),
+                      [&stat](float el) { stat(el); });
+
+
+        return make_pair(dist_histo, stat);
     }
 
   private:

@@ -3,6 +3,7 @@
 #include "minimal_descriptor_distance.h"
 
 #include <algorithm>
+#include <boost/accumulators/statistics/stats.hpp>
 #include <boost/histogram/ostream.hpp>
 #include <cstdint>
 #include <fmt/core.h>
@@ -35,9 +36,14 @@ int analyze_min_distance_impl(std::string_view input_pattern,
                                          gsl::not_null{&process_mutex},
                                          gsl::not_null{&global_min_distances}});
 
-    auto histogram = f.postprocess(50);
-    std::cout << histogram << std::endl;
+    auto [histogram, stat] = f.postprocess(50);
 
+    std::cout << histogram << std::endl;
+    using namespace boost::accumulators;
+    std::cout << "Mean:      " << mean(stat) << "\n"
+              << "Median:    " << median(stat) << "\n"
+              << "Variance:  " << variance(stat) << "\n"
+              << "Skewness:  " << skewness(stat) << "\n";
     return 0;
 }
 }  // namespace
