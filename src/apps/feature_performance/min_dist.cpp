@@ -30,11 +30,12 @@ int analyze_min_distance_impl(std::string_view input_pattern,
     using visitor = statistic_visitor<min_descriptor_distance<NT>,
                                       required_data::descriptors>;
 
-    auto f = parallel_visitation(
-        start_idx, end_idx,
-        visitor{input_pattern, &process_mutex, &global_min_distances});
-    auto histogram = f.postprocess(50);
+    auto f = parallel_visitation(start_idx, end_idx,
+                                 visitor{input_pattern,
+                                         gsl::not_null{&process_mutex},
+                                         gsl::not_null{&global_min_distances}});
 
+    auto histogram = f.postprocess(50);
     std::cout << histogram << std::endl;
 
     return 0;

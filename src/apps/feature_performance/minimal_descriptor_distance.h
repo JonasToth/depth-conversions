@@ -47,7 +47,8 @@ class min_descriptor_distance {
     static const int data_type = detail::element_access<NT>::dtype;
     using access_type          = typename detail::element_access<NT>::type;
 
-    min_descriptor_distance(std::mutex* m, std::vector<float>* global_data)
+    min_descriptor_distance(gsl::not_null<std::mutex*>         m,
+                            gsl::not_null<std::vector<float>*> global_data)
         : process_mutex{m}
         , global_min_distances{global_data} {}
 
@@ -122,8 +123,8 @@ class min_descriptor_distance {
 
   private:
     // Data required for the parallel processing.
-    std::mutex*         process_mutex;
-    std::vector<float>* global_min_distances;
+    gsl::not_null<std::mutex*>         process_mutex;
+    gsl::not_null<std::vector<float>*> global_min_distances;
 };
 
 }  // namespace sens_loc::apps
