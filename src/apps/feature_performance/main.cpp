@@ -1,3 +1,4 @@
+#include "keypoint_distribution.h"
 #include "min_dist.h"
 
 #include <CLI/CLI.hpp>
@@ -42,6 +43,24 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     app.add_option("-e,--end", end_idx, "End index for processing.")
         ->required();
 
+    CLI::App* cmd_keypoint_dist = app.add_subcommand(
+        "keypoint-distribution",
+        "Determine the keypoint distribution over all images");
+    int image_width;
+    cmd_keypoint_dist
+        ->add_option("--image-width", image_width,
+                     "The width of the original input images in pixel (check "
+                     "the intrinsic!")
+        ->required()
+        ->check(CLI::Range(65'535));
+    int image_height;
+    cmd_keypoint_dist
+        ->add_option("--image-height", image_height,
+                     "The height of the original input images in pixel (check "
+                     "the intrinsic!")
+        ->required()
+        ->check(CLI::Range(65'535));
+
     CLI::App* cmd_min_dist = app.add_subcommand(
         "min-distance", "Calculate the minimum distance of descriptors within "
                         "one image and analyze that.");
@@ -57,6 +76,12 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
         cv::NormTypes norm_to_use = str_to_norm(norm_name);
         return analyze_min_distance(feature_file_input_pattern, start_idx,
                                     end_idx, norm_to_use);
+    }
+
+    if (*cmd_keypoint_dist) {
+        return analyze_keypoint_distribution(feature_file_input_pattern,
+                                             start_idx, end_idx, image_width,
+                                             image_height);
     }
 
     UNREACHABLE("Expected to end program with subcommand processing");

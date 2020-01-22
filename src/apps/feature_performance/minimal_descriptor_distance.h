@@ -15,7 +15,6 @@
 #include <limits>
 #include <mutex>
 #include <opencv2/core/base.hpp>
-#include <opencv2/core/hal/interface.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/persistence.hpp>
 #include <opencv2/core/types.hpp>

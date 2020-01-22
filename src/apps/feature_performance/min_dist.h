@@ -1,7 +1,6 @@
 #ifndef MIN_DIST_H_AHV2P7Y1
 #define MIN_DIST_H_AHV2P7Y1
 
-
 #include <opencv2/core/base.hpp>
 #include <string_view>
 

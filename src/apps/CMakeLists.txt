@@ -62,7 +62,8 @@ add_tool(feature_performance
          "${CMAKE_CURRENT_LIST_DIR}/feature_performance/main.cpp")
 target_sources(feature_performance
     PRIVATE
-    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/descriptor_characteristica.h"
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/keypoint_distribution.h"
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/keypoint_distribution.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.h"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/minimal_descriptor_distance.h"
