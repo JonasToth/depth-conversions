@@ -92,3 +92,4 @@ configure_file(feature_performance/orb-1.feature
 add_tool_test(feature_performance test_feature_performance)
 add_tool_test(feature_performance test_feature_performance_min_distance)
 add_tool_test(feature_performance test_feature_performance_keypoints)
+add_tool_test(feature_performance test_feature_performance_matching)
