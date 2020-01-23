@@ -15,16 +15,15 @@ print_info "Using \"${exe}\" as driver executable"
 if ! ${exe} \
     --input "sift-{}.feature" \
     --start 0 --end 1 \
-    matching \
-    --image-width 960 --image-height 540 ; then
-    print_error "Could not analyze sift keypoints"
+    matching ; then
+    print_error "Could not analyze sift matching"
     exit 1
 fi
 
 if ! ${exe} --input "orb-{}.feature" \
     --start 0 --end 1 \
     matching \
-    --image-width 960 --image-height 540 ; then
-    print_error "Could not analyze orb keypoints"
+    --distance-norm HAMMING --no-crosscheck ; then
+    print_error "Could not analyze orb matching"
     exit 1
 fi
