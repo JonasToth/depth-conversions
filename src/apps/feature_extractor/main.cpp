@@ -6,11 +6,14 @@
 #include <opencv2/xfeatures2d.hpp>
 #include <sens_loc/util/console.h>
 #include <sens_loc/util/correctness_util.h>
+#include <sens_loc/util/overloaded.h>
 #include <stdexcept>
 #include <string>
+#include <unordered_map>
 #include <util/colored_parse.h>
 #include <util/tool_macro.h>
 #include <util/version_printer.h>
+#include <variant>
 #include <vector>
 
 /// \defgroup feature-extractor-driver Feature detection and extraction
@@ -19,21 +22,11 @@
 /// serialization.
 
 namespace {
-/// \ingroup feature-extractor-driver
-struct CommonArgs {
-    CommonArgs(CLI::App* cmd) {
-        cmd->add_option("-o,--output", out_path,
-                        "Output file-pattern for sift-features")
-            ->required();
-    }
-
-    std::string out_path;
-};
 
 /// \ingroup feature-extractor-driver
-struct SURFArgs : CommonArgs {
-    SURFArgs(CLI::App* cmd)
-        : CommonArgs(cmd) {
+struct SURFArgs {
+    SURFArgs() = default;
+    SURFArgs(CLI::App* cmd) {
         cmd->add_option("-t,--threshold", hessian_threshold,
                         "Control the hessian threshold value, between 300-500 "
                         "might be good",
@@ -66,9 +59,9 @@ struct SURFArgs : CommonArgs {
 };
 
 /// \ingroup feature-extractor-driver
-struct SIFTArgs : CommonArgs {
-    SIFTArgs(CLI::App* cmd)
-        : CommonArgs(cmd) {
+struct SIFTArgs {
+    SIFTArgs() = default;
+    SIFTArgs(CLI::App* cmd) {
         cmd->add_option("-c,--feature-count", feature_count,
                         "Number of features to retain after ranking, 0 means "
                         "every feature is kept",
@@ -104,9 +97,9 @@ struct SIFTArgs : CommonArgs {
 };
 
 /// \ingroup feature-extractor-driver
-struct ORBArgs : CommonArgs {
-    ORBArgs(CLI::App* cmd)
-        : CommonArgs(cmd) {
+struct ORBArgs {
+    ORBArgs() = default;
+    ORBArgs(CLI::App* cmd) {
         cmd->add_option("-c,--feature-count", feature_count,
                         "Number of features to retain after ranking, 0 means "
                         "every feature is kept",
@@ -166,9 +159,9 @@ struct ORBArgs : CommonArgs {
 };
 
 /// \ingroup feature-extractor-driver
-struct AKAZEArgs : CommonArgs {
-    AKAZEArgs(CLI::App* cmd)
-        : CommonArgs(cmd) {
+struct AKAZEArgs {
+    AKAZEArgs() = default;
+    AKAZEArgs(CLI::App* cmd) {
         cmd->add_set("-d,--descriptor-type", descriptor_type,
                      {"KAZE_UPRIGHT", "KAZE", "MLDB_UPRIGHT", "MLDB"},
                      "Which descriptor to use, upright means that no "
@@ -231,6 +224,27 @@ struct AKAZEArgs : CommonArgs {
     int         n_octave_layers     = 4;
     std::string diffusivity         = "PM_G2";
 };
+
+/// Helper enum to provide information on the capability of an algorithm.
+/// This is used for registering the descriptors and detectors.
+/// \ingroup feature-extractor-driver
+enum class capability : uint8_t {
+    none     = 0,
+    detect   = 1U << 0U,
+    describe = 1U << 1U,
+};
+constexpr capability operator|(capability element1,
+                               capability element2) noexcept {
+    using T = std::underlying_type_t<capability>;
+    return static_cast<capability>(static_cast<T>(element1) |
+                                   static_cast<T>(element2));
+}
+constexpr capability operator&(capability element1,
+                               capability element2) noexcept {
+    using T = std::underlying_type_t<capability>;
+    return static_cast<capability>(static_cast<T>(element1) &
+                                   static_cast<T>(element2));
+}
 }  // namespace
 
 /// Parallelized driver to batch-process images for feature detection and
@@ -246,21 +260,26 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     // because of that.
     cv::setNumThreads(0);
 
-    app.require_subcommand();
+    app.require_subcommand(2);
     app.footer("\n\n"
                "An example invocation of the tool is:\n"
                "\n"
-               "feature_extractor --input 'flexion-{}.png'                 \\\n"
-               "                  --start 0                                \\\n"
-               "                  --end 100                                \\\n"
-               "                  akaze --output akaza-{:04d}.feature[.gz] \\\n"
-               "                  sift --output sift-{:04d}.feature[.gz]"
+               "feature_extractor --input 'flexion-{}.png'            \\\n"
+               "                  --output akaze-{:04d}.feature[.gz]  \\\n"
+               "                  --start 0                           \\\n"
+               "                  --end 100                           \\\n"
+               "                  detector akaze                      \\\n"
+               "                  descriptor akaze"
                "\n");
 
     std::string arg_input_files;
     app.add_option(
            "-i,--input", arg_input_files,
            "Input pattern for images to filter; e.g. \"flexion-{}.png\"")
+        ->required();
+    std::string arg_out_path;
+    app.add_option("-o,--output", arg_out_path,
+                   "Output file-pattern for the feature information")
         ->required();
     int start_idx;
     app.add_option("-s,--start", start_idx, "Start index of batch, inclusive")
@@ -269,74 +288,105 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     app.add_option("-e,--end", end_idx, "End index of batch, inclusive")
         ->required();
 
-    CLI::App* sift_cmd = app.add_subcommand("sift", "Detect SIFT features");
-    sift_cmd->footer("\n\n");
-    const SIFTArgs sift(sift_cmd);
+    CLI::App* detector_cmd =
+        app.add_subcommand("detector", "Configure the detector");
+    detector_cmd->require_subcommand(1);
+    CLI::App* descriptor_cmd = app.add_subcommand(
+        "descriptor", "Configure the descriptor used for the keypoints");
+    descriptor_cmd->require_subcommand(1);
 
-    CLI::App* surf_cmd = app.add_subcommand("surf", "Detect SURF features");
-    surf_cmd->footer("\n\n");
-    const SURFArgs surf(surf_cmd);
+    using feature_args = variant<SURFArgs, SIFTArgs, AKAZEArgs, ORBArgs>;
+    unordered_map<CLI::App*, feature_args> detector_params;
+    unordered_map<CLI::App*, feature_args> descriptor_params;
 
-    CLI::App* orb_cmd = app.add_subcommand("orb", "Detect ORB features");
-    orb_cmd->footer("\n\n");
-    const ORBArgs orb(orb_cmd);
+    for (auto&& a : vector<tuple<const char*, const char*, capability>>{{
+             make_tuple("sift", "Use SIFT implementation",
+                        capability::detect | capability::describe),
+             make_tuple("surf", "Use SURF implementation",
+                        capability::detect | capability::describe),
+             make_tuple("orb", "Use ORB implementation",
+                        capability::detect | capability::describe),
+             make_tuple("akaze", "Use AKAZE implementation",
+                        capability::detect | capability::describe),
+         }}) {
+        auto cmd_to_args = [&](string_view name,
+                               CLI::App*   cmd) -> feature_args {
+            if (name == "sift")
+                return SIFTArgs{cmd};
+            if (name == "surf")
+                return SURFArgs{cmd};
+            if (name == "orb")
+                return ORBArgs{cmd};
+            if (name == "akaze")
+                return AKAZEArgs{cmd};
+            UNREACHABLE("Unexpected detector/descriptor provided!");
+        };
 
-    CLI::App* akaze_cmd = app.add_subcommand("akaze", "Detect AKAZE features");
-    akaze_cmd->footer("\n\n");
-    const AKAZEArgs akaze(akaze_cmd);
+        if ((get<2>(a) & capability::detect) != capability::none) {
+            CLI::App* c = detector_cmd->add_subcommand(get<0>(a), get<1>(a));
+            detector_params.emplace(make_pair(c, cmd_to_args(get<0>(a), c)));
+        }
+
+        if ((get<2>(a) & capability::describe) != capability::none) {
+            CLI::App* c = descriptor_cmd->add_subcommand(get<0>(a), get<1>(a));
+            descriptor_params.emplace(make_pair(c, cmd_to_args(get<0>(a), c)));
+        }
+    }
 
     COLORED_APP_PARSE(app, argc, argv);
+
+    Ensures(descriptor_cmd->get_subcommands().size() == 1);
+    Ensures(detector_cmd->get_subcommands().size() == 1);
 
     // Create a vector of functors (unique_ptr<filter_interface>) that will
     // be executed in order.
     // Each element is created by one subcommand and its parameters.
-    vector<Detector> detectors;
+    using namespace sens_loc::util;
+    using cv::AKAZE;
+    using cv::ORB;
+    using cv::xfeatures2d::SIFT;
+    using cv::xfeatures2d::SURF;
 
-    for (const auto* cmd : app.get_subcommands()) {
-        using cv::AKAZE;
-        using cv::ORB;
-        using cv::xfeatures2d::SIFT;
-        using cv::xfeatures2d::SURF;
+    auto argument_visitor = overloaded{
+        [](const SIFTArgs& sift) -> cv::Ptr<cv::Feature2D> {
+            return SIFT::create(sift.feature_count, sift.octave_layers,
+                                sift.contrast_threshold, sift.edge_threshold,
+                                sift.sigma);
+        },
+        [](const SURFArgs& surf) -> cv::Ptr<cv::Feature2D> {
+            return SURF::create(surf.hessian_threshold, surf.n_octaves,
+                                surf.octave_layers, surf.extended,
+                                surf.upright);
+        },
+        [](const ORBArgs& orb) -> cv::Ptr<cv::Feature2D> {
+            return ORB::create(orb.feature_count, orb.scale_factor,
+                               orb.n_levels, orb.edge_threshold,
+                               orb.first_level, orb.WTA_K,
+                               ORBArgs::string_to_score_type(orb.score_type),
+                               orb.path_size, orb.fast_threshold);
+        },
+        [](const AKAZEArgs& akaze) -> cv::Ptr<cv::Feature2D> {
+            return AKAZE::create(
+                AKAZEArgs::string_to_descriptor(akaze.descriptor_type),
+                akaze.descriptor_size, akaze.descriptor_channels,
+                akaze.threshold, akaze.n_octaves, akaze.n_octave_layers,
+                AKAZEArgs::string_to_diffusivity(akaze.diffusivity));
+        },
+    };
 
-        if (cmd->count() != 1U)
-            throw std::invalid_argument{"Apply each detector only once!"};
+    CLI::App* provided_detector_cmd = detector_cmd->get_subcommands()[0];
+    Ensures(detector_params.count(provided_detector_cmd) == 1);
 
-        if (cmd == surf_cmd)
-            detectors.emplace_back(Detector{
-                SURF::create(surf.hessian_threshold, surf.n_octaves,
-                             surf.octave_layers, surf.extended, surf.upright),
-                surf.out_path});
+    CLI::App* provided_descriptor_cmd = descriptor_cmd->get_subcommands()[0];
+    Ensures(descriptor_params.count(provided_descriptor_cmd) == 1);
 
-        else if (cmd == sift_cmd)
-            detectors.emplace_back(
-                Detector{SIFT::create(sift.feature_count, sift.octave_layers,
-                                      sift.contrast_threshold,
-                                      sift.edge_threshold, sift.sigma),
-                         sift.out_path});
+    const feature_args&   det_args{detector_params[provided_detector_cmd]};
+    const feature_args&   desc_args{descriptor_params[provided_descriptor_cmd]};
+    const batch_extractor extractor(visit(argument_visitor, det_args),
+                                    visit(argument_visitor, desc_args),
+                                    arg_input_files, arg_out_path);
 
-        else if (cmd == orb_cmd)
-            detectors.emplace_back(Detector{
-                ORB::create(orb.feature_count, orb.scale_factor, orb.n_levels,
-                            orb.edge_threshold, orb.first_level, orb.WTA_K,
-                            ORBArgs::string_to_score_type(orb.score_type),
-                            orb.path_size, orb.fast_threshold),
-                orb.out_path});
-
-        else if (cmd == akaze_cmd)
-            detectors.emplace_back(Detector{
-                AKAZE::create(
-                    AKAZEArgs::string_to_descriptor(akaze.descriptor_type),
-                    akaze.descriptor_size, akaze.descriptor_channels,
-                    akaze.threshold, akaze.n_octaves, akaze.n_octave_layers,
-                    AKAZEArgs::string_to_diffusivity(akaze.diffusivity)),
-                akaze.out_path});
-
-        else
-            UNREACHABLE("Unhandled detector provided!");  // LCOV_EXCL_LINE
-    }
-
-    const batch_extractor extractor(detectors, arg_input_files);
-    const bool            success = extractor.process_batch(start_idx, end_idx);
+    const bool success = extractor.process_batch(start_idx, end_idx);
     return success ? 0 : 1;
 }
 MAIN_TAIL

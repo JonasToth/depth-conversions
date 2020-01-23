@@ -19,8 +19,10 @@ set -v
 
 if ! ${exe} \
    -i "flexion-{}.png" \
+   -o "akaze-{}.feature" \
    -s 0 -e 1 \
-   akaze -o "akaze-{}.feature" ; then
+   detector akaze \
+   descriptor akaze ; then
     print_error "Default AKAZE-Detection did not work"
     exit 1
 fi

@@ -18,107 +18,14 @@ rm -f sift-*
 set -v
 
 if ! ${exe} \
-    -i "flexion-{}.png" \
+    -i "flexion-{}.png" -o "sift-{}.feature" \
     -s 0 -e 1 \
-    sift -o "sift-{}.feature" ; then
+    detector sift descriptor sift ; then
     print_error "Default SIFT-Detection did not work"
     exit 1
 fi
 if  [ ! -f sift-0.feature ] || \
     [ ! -f sift-1.feature ]; then
     print_error "Did not create expected output files."
-    exit 1
-fi
-
-# Invalid arguments
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 sift ; then
-    print_error "SIFT requires output path"
-    exit 1
-fi
-
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 \
-   sift -o "sift-bad-{}.feature" \
-   --feature-count -1 ; then
-    print_error "Feature-Count negative was accepted"
-    exit 1
-fi
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 \
-   sift -o "sift-bad-{}.feature" \
-   --feature-count 10001 ; then
-    print_error "Feature-Count too big was accepted"
-    exit 1
-fi
-
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 \
-   sift -o "sift-bad-{}.feature" \
-   --octave-layers 0 ; then
-    print_error "Layer-Count zero was accepted"
-    exit 1
-fi
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 \
-   sift -o "sift-bad-{}.feature" \
-   --octave-layers 11 ; then
-    print_error "Layer-Count too big was accepted"
-    exit 1
-fi
-
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 \
-   sift -o "sift-bad-{}.feature" \
-   --contrast-threshold -0.1 ; then
-    print_error "Negative Contrast Threshold Accepted"
-    exit 1
-fi
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 \
-   sift -o "sift-bad-{}.feature" \
-   --contrast-threshold 1.1 ; then
-    print_error "Too Big Contrast Threshold Accepted"
-    exit 1
-fi
-
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 \
-   sift -o "sift-bad-{}.feature" \
-   --edge-threshold -0.1 ; then
-    print_error "Negative Edge Threshold Accepted"
-    exit 1
-fi
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 \
-   sift -o "sift-bad-{}.feature" \
-   --edge-threshold 101. ; then
-    print_error "Too Big Edge Threshold Accepted"
-    exit 1
-fi
-
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 \
-   sift -o "sift-bad-{}.feature" \
-   --sigma -0.1 ; then
-    print_error "Negative Sigma Accepted"
-    exit 1
-fi
-if ${exe} \
-   -i "flexion-{}.png" \
-   -s 0 -e 1 \
-   sift -o "sift-bad-{}.feature" \
-   --sigma 11. ; then
-    print_error "Too Big Sigma Accepted"
     exit 1
 fi

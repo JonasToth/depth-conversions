@@ -33,14 +33,17 @@ std::optional<math::image<uchar>> load_file(const std::string& name) noexcept {
 /// as pair.
 std::pair<std::vector<cv::KeyPoint>, cv::Mat>
 compute_features(const math::image<uchar>& img,
-                 cv::Feature2D&            detector) noexcept {
-    std::vector<cv::KeyPoint> keypoints;
-    cv::Mat                   descriptors;
+                 cv::Feature2D&            detector,
+                 cv::Feature2D&            descriptor) noexcept {
 
     // The image itself is the mask for feature detection.
     // That is the reason, because the pixels with 0 as value do not contain
     // any information on the geometry.
-    detector.detectAndCompute(img.data(), img.data(), keypoints, descriptors);
+    std::vector<cv::KeyPoint> keypoints;
+    detector.detect(img.data(), keypoints, img.data());
+
+    cv::Mat descriptors;
+    descriptor.compute(img.data(), keypoints, descriptors);
 
     return std::make_pair(std::move(keypoints), std::move(descriptors));
 }
@@ -51,10 +54,12 @@ compute_features(const math::image<uchar>& img,
 /// in \c out_pattern, substituted with \c idx.
 bool process_detector(const math::image<uchar>& image,
                       cv::Feature2D&            detector,
+                      cv::Feature2D&            descriptor,
                       const std::string&        out_file,
                       const std::string&        in_file) noexcept {
 
-    const auto [keypoints, descriptors] = compute_features(image, detector);
+    const auto [keypoints, descriptors] =
+        compute_features(image, detector, descriptor);
 
     try {
         using cv::FileNode;
@@ -73,30 +78,22 @@ bool process_detector(const math::image<uchar>& image,
         return false;
     }
 }
+}  // namespace
 
 /// Runs all \c detectors this file identified by \c idx and \c in_pattern.
-bool process_index(int                          idx,
-                   const std::string&           in_pattern,
-                   const std::vector<Detector>& detectors) noexcept {
-    const std::string                 f_name = fmt::format(in_pattern, idx);
-    std::optional<math::image<uchar>> f      = load_file(f_name);
+bool batch_extractor::process_index(int idx) const noexcept {
+    const std::string                 p = fmt::format(_input_pattern, idx);
+    std::optional<math::image<uchar>> f = load_file(p);
+
     if (!f)
         return false;
 
-    bool success = true;
-    for (auto& detector : detectors) {
-        const std::string out_name = fmt::format(detector.output_pattern, idx);
-        success &= process_detector(*f, *detector.detector, out_name, f_name);
-    }
-    return success;
+    return process_detector(*f, *_detector, *_descriptor,
+                            fmt::format(_ouput_pattern, idx), p);
 }
-
-}  // namespace
 
 bool batch_extractor::process_batch(int start, int end) const noexcept {
     return parallel_indexed_file_processing(
-        start, end, [this](int idx) noexcept -> bool {
-            return process_index(idx, this->_input_pattern, this->_detectors);
-        });
+        start, end, [this](int idx) noexcept { return process_index(idx); });
 }
 }  // namespace sens_loc::apps

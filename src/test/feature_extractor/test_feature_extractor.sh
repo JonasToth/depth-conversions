@@ -27,37 +27,16 @@ if ${exe} -i "flexion-{:03d}.png" -s 0 -e 1 ; then
     exit 1
 fi
 
-if ${exe} -i "not-existing-{:03d}.png" -s 0 -e 1 sift -o "foo-{}.png"; then
+if ${exe} -i "not-existing-{:03d}.png" -s 0 -e 1 -o "foo-{}.png" \
+    detector sift descriptor sift ; then
     print_error "Bad filename needs to fail"
-    exit 1
-fi
-if ${exe} -i "flexion-{}.png" -s 0 -e 1 \
-    akaze  -o "multi1-{}.feature" \
-    akaze ; then
-    print_error "Detecting with same command twice is not supported and should fail!"
-    exit 1
-else
-    print_info "Test Multi-Command identical passed"
-fi
-
-rm -f multi-*
-if ! ${exe} -i "flexion-{}.png" -s 0 -e 1 \
-     akaze  -o "multi-akaze-{}.feature" \
-     orb    -o "multi-orb-{}.feature" ; then
-    print_error "Running multiple detectors with one run failed"
-    exit 1
-fi
-if  [ ! -f multi-akaze-0.feature ] || \
-    [ ! -f multi-orb-0.feature ] || \
-    [ ! -f multi-akaze-1.feature ] || \
-    [ ! -f multi-orb-1.feature ] ; then
-    print_error "Did not create expected output files."
     exit 1
 fi
 
 rm -f compressed-*
 if ! ${exe} -i "flexion-{}.png" -s 0 -e 1 \
-     akaze  -o "compressed-{}.feature.gz" ; then
+     -o "compressed-{}.feature.gz" \
+     detector akaze descriptor akaze ; then
     print_error "Writing compressed files failed"
     exit 1
 fi
