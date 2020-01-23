@@ -329,7 +329,8 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
                 return ORBArgs{cmd};
             if (name == "akaze")
                 return AKAZEArgs{cmd};
-            UNREACHABLE("Unexpected detector/descriptor provided!");
+            UNREACHABLE(
+                "Unexpected detector/descriptor provided!");  // LCOV_EXCL_LINE
         };
 
         if ((get<2>(a) & capability::detect) != capability::none) {
