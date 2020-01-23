@@ -1,4 +1,5 @@
 #include "keypoint_distribution.h"
+#include "matching.h"
 #include "min_dist.h"
 
 #include <CLI/CLI.hpp>
@@ -70,19 +71,32 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                           "Set the norm that shall be used as distance measure",
                           /*defaulted=*/true);
 
+    CLI::App* cmd_matcher = app.add_subcommand(
+        "matching",
+        "Analyze the matchability of the descriptors with consecutive images.");
+    cmd_matcher->add_set("-d,--distance-norm", norm_name,
+                         {"L1", "L2", "L2SQR", "HAMMING", "HAMMING2"},
+                         "Set the norm that shall be used as distance measure",
+                         /*defaulted=*/true);
+    bool no_crosscheck = false;
+    cmd_matcher->add_flag("--no-crosscheck", no_crosscheck,
+                          "Disable crosschecking");
+
     COLORED_APP_PARSE(app, argc, argv);
 
     if (*cmd_min_dist) {
-        cv::NormTypes norm_to_use = str_to_norm(norm_name);
         return analyze_min_distance(feature_file_input_pattern, start_idx,
-                                    end_idx, norm_to_use);
+                                    end_idx, str_to_norm(norm_name));
     }
 
-    if (*cmd_keypoint_dist) {
+    if (*cmd_keypoint_dist)
         return analyze_keypoint_distribution(feature_file_input_pattern,
                                              start_idx, end_idx, image_width,
                                              image_height);
-    }
+
+    if (*cmd_matcher)
+        return analyze_matching(feature_file_input_pattern, start_idx, end_idx,
+                                str_to_norm(norm_name), !no_crosscheck);
 
     UNREACHABLE("Expected to end program with subcommand processing");
 }

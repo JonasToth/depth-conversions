@@ -66,6 +66,8 @@ target_sources(feature_performance
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/keypoint_distribution.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.h"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/matching.h"
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/matching.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/minimal_descriptor_distance.h"
     )
 target_include_directories(feature_performance SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
