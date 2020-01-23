@@ -35,7 +35,7 @@ constexpr required_data operator&(required_data element1,
                                       static_cast<T>(element2));
 }
 
-cv::FileStorage open_feature_file(std::string_view pattern, int index) {
+inline cv::FileStorage open_feature_file(std::string_view pattern, int index) {
     const std::string input_file = fmt::format(pattern, index);
     using cv::FileStorage;
     const FileStorage fs{input_file,
@@ -43,14 +43,14 @@ cv::FileStorage open_feature_file(std::string_view pattern, int index) {
     return fs;
 }
 
-std::vector<cv::KeyPoint> load_keypoints(const cv::FileStorage& fs) {
+inline std::vector<cv::KeyPoint> load_keypoints(const cv::FileStorage& fs) {
     const cv::FileNode        descriptors_node = fs["keypoints"];
     std::vector<cv::KeyPoint> k;
     cv::read(descriptors_node, k);
     return k;
 }
 
-cv::Mat load_descriptors(const cv::FileStorage& fs) {
+inline cv::Mat load_descriptors(const cv::FileStorage& fs) {
     const cv::FileNode descriptors_node = fs["descriptors"];
     cv::Mat            d;
     cv::read(descriptors_node, d);
