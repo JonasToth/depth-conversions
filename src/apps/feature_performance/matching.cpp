@@ -6,6 +6,7 @@
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/median.hpp>
 #include <boost/accumulators/statistics/min.hpp>
+#include <boost/accumulators/statistics/skewness.hpp>
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/histogram.hpp>
@@ -68,7 +69,7 @@ class matching {
         using namespace boost::accumulators;
         accumulator_set<float,
                         stats<tag::count, tag::min, tag::max, tag::median,
-                              tag::mean, tag::variance(lazy)>>
+                              tag::mean, tag::variance(lazy), tag::skewness>>
             distance_stat;
         std::for_each(distances->begin(), distances->end(),
                       [&](float d) { distance_stat(d); });
@@ -81,6 +82,7 @@ class matching {
         dist_histo.fill(*distances);
 
         std::cout << "==== Match Distances\n"
+                  << dist_histo << "\n"
                   << "total count:    " << *total_descriptors << "\n"
                   << "matched count:  " << count(distance_stat) << "\n"
                   << "matched/total:  "
@@ -91,7 +93,8 @@ class matching {
                   << "max:            " << max(distance_stat) << "\n"
                   << "median:         " << median(distance_stat) << "\n"
                   << "mean:           " << mean(distance_stat) << "\n"
-                  << dist_histo << "\n";
+                  << "Variance:       " << variance(distance_stat) << "\n"
+                  << "Skewness:       " << skewness(distance_stat) << "\n";
     }
 
   private:

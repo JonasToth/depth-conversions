@@ -36,11 +36,14 @@ int analyze_min_distance_impl(std::string_view input_pattern,
                                          gsl::not_null{&process_mutex},
                                          gsl::not_null{&global_min_distances}});
 
-    auto [histogram, stat] = f.postprocess(50);
+    auto [histogram, stat] = f.postprocess(25);
 
     std::cout << histogram << std::endl;
     using namespace boost::accumulators;
-    std::cout << "Mean:      " << mean(stat) << "\n"
+    std::cout << "==== Descriptor Distances\n"
+              << "min:       " << min(stat) << "\n"
+              << "max:       " << max(stat) << "\n"
+              << "Mean:      " << mean(stat) << "\n"
               << "Median:    " << median(stat) << "\n"
               << "Variance:  " << variance(stat) << "\n"
               << "Skewness:  " << skewness(stat) << "\n";

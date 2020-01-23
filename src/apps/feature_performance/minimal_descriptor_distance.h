@@ -126,7 +126,7 @@ class min_descriptor_distance {
         dist_histo.fill(*global_min_distances);
 
         using namespace boost::accumulators;
-        accumulator_set<float, stats<tag::mean, tag::median,
+        accumulator_set<float, stats<tag::min, tag::max, tag::mean, tag::median,
                                      tag::variance(lazy), tag::skewness>>
             stat;
 
