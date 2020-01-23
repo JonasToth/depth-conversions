@@ -23,9 +23,8 @@ MAIN_HEAD("Batch-processing tool to plot keypoints and matches") {
                "                   --original-file depth-{}.png      \\\n"
                "                   --output keypoints-depth-{}.png   \\\n"
                "                   --start 0 --end 100 ;\n"
-               "> Overwrite the 'source_path' do use a different file then "
-               "specified in the"
-               "> feature file.");
+               "> Overwrite the 'source_path' with 'depth-{}.png' to use a\n"
+               "> different file then specified in the feature file.\n");
 
     string feature_file_input_pattern;
     app.add_option("-i,--input", feature_file_input_pattern,
