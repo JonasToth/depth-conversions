@@ -97,6 +97,7 @@ class keypoint_distribution {
                     const float dx = kp_ref[i].pt.x - kp_ref[k].pt.x;
                     const float dy = kp_ref[i].pt.y - kp_ref[k].pt.y;
                     const float d  = std::sqrt(dx * dx + dy * dy);
+                    Ensures(d >= 0.0F);
                     local_distances.emplace_back(d);
                 }
 
