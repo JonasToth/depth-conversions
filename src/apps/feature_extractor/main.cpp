@@ -2,6 +2,7 @@
 
 #include <CLI/CLI.hpp>
 #include <iostream>
+#include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d.hpp>
 #include <sens_loc/util/console.h>
@@ -290,7 +291,16 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
 
     CLI::App* detector_cmd =
         app.add_subcommand("detector", "Configure the detector");
+    std::optional<float> keypoint_size_threshold;
+    detector_cmd->add_option(
+        "--kp-size-threshold", keypoint_size_threshold,
+        "Sets a minimum keypoint size to be considered as feasible keypoint");
+    std::optional<float> keypoint_response_threshold;
+    detector_cmd->add_option(
+        "--kp-response-threshold", keypoint_response_threshold,
+        "Sets a minimum response to be considered as feasible keypoint");
     detector_cmd->require_subcommand(1);
+
     CLI::App* descriptor_cmd = app.add_subcommand(
         "descriptor", "Configure the descriptor used for the keypoints");
     descriptor_cmd->require_subcommand(1);
@@ -380,11 +390,30 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     CLI::App* provided_descriptor_cmd = descriptor_cmd->get_subcommands()[0];
     Ensures(descriptor_params.count(provided_descriptor_cmd) == 1);
 
-    const feature_args&   det_args{detector_params[provided_detector_cmd]};
-    const feature_args&   desc_args{descriptor_params[provided_descriptor_cmd]};
+    const feature_args& det_args{detector_params[provided_detector_cmd]};
+    const feature_args& desc_args{descriptor_params[provided_descriptor_cmd]};
+
+    optional<batch_extractor::filter_func> filter;
+
+    if (keypoint_size_threshold && !keypoint_response_threshold)
+        filter = [s = *keypoint_size_threshold](const cv::KeyPoint& kp) {
+            return kp.size < s;
+        };
+
+    else if (!keypoint_size_threshold && keypoint_response_threshold)
+        filter = [r = *keypoint_response_threshold](const cv::KeyPoint& kp) {
+            return kp.response < r;
+        };
+
+    else if (keypoint_size_threshold && keypoint_response_threshold)
+        filter = [s = *keypoint_size_threshold,
+                  r = *keypoint_response_threshold](const cv::KeyPoint& kp) {
+            return kp.size < s || kp.response < r;
+        };
+
     const batch_extractor extractor(visit(argument_visitor, det_args),
                                     visit(argument_visitor, desc_args),
-                                    arg_input_files, arg_out_path);
+                                    arg_input_files, arg_out_path, filter);
 
     const bool success = extractor.process_batch(start_idx, end_idx);
     return success ? 0 : 1;

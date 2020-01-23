@@ -31,3 +31,60 @@ if  [ ! -f akaze-0.feature ] || \
     print_error "Did not create expected output files."
     exit 1
 fi
+
+if ! ${exe} \
+   -i "flexion-{}.png" \
+   -o "akaze-size-{}.feature" \
+   -s 0 -e 1 \
+   detector --kp-size-threshold 5. akaze \
+   descriptor akaze ; then
+    print_error "AKAZE-Detection filtering by keypoint size did not work"
+    exit 1
+fi
+if  [ ! -f akaze-size-0.feature ] || \
+    [ ! -f akaze-size-1.feature ]; then
+    print_error "Did not create expected output files."
+    exit 1
+fi
+if  [ "$(du -k akaze-0.feature | cut -f1)" -le "$(du -k akaze-size-0.feature | cut -f1)" ]; then
+    print_error "Filter keypoints must produce less data."
+    exit 1
+fi
+
+if ! ${exe} \
+   -i "flexion-{}.png" \
+   -o "akaze-response-{}.feature" \
+   -s 0 -e 1 \
+   detector --kp-response-threshold 0.004 akaze \
+   descriptor akaze ; then
+    print_error "AKAZE-Detection filtering by keypoint response did not work"
+    exit 1
+fi
+if  [ ! -f akaze-response-0.feature ] || \
+    [ ! -f akaze-response-1.feature ]; then
+    print_error "Did not create expected output files."
+    exit 1
+fi
+if  [ "$(du -k akaze-0.feature | cut -f1)" -le "$(du -k akaze-response-0.feature | cut -f1)" ]; then
+    print_error "Filter keypoints must produce less data."
+    exit 1
+fi
+
+if ! ${exe} \
+   -i "flexion-{}.png" \
+   -o "akaze-size-response-{}.feature" \
+   -s 0 -e 1 \
+   detector --kp-response-threshold 0.004 --kp-size-threshold 5. akaze \
+   descriptor akaze ; then
+    print_error "AKAZE-Detection filtering by keypoint response and size did not work"
+    exit 1
+fi
+if  [ ! -f akaze-size-response-0.feature ] || \
+    [ ! -f akaze-size-response-1.feature ]; then
+    print_error "Did not create expected output files."
+    exit 1
+fi
+if  [ "$(du -k akaze-0.feature | cut -f1)" -le "$(du -k akaze-size-response-0.feature | cut -f1)" ]; then
+    print_error "Filter keypoints must produce less data."
+    exit 1
+fi
