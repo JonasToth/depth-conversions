@@ -2,6 +2,7 @@
 #define POSE_H_ZQQXTH63
 
 #include <Eigen/Geometry>
+#include <iostream>
 #include <istream>
 #include <optional>
 #include <sstream>
@@ -51,8 +52,10 @@ inline std::optional<Eigen::Affine3f> load_pose(std::istream& in) {
     // The affine transformation is not only a rotation and translation, but
     // includes shearing. This is not allowed for a pose!
     // Note: arguments are: 'block(startRow, startCol, blockRows, blockCols)'
-    if (std::abs(std::abs(p.block(0, 0, 3, 3).determinant()) - 1.0F) > 0.01F)
+    if (std::abs(std::abs(p.block<3, 3>(0, 0).determinant()) - 1.0F) > 0.1F) {
+        std::cerr << "Bad Rotation matrix\n";
         return nullopt;
+    }
 
     return {Eigen::Affine3f(p)};
 }

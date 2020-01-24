@@ -89,7 +89,23 @@ configure_file(feature_performance/orb-0.feature
                feature_performance/orb-0.feature COPYONLY)
 configure_file(feature_performance/orb-1.feature
                feature_performance/orb-1.feature COPYONLY)
+
+configure_file(feature_performance/surf-1-octave-0.feature.gz
+               feature_performance/surf-1-octave-0.feature.gz COPYONLY)
+configure_file(feature_performance/surf-1-octave-1.feature.gz
+               feature_performance/surf-1-octave-1.feature.gz COPYONLY)
+configure_file(feature_performance/kinect_intrinsic.txt
+               feature_performance/kinect_intrinsic.txt COPYONLY)
+configure_file(feature_performance/filtered-0.png
+               feature_performance/filtered-0.png COPYONLY)
+configure_file(feature_performance/filtered-1.png
+               feature_performance/filtered-1.png COPYONLY)
+configure_file(feature_performance/pose-0.pose
+               feature_performance/pose-0.pose COPYONLY)
+configure_file(feature_performance/pose-1.pose
+               feature_performance/pose-1.pose COPYONLY)
 add_tool_test(feature_performance test_feature_performance)
 add_tool_test(feature_performance test_feature_performance_min_distance)
 add_tool_test(feature_performance test_feature_performance_keypoints)
 add_tool_test(feature_performance test_feature_performance_matching)
+add_tool_test(feature_performance test_feature_performance_precision_recall)

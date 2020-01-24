@@ -111,7 +111,7 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
         ->required();
     string intrinsic_file;
     cmd_prec_rec
-        ->add_option("--instrinc", intrinsic_file,
+        ->add_option("--intrinsic", intrinsic_file,
                      "File path to the intrinsic - currently only pinhole!")
         ->required();
     cmd_prec_rec->add_set("-d,--match-norm", norm_name,
