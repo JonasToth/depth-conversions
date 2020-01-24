@@ -8,11 +8,12 @@
 #include <sens_loc/camera_models/pinhole.h>
 #include <sstream>
 
-namespace sens_loc {
+namespace sens_loc::io {
+
 
 ///
 template <typename Real, template <typename> typename Intrinsic>
-class io {
+class camera {
   public:
     static_assert(std::is_floating_point_v<Real>);
     static_assert(camera_models::is_intrinsic_v<Intrinsic, Real>);
@@ -24,7 +25,7 @@ class io {
 };
 
 template <typename Real>
-class io<Real, camera_models::pinhole> {
+class camera<Real, camera_models::pinhole> {
   public:
     static_assert(std::is_floating_point_v<Real>);
 
@@ -99,7 +100,7 @@ class io<Real, camera_models::pinhole> {
 
 
 template <typename Real>
-class io<Real, camera_models::equirectangular> {
+class camera<Real, camera_models::equirectangular> {
   public:
     static_assert(std::is_floating_point_v<Real>);
 
@@ -155,6 +156,6 @@ class io<Real, camera_models::equirectangular> {
                                                     {theta_min, theta_max});
     }
 };
-}  // namespace sens_loc
+}  // namespace sens_loc::io
 
 #endif /* end of include guard: INTRINSICS_H_6SQKKYBV */

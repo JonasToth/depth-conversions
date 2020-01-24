@@ -4,7 +4,6 @@
 
 #define CLI11_HAS_FILESYSTEM 0
 #include <CLI/CLI.hpp>
-
 #include <fstream>
 #include <iostream>
 #include <memory>
@@ -319,7 +318,7 @@ MAIN_HEAD("Batch-conversion of depth images to various derived image-types.") {
 
 #define LOAD_INTRINSIC(model_name)                                             \
     if (camera_model == #model_name) {                                         \
-        auto r = io<float, model_name>::load_intrinsic(cali_fstream);          \
+        auto r = io::camera<float, model_name>::load_intrinsic(cali_fstream);  \
         if (r)                                                                 \
             return *r;                                                         \
         return nullopt;                                                        \

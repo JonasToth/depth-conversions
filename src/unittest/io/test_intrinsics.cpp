@@ -4,6 +4,7 @@
 #include <sstream>
 
 using namespace sens_loc;
+using namespace sens_loc::io;
 using namespace sens_loc::camera_models;
 using namespace std;
 
@@ -12,7 +13,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         ifstream unopened_file;
         unopened_file.setstate(std::ios_base::failbit);
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(unopened_file);
+            camera<double, pinhole>::load_intrinsic(unopened_file);
         REQUIRE(!p);
     }
     SUBCASE("Proper intrinsic with 3 lines") {
@@ -22,7 +23,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         istringstream fake_file{intrinsic};
 
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(p);
 
         REQUIRE(p->w() == 960);
@@ -40,7 +41,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         istringstream fake_file{intrinsic};
 
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(p);
 
         REQUIRE(p->w() == 960);
@@ -54,14 +55,14 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         string                    intrinsic = "-960 540\n";
         istringstream             fake_file{intrinsic};
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Zero value for dimension") {
         string                    intrinsic = "960 0\n";
         istringstream             fake_file{intrinsic};
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
 
@@ -70,7 +71,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "-10.0 0.0 500.0\n";
         istringstream             fake_file{intrinsic};
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Zero value for cx") {
@@ -78,7 +79,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "10.0 0.0 0.0\n";
         istringstream             fake_file{intrinsic};
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
 
@@ -88,7 +89,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "0.0 -10.0 250.0\n";
         istringstream             fake_file{intrinsic};
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Zero value for cy") {
@@ -97,7 +98,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "0.0 10.0 0.0\n";
         istringstream             fake_file{intrinsic};
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
 
@@ -106,7 +107,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
         string                    intrinsic = "960\n";
         istringstream             fake_file{intrinsic};
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Line ends too early for x-row") {
@@ -114,7 +115,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "10.0\n";
         istringstream             fake_file{intrinsic};
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Line ends too early in y row") {
@@ -123,7 +124,7 @@ TEST_CASE("Loading Pinhole Intrinsics") {
                            "0.0 10.0\n";
         istringstream             fake_file{intrinsic};
         optional<pinhole<double>> p =
-            io<double, pinhole>::load_intrinsic(fake_file);
+            camera<double, pinhole>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
 }
@@ -133,14 +134,14 @@ TEST_CASE("Loading Equirectangular Intrinsics") {
         ifstream unopened_file;
         unopened_file.setstate(std::ios_base::failbit);
         optional<equirectangular<double>> p =
-            io<double, equirectangular>::load_intrinsic(unopened_file);
+            camera<double, equirectangular>::load_intrinsic(unopened_file);
         REQUIRE(!p);
     }
     SUBCASE("Proper intrinsic with dimension only") {
         string        intrinsic = "3600 1800";
         istringstream fake_file{intrinsic};
 
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(p);
 
         REQUIRE(p->w() == 3600);
@@ -151,7 +152,7 @@ TEST_CASE("Loading Equirectangular Intrinsics") {
                            "0.7853981634  2.35619449019";
         istringstream fake_file{intrinsic};
 
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(p);
 
         REQUIRE(p->w() == 3600);
@@ -160,13 +161,13 @@ TEST_CASE("Loading Equirectangular Intrinsics") {
     SUBCASE("Negative value for dimension") {
         string        intrinsic = "-3600 1800";
         istringstream fake_file{intrinsic};
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Zero value for dimension") {
         string        intrinsic = "3600 0\n";
         istringstream fake_file{intrinsic};
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
 
@@ -174,21 +175,21 @@ TEST_CASE("Loading Equirectangular Intrinsics") {
         string intrinsic = "3600 1800\n"
                            "-10.0 500.0";
         istringstream fake_file{intrinsic};
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Negative value for theta_max") {
         string intrinsic = "960 540\n"
                            "10.0 -500.0";
         istringstream fake_file{intrinsic};
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Zero value for theta_max") {
         string intrinsic = "960 540\n"
                            "0.0 0.0\n";
         istringstream fake_file{intrinsic};
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
 
@@ -197,35 +198,35 @@ TEST_CASE("Loading Equirectangular Intrinsics") {
         string intrinsic = "3600 1800\n"
                            "10.0 90.0";
         istringstream fake_file{intrinsic};
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("theta_max too big") {
         string intrinsic = "3600 1800\n"
                            "0.0 10.0";
         istringstream fake_file{intrinsic};
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("wrong ordering of theta values") {
         string intrinsic = "3600 1800\n"
                            "1.5 0.7\n";
         istringstream fake_file{intrinsic};
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
 
     SUBCASE("Line ends to early in dimensions") {
         string        intrinsic = "1000\n";
         istringstream fake_file{intrinsic};
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
     SUBCASE("Line ends too early for theta row") {
         string intrinsic = "1000 250\n"
                            "0.4\n";
         istringstream fake_file{intrinsic};
-        auto p = io<double, equirectangular>::load_intrinsic(fake_file);
+        auto p = camera<double, equirectangular>::load_intrinsic(fake_file);
         REQUIRE(!p);
     }
 }
