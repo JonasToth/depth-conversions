@@ -155,20 +155,26 @@ int analyze_matching(std::string_view                input_pattern,
                      std::optional<std::string_view> original_files) {
     Expects(start_idx < end_idx && "Matching requires at least 2 images");
 
-    using visitor = statistic_visitor<matching, required_data::descriptors>;
-
     std::mutex         distance_mutex;
     std::vector<float> global_minimal_distances;
     std::uint64_t      total_descriptors;
 
+    using visitor = statistic_visitor<matching, required_data::descriptors>;
+    auto analysis_v =
+        visitor{/*input_pattern=*/input_pattern,
+                /*distance_mutex=*/gsl::not_null{&distance_mutex},
+                /*distances=*/gsl::not_null{&global_minimal_distances},
+                /*descriptor_count=*/gsl::not_null{&total_descriptors},
+                /*norm_to_use=*/norm_to_use,
+                /*crosscheck=*/crosscheck,
+                /*input_pattern=*/input_pattern,
+                /*output_pattern=*/output_pattern,
+                /*original_files=*/original_files};
+
     auto f = parallel_visitation(
         start_idx + 1,  // Because two consecutive images are matched, the first
                         // index is skipped. This requires "backwards" matching.
-        end_idx,
-        visitor{input_pattern, gsl::not_null{&distance_mutex},
-                gsl::not_null{&global_minimal_distances},
-                gsl::not_null{&total_descriptors}, norm_to_use, crosscheck,
-                input_pattern, output_pattern, original_files});
+        end_idx, analysis_v);
 
     f.postprocess();
 

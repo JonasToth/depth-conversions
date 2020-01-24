@@ -1,6 +1,7 @@
 #include "keypoint_distribution.h"
 #include "matching.h"
 #include "min_dist.h"
+#include "precision_recall.h"
 
 #include <CLI/CLI.hpp>
 #include <boost/histogram.hpp>
@@ -94,6 +95,30 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
             "the features were calculated on. Must be provided for plotting.")
         ->needs(match_output_opt);
 
+
+    CLI::App* cmd_prec_rec = app.add_subcommand(
+        "precision-recall",
+        "Calculate precision and recall for consecutive image matching");
+    string depth_image_path;
+    cmd_prec_rec
+        ->add_option("--depth-image", depth_image_path,
+                     "File pattern for the original depth images")
+        ->required();
+    string pose_file_pattern;
+    cmd_prec_rec
+        ->add_option("--pose-file", pose_file_pattern,
+                     "File pattern for the poses of each camera-idx.")
+        ->required();
+    string intrinsic_file;
+    cmd_prec_rec
+        ->add_option("--instrinc", intrinsic_file,
+                     "File path to the intrinsic - currently only pinhole!")
+        ->required();
+    cmd_prec_rec->add_set("-d,--match-norm", norm_name,
+                          {"L1", "L2", "L2SQR", "HAMMING", "HAMMING2"},
+                          "Set the norm that shall be used as distance measure",
+                          /*defaulted=*/true);
+
     COLORED_APP_PARSE(app, argc, argv);
 
     if (*cmd_min_dist) {
@@ -110,6 +135,11 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
         return analyze_matching(feature_file_input_pattern, start_idx, end_idx,
                                 str_to_norm(norm_name), !no_crosscheck,
                                 match_output, original_images);
+
+    if (*cmd_prec_rec)
+        return analyze_precision_recall(
+            feature_file_input_pattern, start_idx, end_idx, depth_image_path,
+            pose_file_pattern, intrinsic_file, str_to_norm(norm_name));
 
     UNREACHABLE("Expected to end program with subcommand processing");
 }
