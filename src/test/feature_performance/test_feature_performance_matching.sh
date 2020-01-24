@@ -27,3 +27,16 @@ if ! ${exe} --input "orb-{}.feature" \
     print_error "Could not analyze orb matching"
     exit 1
 fi
+
+rm -f sift-matched-1.png
+if ! ${exe} \
+    --input "sift-{}.feature" \
+    --start 0 --end 1 \
+    matching --match-output "sift-matched-{}.png" --original-images "../feature_extractor/flexion-{}.png" ; then
+    print_error "Could not analyze sift matching and draw them"
+    exit 1
+fi
+if  [ ! -f sift-matched-1.png ] ; then
+    print_error "Did not create expected output files."
+    exit 1
+fi

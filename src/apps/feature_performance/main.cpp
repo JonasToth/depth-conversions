@@ -82,6 +82,18 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     cmd_matcher->add_flag("--no-crosscheck", no_crosscheck,
                           "Disable crosschecking");
 
+    optional<string> match_output;
+    CLI::Option*     match_output_opt = cmd_matcher->add_option(
+        "--match-output", match_output,
+        "Provide a filename for drawing the matches onto an image.");
+    optional<string> original_images;
+    cmd_matcher
+        ->add_option(
+            "--original-images", original_images,
+            "Provide the file pattern for the original image "
+            "the features were calculated on. Must be provided for plotting.")
+        ->needs(match_output_opt);
+
     COLORED_APP_PARSE(app, argc, argv);
 
     if (*cmd_min_dist) {
@@ -96,7 +108,8 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
 
     if (*cmd_matcher)
         return analyze_matching(feature_file_input_pattern, start_idx, end_idx,
-                                str_to_norm(norm_name), !no_crosscheck);
+                                str_to_norm(norm_name), !no_crosscheck,
+                                match_output, original_images);
 
     UNREACHABLE("Expected to end program with subcommand processing");
 }

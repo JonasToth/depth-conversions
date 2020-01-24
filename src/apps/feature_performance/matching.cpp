@@ -18,7 +18,10 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
+#include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 #include <util/batch_visitor.h>
+#include <util/io.h>
 #include <util/statistic_visitor.h>
 
 namespace {
@@ -29,12 +32,20 @@ class matching {
              gsl::not_null<std::uint64_t*>      descriptor_count,
              cv::NormTypes                      norm_to_use,
              bool                               crosscheck,
-             std::string_view                   input_pattern) noexcept
+             std::string_view                   input_pattern,
+             std::optional<std::string_view>    output_pattern,
+             std::optional<std::string_view>    original_files) noexcept
         : distance_mutex{distance_mutex}
         , distances{distances}
         , total_descriptors{descriptor_count}
         , matcher{cv::BFMatcher::create(norm_to_use, crosscheck)}
-        , input_pattern{input_pattern} {}
+        , input_pattern{input_pattern}
+        , output_pattern{output_pattern}
+        , original_images{original_files} {
+        // XOR is true if both operands have the same value.
+        Expects(!(output_pattern.has_value() ^ original_images.has_value()) &&
+                "Either both or none are set");
+    }
 
     void operator()(
         int idx,
@@ -59,6 +70,32 @@ class matching {
                            std::back_inserter(*distances),
                            [](const cv::DMatch& m) { return m.distance; });
             (*total_descriptors) += descriptors->rows;
+        }
+
+        if (output_pattern) {
+            const cv::FileStorage this_feature =
+                sens_loc::apps::open_feature_file(input_pattern, idx);
+            const std::vector<cv::KeyPoint> previous_keypoints =
+                sens_loc::apps::load_keypoints(this_feature);
+
+            const std::vector<cv::KeyPoint> this_keypoints =
+                sens_loc::apps::load_keypoints(previous_img);
+
+            const std::string img_p1 = fmt::format(*original_images, idx - 1);
+            const std::string img_p2 = fmt::format(*original_images, idx);
+            auto              img1   = sens_loc::apps::load_file(img_p1);
+            auto              img2   = sens_loc::apps::load_file(img_p2);
+
+            if (!img1 || !img2)
+                return;
+
+            cv::Mat out_img;
+            cv::drawMatches(img1->data(), previous_keypoints, img2->data(),
+                            this_keypoints, matches, out_img,
+                            cv::Scalar(0, 0, 255), cv::Scalar(255, 0, 0));
+
+            const std::string output = fmt::format(*output_pattern, idx);
+            cv::imwrite(output, out_img);
         }
     }
 
@@ -103,15 +140,19 @@ class matching {
     gsl::not_null<std::uint64_t*>      total_descriptors;
     cv::Ptr<cv::BFMatcher>             matcher;
     std::string_view                   input_pattern;
+    std::optional<std::string_view>    output_pattern;
+    std::optional<std::string_view>    original_images;
 };
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_matching(std::string_view input_pattern,
-                     int              start_idx,
-                     int              end_idx,
-                     cv::NormTypes    norm_to_use,
-                     bool             crosscheck) {
+int analyze_matching(std::string_view                input_pattern,
+                     int                             start_idx,
+                     int                             end_idx,
+                     cv::NormTypes                   norm_to_use,
+                     bool                            crosscheck,
+                     std::optional<std::string_view> output_pattern,
+                     std::optional<std::string_view> original_files) {
     Expects(start_idx < end_idx && "Matching requires at least 2 images");
 
     using visitor = statistic_visitor<matching, required_data::descriptors>;
@@ -127,7 +168,7 @@ int analyze_matching(std::string_view input_pattern,
         visitor{input_pattern, gsl::not_null{&distance_mutex},
                 gsl::not_null{&global_minimal_distances},
                 gsl::not_null{&total_descriptors}, norm_to_use, crosscheck,
-                input_pattern});
+                input_pattern, output_pattern, original_files});
 
     f.postprocess();
 
