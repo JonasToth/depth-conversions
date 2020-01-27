@@ -23,6 +23,7 @@
 #include <opencv2/core/types.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <optional>
+#include <sens_loc/analysis/distance.h>
 #include <sens_loc/util/correctness_util.h>
 #include <sens_loc/util/thread_analysis.h>
 #include <stdexcept>
@@ -111,36 +112,26 @@ class min_descriptor_distance {
     /// Postprocess the findings of the minimal distances for each image to
     /// a coherent statistical finding. This will overwrite previous analysis
     /// and should only be called once.
-    [[nodiscard]] auto postprocess(int bins) noexcept {
+    void postprocess() noexcept {
         // Lock the mutex, just in case. This method is not expected to be
         // run in parallel, but it could.
         std::lock_guard guard{*process_mutex};
-
         Expects(!global_min_distances->empty());
 
-        auto [_, max_it] = std::minmax_element(
-            std::begin(*global_min_distances), std::end(*global_min_distances));
+        const auto                   bins = 25UL;
+        sens_loc::analysis::distance distance_stat{
+            *global_min_distances, bins,
+            "Minimal Intra Image Descriptor Distances"};
 
-        Expects(*_ >= 0.0F);
-
-        // Histogramming
-        using namespace boost::histogram;
-        auto dist_histo = make_histogram(
-            axis::regular<float, use_default, axis::option::none_t>(
-                bins, 0.0F, *max_it + 0.01F));
-        dist_histo.fill(*global_min_distances);
-
-        using namespace boost::accumulators;
-        accumulator_set<float, stats<tag::min, tag::max, tag::mean, tag::median,
-                                     tag::variance(lazy), tag::skewness>>
-            stat;
-
-        std::for_each(std::begin(*global_min_distances),
-                      std::end(*global_min_distances),
-                      [&stat](float el) { stat(el); });
-
-
-        return make_pair(dist_histo, stat);
+        std::cout << distance_stat.histogram() << "\n"
+                  << "==== Descriptor Distances\n"
+                  << "min:       " << distance_stat.min() << "\n"
+                  << "max:       " << distance_stat.max() << "\n"
+                  << "Mean:      " << distance_stat.mean() << "\n"
+                  << "Median:    " << distance_stat.median() << "\n"
+                  << "Variance:  " << distance_stat.variance() << "\n"
+                  << "StdDev:    " << distance_stat.stddev() << "\n"
+                  << "Skewness:  " << distance_stat.skewness() << "\n";
     }
 
   private:
@@ -167,17 +158,8 @@ int analyze_min_distance_impl(std::string_view input_pattern,
                                          gsl::not_null{&process_mutex},
                                          gsl::not_null{&global_min_distances}});
 
-    auto [histogram, stat] = f.postprocess(25);
+    f.postprocess();
 
-    std::cout << histogram << std::endl;
-    using namespace boost::accumulators;
-    std::cout << "==== Descriptor Distances\n"
-              << "min:       " << min(stat) << "\n"
-              << "max:       " << max(stat) << "\n"
-              << "Mean:      " << mean(stat) << "\n"
-              << "Median:    " << median(stat) << "\n"
-              << "Variance:  " << variance(stat) << "\n"
-              << "Skewness:  " << skewness(stat) << "\n";
     return 0;
 }
 }  // namespace

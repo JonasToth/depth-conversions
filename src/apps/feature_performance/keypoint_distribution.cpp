@@ -16,6 +16,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 #include <optional>
+#include <sens_loc/analysis/distance.h>
 #include <sstream>
 #include <util/batch_visitor.h>
 #include <util/statistic_visitor.h>
@@ -168,17 +169,9 @@ class keypoint_distribution {
                       });
 
 
-        accumulator_set<float,
-                        stats<tag::count, tag::min, tag::max, tag::median,
-                              tag::mean, tag::variance(lazy)>>
-            dist_stat;
-        std::for_each(global_distances->begin(), global_distances->end(),
-                      [&](float d) { dist_stat(d); });
-        auto dist_bins  = 50;
-        auto dist_histo = make_histogram(
-            axis::regular(dist_bins, min(dist_stat) - 0.01F,
-                          max(dist_stat) + 0.01F, "minimal distance"));
-        dist_histo.fill(*global_distances);
+        const auto                   dist_bins = 50UL;
+        sens_loc::analysis::distance distance_stat{*global_distances, dist_bins,
+                                                   "minimal keypoint distance"};
 
         std::cout << "==== Response\n"
                   << "count:  " << count(response_stat) << "\n"
@@ -186,21 +179,28 @@ class keypoint_distribution {
                   << "max:    " << max(response_stat) << "\n"
                   << "median: " << median(response_stat) << "\n"
                   << "mean:   " << mean(response_stat) << "\n"
+                  << "var:    " << variance(response_stat) << "\n"
+                  << "stddev: " << std::sqrt(variance(response_stat)) << "\n"
                   << response_histo << "\n"
+
                   << "==== Size\n"
                   << "count:  " << count(size_stat) << "\n"
                   << "min:    " << min(size_stat) << "\n"
                   << "max:    " << max(size_stat) << "\n"
                   << "median: " << median(size_stat) << "\n"
                   << "mean:   " << mean(size_stat) << "\n"
+                  << "var:    " << variance(size_stat) << "\n"
+                  << "stddev: " << std::sqrt(variance(size_stat)) << "\n"
                   << size_histo << "\n"
+
                   << "=== Distance\n"
-                  << "count:  " << count(dist_stat) << "\n"
-                  << "min:    " << min(dist_stat) << "\n"
-                  << "max:    " << max(dist_stat) << "\n"
-                  << "median: " << median(dist_stat) << "\n"
-                  << "mean:   " << mean(dist_stat) << "\n"
-                  << dist_histo << "\n";
+                  << "count:  " << distance_stat.count() << "\n"
+                  << "min:    " << distance_stat.min() << "\n"
+                  << "max:    " << distance_stat.max() << "\n"
+                  << "median: " << distance_stat.median() << "\n"
+                  << "mean:   " << distance_stat.mean() << "\n"
+                  << "stddev: " << distance_stat.stddev() << "\n"
+                  << distance_stat.histogram() << "\n";
 
         std::ofstream gnuplot_data{"location_histo.data"};
         gnuplot_data << histogram_to_gnuplot(location_histo) << std::endl;

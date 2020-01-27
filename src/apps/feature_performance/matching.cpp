@@ -1,15 +1,5 @@
 #include "matching.h"
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/framework/accumulator_set.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/median.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/skewness.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/histogram.hpp>
 #include <boost/histogram/ostream.hpp>
 #include <cstdint>
 #include <gsl/gsl>
@@ -20,6 +10,7 @@
 #include <opencv2/features2d.hpp>
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
+#include <sens_loc/analysis/distance.h>
 #include <util/batch_visitor.h>
 #include <util/io.h>
 #include <util/statistic_visitor.h>
@@ -103,35 +94,24 @@ class matching {
         std::lock_guard guard{*distance_mutex};
         Expects(!distances->empty());
 
-        using namespace boost::accumulators;
-        accumulator_set<float,
-                        stats<tag::count, tag::min, tag::max, tag::median,
-                              tag::mean, tag::variance(lazy), tag::skewness>>
-            distance_stat;
-        std::for_each(distances->begin(), distances->end(),
-                      [&](float d) { distance_stat(d); });
-
-        using namespace boost::histogram;
-        auto dist_bins  = 25;
-        auto dist_histo = make_histogram(
-            axis::regular(dist_bins, min(distance_stat) - 0.01F,
-                          max(distance_stat) + 0.01F, "match distance"));
-        dist_histo.fill(*distances);
+        const auto                   dist_bins = 25;
+        sens_loc::analysis::distance distance_stat{*distances, dist_bins};
 
         std::cout << "==== Match Distances\n"
-                  << dist_histo << "\n"
+                  << distance_stat.histogram() << "\n"
                   << "total count:    " << *total_descriptors << "\n"
-                  << "matched count:  " << count(distance_stat) << "\n"
+                  << "matched count:  " << distances->size() << "\n"
                   << "matched/total:  "
-                  << static_cast<double>(count(distance_stat)) /
+                  << static_cast<double>(distances->size()) /
                          static_cast<double>(*total_descriptors)
                   << "\n"
-                  << "min:            " << min(distance_stat) << "\n"
-                  << "max:            " << max(distance_stat) << "\n"
-                  << "median:         " << median(distance_stat) << "\n"
-                  << "mean:           " << mean(distance_stat) << "\n"
-                  << "Variance:       " << variance(distance_stat) << "\n"
-                  << "Skewness:       " << skewness(distance_stat) << "\n";
+                  << "min:            " << distance_stat.min() << "\n"
+                  << "max:            " << distance_stat.max() << "\n"
+                  << "median:         " << distance_stat.median() << "\n"
+                  << "mean:           " << distance_stat.mean() << "\n"
+                  << "Variance:       " << distance_stat.variance() << "\n"
+                  << "StdDev:         " << distance_stat.stddev() << "\n"
+                  << "Skewness:       " << distance_stat.skewness() << "\n";
     }
 
   private:

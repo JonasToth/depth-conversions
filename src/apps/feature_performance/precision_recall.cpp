@@ -1,20 +1,10 @@
 #include "precision_recall.h"
 
 #include "gsl/gsl_assert"
+#include "sens_loc/analysis/distance.h"
 #include "sens_loc/math/coordinate.h"
 
 #include <Eigen/src/Geometry/Transform.h>
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/framework/accumulator_set.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/median.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/skewness.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/histogram.hpp>
-#include <boost/histogram/make_histogram.hpp>
 #include <boost/histogram/ostream.hpp>
 #include <fstream>
 #include <gsl/gsl>
@@ -193,35 +183,27 @@ class prec_recall_analysis {
     void postprocess() noexcept {
         std::lock_guard guard{*_distance_mutex};
 
-        using namespace boost::accumulators;
-        accumulator_set<float,
-                        stats<tag::count, tag::min, tag::max, tag::median,
-                              tag::mean, tag::variance(lazy), tag::skewness>>
-            distance_stat;
-        std::for_each(_global_distances->begin(), _global_distances->end(),
-                      [&](float d) { distance_stat(d); });
+        // Calculate the median of the distances by partial sorting until the
+        // half.
+        auto median_it =
+            _global_distances->begin() + _global_distances->size() / 2UL;
+        std::nth_element(_global_distances->begin(), median_it,
+                         _global_distances->end());
+        _global_distances->erase(median_it, _global_distances->end());
 
-        const float med = median(distance_stat);
-        auto        new_end =
-            std::remove_if(_global_distances->begin(), _global_distances->end(),
-                           [=](float d) { return d > med; });
-        _global_distances->erase(new_end, _global_distances->end());
+        const auto                   dist_bins = 50;
+        sens_loc::analysis::distance distance_stat{
+            *_global_distances, dist_bins, "world distance of matched points"};
 
-        using namespace boost::histogram;
-        const auto dist_bins      = 50;
-        auto       distance_histo = make_histogram(
-            axis::regular(dist_bins, min(distance_stat), median(distance_stat),
-                          "world distance of matched points"));
-        distance_histo.fill(*_global_distances);
-        std::cout << distance_histo << "\n"
-                  << "matched count:  " << count(distance_stat) << "\n"
-                  << "min:            " << min(distance_stat) << "\n"
-                  << "max:            " << max(distance_stat) << "\n"
-                  << "median:         " << median(distance_stat) << "\n"
-                  << "mean:           " << mean(distance_stat) << "\n"
-                  << "Variance:       " << variance(distance_stat) << "\n"
-                  << "Skewness:       " << skewness(distance_stat) << "\n";
-        _global_distances->erase(new_end, _global_distances->end());
+        std::cout << distance_stat.histogram() << "\n"
+                  << "matched count:  " << distance_stat.count() << "\n"
+                  << "min:            " << distance_stat.min() << "\n"
+                  << "max:            " << distance_stat.max() << "\n"
+                  << "median:         " << distance_stat.median() << "\n"
+                  << "mean:           " << distance_stat.mean() << "\n"
+                  << "Variance:       " << distance_stat.variance() << "\n"
+                  << "StdDev:         " << distance_stat.stddev() << "\n"
+                  << "Skewness:       " << distance_stat.skewness() << "\n";
     }
 
   private:

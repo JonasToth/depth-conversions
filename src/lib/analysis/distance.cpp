@@ -10,7 +10,7 @@
 
 namespace sens_loc::analysis {
 
-void distance::analyze(gsl::span<const float> distances) noexcept {
+void distance::analyze(gsl::span<const float> distances, bool histo) noexcept {
     Expects(!distances.empty());
     _data  = distances;
     _count = _data.size();
@@ -30,11 +30,15 @@ void distance::analyze(gsl::span<const float> distances) noexcept {
     _stddev   = std::sqrt(_variance);
     _skewness = boost::accumulators::skewness(stat);
 
+    if (!histo)
+        return;
+
     using namespace boost::histogram;
-    float histo_min = _min - 5.F * std::numeric_limits<float>::epsilon();
-    float histo_max = _max + 5.F * std::numeric_limits<float>::epsilon();
-    _histo =
-        make_histogram(axis::regular<float>(_bin_count, histo_min, histo_max));
+    const float histo_min = _min - 5.F * std::numeric_limits<float>::epsilon();
+    const float histo_max = _max + 5.F * std::numeric_limits<float>::epsilon();
+
+    _histo = make_histogram(
+        axis::regular<float>(_bin_count, histo_min, histo_max, _axis_title));
     _histo.fill(_data);
 }
 
