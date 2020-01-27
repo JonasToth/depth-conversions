@@ -5,6 +5,7 @@ list(APPEND sens_loc_headers
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/version.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/analysis/distance.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/analysis/keypoints.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/analysis/match.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/pinhole.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/equirectangular.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/utility.h"
@@ -36,6 +37,8 @@ target_sources(sens_loc PUBLIC ${sens_loc_headers})
 target_sources(sens_loc PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/lib/analysis/distance.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/analysis/keypoints.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/lib/analysis/match.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/lib/camera_models/projection.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/io/pose.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/util/correctness_util.cpp"
     )

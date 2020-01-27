@@ -1,12 +1,18 @@
 #include "precision_recall.h"
 
+#include "sens_loc/math/image.h"
+
 #include <boost/histogram/ostream.hpp>
 #include <fstream>
 #include <gsl/gsl>
+#include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
+#include <opencv2/imgproc.hpp>
 #include <sens_loc/analysis/distance.h>
+#include <sens_loc/analysis/match.h>
 #include <sens_loc/camera_models/pinhole.h>
+#include <sens_loc/camera_models/projection.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/io/pose.h>
@@ -60,11 +66,8 @@ class prec_recall_analysis {
         const int previous_idx = idx - 1;
 
         using namespace sens_loc;
-        using math::make_pointcloud;
-        using math::pointcloud_t;
-        using math::pointwise_distance;
-        using math::pose_t;
-        using math::relative_pose;
+        using namespace camera_models;
+        using namespace math;
         using namespace sens_loc::apps;
         using namespace std;
         using namespace cv;
@@ -122,48 +125,58 @@ class prec_recall_analysis {
         // Extract the pixels that are the center of the keypoint and use
         // their depth value to create the 3D point.
         // Trainpointcloud: Previous
-        pointcloud_t previous_points =
-            make_pointcloud(narrow<unsigned int>(matches.size()));
+        const auto [kps, prev_kps] =
+            analysis::gather_matches(matches, *keypoints, previous_keypoints);
 
-        // Querypointcloud: this
-        pointcloud_t points =
-            make_pointcloud(narrow<unsigned int>(matches.size()));
+        imagepoints_t img_previous = keypoint_to_coords(prev_kps);
+        pointcloud_t  prev_points = project_to_sphere(_intrinsic, img_previous);
 
-        size_t match_idx = 0;
-        for (const DMatch& match : matches) {
-            auto q_kp = (*keypoints)[match.queryIdx];
-            auto t_kp = previous_keypoints[match.trainIdx];
-
-            auto q_px = math::pixel_coord<float>{q_kp.pt.x, q_kp.pt.y};
-            auto q_d  = float(depth_image->at(q_px));
-            auto t_px = math::pixel_coord<float>{t_kp.pt.x, q_kp.pt.y};
+        Expects(kps.size() == prev_kps.size());
+        for (unsigned int match_idx = 0; match_idx < kps.size(); ++match_idx) {
+            auto t_kp = prev_kps[match_idx];
+            auto t_px = math::pixel_coord<float>{t_kp.pt.x, t_kp.pt.y};
             auto t_d  = float(previous_depth_image->at(t_px));
 
-            auto q_s = _intrinsic.pixel_to_sphere(q_px);
-            auto t_s = _intrinsic.pixel_to_sphere(t_px);
+            // Make coordinate homogeneous in camera the camera coordinates
+            // of the previous camera.
+            Vector4f cam_coords = t_d * prev_points.col(match_idx);
+            cam_coords(3)       = 1.0F;
 
-            auto q_h =
-                Vector4f{q_d * q_s.Xs(), q_d * q_s.Ys(), q_d * q_s.Zs(), 1.F};
-            points.col(match_idx) = q_h;
-
-            auto t_h =
-                Vector4f{t_d * t_s.Xs(), t_d * t_s.Ys(), t_d * t_s.Zs(), 1.F};
-            previous_points.col(match_idx) = t_h;
-
-            ++match_idx;
+            prev_points.col(match_idx) = cam_coords;
         }
 
         // == Calculate relative pose between the two frames.
         pose_t rel_pose = relative_pose(*previous_pose, *pose);
 
         // == Transform matches from previous frame into this coordinate frame.
-        pointcloud_t prev_in_this_frame = rel_pose * previous_points;
+        pointcloud_t prev_in_this_frame = rel_pose * prev_points;
 
-        // == Calculate the distance of each match.
+        // == Project the points back into the current image.
+        imagepoints_t prev_in_img =
+            project_to_image(_intrinsic, prev_in_this_frame);
+
+        // == Calculate the distance between the keypoints backprojected
+        imagepoints_t img_kps   = keypoint_to_coords(kps);
+        auto          distances = pointwise_distance(img_kps, prev_in_img);
+
+        // == Plot the keypoints in one image.
+        vector<KeyPoint> prev_in_this_kps = coords_to_keypoint(prev_in_img);
+        auto             cvt              = math::convert<uchar>(*depth_image);
+        Mat              target;
+        cvtColor(cvt.data(), target, COLOR_GRAY2BGR);
+        // Draw the keypoints detected in this image.
+        drawKeypoints(target, kps, target, Scalar(255, 0, 0),
+                      DrawMatchesFlags::DRAW_OVER_OUTIMG);
+        // Draw the keypoints detected in the previous image, backprojected
+        // into this image.
+        drawKeypoints(target, prev_in_this_kps, target, Scalar(0, 255, 0),
+                      DrawMatchesFlags::DRAW_OVER_OUTIMG);
+        imwrite(fmt::format("funk/coorespondence-{:04d}.png", idx), target);
+#if 0
+        // == Calculate the distance of each match in 3D space
         RowVectorXf distances = pointwise_distance(points, prev_in_this_frame);
         Ensures(size_t(distances.cols()) == matches.size());
 
-#if 0
         RowVectorXf::Index min_row;
         RowVectorXf::Index min_col;
         cout << "Min: " << distances.minCoeff(&min_row, &min_col)
@@ -190,7 +203,7 @@ class prec_recall_analysis {
 
         const auto                   dist_bins = 50;
         sens_loc::analysis::distance distance_stat{
-            *_global_distances, dist_bins, "world distance of matched points"};
+            *_global_distances, dist_bins, "backprojection error pixels"};
 
         cout << distance_stat.histogram() << "\n"
              << "matched count:  " << distance_stat.count() << "\n"

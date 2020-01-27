@@ -12,6 +12,9 @@ namespace sens_loc::math {
 /// point in homogenous coordinates.
 using pointcloud_t = Eigen::Matrix<float, 4, Eigen::Dynamic, Eigen::ColMajor>;
 
+/// A set of points in homogeneous pixel coordinates.
+using imagepoints_t = Eigen::Matrix<float, 3, Eigen::Dynamic, Eigen::ColMajor>;
+
 /// Allocate a pointcloud with \c point_count number of points with homogeneous
 /// coordinates.
 /// \warning The points are uninitialized!
@@ -34,6 +37,26 @@ inline Eigen::RowVectorXf pointwise_distance(const pointcloud_t& c0,
     Expects(c0.cols() == c1.cols());
 
     pointcloud_t       diff      = c0 - c1;
+    Eigen::RowVectorXf distances = diff.colwise().norm();
+
+    Ensures(distances.rows() == 1);
+    Ensures(distances.cols() == c0.cols());
+    Ensures(distances.cols() == c1.cols());
+    Ensures(distances.minCoeff() >= 0.0F);
+
+    return distances;
+}
+
+/// Calculate the point-wise euclidean distance between each point in \c c0
+/// and \c c1.
+/// The result is a row-vector with the distance for point 'i' at position 'i'.
+/// \pre c0.cols() == c1.cols() => the same number of points
+/// \post each element in the result is non-negative.
+inline Eigen::RowVectorXf pointwise_distance(const imagepoints_t& c0,
+                                             const imagepoints_t& c1) noexcept {
+    Expects(c0.cols() == c1.cols());
+
+    imagepoints_t      diff      = c0 - c1;
     Eigen::RowVectorXf distances = diff.colwise().norm();
 
     Ensures(distances.rows() == 1);

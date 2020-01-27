@@ -148,7 +148,7 @@ pinhole<Real>::image_to_sphere(const math::image_coord<Real>& p) const
     const double y = p.y();
     const double z = 1.;
 
-    const double factor = std::sqrt(1. + x * x + y * y) / (1. + x * x + y * y);
+    const double             factor = Real(1.) / (Real(1.) + x * x + y * y);
     math::sphere_coord<Real> res(factor * x, factor * y, factor * z);
 
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
