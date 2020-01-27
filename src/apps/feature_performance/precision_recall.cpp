@@ -35,13 +35,15 @@ class prec_recall_analysis {
                          string_view              intrinsic_file,
                          cv::NormTypes            matching_norm,
                          not_null<mutex*>         distance_mutex,
-                         not_null<vector<float>*> global_distances) noexcept
+                         not_null<vector<float>*> global_distances,
+                         optional<string_view>    backproject_pattern) noexcept
         : _feature_file_pattern{feature_file_pattern}
         , _depth_image_pattern{depth_image_pattern}
         , _pose_file_pattern{pose_file_pattern}
         , _matcher{cv::BFMatcher::create(matching_norm, /*crosscheck=*/true)}
         , _distance_mutex{distance_mutex}
-        , _global_distances{global_distances} {
+        , _global_distances{global_distances}
+        , _backproject_pattern{backproject_pattern} {
         Expects(!_feature_file_pattern.empty());
         Expects(!_depth_image_pattern.empty());
         Expects(!_pose_file_pattern.empty());
@@ -159,19 +161,21 @@ class prec_recall_analysis {
         imagepoints_t img_kps   = keypoint_to_coords(kps);
         auto          distances = pointwise_distance(img_kps, prev_in_img);
 
-        // == Plot the keypoints in one image.
-        vector<KeyPoint> prev_in_this_kps = coords_to_keypoint(prev_in_img);
-        auto             cvt              = math::convert<uchar>(*depth_image);
-        Mat              target;
-        cvtColor(cvt.data(), target, COLOR_GRAY2BGR);
-        // Draw the keypoints detected in this image.
-        drawKeypoints(target, kps, target, Scalar(255, 0, 0),
-                      DrawMatchesFlags::DRAW_OVER_OUTIMG);
-        // Draw the keypoints detected in the previous image, backprojected
-        // into this image.
-        drawKeypoints(target, prev_in_this_kps, target, Scalar(0, 255, 0),
-                      DrawMatchesFlags::DRAW_OVER_OUTIMG);
-        imwrite(fmt::format("funk/coorespondence-{:04d}.png", idx), target);
+        if (_backproject_pattern) {
+            // == Plot the keypoints in one image.
+            vector<KeyPoint> prev_in_this_kps = coords_to_keypoint(prev_in_img);
+            auto             cvt = math::convert<uchar>(*depth_image);
+            Mat              target;
+            cvtColor(cvt.data(), target, COLOR_GRAY2BGR);
+            // Draw the keypoints detected in this image.
+            drawKeypoints(target, kps, target, Scalar(255, 0, 0),
+                          DrawMatchesFlags::DRAW_OVER_OUTIMG);
+            // Draw the keypoints detected in the previous image, backprojected
+            // into this image.
+            drawKeypoints(target, prev_in_this_kps, target, Scalar(0, 255, 0),
+                          DrawMatchesFlags::DRAW_OVER_OUTIMG);
+            imwrite(fmt::format(*_backproject_pattern, idx), target);
+        }
 #if 0
         // == Calculate the distance of each match in 3D space
         RowVectorXf distances = pointwise_distance(points, prev_in_this_frame);
@@ -225,17 +229,20 @@ class prec_recall_analysis {
 
     not_null<mutex*>         _distance_mutex;
     not_null<vector<float>*> _global_distances;
+
+    optional<string_view> _backproject_pattern;
 };
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_precision_recall(string_view   feature_file_pattern,
-                             int           start_idx,
-                             int           end_idx,
-                             string_view   depth_image_pattern,
-                             string_view   pose_file_pattern,
-                             string_view   intrinsic_file,
-                             cv::NormTypes matching_norm) {
+int analyze_precision_recall(string_view           feature_file_pattern,
+                             int                   start_idx,
+                             int                   end_idx,
+                             string_view           depth_image_pattern,
+                             string_view           pose_file_pattern,
+                             string_view           intrinsic_file,
+                             cv::NormTypes         matching_norm,
+                             optional<string_view> backproject_pattern) {
     Expects(start_idx < end_idx &&
             "Precision-Recall calculation requires at least two images");
 
@@ -252,7 +259,8 @@ int analyze_precision_recall(string_view   feature_file_pattern,
                               intrinsic_file,
                               matching_norm,
                               not_null{&distance_mutex},
-                              not_null{&global_distances}};
+                              not_null{&global_distances},
+                              backproject_pattern};
 
     // Consecutive images are matched and analysed, therefore the first index
     // must be skipped.

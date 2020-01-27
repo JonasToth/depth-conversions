@@ -22,13 +22,15 @@ namespace sens_loc::apps {
 // - Insert the distances into a vector.
 // - Statistical analysis of these distances.
 
-int analyze_precision_recall(std::string_view feature_file_pattern,
-                             int              start_idx,
-                             int              end_idx,
-                             std::string_view depth_image_pattern,
-                             std::string_view pose_file_pattern,
-                             std::string_view intrinsic_file,
-                             cv::NormTypes    matching_norm);
+int analyze_precision_recall(
+    std::string_view                feature_file_pattern,
+    int                             start_idx,
+    int                             end_idx,
+    std::string_view                depth_image_pattern,
+    std::string_view                pose_file_pattern,
+    std::string_view                intrinsic_file,
+    cv::NormTypes                   matching_norm,
+    std::optional<std::string_view> backproject_pattern);
 
 }  // namespace sens_loc::apps
 

@@ -118,6 +118,10 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                           {"L1", "L2", "L2SQR", "HAMMING", "HAMMING2"},
                           "Set the norm that shall be used as distance measure",
                           /*defaulted=*/true);
+    optional<string> backproject_pattern;
+    cmd_prec_rec->add_option("--backprojection", backproject_pattern,
+                             "Provide a file-pattern to optionally print the "
+                             "backprojection for matched keypoints");
 
     COLORED_APP_PARSE(app, argc, argv);
 
@@ -139,7 +143,8 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     if (*cmd_prec_rec)
         return analyze_precision_recall(
             feature_file_input_pattern, start_idx, end_idx, depth_image_path,
-            pose_file_pattern, intrinsic_file, str_to_norm(norm_name));
+            pose_file_pattern, intrinsic_file, str_to_norm(norm_name),
+            backproject_pattern);
 
     UNREACHABLE("Expected to end program with "  // LCOV_EXCL_LINE
                 "subcommand processing");        // LCOV_EXCL_LINE
