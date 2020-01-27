@@ -72,5 +72,3 @@ target_sources(feature_performance
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/precision_recall.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/minimal_descriptor_distance.h"
     )
-target_include_directories(feature_performance SYSTEM PRIVATE ${Boost_INCLUDE_DIRS})
-target_link_directories(feature_performance PRIVATE ${Boost_LIBRARY_DIRS})

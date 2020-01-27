@@ -3,6 +3,7 @@ find_package(Threads REQUIRED)
 add_library(sens_loc)
 list(APPEND sens_loc_headers 
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/version.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/analysis/distance.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/pinhole.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/equirectangular.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/utility.h"
@@ -31,6 +32,7 @@ list(APPEND sens_loc_headers
     )
 target_sources(sens_loc PUBLIC ${sens_loc_headers})
 target_sources(sens_loc PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/lib/analysis/distance.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/io/pose.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/util/correctness_util.cpp"
     )
@@ -41,6 +43,8 @@ target_include_directories(sens_loc
     $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
     $<INSTALL_INTERFACE:include>
     )
+target_include_directories(sens_loc
+    SYSTEM PUBLIC ${Boost_INCLUDE_DIRS})
 target_link_libraries(sens_loc
     PUBLIC
     GSL
@@ -49,6 +53,7 @@ target_link_libraries(sens_loc
     taskflow::taskflow
     Eigen3::Eigen
     ${OpenCV_LIBS}
+    ${Boost_LIBRARY_DIRS}
     )
 target_compile_features(sens_loc INTERFACE cxx_std_17)
 add_dependencies(sens_loc dependencies)
