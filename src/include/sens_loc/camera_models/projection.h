@@ -24,8 +24,8 @@ math::imagepoints_t project_to_image(const pinhole<float>&     pinhole,
 /// Project pixel coordinates to the unit-sphere.
 /// \sa project_to_image
 math::pointcloud_t
-project_to_sphere(const pinhole<float>&   pinhole,
-                  const Eigen::Matrix3Xf& homogeneous_pixel) noexcept;
+project_to_sphere(const pinhole<float>&      pinhole,
+                  const math::imagepoints_t& homogeneous_pixel) noexcept;
 
 /// Convert keypoints to homogeneous pixel coordinates.
 math::imagepoints_t

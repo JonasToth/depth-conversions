@@ -24,18 +24,24 @@ imagepoints_t project_to_image(const pinhole<float>& pinhole,
     Matrix<float, 3, 3> K = camera_matrix(pinhole);
 
     imagepoints_t image_coord(3, points.cols());
+    Ensures(image_coord.cols() == points.cols());
+    Ensures(image_coord.rows() == 3);
 
     for (int i = 0; i < points.cols(); ++i) {
-        const float Z = points(2, i);
+        const float Z = points.col(i).z();
         // A point in the image-plane can not be projected by the pinhole model.
         // Such points are marked as invalid.
         image_coord.col(i) =
-            Z != 0.0F
-                ? Vector2f{points(0, i) / Z, points(1, i) / Z}.homogeneous()
-                : Vector3f{0.0F, 0.0F, 0.0F};
+            Z != 0.0F ? Vector2f{points.col(i).x() / Z, points.col(i).y() / Z}
+                            .homogeneous()
+                      : Vector3f{0.0F, 0.0F, 0.0F};
+        // 'z' is the homogeneous coordinate in this case.
+        Ensures(image_coord.col(i).z() == 1.0F);
     }
 
     imagepoints_t pixel_coord = K * image_coord;
+    Ensures(pixel_coord.cols() == points.cols());
+    Ensures(pixel_coord.rows() == 3);
 
     // Mark every pixel-coordinate that is not within the viewport as invalid.
     for (int i = 0; i < pixel_coord.cols(); ++i) {
@@ -45,8 +51,6 @@ imagepoints_t project_to_image(const pinhole<float>& pinhole,
             pixel_coord.col(i) = Vector3f{0.0F, 0.0F, 0.0F};
     }
 
-    Ensures(pixel_coord.cols() == points.cols());
-    Ensures(pixel_coord.rows() == 3);
 
     return pixel_coord;
 }
@@ -56,36 +60,45 @@ pointcloud_t project_to_sphere(const pinhole<float>& pinhole,
     Matrix<float, 3, 3> K_inv = camera_matrix(pinhole).inverse();
 
     imagepoints_t image_coord = K_inv * pixel;
-    pointcloud_t  sphere_coord(4, pixel.cols());
+    Ensures(image_coord.cols() == pixel.cols());
+    Ensures(image_coord.rows() == 3);
+
+    pointcloud_t sphere_coord(4, pixel.cols());
+    Ensures(sphere_coord.cols() == pixel.cols());
+    Ensures(sphere_coord.rows() == 4);
 
     for (int i = 0; i < pixel.cols(); ++i) {
         const float    f      = 1.0F / image_coord.col(i).norm();
         const Vector3f sphere = f * image_coord.col(i);
         sphere_coord.col(i)   = sphere.homogeneous();
+        Ensures(sphere_coord.col(i).w() == 1.0F);
     }
 
     Ensures(sphere_coord.rows() == 4);
     Ensures(sphere_coord.cols() == pixel.cols());
     Ensures(sphere_coord.row(3).sum() == narrow_cast<float>(pixel.cols()));
+
     return sphere_coord;
 }
 
 
 imagepoints_t keypoint_to_coords(const vector<KeyPoint>& kps) noexcept {
     imagepoints_t pixel_coord(3, narrow_cast<int>(kps.size()));
+    Ensures(pixel_coord.cols() == kps.size());
+    Ensures(pixel_coord.rows() == 3);
 
     for (size_t i = 0; i < kps.size(); ++i)
         pixel_coord.col(i) = Vector2f{kps[i].pt.x, kps[i].pt.y}.homogeneous();
 
-    Ensures(pixel_coord.cols() == kps.size());
-    Ensures(pixel_coord.rows() == 3);
+    Ensures(pixel_coord.row(2).sum() == narrow_cast<float>(kps.size()));
     return pixel_coord;
 }
 
 vector<KeyPoint> coords_to_keypoint(const math::imagepoints_t& pts) noexcept {
-    vector<KeyPoint> kps(pts.cols());
+    vector<KeyPoint> kps;
+    kps.reserve(pts.cols());
     for (int i = 0; i < pts.cols(); ++i)
-        kps[i].pt = {pts.col(i).x(), pts.col(i).y()};
+        kps.emplace_back(pts.col(i).x(), pts.col(i).y(), /*size=*/5.0F);
 
     Ensures(kps.size() == std::size_t(pts.cols()));
     return kps;

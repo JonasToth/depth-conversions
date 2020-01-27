@@ -55,6 +55,8 @@ inline Eigen::RowVectorXf pointwise_distance(const pointcloud_t& c0,
 inline Eigen::RowVectorXf pointwise_distance(const imagepoints_t& c0,
                                              const imagepoints_t& c1) noexcept {
     Expects(c0.cols() == c1.cols());
+    Expects(c0.rows() == c1.rows());
+    Expects(c0.rows() == 3);
 
     imagepoints_t      diff      = c0 - c1;
     Eigen::RowVectorXf distances = diff.colwise().norm();
