@@ -16,18 +16,20 @@
 #include <util/io.h>
 #include <util/statistic_visitor.h>
 
+using namespace std;
+using namespace gsl;
+
 namespace {
 
 class prec_recall_analysis {
   public:
-    prec_recall_analysis(
-        std::string_view                   feature_file_pattern,
-        std::string_view                   depth_image_pattern,
-        std::string_view                   pose_file_pattern,
-        std::string_view                   intrinsic_file,
-        cv::NormTypes                      matching_norm,
-        gsl::not_null<std::mutex*>         distance_mutex,
-        gsl::not_null<std::vector<float>*> global_distances) noexcept
+    prec_recall_analysis(string_view              feature_file_pattern,
+                         string_view              depth_image_pattern,
+                         string_view              pose_file_pattern,
+                         string_view              intrinsic_file,
+                         cv::NormTypes            matching_norm,
+                         not_null<mutex*>         distance_mutex,
+                         not_null<vector<float>*> global_distances) noexcept
         : _feature_file_pattern{feature_file_pattern}
         , _depth_image_pattern{depth_image_pattern}
         , _pose_file_pattern{pose_file_pattern}
@@ -39,7 +41,7 @@ class prec_recall_analysis {
         Expects(!_pose_file_pattern.empty());
         Expects(!intrinsic_file.empty());
 
-        std::ifstream intrinsic{std::string(intrinsic_file)};
+        ifstream intrinsic{string(intrinsic_file)};
 
         auto maybe_intrinsic = sens_loc::io::camera<
             float, sens_loc::camera_models::pinhole>::load_intrinsic(intrinsic);
@@ -47,13 +49,13 @@ class prec_recall_analysis {
         _intrinsic = *maybe_intrinsic;
     }
 
-    void operator()(int                                      idx,
-                    std::optional<std::vector<cv::KeyPoint>> keypoints,
-                    std::optional<cv::Mat> descriptors) noexcept {
+    void operator()(int                            idx,
+                    optional<vector<cv::KeyPoint>> keypoints,
+                    optional<cv::Mat>              descriptors) noexcept {
         Expects(keypoints);
         Expects(!keypoints->empty());
         Expects(descriptors);
-        Expects(std::size_t(descriptors->rows) == keypoints->size());
+        Expects(size_t(descriptors->rows) == keypoints->size());
 
         const int previous_idx = idx - 1;
 
@@ -80,7 +82,7 @@ class prec_recall_analysis {
         optional<math::image<ushort>> previous_depth_image =
             io::load_image<ushort>(previous_depth_path, cv::IMREAD_UNCHANGED);
         if (!previous_depth_image) {
-            std::cerr << "No previous depth image\n";
+            cerr << "No previous depth image\n";
             return;
         }
 
@@ -89,7 +91,7 @@ class prec_recall_analysis {
         ifstream         previous_pose_file(previous_pose_path);
         optional<pose_t> previous_pose = io::load_pose(previous_pose_file);
         if (!previous_pose) {
-            std::cerr << "No previous pose - " << previous_pose_path << "\n";
+            cerr << "No previous pose - " << previous_pose_path << "\n";
             return;
         }
 
@@ -98,7 +100,7 @@ class prec_recall_analysis {
         optional<math::image<ushort>> depth_image =
             io::load_image<ushort>(depth_path, cv::IMREAD_UNCHANGED);
         if (!depth_image) {
-            std::cerr << "No depth image\n";
+            cerr << "No depth image\n";
             return;
         }
 
@@ -106,7 +108,7 @@ class prec_recall_analysis {
         ifstream         pose_file(pose_path);
         optional<pose_t> pose = io::load_pose(pose_file);
         if (!pose) {
-            std::cerr << "No pose - " << pose_path << "\n";
+            cerr << "No pose - " << pose_path << "\n";
             return;
         }
 
@@ -121,11 +123,11 @@ class prec_recall_analysis {
         // their depth value to create the 3D point.
         // Trainpointcloud: Previous
         pointcloud_t previous_points =
-            make_pointcloud(gsl::narrow<unsigned int>(matches.size()));
+            make_pointcloud(narrow<unsigned int>(matches.size()));
 
         // Querypointcloud: this
         pointcloud_t points =
-            make_pointcloud(gsl::narrow<unsigned int>(matches.size()));
+            make_pointcloud(narrow<unsigned int>(matches.size()));
 
         size_t match_idx = 0;
         for (const DMatch& match : matches) {
@@ -158,77 +160,77 @@ class prec_recall_analysis {
         pointcloud_t prev_in_this_frame = rel_pose * previous_points;
 
         // == Calculate the distance of each match.
-        RowVectorXf  distances = pointwise_distance(points, prev_in_this_frame);
+        RowVectorXf distances = pointwise_distance(points, prev_in_this_frame);
         Ensures(size_t(distances.cols()) == matches.size());
 
 #if 0
         RowVectorXf::Index min_row;
         RowVectorXf::Index min_col;
-        std::cout << "Min: " << distances.minCoeff(&min_row, &min_col)
+        cout << "Min: " << distances.minCoeff(&min_row, &min_col)
                   << "  at pixel " << (*keypoints)[min_col].pt << "\n";
 #endif
 
         {
-            std::lock_guard guard{*_distance_mutex};
+            lock_guard guard{*_distance_mutex};
             for (int i = 0; i < distances.cols(); ++i)
                 _global_distances->emplace_back(distances(i));
         }
     }
 
     void postprocess() noexcept {
-        std::lock_guard guard{*_distance_mutex};
+        lock_guard guard{*_distance_mutex};
 
         // Calculate the median of the distances by partial sorting until the
         // middle element.
         auto median_it =
             _global_distances->begin() + _global_distances->size() / 2UL;
-        std::nth_element(_global_distances->begin(), median_it,
-                         _global_distances->end());
+        nth_element(_global_distances->begin(), median_it,
+                    _global_distances->end());
         _global_distances->erase(median_it, _global_distances->end());
 
         const auto                   dist_bins = 50;
         sens_loc::analysis::distance distance_stat{
             *_global_distances, dist_bins, "world distance of matched points"};
 
-        std::cout << distance_stat.histogram() << "\n"
-                  << "matched count:  " << distance_stat.count() << "\n"
-                  << "min:            " << distance_stat.min() << "\n"
-                  << "max:            " << distance_stat.max() << "\n"
-                  << "median:         " << distance_stat.median() << "\n"
-                  << "mean:           " << distance_stat.mean() << "\n"
-                  << "Variance:       " << distance_stat.variance() << "\n"
-                  << "StdDev:         " << distance_stat.stddev() << "\n"
-                  << "Skewness:       " << distance_stat.skewness() << "\n";
+        cout << distance_stat.histogram() << "\n"
+             << "matched count:  " << distance_stat.count() << "\n"
+             << "min:            " << distance_stat.min() << "\n"
+             << "max:            " << distance_stat.max() << "\n"
+             << "median:         " << distance_stat.median() << "\n"
+             << "mean:           " << distance_stat.mean() << "\n"
+             << "Variance:       " << distance_stat.variance() << "\n"
+             << "StdDev:         " << distance_stat.stddev() << "\n"
+             << "Skewness:       " << distance_stat.skewness() << "\n";
     }
 
   private:
-    std::string_view                        _feature_file_pattern;
-    std::string_view                        _depth_image_pattern;
-    std::string_view                        _pose_file_pattern;
+    string_view                             _feature_file_pattern;
+    string_view                             _depth_image_pattern;
+    string_view                             _pose_file_pattern;
     sens_loc::camera_models::pinhole<float> _intrinsic;
     cv::Ptr<cv::BFMatcher>                  _matcher;
 
-    gsl::not_null<std::mutex*>         _distance_mutex;
-    gsl::not_null<std::vector<float>*> _global_distances;
+    not_null<mutex*>         _distance_mutex;
+    not_null<vector<float>*> _global_distances;
 };
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_precision_recall(std::string_view feature_file_pattern,
-                             int              start_idx,
-                             int              end_idx,
-                             std::string_view depth_image_pattern,
-                             std::string_view pose_file_pattern,
-                             std::string_view intrinsic_file,
-                             cv::NormTypes    matching_norm) {
+int analyze_precision_recall(string_view   feature_file_pattern,
+                             int           start_idx,
+                             int           end_idx,
+                             string_view   depth_image_pattern,
+                             string_view   pose_file_pattern,
+                             string_view   intrinsic_file,
+                             cv::NormTypes matching_norm) {
     Expects(start_idx < end_idx &&
             "Precision-Recall calculation requires at least two images");
 
     using visitor =
         statistic_visitor<prec_recall_analysis, required_data::keypoints |
                                                     required_data::descriptors>;
-    std::mutex         distance_mutex;
-    std::vector<float> global_distances;
+    mutex         distance_mutex;
+    vector<float> global_distances;
 
     auto analysis_v = visitor{feature_file_pattern,
                               feature_file_pattern,
@@ -236,8 +238,8 @@ int analyze_precision_recall(std::string_view feature_file_pattern,
                               pose_file_pattern,
                               intrinsic_file,
                               matching_norm,
-                              gsl::not_null{&distance_mutex},
-                              gsl::not_null{&global_distances}};
+                              not_null{&distance_mutex},
+                              not_null{&global_distances}};
 
     // Consecutive images are matched and analysed, therefore the first index
     // must be skipped.

@@ -141,6 +141,7 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
             feature_file_input_pattern, start_idx, end_idx, depth_image_path,
             pose_file_pattern, intrinsic_file, str_to_norm(norm_name));
 
-    UNREACHABLE("Expected to end program with subcommand processing");
+    UNREACHABLE("Expected to end program with "  // LCOV_EXCL_LINE
+                "subcommand processing");        // LCOV_EXCL_LINE
 }
 MAIN_TAIL
