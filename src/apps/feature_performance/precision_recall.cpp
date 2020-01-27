@@ -36,14 +36,16 @@ class prec_recall_analysis {
                          cv::NormTypes            matching_norm,
                          not_null<mutex*>         distance_mutex,
                          not_null<vector<float>*> global_distances,
-                         optional<string_view>    backproject_pattern) noexcept
+                         optional<string_view>    backproject_pattern,
+                         optional<string_view>    original_files) noexcept
         : _feature_file_pattern{feature_file_pattern}
         , _depth_image_pattern{depth_image_pattern}
         , _pose_file_pattern{pose_file_pattern}
         , _matcher{cv::BFMatcher::create(matching_norm, /*crosscheck=*/true)}
         , _distance_mutex{distance_mutex}
         , _global_distances{global_distances}
-        , _backproject_pattern{backproject_pattern} {
+        , _backproject_pattern{backproject_pattern}
+        , _original_files{original_files} {
         Expects(!_feature_file_pattern.empty());
         Expects(!_depth_image_pattern.empty());
         Expects(!_pose_file_pattern.empty());
@@ -150,7 +152,8 @@ class prec_recall_analysis {
         // == Calculate relative pose between the two frames.
         pose_t rel_pose = relative_pose(*previous_pose, *pose);
 
-        // == Transform matches from previous frame into this coordinate frame.
+        // == Transform matches from previous frame into this coordinate
+        // frame.
         pointcloud_t prev_in_this_frame = rel_pose * prev_points;
 
         // == Project the points back into the current image.
@@ -163,18 +166,20 @@ class prec_recall_analysis {
 
         if (_backproject_pattern) {
             // == Plot the keypoints in one image.
+            auto orig_img =
+                sens_loc::apps::load_file(fmt::format(*_original_files, idx));
             vector<KeyPoint> prev_in_this_kps = coords_to_keypoint(prev_in_img);
-            auto             cvt = math::convert<uchar>(*depth_image);
-            Mat              target;
-            cvtColor(cvt.data(), target, COLOR_GRAY2BGR);
+
+            Mat out_img;
+            cvtColor(orig_img->data(), out_img, cv::COLOR_GRAY2BGR);
             // Draw the keypoints detected in this image.
-            drawKeypoints(target, kps, target, Scalar(255, 0, 0),
+            drawKeypoints(out_img, kps, out_img, Scalar(255, 0, 0),
                           DrawMatchesFlags::DRAW_OVER_OUTIMG);
-            // Draw the keypoints detected in the previous image, backprojected
-            // into this image.
-            drawKeypoints(target, prev_in_this_kps, target, Scalar(0, 255, 0),
+            // Draw the keypoints detected in the previous image,
+            // backprojected into this image.
+            drawKeypoints(out_img, prev_in_this_kps, out_img, Scalar(0, 0, 255),
                           DrawMatchesFlags::DRAW_OVER_OUTIMG);
-            imwrite(fmt::format(*_backproject_pattern, idx), target);
+            imwrite(fmt::format(*_backproject_pattern, idx), out_img);
         }
 #if 0
         // == Calculate the distance of each match in 3D space
@@ -197,8 +202,8 @@ class prec_recall_analysis {
     void postprocess() noexcept {
         lock_guard guard{*_distance_mutex};
 
-        // Calculate the median of the distances by partial sorting until the
-        // middle element.
+        // Calculate the median of the distances by partial sorting until
+        // the middle element.
         auto median_it =
             _global_distances->begin() + _global_distances->size() / 2UL;
         nth_element(_global_distances->begin(), median_it,
@@ -231,6 +236,7 @@ class prec_recall_analysis {
     not_null<vector<float>*> _global_distances;
 
     optional<string_view> _backproject_pattern;
+    optional<string_view> _original_files;
 };
 }  // namespace
 
@@ -242,7 +248,8 @@ int analyze_precision_recall(string_view           feature_file_pattern,
                              string_view           pose_file_pattern,
                              string_view           intrinsic_file,
                              cv::NormTypes         matching_norm,
-                             optional<string_view> backproject_pattern) {
+                             optional<string_view> backproject_pattern,
+                             optional<string_view> original_files) {
     Expects(start_idx < end_idx &&
             "Precision-Recall calculation requires at least two images");
 
@@ -260,10 +267,11 @@ int analyze_precision_recall(string_view           feature_file_pattern,
                               matching_norm,
                               not_null{&distance_mutex},
                               not_null{&global_distances},
-                              backproject_pattern};
+                              backproject_pattern,
+                              original_files};
 
-    // Consecutive images are matched and analysed, therefore the first index
-    // must be skipped.
+    // Consecutive images are matched and analysed, therefore the first
+    // index must be skipped.
     auto f = parallel_visitation(start_idx + 1, end_idx, analysis_v);
     f.postprocess();
 

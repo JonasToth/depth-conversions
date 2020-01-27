@@ -88,12 +88,14 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
         "--match-output", match_output,
         "Provide a filename for drawing the matches onto an image.");
     optional<string> original_images;
-    cmd_matcher
-        ->add_option(
-            "--original-images", original_images,
-            "Provide the file pattern for the original image "
-            "the features were calculated on. Must be provided for plotting.")
-        ->needs(match_output_opt);
+    CLI::Option*     orig_imgs_opt =
+        cmd_matcher
+            ->add_option("--original-images", original_images,
+                         "Provide the file pattern for the original image "
+                         "the features were calculated on. Must be provided "
+                         "for plotting.")
+            ->needs(match_output_opt);
+    match_output_opt->needs(orig_imgs_opt);
 
 
     CLI::App* cmd_prec_rec = app.add_subcommand(
@@ -119,9 +121,18 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                           "Set the norm that shall be used as distance measure",
                           /*defaulted=*/true);
     optional<string> backproject_pattern;
-    cmd_prec_rec->add_option("--backprojection", backproject_pattern,
-                             "Provide a file-pattern to optionally print the "
-                             "backprojection for matched keypoints");
+    CLI::Option*     backproject_opt = cmd_prec_rec->add_option(
+        "--backprojection", backproject_pattern,
+        "Provide a file-pattern to optionally print the "
+        "backprojection for matched keypoints");
+    CLI::Option* orig_imgs =
+        cmd_prec_rec
+            ->add_option("--orig-images", original_images,
+                         "Provide the file pattern for the original image "
+                         "the features were calculated on. Must be provided "
+                         "for plotting.")
+            ->needs(backproject_opt);
+    backproject_opt->needs(orig_imgs);
 
     COLORED_APP_PARSE(app, argc, argv);
 
@@ -144,7 +155,7 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
         return analyze_precision_recall(
             feature_file_input_pattern, start_idx, end_idx, depth_image_path,
             pose_file_pattern, intrinsic_file, str_to_norm(norm_name),
-            backproject_pattern);
+            backproject_pattern, original_images);
 
     UNREACHABLE("Expected to end program with "  // LCOV_EXCL_LINE
                 "subcommand processing");        // LCOV_EXCL_LINE
