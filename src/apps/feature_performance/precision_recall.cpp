@@ -1,25 +1,22 @@
 #include "precision_recall.h"
 
-#include "gsl/gsl_assert"
-#include "sens_loc/analysis/distance.h"
-#include "sens_loc/math/coordinate.h"
-
-#include <Eigen/src/Geometry/Transform.h>
 #include <boost/histogram/ostream.hpp>
 #include <fstream>
 #include <gsl/gsl>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
+#include <sens_loc/analysis/distance.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/io/pose.h>
+#include <sens_loc/math/coordinate.h>
+#include <sens_loc/math/pointcloud.h>
 #include <util/batch_visitor.h>
 #include <util/io.h>
 #include <util/statistic_visitor.h>
 
 namespace {
-using pointcloud = Eigen::Matrix<float, 4, Eigen::Dynamic, Eigen::ColMajor>;
 
 class prec_recall_analysis {
   public:
@@ -61,6 +58,11 @@ class prec_recall_analysis {
         const int previous_idx = idx - 1;
 
         using namespace sens_loc;
+        using math::make_pointcloud;
+        using math::pointcloud_t;
+        using math::pointwise_distance;
+        using math::pose_t;
+        using math::relative_pose;
         using namespace sens_loc::apps;
         using namespace std;
         using namespace cv;
@@ -84,8 +86,8 @@ class prec_recall_analysis {
 
         const string previous_pose_path =
             fmt::format(_pose_file_pattern, previous_idx);
-        ifstream           previous_pose_file(previous_pose_path);
-        optional<Affine3f> previous_pose = io::load_pose(previous_pose_file);
+        ifstream         previous_pose_file(previous_pose_path);
+        optional<pose_t> previous_pose = io::load_pose(previous_pose_file);
         if (!previous_pose) {
             std::cerr << "No previous pose - " << previous_pose_path << "\n";
             return;
@@ -100,9 +102,9 @@ class prec_recall_analysis {
             return;
         }
 
-        const string       pose_path = fmt::format(_pose_file_pattern, idx);
-        ifstream           pose_file(pose_path);
-        optional<Affine3f> pose = io::load_pose(pose_file);
+        const string     pose_path = fmt::format(_pose_file_pattern, idx);
+        ifstream         pose_file(pose_path);
+        optional<pose_t> pose = io::load_pose(pose_file);
         if (!pose) {
             std::cerr << "No pose - " << pose_path << "\n";
             return;
@@ -118,16 +120,12 @@ class prec_recall_analysis {
         // Extract the pixels that are the center of the keypoint and use
         // their depth value to create the 3D point.
         // Trainpointcloud: Previous
-        pointcloud previous_points(4, matches.size());
-        Ensures(size_t(previous_points.cols()) == matches.size());
-        Ensures(previous_points.rows() == 4);
-        previous_points.row(3).fill(1.0F);
+        pointcloud_t previous_points =
+            make_pointcloud(gsl::narrow<unsigned int>(matches.size()));
 
         // Querypointcloud: this
-        pointcloud points(4, matches.size());
-        Ensures(size_t(points.cols()) == matches.size());
-        Ensures(points.rows() == 4);
-        points.row(3).fill(1.0F);
+        pointcloud_t points =
+            make_pointcloud(gsl::narrow<unsigned int>(matches.size()));
 
         size_t match_idx = 0;
         for (const DMatch& match : matches) {
@@ -154,16 +152,13 @@ class prec_recall_analysis {
         }
 
         // == Calculate relative pose between the two frames.
-        Affine3f relative_pose = previous_pose->inverse() * *pose;
+        pose_t rel_pose = relative_pose(*previous_pose, *pose);
 
         // == Transform matches from previous frame into this coordinate frame.
-        pointcloud prev_in_this_frame = relative_pose * previous_points;
+        pointcloud_t prev_in_this_frame = rel_pose * previous_points;
 
         // == Calculate the distance of each match.
-        pointcloud  diff      = points - prev_in_this_frame;
-        RowVectorXf distances = diff.colwise().norm();
-
-        Ensures(distances.rows() == 1);
+        RowVectorXf  distances = pointwise_distance(points, prev_in_this_frame);
         Ensures(size_t(distances.cols()) == matches.size());
 
 #if 0
@@ -184,7 +179,7 @@ class prec_recall_analysis {
         std::lock_guard guard{*_distance_mutex};
 
         // Calculate the median of the distances by partial sorting until the
-        // half.
+        // middle element.
         auto median_it =
             _global_distances->begin() + _global_distances->size() / 2UL;
         std::nth_element(_global_distances->begin(), median_it,

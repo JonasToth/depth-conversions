@@ -25,6 +25,7 @@ list(APPEND sens_loc_headers
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/derivatives.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/eigen_types.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/image.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/pointcloud.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/scaling.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/triangles.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/preprocess/filter.h"
