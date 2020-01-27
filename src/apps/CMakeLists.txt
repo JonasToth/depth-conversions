@@ -70,5 +70,4 @@ target_sources(feature_performance
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/matching.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/precision_recall.h"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/precision_recall.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/minimal_descriptor_distance.h"
     )

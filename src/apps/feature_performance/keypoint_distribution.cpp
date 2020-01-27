@@ -1,14 +1,5 @@
 #include "keypoint_distribution.h"
 
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/framework/accumulator_set.hpp>
-#include <boost/accumulators/statistics/max.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/median.hpp>
-#include <boost/accumulators/statistics/min.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/histogram.hpp>
 #include <boost/histogram/ostream.hpp>
 #include <fstream>
 #include <gsl/gsl>
@@ -17,6 +8,7 @@
 #include <opencv2/core/types.hpp>
 #include <optional>
 #include <sens_loc/analysis/distance.h>
+#include <sens_loc/analysis/keypoints.h>
 #include <sstream>
 #include <util/batch_visitor.h>
 #include <util/statistic_visitor.h>
@@ -122,76 +114,46 @@ class keypoint_distribution {
         }
     }
 
-    auto postprocess(int image_width, int image_height) {
+    auto postprocess(unsigned int image_width, unsigned int image_height) {
         Expects(!global_keypoints->empty());
         Expects(!global_distances->empty());
 
-        using namespace boost::histogram;
-        // Number of bins in one direction for 2D histogram.
-        auto location_bins  = 200;
-        auto location_histo = make_histogram(
-            axis::regular(location_bins, 0.0F, 1.0F, "normalized width"),
-            axis::regular(location_bins, 0.0F, 1.0F, "normalized height"));
+        sens_loc::analysis::keypoints kp{image_width, image_height};
 
-        using namespace boost::accumulators;
-        accumulator_set<float,
-                        stats<tag::count, tag::min, tag::max, tag::median,
-                              tag::mean, tag::variance(lazy)>>
-            response_stat;
-        accumulator_set<float,
-                        stats<tag::count, tag::min, tag::max, tag::median,
-                              tag::mean, tag::variance(lazy)>>
-            size_stat;
+        const auto location_bins = 200U;
+        kp.configure_distribution(location_bins);
+        kp.configure_distribution("normalized width", "normalized height");
 
-        std::for_each(global_keypoints->begin(), global_keypoints->end(),
-                      [&](const cv::KeyPoint& kp) {
-                          response_stat(kp.response);
-                          size_stat(kp.size);
-                          location_histo(
-                              kp.pt.x / static_cast<float>(image_width),
-                              kp.pt.y / static_cast<float>(image_height));
-                      });
+        const auto response_bins = 50U;
+        kp.configure_response(response_bins, "detector response");
 
-        auto response_bins  = 50;
-        auto response_range = max(response_stat) - min(response_stat);
-        auto response_histo = make_histogram(axis::regular(
-            response_bins, min(response_stat) - response_range / response_bins,
-            max(response_stat) + response_range / response_bins, "reponse"));
-
-        auto size_bins  = 50;
-        auto size_histo = make_histogram(
-            axis::regular(size_bins, 0.0F, max(size_stat) + 0.01F, "size"));
-
-        std::for_each(global_keypoints->begin(), global_keypoints->end(),
-                      [&response_histo, &size_histo](const cv::KeyPoint& kp) {
-                          response_histo(kp.response);
-                          size_histo(kp.size);
-                      });
-
+        const auto size_bins = 50U;
+        kp.configure_size(size_bins, "keypoint size");
+        kp.analyze(*global_keypoints);
 
         const auto                   dist_bins = 50UL;
         sens_loc::analysis::distance distance_stat{*global_distances, dist_bins,
                                                    "minimal keypoint distance"};
 
         std::cout << "==== Response\n"
-                  << "count:  " << count(response_stat) << "\n"
-                  << "min:    " << min(response_stat) << "\n"
-                  << "max:    " << max(response_stat) << "\n"
-                  << "median: " << median(response_stat) << "\n"
-                  << "mean:   " << mean(response_stat) << "\n"
-                  << "var:    " << variance(response_stat) << "\n"
-                  << "stddev: " << std::sqrt(variance(response_stat)) << "\n"
-                  << response_histo << "\n"
+                  << "count:  " << kp.response().count << "\n"
+                  << "min:    " << kp.response().min << "\n"
+                  << "max:    " << kp.response().max << "\n"
+                  << "median: " << kp.response().median << "\n"
+                  << "mean:   " << kp.response().mean << "\n"
+                  << "var:    " << kp.response().variance << "\n"
+                  << "stddev: " << kp.response().stddev << "\n"
+                  << kp.response_histo() << "\n"
 
                   << "==== Size\n"
-                  << "count:  " << count(size_stat) << "\n"
-                  << "min:    " << min(size_stat) << "\n"
-                  << "max:    " << max(size_stat) << "\n"
-                  << "median: " << median(size_stat) << "\n"
-                  << "mean:   " << mean(size_stat) << "\n"
-                  << "var:    " << variance(size_stat) << "\n"
-                  << "stddev: " << std::sqrt(variance(size_stat)) << "\n"
-                  << size_histo << "\n"
+                  << "count:  " << kp.size().count << "\n"
+                  << "min:    " << kp.size().min << "\n"
+                  << "max:    " << kp.size().max << "\n"
+                  << "median: " << kp.size().median << "\n"
+                  << "mean:   " << kp.size().mean << "\n"
+                  << "var:    " << kp.size().variance << "\n"
+                  << "stddev: " << kp.size().stddev << "\n"
+                  << kp.size_histo() << "\n"
 
                   << "=== Distance\n"
                   << "count:  " << distance_stat.count() << "\n"
@@ -203,7 +165,7 @@ class keypoint_distribution {
                   << distance_stat.histogram() << "\n";
 
         std::ofstream gnuplot_data{"location_histo.data"};
-        gnuplot_data << histogram_to_gnuplot(location_histo) << std::endl;
+        gnuplot_data << histogram_to_gnuplot(kp.distribution()) << std::endl;
     }
 
   private:
@@ -221,8 +183,8 @@ namespace sens_loc::apps {
 int analyze_keypoint_distribution(std::string_view input_pattern,
                                   int              start_idx,
                                   int              end_idx,
-                                  int              image_width,
-                                  int              image_height) {
+                                  unsigned int     image_width,
+                                  unsigned int     image_height) {
     using visitor =
         statistic_visitor<keypoint_distribution, required_data::keypoints>;
 

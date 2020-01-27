@@ -48,14 +48,14 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     CLI::App* cmd_keypoint_dist = app.add_subcommand(
         "keypoint-distribution",
         "Determine the keypoint distribution over all images");
-    int image_width;
+    unsigned int image_width;
     cmd_keypoint_dist
         ->add_option("--image-width", image_width,
                      "The width of the original input images in pixel (check "
                      "the intrinsic!")
         ->required()
         ->check(CLI::Range(65'535));
-    int image_height;
+    unsigned int image_height;
     cmd_keypoint_dist
         ->add_option("--image-height", image_height,
                      "The height of the original input images in pixel (check "

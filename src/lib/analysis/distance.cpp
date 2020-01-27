@@ -11,9 +11,12 @@
 namespace sens_loc::analysis {
 
 void distance::analyze(gsl::span<const float> distances, bool histo) noexcept {
+    _histo.reset();
+    _s.reset();
+
     Expects(!distances.empty());
-    _data  = distances;
-    _count = _data.size();
+    _data    = distances;
+    _s.count = _data.size();
 
     using namespace boost::accumulators;
     accumulator_set<float, stats<tag::min, tag::max, tag::median, tag::mean,
@@ -22,23 +25,24 @@ void distance::analyze(gsl::span<const float> distances, bool histo) noexcept {
     std::for_each(std::begin(_data), std::end(_data),
                   [&](auto e) noexcept -> void { stat(e); });
 
-    _min      = boost::accumulators::min(stat);
-    _max      = boost::accumulators::max(stat);
-    _median   = boost::accumulators::median(stat);
-    _mean     = boost::accumulators::mean(stat);
-    _variance = boost::accumulators::variance(stat);
-    _stddev   = std::sqrt(_variance);
-    _skewness = boost::accumulators::skewness(stat);
+    // If the namepsace is not provided, the call is ambigous.
+    _s.min      = boost::accumulators::min(stat);
+    _s.max      = boost::accumulators::max(stat);
+    _s.median   = boost::accumulators::median(stat);
+    _s.mean     = boost::accumulators::mean(stat);
+    _s.variance = boost::accumulators::variance(stat);
+    _s.stddev   = std::sqrt(_s.variance);
+    _s.skewness = boost::accumulators::skewness(stat);
 
     if (!histo)
         return;
 
     using namespace boost::histogram;
-    const float histo_min = _min - 5.F * std::numeric_limits<float>::epsilon();
-    const float histo_max = _max + 5.F * std::numeric_limits<float>::epsilon();
+    const float h_min = _s.min - 5.F * std::numeric_limits<float>::epsilon();
+    const float h_max = _s.max + 5.F * std::numeric_limits<float>::epsilon();
 
     _histo = make_histogram(
-        axis::regular<float>(_bin_count, histo_min, histo_max, _axis_title));
+        axis::regular<float>(_bin_count, h_min, h_max, _axis_title));
     _histo.fill(_data);
 }
 

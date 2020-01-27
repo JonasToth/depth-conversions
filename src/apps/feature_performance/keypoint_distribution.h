@@ -8,8 +8,8 @@ namespace sens_loc::apps {
 int analyze_keypoint_distribution(std::string_view input_pattern,
                                   int              start_idx,
                                   int              end_idx,
-                                  int              image_width,
-                                  int              image_height);
+                                  unsigned int     image_width,
+                                  unsigned int     image_height);
 }  // namespace sens_loc::apps
 
 #endif /* end of include guard: KEYPOINT_DISTRIBUTION_H_K2G0XHSJ */
