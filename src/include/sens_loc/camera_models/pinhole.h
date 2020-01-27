@@ -148,8 +148,13 @@ pinhole<Real>::image_to_sphere(const math::image_coord<Real>& p) const
     const double y = p.y();
     const double z = 1.;
 
-    const double             factor = 1. / (1. + x * x + y * y);
-    math::sphere_coord<Real> res(factor * x, factor * y, factor * z);
+    const double cse    = 1. + x * x + y * y;
+    const double factor = 1. / std::sqrt(cse);
+
+    using gsl::narrow_cast;
+    math::sphere_coord<Real> res(narrow_cast<Real>(factor * x),
+                                 narrow_cast<Real>(factor * y),
+                                 narrow_cast<Real>(factor * z));
 
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     Ensures(std::abs(res.norm() - 1.) < 0.000001);
