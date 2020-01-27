@@ -41,8 +41,7 @@ void distance::analyze(gsl::span<const float> distances, bool histo) noexcept {
     const float h_min = _s.min - 5.F * std::numeric_limits<float>::epsilon();
     const float h_max = _s.max + 5.F * std::numeric_limits<float>::epsilon();
 
-    _histo = make_histogram(
-        axis::regular<float>(_bin_count, h_min, h_max, _axis_title));
+    _histo = make_histogram(axis_t(_bin_count, h_min, h_max, _axis_title));
     _histo.fill(_data);
 }
 

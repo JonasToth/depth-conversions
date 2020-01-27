@@ -47,22 +47,22 @@ void keypoints::analyze(gsl::span<const cv::KeyPoint> points,
 
     if (distribution)
         _distribution = make_histogram(
-            axis::regular(_dist_width_bins, 0.0F, 1.0F, _dist_w_title),
-            axis::regular(_dist_height_bins, 0.0F, 1.0F, _dist_h_title));
+            axis_t{_dist_width_bins, 0.0F, 1.0F, _dist_w_title},
+            axis_t{_dist_height_bins, 0.0F, 1.0F, _dist_h_title});
 
     const float delta = 5.0F * std::numeric_limits<float>::epsilon();
     if (size && _size_histo_enabled) {
         const float s_min = min(size_stat) - delta;
         const float s_max = max(size_stat) + delta;
-        _size_histo       = make_histogram(
-            axis::regular{_size_bins, s_min, s_max, _size_title});
+        _size_histo =
+            make_histogram(axis_t{_size_bins, s_min, s_max, _size_title});
     }
 
     if (response && _response_histo_enabled) {
         const float r_min = min(response_stat) - delta;
         const float r_max = max(response_stat) + delta;
         _response_histo   = make_histogram(
-            axis::regular{_response_bins, r_min, r_max, _response_title});
+            axis_t{_response_bins, r_min, r_max, _response_title});
     }
 
     std::for_each(points.begin(), points.end(), [&](const cv::KeyPoint& kp) {

@@ -11,31 +11,14 @@ namespace sens_loc::analysis {
 /// Analyze the distribution and characteristics of detected keypoints.
 class keypoints {
   public:
+    /// Use a regular grid with no transformation, no overflow and an axis
+    /// title.
+    using axis_t = distance::axis_t;
     /// Histogram type for the 2D distribution of keypoints in the dataset.
-    using distribution_histo_t = decltype(boost::histogram::make_histogram(
-        boost::histogram::axis::regular<
-            float,  // 'float' values are tracked with the histogram.
-            boost::histogram::axis::transform::id,  // do no transformation
-                                                    // before insertion
-            std::string,  // a string is the metadata for the axis (=title)
-            boost::histogram::axis::option::none_t>{},  // no overflow/underflow
-                                                        // by construction.
-        boost::histogram::axis::regular<
-            float,
-            boost::histogram::axis::transform::id,
-            std::string,
-            boost::histogram::axis::option::none_t>{}));
-
+    using distribution_histo_t =
+        decltype(boost::histogram::make_histogram(axis_t{}, axis_t{}));
     /// Histogram type for 'size' and 'response' of the keypoints.
-    using histo_t = decltype(boost::histogram::make_histogram(
-        boost::histogram::axis::regular<
-            float,  // 'float' values are tracked with the histogram.
-            boost::histogram::axis::transform::id,  // do no transformation
-                                                    // before insertion
-            std::string,  // a string is the metadata for the axis (=title)
-            boost::histogram::axis::option::none_t>{}));  // no
-                                                          // overflow/underflow
-                                                          // by construction.
+    using histo_t = decltype(boost::histogram::make_histogram(axis_t{}));
 
     keypoints() = default;
     keypoints(unsigned int img_width, unsigned int img_height)

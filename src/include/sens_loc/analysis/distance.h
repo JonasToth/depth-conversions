@@ -41,15 +41,17 @@ struct statistic {
 /// quantity though.
 class distance {
   public:
-    using histo_t = decltype(boost::histogram::make_histogram(
-        boost::histogram::axis::regular<
-            float,  // 'float' values are tracked with the histogram.
-            boost::histogram::axis::transform::id,  // do no transformation
-                                                    // before insertion
-            std::string,  // a string is the metadata for the axis (=title)
-            boost::histogram::axis::option::none_t>{}));  // no
-                                                          // overflow/underflow
-                                                          // by construction.
+    using axis_t = boost::histogram::axis::regular<
+        // 'float' values are tracked with the histogram.
+        float,
+        // do no transformation before insertion
+        boost::histogram::axis::transform::id,
+        // a string is the metadata for the axis (=title)
+        std::string,
+        // no overflow/underflow by construction.
+        boost::histogram::axis::option::none_t>;
+    using histo_t = decltype(boost::histogram::make_histogram(axis_t{}));
+
 
     distance() = default;
     distance(gsl::span<const float> distances,
