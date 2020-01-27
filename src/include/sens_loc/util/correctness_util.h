@@ -1,12 +1,8 @@
 #ifndef CORRECTNESS_UTIL_H_BJPG9UMQ
 #define CORRECTNESS_UTIL_H_BJPG9UMQ
 
-#include <exception>
-#include <gsl/gsl>
-#include <iostream>
 #include <opencv2/core.hpp>
 #include <sens_loc/math/image.h>
-#include <sens_loc/util/console.h>
 #include <string_view>
 
 namespace sens_loc {
@@ -35,15 +31,9 @@ namespace util {
 /// \note \c unreachable is inspired by \c llvm_unreachable
 /// \note use  `// LCOV_EXCL_LINE` to exclude UNREACHABLE from the coverage
 /// reports
-[[noreturn]] inline void unreachable(const std::string_view message = {},
-                                     const std::string_view file    = {},
-                                     int                    line    = -1) {
-    std::cerr << err{} << file << ":" << line
-              << ": Program ran into an unreachable!\n"
-              << info{} << message << "\n"
-              << "Terminating!\n";
-    std::exit(1);
-}
+[[noreturn]] void unreachable(const std::string_view message = {},
+                              const std::string_view file    = {},
+                              const int              line    = -1) noexcept;
 
 /// Calculate the average pixel error of the two images.
 /// This function uses the L2-Norm as error measure and divides it by the
@@ -54,23 +44,13 @@ namespace util {
 ///
 /// \returns
 /// \f[\frac{\lVert i_1 - i_2 \rVert_2}{\#Pixel \cdot \#Channels}\f]
-inline double average_pixel_error(const cv::Mat& i1,
-                                  const cv::Mat& i2) noexcept {
-    Expects(i1.cols == i2.cols);
-    Expects(i1.rows == i2.rows);
-    Expects(i1.type() == i2.type());
-    Expects(i1.channels() == i2.channels());
+double average_pixel_error(const cv::Mat& i1, const cv::Mat& i2) noexcept;
 
-    const size_t n_pixels = i1.cols * i1.rows * i1.channels();
-    const double result   = cv::norm(i1, i2, cv::NORM_L2);
-
-    Ensures(result >= 0.);
-    return result / double(n_pixels);
-}
 template <typename Image>
 double average_pixel_error(const Image& i1, const Image& i2) noexcept {
     return average_pixel_error(i1.data(), i2.data());
 }
+
 }  // namespace util
 }  // namespace sens_loc
 

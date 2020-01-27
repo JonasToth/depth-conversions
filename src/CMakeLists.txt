@@ -1,7 +1,7 @@
 find_package(Threads REQUIRED)
 
-add_library(sens_loc INTERFACE)
-target_sources(sens_loc INTERFACE
+add_library(sens_loc)
+list(APPEND sens_loc_headers 
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/version.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/pinhole.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/camera_models/equirectangular.h"
@@ -15,6 +15,7 @@ target_sources(sens_loc INTERFACE
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/conversion/util.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/image.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/intrinsics.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/pose.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/angle_conversion.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/constants.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/coordinate.h"
@@ -28,14 +29,20 @@ target_sources(sens_loc INTERFACE
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/console.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/correctness_util.h"
     )
+target_sources(sens_loc PUBLIC ${sens_loc_headers})
+target_sources(sens_loc PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/lib/io/pose.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/lib/util/correctness_util.cpp"
+    )
+
 add_library(sens_loc::sens_loc ALIAS sens_loc)
 target_include_directories(sens_loc
-    INTERFACE
+    PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_LIST_DIR}/include>
     $<INSTALL_INTERFACE:include>
     )
 target_link_libraries(sens_loc
-    INTERFACE
+    PUBLIC
     GSL
     rang
     Threads::Threads
