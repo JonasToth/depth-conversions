@@ -65,14 +65,16 @@ void keypoints::analyze(gsl::span<const cv::KeyPoint> points,
             axis_t{_response_bins, r_min, r_max, _response_title});
     }
 
-    std::for_each(points.begin(), points.end(), [&](const cv::KeyPoint& kp) {
-        if (distribution)
-            _distribution(kp.pt.x / static_cast<float>(_img_width),
-                          kp.pt.y / static_cast<float>(_img_height));
-        if (response && _response_histo_enabled)
-            _response_histo(kp.response);
-        if (size && _size_histo_enabled)
-            _size_histo(kp.size);
-    });
+    std::for_each(points.begin(), points.end(),
+                  [&](const cv::KeyPoint& kp) noexcept -> void {
+                      if (distribution)
+                          _distribution(
+                              kp.pt.x / static_cast<float>(_img_width),
+                              kp.pt.y / static_cast<float>(_img_height));
+                      if (response && _response_histo_enabled)
+                          _response_histo(kp.response);
+                      if (size && _size_histo_enabled)
+                          _size_histo(kp.size);
+                  });
 }
 }  // namespace sens_loc::analysis

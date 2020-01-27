@@ -31,9 +31,9 @@ namespace util {
 /// \note \c unreachable is inspired by \c llvm_unreachable
 /// \note use  `// LCOV_EXCL_LINE` to exclude UNREACHABLE from the coverage
 /// reports
-[[noreturn]] void unreachable(const std::string_view message = {},
-                              const std::string_view file    = {},
-                              const int              line    = -1) noexcept;
+[[noreturn]] void unreachable(std::string_view message = {},
+                              std::string_view file    = {},
+                              int              line    = -1) noexcept;
 
 /// Calculate the average pixel error of the two images.
 /// This function uses the L2-Norm as error measure and divides it by the

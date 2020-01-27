@@ -59,8 +59,7 @@ class distance {
              std::string            title     = "distance")
         : _data{distances}
         , _bin_count{bin_count}
-        , _axis_title{std::move(title)}
-        , _histo{} {
+        , _axis_title{std::move(title)} {
         analyze(_data);
     }
 
