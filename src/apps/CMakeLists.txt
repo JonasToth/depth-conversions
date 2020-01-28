@@ -71,8 +71,3 @@ target_sources(feature_performance
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/precision_recall.h"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/precision_recall.cpp"
     )
-# Bug#33 is mitigated by this.
-target_compile_definitions(feature_performance
-    PRIVATE
-    "EIGEN_DONT_VECTORIZE"
-    )
