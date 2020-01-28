@@ -63,15 +63,6 @@ class min_descriptor_distance {
         : process_mutex{m}
         , global_min_distances{global_data} {}
 
-    ~min_descriptor_distance()                                        = default;
-    min_descriptor_distance(const min_descriptor_distance<NT>& other) = default;
-    min_descriptor_distance(min_descriptor_distance<NT>&& other)      = default;
-
-    min_descriptor_distance&
-    operator=(const min_descriptor_distance<NT>& other) = default;
-    min_descriptor_distance&
-    operator=(min_descriptor_distance<NT>&& other) = default;
-
     void
     operator()(int /*idx*/,
                std::optional<std::vector<cv::KeyPoint>> keypoints,  // NOLINT
