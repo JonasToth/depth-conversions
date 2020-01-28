@@ -208,6 +208,23 @@ class coordinate
     }
 };
 
+template <typename Real>
+coordinate<Real, frame::camera>
+operator*(Real factor, const coordinate<Real, frame::camera>& pt) noexcept {
+    static_assert(std::is_floating_point_v<Real>,
+                  "Real must be a floating point type for scaling operations!");
+    return {factor * pt.X(), factor + pt.Y(), factor * pt.Z()};
+}
+
+/// Scaling spherical coordinates results in camera coordinates.
+template <typename Real>
+coordinate<Real, frame::camera>
+operator*(Real factor, const coordinate<Real, frame::sphere>& pt) noexcept {
+    static_assert(std::is_floating_point_v<Real>,
+                  "Real must be a floating point type for scaling operations!");
+    return {factor * pt.Xs(), factor * pt.Ys(), factor * pt.Zs()};
+}
+
 template <typename Real = int>
 using pixel_coord = coordinate<Real, frame::pixel>;
 template <typename Real = float>

@@ -80,6 +80,7 @@ class prec_recall_analysis {
         // == Load all data from the previous index.
         const FileStorage previous_feature_file =
             open_feature_file(_feature_file_pattern, previous_idx);
+
         vector<KeyPoint> previous_keypoints =
             load_keypoints(previous_feature_file);
         Mat previous_descriptors = load_descriptors(previous_feature_file);
@@ -137,16 +138,12 @@ class prec_recall_analysis {
 
         Expects(kps.size() == prev_kps.size());
         for (unsigned int match_idx = 0; match_idx < kps.size(); ++match_idx) {
+            // Retrieve the depth value from the input depth-image for the
+            // previous index.
             auto t_kp = prev_kps[match_idx];
             auto t_px = math::pixel_coord<float>{t_kp.pt.x, t_kp.pt.y};
-            auto t_d  = float(previous_depth_image->at(t_px));
-
-            // Make coordinate homogeneous in camera the camera coordinates
-            // of the previous camera.
-            Vector4f cam_coords = t_d * prev_points.col(match_idx);
-            cam_coords(3)       = 1.0F;
-
-            prev_points.col(match_idx) = cam_coords;
+            auto t_d  = narrow_cast<float>(previous_depth_image->at(t_px));
+            prev_points[match_idx] = t_d * prev_points[match_idx];
         }
 
         // == Calculate relative pose between the two frames.
@@ -194,8 +191,8 @@ class prec_recall_analysis {
 
         {
             lock_guard guard{*_distance_mutex};
-            for (int i = 0; i < distances.cols(); ++i)
-                _global_distances->emplace_back(distances(i));
+            _global_distances->insert(_global_distances->end(),
+                                      distances.begin(), distances.end());
         }
     }
 

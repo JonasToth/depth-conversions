@@ -93,6 +93,13 @@ class pinhole {
     [[nodiscard]] math::sphere_coord<Real>
     image_to_sphere(const math::image_coord<Real>& p) const noexcept;
 
+    /// Project points in camera coordinates to pixel coordinates.
+    /// \note if the point can not be projected (\c p.z() == 0) the pixel
+    /// coordinate {-1, -1} is returned.
+    /// \sa pinhole::project_to_sphere
+    [[nodiscard]] math::pixel_coord<Real>
+    camera_to_pixel(const math::camera_coord<Real>& p) const noexcept;
+
   private:
     int  _w  = 0;    ///< width of the image
     int  _h  = 0;    ///< height of the image
@@ -160,6 +167,34 @@ pinhole<Real>::image_to_sphere(const math::image_coord<Real>& p) const
     Ensures(std::abs(res.norm() - 1.) < 0.000001);
 
     return res;
+}
+template <typename Real>
+math::pixel_coord<Real>
+pinhole<Real>::camera_to_pixel(const math::camera_coord<Real>& p) const
+    noexcept {
+    static_assert(std::is_arithmetic_v<Real>);
+    Expects(_fx > 0.);
+    Expects(_fy > 0.);
+    Expects(_cx > 0.);
+    Expects(_cy > 0.);
+    Expects(p1 == 0.);
+    Expects(p2 == 0.);
+    Expects(k1 == 0.);
+    Expects(k2 == 0.);
+    Expects(k3 == 0.);
+
+    if (p.Z() == 0.0F)
+        return {Real(-1), Real(-1)};
+
+    const math::image_coord<Real> i{p.X() / p.Z(), p.Y() / p.Z()};
+    const Real                    u{fx() * i.x() + cx() * i.x()};
+    const Real                    v{fy() * i.y() + cy() * i.y()};
+
+    if (u < 0.0F || u > gsl::narrow_cast<Real>(w()) || v < 0.0F ||
+        v > gsl::narrow_cast<Real>(h()))
+        return {Real(-1), Real(-1)};
+
+    return {u, v};
 }
 }  // namespace camera_models
 }  // namespace sens_loc
