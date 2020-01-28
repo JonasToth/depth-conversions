@@ -30,6 +30,7 @@ TEST_CASE("Loading Pose") {
         CHECK(p->matrix()(0, 3) == Approx(-0.013973F));
         CHECK(p->matrix()(1, 3) == Approx(-0.006388F));
         CHECK(p->matrix()(2, 3) == Approx(+0.102325F));
+        CHECK(p->matrix()(3, 3) == Approx(+1.0F));
     }
 
     SUBCASE("Not enough rows") {
