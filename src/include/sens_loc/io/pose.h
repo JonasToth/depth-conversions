@@ -1,7 +1,7 @@
 #ifndef POSE_H_ZQQXTH63
 #define POSE_H_ZQQXTH63
 
-#include <Eigen/Geometry>
+#include <sens_loc/math/pointcloud.h>
 #include <istream>
 #include <optional>
 
@@ -19,7 +19,7 @@ namespace sens_loc::io {
 /// \param file_name path to the file to read from.
 /// \returns an matrix usable for affine transformation on success, on failure
 /// std::nullopt
-std::optional<Eigen::Affine3f> load_pose(std::istream& in) noexcept;
+std::optional<math::pose_t> load_pose(std::istream& in) noexcept;
 
 }  // namespace sens_loc::io
 

@@ -1,11 +1,10 @@
-#include "sens_loc/io/pose.h"
-
 #include <iostream>
+#include <sens_loc/io/pose.h>
 #include <sstream>
 #include <string>
 
 namespace sens_loc::io {
-std::optional<Eigen::Affine3f> load_pose(std::istream& in) noexcept {
+std::optional<math::pose_t> load_pose(std::istream& in) noexcept {
     using std::ios_base;
     using std::nullopt;
     using std::string;
@@ -14,9 +13,7 @@ std::optional<Eigen::Affine3f> load_pose(std::istream& in) noexcept {
     if (!in.good())
         return nullopt;
 
-    Eigen::Matrix4f p;
-    p.fill(0.0F);
-    p(3, 3) = 1.0F;
+    Eigen::Matrix4f p = Eigen::Matrix4f::Identity();
 
     int line_nbr = 0;
     for (string line; getline(in, line) && line_nbr < 3; ++line_nbr) {
@@ -35,11 +32,12 @@ std::optional<Eigen::Affine3f> load_pose(std::istream& in) noexcept {
     // The affine transformation is not only a rotation and translation, but
     // includes shearing. This is not allowed for a pose!
     // Note: arguments are: 'block(startRow, startCol, blockRows, blockCols)'
-    if (std::abs(std::abs(p.block<3, 3>(0, 0).determinant()) - 1.0F) > 0.1F) {
+    if (std::abs(std::abs(p.block<3, 3>(0, 0).determinant()) - 1.0F) >
+        0.0001F) {
         std::cerr << "Bad Rotation matrix\n";
         return nullopt;
     }
 
-    return {Eigen::Affine3f(p)};
+    return p;
 }
 }  // namespace sens_loc::io

@@ -75,7 +75,6 @@ class prec_recall_analysis {
         using namespace sens_loc::apps;
         using namespace std;
         using namespace cv;
-        using namespace Eigen;
 
         // == Load all data from the previous index.
         const FileStorage previous_feature_file =
@@ -157,7 +156,8 @@ class prec_recall_analysis {
         imagepoints_t prev_in_img =
             project_to_image(_intrinsic, prev_in_this_frame);
 
-        // == Calculate the distance between the keypoints backprojected
+        // == Calculate the distance between the previous keypoints
+        // backprojected in the current image and the keypoints in this image.
         imagepoints_t img_kps   = keypoint_to_coords(kps);
         auto          distances = pointwise_distance(img_kps, prev_in_img);
 
@@ -178,16 +178,6 @@ class prec_recall_analysis {
                           DrawMatchesFlags::DRAW_OVER_OUTIMG);
             imwrite(fmt::format(*_backproject_pattern, idx), out_img);
         }
-#if 0
-        // == Calculate the distance of each match in 3D space
-        RowVectorXf distances = pointwise_distance(points, prev_in_this_frame);
-        Ensures(size_t(distances.cols()) == matches.size());
-
-        RowVectorXf::Index min_row;
-        RowVectorXf::Index min_col;
-        cout << "Min: " << distances.minCoeff(&min_row, &min_col)
-                  << "  at pixel " << (*keypoints)[min_col].pt << "\n";
-#endif
 
         {
             lock_guard guard{*_distance_mutex};

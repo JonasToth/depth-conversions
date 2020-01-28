@@ -1,7 +1,6 @@
 #ifndef DEPTH_TO_TRIPLE_H_Y021ENVZ
 #define DEPTH_TO_TRIPLE_H_Y021ENVZ
 
-#include <Eigen/Dense>
 #include <cmath>
 #include <iostream>
 #include <limits>

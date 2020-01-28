@@ -11,7 +11,7 @@ TEST_CASE("Loading Pose") {
     SUBCASE("Nonexisting File") {
         ifstream unopened_file;
         unopened_file.setstate(std::ios_base::failbit);
-        optional<Eigen::Affine3f> p = io::load_pose(unopened_file);
+        optional<Eigen::Matrix4f> p = io::load_pose(unopened_file);
         REQUIRE(!p);
     }
 
@@ -21,7 +21,7 @@ TEST_CASE("Loading Pose") {
                            "0.057711 -0.001087 0.998333 0.102325";
         istringstream fake_file{intrinsic};
 
-        optional<Eigen::Affine3f> p = io::load_pose(fake_file);
+        optional<Eigen::Matrix4f> p = io::load_pose(fake_file);
         REQUIRE(p);
         CHECK(p->matrix()(0, 0) == Approx(+0.998332F));
         CHECK(p->matrix()(1, 1) == Approx(+0.999998F));

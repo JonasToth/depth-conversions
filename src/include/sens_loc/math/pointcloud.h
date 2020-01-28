@@ -2,7 +2,6 @@
 #define POINTCLOUD_H_8O5EBVHZ
 
 #include <Eigen/Core>
-#include <Eigen/Geometry>
 #include <algorithm>
 #include <gsl/gsl>
 #include <sens_loc/math/coordinate.h>
@@ -41,7 +40,7 @@ std::vector<float> pointwise_distance(const points& c0,
 /// A pose is an affine transformation in 3 dimensions. Internally this is
 /// processed with homogeneous coordinates.
 /// \sa pointcloud_t
-using pose_t = Eigen::Affine3f;
+using pose_t = Eigen::Matrix4f;
 
 /// Calculate the relative pose to get from \c from to \c to.
 ///
@@ -61,7 +60,7 @@ inline pointcloud_t operator*(const pose_t&       p,
     result.reserve(points.size());
 
     for (const auto& pt : points) {
-        Eigen::Vector3f tr = p * Eigen::Vector3f{pt.X(), pt.Y(), pt.Z()};
+        Eigen::Vector4f tr = p * Eigen::Vector4f{pt.X(), pt.Y(), pt.Z(), 1.0F};
         result.emplace_back(tr.x(), tr.y(), tr.z());
     }
     return result;

@@ -1,8 +1,6 @@
 #ifndef PRECISION_RECALL_H_G2FJDYVV
 #define PRECISION_RECALL_H_G2FJDYVV
 
-#include <Eigen/Core>
-#include <Eigen/Geometry>
 #include <opencv2/core/base.hpp>
 #include <optional>
 #include <string_view>
