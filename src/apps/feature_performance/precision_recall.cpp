@@ -22,7 +22,9 @@
 #include <util/statistic_visitor.h>
 
 using namespace std;
+using namespace sens_loc;
 using namespace gsl;
+using namespace cv;
 
 namespace {
 
@@ -32,7 +34,7 @@ class prec_recall_analysis {
                          string_view              depth_image_pattern,
                          string_view              pose_file_pattern,
                          string_view              intrinsic_file,
-                         cv::NormTypes            matching_norm,
+                         NormTypes                matching_norm,
                          not_null<mutex*>         distance_mutex,
                          not_null<vector<float>*> global_distances,
                          optional<string_view>    backproject_pattern,
@@ -52,15 +54,16 @@ class prec_recall_analysis {
 
         ifstream intrinsic{string(intrinsic_file)};
 
-        auto maybe_intrinsic = sens_loc::io::camera<
-            float, sens_loc::camera_models::pinhole>::load_intrinsic(intrinsic);
+        auto maybe_intrinsic =
+            io::camera<float, camera_models::pinhole>::load_intrinsic(
+                intrinsic);
         Expects(maybe_intrinsic.has_value());
         _intrinsic = *maybe_intrinsic;
     }
 
-    void operator()(int                            idx,
-                    optional<vector<cv::KeyPoint>> keypoints,
-                    optional<cv::Mat>              descriptors) noexcept {
+    void operator()(int                        idx,
+                    optional<vector<KeyPoint>> keypoints,
+                    optional<Mat>              descriptors) noexcept {
         Expects(keypoints);
         Expects(!keypoints->empty());
         Expects(descriptors);
@@ -68,12 +71,9 @@ class prec_recall_analysis {
 
         const int previous_idx = idx - 1;
 
-        using namespace sens_loc;
         using namespace camera_models;
         using namespace math;
-        using namespace sens_loc::apps;
-        using namespace std;
-        using namespace cv;
+        using namespace apps;
 
         // == Load all data from the previous index.
         const FileStorage previous_feature_file =
@@ -196,9 +196,9 @@ class prec_recall_analysis {
                     _global_distances->end());
         _global_distances->erase(median_it, _global_distances->end());
 
-        const auto                   dist_bins = 50;
-        sens_loc::analysis::distance distance_stat{
-            *_global_distances, dist_bins, "backprojection error pixels"};
+        const auto         dist_bins = 50;
+        analysis::distance distance_stat{*_global_distances, dist_bins,
+                                         "backprojection error pixels"};
 
         cout << distance_stat.histogram() << "\n"
              << "matched count:  " << distance_stat.count() << "\n"
@@ -212,11 +212,11 @@ class prec_recall_analysis {
     }
 
   private:
-    string_view                             _feature_file_pattern;
-    string_view                             _depth_image_pattern;
-    string_view                             _pose_file_pattern;
-    sens_loc::camera_models::pinhole<float> _intrinsic;
-    cv::Ptr<cv::BFMatcher>                  _matcher;
+    string_view                   _feature_file_pattern;
+    string_view                   _depth_image_pattern;
+    string_view                   _pose_file_pattern;
+    camera_models::pinhole<float> _intrinsic;
+    Ptr<BFMatcher>                _matcher;
 
     not_null<mutex*>         _distance_mutex;
     not_null<vector<float>*> _global_distances;
@@ -233,7 +233,7 @@ int analyze_precision_recall(string_view           feature_file_pattern,
                              string_view           depth_image_pattern,
                              string_view           pose_file_pattern,
                              string_view           intrinsic_file,
-                             cv::NormTypes         matching_norm,
+                             NormTypes             matching_norm,
                              optional<string_view> backproject_pattern,
                              optional<string_view> original_files) {
     Expects(start_idx < end_idx &&
