@@ -100,6 +100,8 @@ configure_file(feature_performance/filtered-0.png
                feature_performance/filtered-0.png COPYONLY)
 configure_file(feature_performance/filtered-1.png
                feature_performance/filtered-1.png COPYONLY)
+configure_file(feature_performance/flexion-1.png
+               feature_performance/flexion-1.png COPYONLY)
 configure_file(feature_performance/pose-0.pose
                feature_performance/pose-0.pose COPYONLY)
 configure_file(feature_performance/pose-1.pose

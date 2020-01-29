@@ -23,3 +23,21 @@ if ! ${exe} \
     print_error "Could not calculate precision and recall"
     exit 1
 fi
+
+if ! ${exe} \
+    --input "surf-1-octave-{}.feature.gz" \
+    --start 0 --end 1 \
+    precision-recall \
+    --depth-image "filtered-{}.png" \
+    --pose-file "pose-{}.pose" \
+    --intrinsic "kinect_intrinsic.txt" \
+    --match-norm "L2" \
+    --backprojection "backprojected-{}.png" \
+    --orig-images "flexion-{}.png" ; then
+    print_error "Could not calculate precision and recall and plot the reprojection"
+    exit 1
+fi
+if [ ! -f backprojected-1.png ] ; then
+    print_error "Did not create expected output files."
+    exit 1
+fi

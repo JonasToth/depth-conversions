@@ -47,7 +47,8 @@ imagepoints_t keypoint_to_coords(const vector<KeyPoint>& kps) noexcept {
 }
 
 vector<KeyPoint> coords_to_keypoint(const math::imagepoints_t& pts) noexcept {
-    vector<KeyPoint> kps(pts.size());
+    vector<KeyPoint> kps;
+    kps.reserve(pts.size());
     for (const auto& c : pts)
         kps.emplace_back(c.u(), c.v(), /*size=*/5.0F);
 
