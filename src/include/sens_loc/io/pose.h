@@ -16,7 +16,7 @@ namespace sens_loc::io {
 /// r21 r22 r23 t2
 /// r31 r32 r33 t3
 /// ```
-/// \param file_name path to the file to read from.
+/// \param in input stream that contains the pose
 /// \returns an matrix usable for affine transformation on success, on failure
 /// std::nullopt
 std::optional<math::pose_t> load_pose(std::istream& in) noexcept;
