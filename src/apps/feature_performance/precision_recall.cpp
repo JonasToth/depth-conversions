@@ -1,7 +1,5 @@
 #include "precision_recall.h"
 
-#include "sens_loc/math/image.h"
-
 #include <boost/histogram/ostream.hpp>
 #include <fstream>
 #include <gsl/gsl>
@@ -17,6 +15,7 @@
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/io/pose.h>
 #include <sens_loc/math/coordinate.h>
+#include <sens_loc/math/image.h>
 #include <sens_loc/math/pointcloud.h>
 #include <util/batch_visitor.h>
 #include <util/io.h>

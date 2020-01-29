@@ -2,13 +2,6 @@
 
 #define _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS
 #include <algorithm>
-#include <boost/accumulators/accumulators.hpp>
-#include <boost/accumulators/statistics/mean.hpp>
-#include <boost/accumulators/statistics/median.hpp>
-#include <boost/accumulators/statistics/skewness.hpp>
-#include <boost/accumulators/statistics/stats.hpp>
-#include <boost/accumulators/statistics/variance.hpp>
-#include <boost/histogram.hpp>
 #include <boost/histogram/ostream.hpp>
 #include <cstdint>
 #include <fmt/core.h>
