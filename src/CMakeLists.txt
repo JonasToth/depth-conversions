@@ -42,6 +42,7 @@ target_sources(sens_loc PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/lib/io/pose.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/util/correctness_util.cpp"
     )
+common_target_properties(sens_loc)
 
 add_library(sens_loc::sens_loc ALIAS sens_loc)
 target_include_directories(sens_loc

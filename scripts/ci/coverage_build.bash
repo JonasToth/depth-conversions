@@ -34,6 +34,7 @@ lcov \
     --capture \
     --directory ../src/apps \
     --directory ../src/include \
+    --directory ../src/lib \
     --directory src/ \
     --output-file test_coverage.info
 lcov --list test_coverage.info
