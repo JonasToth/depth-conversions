@@ -1,3 +1,4 @@
+#include <cstddef>
 #include <gsl/gsl>
 #include <sens_loc/analysis/match.h>
 
@@ -14,18 +15,18 @@ gather_matches(span<const DMatch>   matches,
     Expects(kp0.size() >= matches.size());
     Expects(kp1.size() >= matches.size());
 
-    vector<KeyPoint> p0(matches.size());
-    vector<KeyPoint> p1(matches.size());
+    vector<KeyPoint> p0;
+    p0.reserve(matches.size());
+    vector<KeyPoint> p1;
+    p1.reserve(matches.size());
 
-    size_t match_idx = 0;
     for (const DMatch& match : matches) {
-        p0[match_idx] = kp0[match.queryIdx];
-        p1[match_idx] = kp1[match.trainIdx];
-        ++match_idx;
+        p0.emplace_back(kp0[match.queryIdx]);
+        p1.emplace_back(kp1[match.trainIdx]);
     }
 
     Ensures(p0.size() == p1.size());
-    Ensures(p0.size() == matches.size());
+    Ensures(narrow_cast<ptrdiff_t>(p0.size()) == matches.size());
 
     return make_pair(p0, p1);
 }

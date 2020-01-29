@@ -85,13 +85,12 @@ class distance {
 
 
     distance() = default;
-    distance(gsl::span<const float> distances,
-             unsigned int           bin_count = 50U,
-             std::string            title     = "distance")
-        : _data{distances}
-        , _bin_count{bin_count}
+    explicit distance(gsl::span<const float> distances,
+                      unsigned int           bin_count = 50U,
+                      std::string            title     = "distance") noexcept
+        : _bin_count{bin_count}
         , _axis_title{std::move(title)} {
-        analyze(_data);
+        analyze(distances);
     }
 
     /// Analyses the provided distances. This will overwrite a previous
@@ -114,10 +113,6 @@ class distance {
     [[nodiscard]] float       skewness() const noexcept { return _s.skewness; }
 
   private:
-    // Accumulators that are run over the dataset. This data stores the
-    // results.
-    gsl::span<const float> _data;
-
     unsigned int _bin_count  = 50UL;
     std::string  _axis_title = "distance";
     histo_t      _histo;
