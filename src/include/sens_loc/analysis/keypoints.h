@@ -25,6 +25,12 @@ class keypoints {
         : _img_width{img_width}
         , _img_height{img_height} {}
 
+    void configure_image_dimension(unsigned int img_width,
+                                   unsigned int img_height) noexcept {
+        _img_width  = img_width;
+        _img_height = img_height;
+    }
+
     void configure_size(unsigned int bins) noexcept { _size_bins = bins; }
     void configure_size(std::string axis_title) noexcept {
         _size_title = std::move(axis_title);
@@ -33,7 +39,7 @@ class keypoints {
         _size_bins  = bins;
         _size_title = std::move(axis_title);
     }
-    void control_size_histo(bool enabled) noexcept {
+    void enable_size_histo(bool enabled) noexcept {
         _size_histo_enabled = enabled;
     }
 
@@ -49,7 +55,7 @@ class keypoints {
         _response_bins  = bins;
         _response_title = std::move(axis_title);
     }
-    void control_response_histo(bool enabled) noexcept {
+    void enable_response_histo(bool enabled) noexcept {
         _response_histo_enabled = enabled;
     }
 
@@ -69,8 +75,9 @@ class keypoints {
         _dist_h_title = std::move(h_axis_title);
     }
 
-    /// Analyze the properties of a set of keypoints. The boolean are toggles
-    /// to deactivate some analyses to save some computations.
+    /// Analyze the properties of a set of keypoints. The booleans are toggles
+    /// to deactivate analysis for the specified quantity to save some
+    /// computations.
     void analyze(gsl::span<const cv::KeyPoint> points,
                  bool                          distribution = true,
                  bool                          size         = true,
@@ -92,26 +99,24 @@ class keypoints {
     }
 
   private:
-    unsigned int _img_width  = 0UL;
-    unsigned int _img_height = 0UL;
-
-    gsl::span<const cv::KeyPoint> _data;
+    unsigned int _img_width  = 0U;
+    unsigned int _img_height = 0U;
 
     bool         _size_histo_enabled = true;
     statistic    _size;
     histo_t      _size_histo;
-    unsigned int _size_bins  = 50UL;
+    unsigned int _size_bins  = 50U;
     std::string  _size_title = "size of keypoints";
 
     bool         _response_histo_enabled = true;
     statistic    _response;
     histo_t      _response_histo;
-    unsigned int _response_bins  = 50UL;
+    unsigned int _response_bins  = 50U;
     std::string  _response_title = "response of keypoints";
 
     distribution_histo_t _distribution;
-    unsigned int         _dist_width_bins  = 50UL;
-    unsigned int         _dist_height_bins = 50UL;
+    unsigned int         _dist_width_bins  = 50U;
+    unsigned int         _dist_height_bins = 50U;
     std::string          _dist_w_title = "width - distribution of keypoints";
     std::string          _dist_h_title = "height - distribution of keypoints";
 };

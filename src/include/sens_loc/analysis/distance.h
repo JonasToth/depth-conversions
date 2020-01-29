@@ -1,6 +1,12 @@
 #ifndef DISTANCE_H_MUJPGVJL
 #define DISTANCE_H_MUJPGVJL
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/median.hpp>
+#include <boost/accumulators/statistics/skewness.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
 #include <boost/histogram.hpp>
 #include <gsl/gsl>
 
@@ -12,6 +18,17 @@ namespace analysis {
 
 /// Wrapper-struct to hold the common set of statistical values.
 struct statistic {
+    using accumulator_t = boost::accumulators::accumulator_set<
+        float,
+        boost::accumulators::stats<boost::accumulators::tag::count,
+                                   boost::accumulators::tag::min,
+                                   boost::accumulators::tag::max,
+                                   boost::accumulators::tag::median,
+                                   boost::accumulators::tag::mean,
+                                   boost::accumulators::tag::variance(
+                                       boost::accumulators::lazy),
+                                   boost::accumulators::tag::skewness>>;
+
     std::size_t count    = 0UL;
     float       min      = 0.0F;
     float       max      = 0.0F;
@@ -20,6 +37,20 @@ struct statistic {
     float       variance = 0.0F;
     float       stddev   = 0.0F;
     float       skewness = 0.0F;
+
+    static statistic make(const accumulator_t& accu) {
+        statistic s;
+        using namespace boost::accumulators;
+        s.count    = boost::accumulators::count(accu);
+        s.min      = boost::accumulators::min(accu);
+        s.max      = boost::accumulators::max(accu);
+        s.median   = boost::accumulators::median(accu);
+        s.mean     = boost::accumulators::mean(accu);
+        s.variance = boost::accumulators::variance(accu);
+        s.stddev   = std::sqrt(s.variance);
+        s.skewness = boost::accumulators::skewness(accu);
+        return s;
+    }
 
     void reset() noexcept {
         count    = 0UL;

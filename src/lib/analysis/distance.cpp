@@ -21,10 +21,7 @@ void distance::analyze(gsl::span<const float> distances, bool histo) noexcept {
     _data    = distances;
     _s.count = _data.size();
 
-    using namespace boost::accumulators;
-    accumulator_set<float, stats<tag::min, tag::max, tag::median, tag::mean,
-                                 tag::variance(lazy), tag::skewness>>
-        stat;
+    statistic::accumulator_t stat;
     try {
         std::for_each(std::begin(_data), std::end(_data),
                       [&](auto e) { stat(e); });
@@ -37,13 +34,7 @@ void distance::analyze(gsl::span<const float> distances, bool histo) noexcept {
 
     try {
         // If the namepsace is not provided, the call is ambigous.
-        _s.min      = boost::accumulators::min(stat);
-        _s.max      = boost::accumulators::max(stat);
-        _s.median   = boost::accumulators::median(stat);
-        _s.mean     = boost::accumulators::mean(stat);
-        _s.variance = boost::accumulators::variance(stat);
-        _s.stddev   = std::sqrt(_s.variance);
-        _s.skewness = boost::accumulators::skewness(stat);
+        _s = statistic::make(stat);
     } catch (const std::exception& e) {
         std::cerr << sens_loc::util::err{} << "Can not extract accumulator.\n"
                   << "Message: " << e.what() << "\n";
@@ -52,12 +43,12 @@ void distance::analyze(gsl::span<const float> distances, bool histo) noexcept {
     if (!histo)
         return;
 
-    using namespace boost::histogram;
     const float h_min = _s.min - 5.F * std::numeric_limits<float>::epsilon();
     const float h_max = _s.max + 5.F * std::numeric_limits<float>::epsilon();
 
     try {
-        _histo = make_histogram(axis_t(_bin_count, h_min, h_max, _axis_title));
+        _histo = boost::histogram::make_histogram(
+            axis_t(_bin_count, h_min, h_max, _axis_title));
         _histo.fill(_data);
     } catch (const std::exception& e) {
         std::cerr << sens_loc::util::err{}
