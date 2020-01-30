@@ -31,6 +31,14 @@ static cv::NormTypes str_to_norm(std::string_view n) {
 }
 
 MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
+    // Explicitly disable threading from OpenCV functions, as the
+    // parallelization is done at a higher level.
+    // That means, that each filter application is not multithreaded, but each
+    // image modification is. This is necessary as "TaskFlow" does not play
+    // nice with OpenCV threading and they introduce data races in the program
+    // because of that.
+    cv::setNumThreads(0);
+
     // Require exactly one subcommand.
     app.require_subcommand(1);
 

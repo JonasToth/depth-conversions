@@ -3,10 +3,12 @@
 #include <boost/histogram/ostream.hpp>
 #include <fstream>
 #include <gsl/gsl>
+#include <opencv2/core/hal/interface.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/imgproc.hpp>
+#include <opencv2/rgbd/depth.hpp>
 #include <sens_loc/analysis/distance.h>
 #include <sens_loc/analysis/match.h>
 #include <sens_loc/camera_models/pinhole.h>
@@ -17,6 +19,7 @@
 #include <sens_loc/math/coordinate.h>
 #include <sens_loc/math/image.h>
 #include <sens_loc/math/pointcloud.h>
+#include <sens_loc/util/console.h>
 #include <util/batch_visitor.h>
 #include <util/io.h>
 #include <util/statistic_visitor.h>
@@ -27,6 +30,17 @@ using namespace gsl;
 using namespace cv;
 
 namespace {
+
+inline Mat cv_camera_matrix(const camera_models::pinhole<float>& i) {
+    Mat K             = Mat::eye(3, 3, CV_32F);
+    K.at<float>(0, 0) = i.fx();
+    K.at<float>(1, 1) = i.fy();
+    K.at<float>(0, 2) = i.cx();
+    K.at<float>(1, 2) = i.cy();
+    return K;
+}
+
+constexpr float unit_factor = 0.001F;
 
 class prec_recall_analysis {
   public:
@@ -59,6 +73,18 @@ class prec_recall_analysis {
                 intrinsic);
         Expects(maybe_intrinsic.has_value());
         _intrinsic = *maybe_intrinsic;
+
+        if constexpr (is_same_v<decltype(_intrinsic),
+                                camera_models::pinhole<float>>) {
+            _icp = rgbd::ICPOdometry::create(cv_camera_matrix(_intrinsic)
+#if 0
+                ,
+                /*minDepth=*/0.1F,      // Distance in meters.
+                /*maxDepth=*/10.0F,     // Distance in meters.
+                /*maxDepthDiff=*/0.05F  // Distance in meters.
+#endif
+            );
+        }
     }
 
     void operator()(int                        idx,
@@ -69,7 +95,8 @@ class prec_recall_analysis {
         Expects(descriptors);
         Expects(size_t(descriptors->rows) == keypoints->size());
 
-        const int previous_idx = idx - 1;
+        static mutex stdio_mutex;
+        const int    previous_idx = idx - 1;
 
         using namespace camera_models;
         using namespace math;
@@ -118,21 +145,32 @@ class prec_recall_analysis {
             return;
         }
 
+        lock_guard guard{stdio_mutex};
+
         // == Match the keypoints with cross-checking.
         vector<DMatch> matches;
         // QueryDescriptors: first argument
         // TrainDescriptors: second argument
-        _matcher->match(*descriptors, previous_descriptors, matches);
+        _matcher->match(previous_descriptors, *descriptors, matches);
+        cerr << "First pixel after match:\n"
+             << "Train: " << previous_keypoints[matches[0].trainIdx].pt << "\n"
+             << "Query: " << (*keypoints)[matches[0].queryIdx].pt << "\n";
 
         // == get keypoints as world points
         // Extract the pixels that are the center of the keypoint and use
         // their depth value to create the 3D point.
         // Trainpointcloud: Previous
         const auto [kps, prev_kps] =
-            analysis::gather_matches(matches, *keypoints, previous_keypoints);
+            analysis::gather_matches(matches, previous_keypoints, *keypoints);
 
         imagepoints_t img_previous = keypoint_to_coords(prev_kps);
-        pointcloud_t  prev_points = project_to_sphere(_intrinsic, img_previous);
+        cerr << "Track first point in " << idx
+             << ":\npixel coordinates on previous image: "
+             << img_previous[0].u() << " / " << img_previous[0].v() << "\n";
+
+        pointcloud_t prev_points = project_to_sphere(_intrinsic, img_previous);
+        cerr << "Project to sphere: " << prev_points[0].X() << " / "
+             << prev_points[0].Y() << " / " << prev_points[0].Z() << "\n";
 
         Expects(kps.size() == prev_kps.size());
         for (unsigned int match_idx = 0; match_idx < kps.size(); ++match_idx) {
@@ -143,17 +181,71 @@ class prec_recall_analysis {
             auto t_d  = narrow_cast<float>(previous_depth_image->at(t_px));
             prev_points[match_idx] = t_d * prev_points[match_idx];
         }
+        cerr << "Project to Space: " << prev_points[0].X() << " / "
+             << prev_points[0].Y() << " / " << prev_points[0].Z() << "\n";
 
         // == Calculate relative pose between the two frames.
         pose_t rel_pose = relative_pose(*previous_pose, *pose);
+        for (int i = 0; i < 3; ++i)
+            rel_pose(i, 3) *= 1.0F / unit_factor;
 
+#if 0
+        // Refine that pose with an ICP if possible.
+        if (_icp) {
+
+            Mat Rt;
+            Mat initial = Mat::eye(4, 4, CV_64FC1);
+            // Copy rotation part.
+            for (int i = 0; i < 4; ++i)
+                for (int j = 0; j < 4; ++j)
+                    initial.at<double>(i, j) = rel_pose(i, j);
+
+            Mat prev_mask;
+            previous_depth_image->data().convertTo(prev_mask, CV_8UC1);
+
+            Mat this_mask;
+            depth_image->data().convertTo(this_mask, CV_8UC1);
+
+            Mat cvt_prev_depth;
+            previous_depth_image->data().convertTo(cvt_prev_depth, CV_32F,
+                                                   unit_factor);
+
+            Mat cvt_this_depth;
+            depth_image->data().convertTo(cvt_this_depth, CV_32F, unit_factor);
+
+            const bool icp_success = _icp->compute(/*srcImage=*/Mat(),
+                                                   /*srcDepth=*/cvt_prev_depth,
+                                                   /*srcMask=*/prev_mask,
+                                                   /*dstImage=*/Mat(),
+                                                   /*dstDepth=*/cvt_this_depth,
+                                                   /*dstMask=*/this_mask,
+                                                   /*Rt=*/Rt,
+                                                   /*initRt=*/initial);
+
+            if (icp_success) {
+                for (int i = 0; i < 4; ++i)
+                    for (int j = 0; j < 4; ++j)
+                        rel_pose(i, j) = Rt.at<double>(i, j);
+            } else {
+                cerr << util::warn{} << "No ICP result for idx: " << idx
+                     << "!\n";
+            }
+        }
+#endif
+
+        cerr << rel_pose << "\n";
         // == Transform matches from previous frame into this coordinate
         // frame.
         pointcloud_t prev_in_this_frame = rel_pose * prev_points;
+        cerr << "Project into this frame: " << prev_in_this_frame[0].X()
+             << " / " << prev_in_this_frame[0].Y() << " / "
+             << prev_in_this_frame[0].Z() << "\n";
 
         // == Project the points back into the current image.
         imagepoints_t prev_in_img =
             project_to_image(_intrinsic, prev_in_this_frame);
+        cerr << "Pixel in this frame: " << prev_in_img[0].u() << " / "
+             << prev_in_img[0].v() << "\n";
 
         // == Calculate the distance between the previous keypoints
         // backprojected in the current image and the keypoints in this image.
@@ -162,8 +254,7 @@ class prec_recall_analysis {
 
         if (_backproject_pattern) {
             // == Plot the keypoints in one image.
-            auto orig_img =
-                sens_loc::apps::load_file(fmt::format(*_original_files, idx));
+            auto orig_img = load_file(fmt::format(*_original_files, idx));
             vector<KeyPoint> prev_in_this_kps = coords_to_keypoint(prev_in_img);
 
             Mat out_img;
@@ -200,6 +291,7 @@ class prec_recall_analysis {
         analysis::distance distance_stat{*_global_distances, dist_bins,
                                          "backprojection error pixels"};
 
+#if 0
         cout << distance_stat.histogram() << "\n"
              << "matched count:  " << distance_stat.count() << "\n"
              << "min:            " << distance_stat.min() << "\n"
@@ -209,6 +301,7 @@ class prec_recall_analysis {
              << "Variance:       " << distance_stat.variance() << "\n"
              << "StdDev:         " << distance_stat.stddev() << "\n"
              << "Skewness:       " << distance_stat.skewness() << "\n";
+#endif
     }
 
   private:
@@ -223,6 +316,8 @@ class prec_recall_analysis {
 
     optional<string_view> _backproject_pattern;
     optional<string_view> _original_files;
+
+    Ptr<rgbd::Odometry> _icp;
 };
 }  // namespace
 

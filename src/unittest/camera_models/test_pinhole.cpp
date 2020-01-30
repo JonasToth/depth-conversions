@@ -1,3 +1,5 @@
+#include "sens_loc/math/coordinate.h"
+
 #include <cmath>
 #include <doctest/doctest.h>
 #include <sens_loc/camera_models/concepts.h>
@@ -100,5 +102,29 @@ TEST_CASE("Project pixels to sphere") {
         const auto cos_phi = p0.dot(p1);
         const auto angle   = std::acos(cos_phi);
         MESSAGE("antidiag: acos(phi) == " << rad_to_deg(angle) << "°");
+    }
+}
+
+TEST_CASE("Project camera coordinates into the image") {
+    pinhole<double> p = {
+        /*w=*/960,      /*h=*/540,     /*fx=*/519.226,
+        /*fy=*/479.462, /*cx=*/522.23, /*cy=*/272.737,
+    };
+
+    SUBCASE("Coordinate Transformations") {
+        const pixel_coord<double>  pixel(100, 100);
+        const sphere_coord<double> P_s_pixel = p.pixel_to_sphere(pixel);
+
+        const pixel_coord<double> back0 = p.camera_to_pixel(1.0 * P_s_pixel);
+        const pixel_coord<double> back1 = p.camera_to_pixel(10.0 * P_s_pixel);
+
+        CHECK(back0.u() == Approx(back1.u()));
+        CHECK(back0.v() == Approx(back1.v()));
+
+        CHECK(back0.u() == Approx(pixel.u()));
+        CHECK(back0.v() == Approx(pixel.v()));
+
+        // Both coordinates needed to be identical. This can be checked
+        // with 'v \cdot v == abs(v) * abs(v)'.
     }
 }

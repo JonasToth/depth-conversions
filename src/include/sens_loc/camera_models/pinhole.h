@@ -3,6 +3,7 @@
 
 #include <cmath>
 #include <gsl/gsl>
+#include <iostream>
 #include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/math/constants.h>
 #include <sens_loc/math/coordinate.h>
@@ -173,10 +174,10 @@ math::pixel_coord<Real>
 pinhole<Real>::camera_to_pixel(const math::camera_coord<Real>& p) const
     noexcept {
     static_assert(std::is_arithmetic_v<Real>);
-    Expects(_fx > 0.);
-    Expects(_fy > 0.);
-    Expects(_cx > 0.);
-    Expects(_cy > 0.);
+    Expects(fx() > 0.);
+    Expects(fy() > 0.);
+    Expects(cx() > 0.);
+    Expects(cy() > 0.);
     Expects(p1 == 0.);
     Expects(p2 == 0.);
     Expects(k1 == 0.);
@@ -187,12 +188,14 @@ pinhole<Real>::camera_to_pixel(const math::camera_coord<Real>& p) const
         return {Real(-1), Real(-1)};
 
     const math::image_coord<Real> i{p.X() / p.Z(), p.Y() / p.Z()};
-    const Real                    u{fx() * i.x() + cx() * i.x()};
-    const Real                    v{fy() * i.y() + cy() * i.y()};
+    const Real                    u{fx() * i.x() + cx()};
+    const Real                    v{fy() * i.y() + cy()};
 
     if (u < 0.0F || u > gsl::narrow_cast<Real>(w()) || v < 0.0F ||
-        v > gsl::narrow_cast<Real>(h()))
+        v > gsl::narrow_cast<Real>(h())) {
+        // std::cerr << "out of image; " << u << " / " << v << "\n";
         return {Real(-1), Real(-1)};
+    }
 
     return {u, v};
 }
