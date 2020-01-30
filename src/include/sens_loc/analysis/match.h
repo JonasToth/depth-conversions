@@ -15,9 +15,9 @@ namespace sens_loc::analysis {
 /// \pre \c kp0 is the query set in \c matches.
 /// \pre \c kp1 is the training set in \c matches.
 std::pair<std::vector<cv::KeyPoint>, std::vector<cv::KeyPoint>>
-gather_matches(gsl::span<const cv::DMatch>   matches,
-               gsl::span<const cv::KeyPoint> kp0,
-               gsl::span<const cv::KeyPoint> kp1) noexcept;
+gather_matches(const std::vector<cv::DMatch>&   matches,
+               const std::vector<cv::KeyPoint>& kp0,
+               const std::vector<cv::KeyPoint>& kp1) noexcept;
 }  // namespace sens_loc::analysis
 
 #endif /* end of include guard: MATCH_H_COIEXYNJ */

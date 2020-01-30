@@ -213,7 +213,7 @@ coordinate<Real, frame::camera>
 operator*(Real factor, const coordinate<Real, frame::camera>& pt) noexcept {
     static_assert(std::is_floating_point_v<Real>,
                   "Real must be a floating point type for scaling operations!");
-    return {factor * pt.X(), factor + pt.Y(), factor * pt.Z()};
+    return {factor * pt.X(), factor * pt.Y(), factor * pt.Z()};
 }
 
 /// Scaling spherical coordinates results in camera coordinates.

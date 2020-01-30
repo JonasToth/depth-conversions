@@ -46,8 +46,8 @@ class matching {
         Expects(descriptors->rows > 0);
 
         const int             previous_idx = idx - 1;
-        const cv::FileStorage previous_img =
-            sens_loc::apps::open_feature_file(input_pattern, previous_idx);
+        const cv::FileStorage previous_img = sens_loc::apps::open_feature_file(
+            fmt::format(input_pattern, previous_idx));
         cv::Mat previous_descriptors =
             sens_loc::apps::load_descriptors(previous_img);
 
@@ -65,7 +65,8 @@ class matching {
 
         if (output_pattern) {
             const cv::FileStorage this_feature =
-                sens_loc::apps::open_feature_file(input_pattern, idx);
+                sens_loc::apps::open_feature_file(
+                    fmt::format(input_pattern, idx));
             const std::vector<cv::KeyPoint> previous_keypoints =
                 sens_loc::apps::load_keypoints(this_feature);
 

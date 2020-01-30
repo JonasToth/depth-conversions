@@ -7,6 +7,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/persistence.hpp>
 #include <optional>
+#include <sens_loc/util/console.h>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -35,11 +36,9 @@ constexpr required_data operator&(required_data element1,
                                       static_cast<T>(element2));
 }
 
-inline cv::FileStorage open_feature_file(std::string_view pattern, int index) {
-    const std::string input_file = fmt::format(pattern, index);
+inline cv::FileStorage open_feature_file(const std::string& f_path) {
     using cv::FileStorage;
-    const FileStorage fs{input_file,
-                         FileStorage::READ | FileStorage::FORMAT_YAML};
+    const FileStorage fs{f_path, FileStorage::READ | FileStorage::FORMAT_YAML};
     return fs;
 }
 
@@ -67,9 +66,6 @@ inline cv::Mat load_descriptors(const cv::FileStorage& fs) {
 /// \warning \c Analysor must be thread safe!
 template <typename Analysor, required_data data_elements>
 struct statistic_visitor : Analysor {
-    static_assert(data_elements != required_data::none,
-                  "At least some data must be loaded");
-
     std::string_view input_pattern;
 
     template <typename... Args>
@@ -78,22 +74,30 @@ struct statistic_visitor : Analysor {
         , input_pattern{input_pattern} {}
 
     void operator()(int i) noexcept {
-        const cv::FileStorage fs = open_feature_file(input_pattern, i);
+        try {
+            const cv::FileStorage fs =
+                open_feature_file(fmt::format(input_pattern, i));
 
-        std::optional<std::vector<cv::KeyPoint>> keypoints   = std::nullopt;
-        std::optional<cv::Mat>                   descriptors = std::nullopt;
+            std::optional<std::vector<cv::KeyPoint>> keypoints   = std::nullopt;
+            std::optional<cv::Mat>                   descriptors = std::nullopt;
 
-        if constexpr ((data_elements & required_data::keypoints) !=
-                      required_data::none)
-            keypoints = load_keypoints(fs);
+            if constexpr ((data_elements & required_data::keypoints) !=
+                          required_data::none)
+                keypoints = load_keypoints(fs);
 
-        if constexpr ((data_elements & required_data::descriptors) !=
-                      required_data::none)
-            descriptors = load_descriptors(fs);
+            if constexpr ((data_elements & required_data::descriptors) !=
+                          required_data::none)
+                descriptors = load_descriptors(fs);
 
-        // Call the base-classes analysis operator to actually analyse the
-        // data.
-        Analysor::operator()(i, std::move(keypoints), std::move(descriptors));
+            // Call the base-classes analysis operator to actually analyse the
+            // data.
+            Analysor::operator()(i, std::move(keypoints),
+                                 std::move(descriptors));
+        } catch (...) {
+            std::cerr << util::err{}
+                      << "Could not initialize data for idx: " << i << "\n";
+            return;
+        }
     }
 };
 }  // namespace sens_loc::apps
