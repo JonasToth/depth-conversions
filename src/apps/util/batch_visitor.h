@@ -21,7 +21,7 @@ Functor parallel_visitation(int start, int end, Functor&& f) noexcept {
     if (start > end)
         std::swap(start, end);
 
-    tf::Executor executor(1);
+    tf::Executor executor;
     tf::Taskflow tf;
     tf.parallel_for(start, end + 1, 1, std::forward<Functor>(f));
     executor.run(tf).wait();

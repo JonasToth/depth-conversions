@@ -26,6 +26,9 @@ std::vector<float> pointwise_distance(const points& c0,
     Expects(c0.size() == c1.size());
 
     std::vector<float> distances;
+    if (c0.empty())
+        return distances;
+
     distances.reserve(c0.size());
     for (std::size_t i = 0; i < c0.size(); ++i)
         distances.emplace_back((c0[i] - c1[i]).norm());
