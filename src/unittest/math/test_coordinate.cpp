@@ -39,6 +39,16 @@ TEST_CASE("world coordinate") {
         coordinate<double, frame::world> p3(3., 4., 5.), p4(3., 4., 5.);
         REQUIRE(p3.dot(p4) == 50.);
     }
+    SUBCASE("difference") {
+        coordinate<double, frame::world> p1{10., 2., -5.};
+        coordinate<double, frame::world> p2{11., 10., -2.};
+
+        coordinate<double, frame::world> diff = p2 - p1;
+
+        REQUIRE(diff.U() == Approx(1.0));
+        REQUIRE(diff.V() == Approx(8.0));
+        REQUIRE(diff.W() == Approx(3.0));
+    }
 }
 
 TEST_CASE("pixel coordinate") {
@@ -58,5 +68,66 @@ TEST_CASE("pixel coordinate") {
         p1 = p2;
         REQUIRE(p1.u() == 112);
         REQUIRE(p1.v() == 22);
+    }
+}
+
+TEST_CASE("Scale spherical coordinates") {
+    SUBCASE("x coord works") {
+        sphere_coord<float> p0{1.F, 0.0F, 0.0F};
+        camera_coord<float> c0{10.0F * p0};
+
+        REQUIRE(c0.norm() == Approx(10.0F));
+        REQUIRE(c0.X() == Approx(10.0F));
+        REQUIRE(c0.Y() == Approx(0.0F));
+        REQUIRE(c0.Z() == Approx(0.0F));
+    }
+
+    SUBCASE("y coord works") {
+        sphere_coord<float> p0{0.F, 1.0F, 0.0F};
+        camera_coord<float> c0{10.0F * p0};
+
+        REQUIRE(c0.norm() == Approx(10.0F));
+        REQUIRE(c0.X() == Approx(0.0F));
+        REQUIRE(c0.Y() == Approx(10.0F));
+        REQUIRE(c0.Z() == Approx(0.0F));
+    }
+    SUBCASE("z coord works") {
+        sphere_coord<float> p0{0.F, 0.0F, 1.0F};
+        camera_coord<float> c0{10.0F * p0};
+
+        REQUIRE(c0.norm() == Approx(10.0F));
+        REQUIRE(c0.X() == Approx(0.0F));
+        REQUIRE(c0.Y() == Approx(0.0F));
+        REQUIRE(c0.Z() == Approx(10.0F));
+    }
+}
+TEST_CASE("Scale camera coordinates") {
+    SUBCASE("x coord works") {
+        camera_coord<float> p0{1.F, 0.0F, 0.0F};
+        camera_coord<float> c0{10.0F * p0};
+
+        REQUIRE(c0.norm() == Approx(10.0F));
+        REQUIRE(c0.X() == Approx(10.0F));
+        REQUIRE(c0.Y() == Approx(0.0F));
+        REQUIRE(c0.Z() == Approx(0.0F));
+    }
+
+    SUBCASE("y coord works") {
+        camera_coord<float> p0{0.F, 1.0F, 0.0F};
+        camera_coord<float> c0{10.0F * p0};
+
+        REQUIRE(c0.norm() == Approx(10.0F));
+        REQUIRE(c0.X() == Approx(0.0F));
+        REQUIRE(c0.Y() == Approx(10.0F));
+        REQUIRE(c0.Z() == Approx(0.0F));
+    }
+    SUBCASE("z coord works") {
+        camera_coord<float> p0{0.F, 0.0F, 1.0F};
+        camera_coord<float> c0{10.0F * p0};
+
+        REQUIRE(c0.norm() == Approx(10.0F));
+        REQUIRE(c0.X() == Approx(0.0F));
+        REQUIRE(c0.Y() == Approx(0.0F));
+        REQUIRE(c0.Z() == Approx(10.0F));
     }
 }

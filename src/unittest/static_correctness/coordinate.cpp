@@ -35,6 +35,32 @@ static void fail_assignment() {
 }
 #endif
 
+#if defined(OPERATOR_SCALING_PIXEL)
+static void fail_scale_pixel() {
+    pixel_coord<double> p0;
+    (void) 20. * p0;
+}
+#endif
+
+#if defined(OPERATOR_SCALING_IMAGE)
+static void fail_scale_pixel() {
+    image_coord<double> p0;
+    (void) 20. * p0;
+}
+#endif
+#if defined(OPERATOR_SCALING_WORLD)
+static void fail_scale_pixel() {
+    world_coord<double> p0;
+    (void) 20. * p0;
+}
+#endif
+#if defined(SPHERICAL_SCALING_TO_SPHERICAL)
+static void fail_scale_pixel() {
+    sphere_coord<double> p0;
+    sphere_coord         res = 20. * p0;
+}
+#endif
+
 int main() {
     return 0;
 }
