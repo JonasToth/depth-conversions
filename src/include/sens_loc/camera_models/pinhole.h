@@ -189,8 +189,8 @@ pinhole<Real>::camera_to_pixel(const math::camera_coord<Real>& p) const
         return {_Real(-1), _Real(-1)};
 
     const math::image_coord<Real> i{p.X() / p.Z(), p.Y() / p.Z()};
-    const _Real u = gsl::narrow_cast<_Real>(fx() * i.x() + cx());
-    const _Real v = gsl::narrow_cast<_Real>(fy() * i.y() + cy());
+    const auto u = gsl::narrow_cast<_Real>(fx() * i.x() + cx());
+    const auto v = gsl::narrow_cast<_Real>(fy() * i.y() + cy());
 
     if (u < _Real(0.0) || u > gsl::narrow_cast<Real>(w()) || v < _Real(0.0) ||
         v > gsl::narrow_cast<Real>(h()))
