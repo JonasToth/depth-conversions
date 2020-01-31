@@ -57,7 +57,7 @@ TEST_CASE("relative pose calculation") {
     SUBCASE("diff between identity pose") {
         pose_t i = pose_t::Identity(4, 4);
         pose_t r = relative_pose(i, i);
-        REQUIRE(r == pose_t::Identity(4, 4));
+        REQUIRE((r - pose_t::Identity(4, 4)).norm() == Approx(0.0F));
     }
     SUBCASE("diff between identity pose and some pose") {
         pose_t p = pose_t::Identity(4, 4);
@@ -65,7 +65,7 @@ TEST_CASE("relative pose calculation") {
         p(1, 3)  = -10.0F;  // Y-Translation
         p(2, 3)  = -40.0F;  // Z-Translation
         pose_t r = relative_pose(pose_t::Identity(4, 4), p);
-        REQUIRE(r == p);
+        REQUIRE((r - p).norm() == Approx(0.0F));
     }
     SUBCASE("diff between pose and identity pose") {
         pose_t p = pose_t::Identity(4, 4);
@@ -73,7 +73,7 @@ TEST_CASE("relative pose calculation") {
         p(1, 3)  = -10.0F;  // Y-Translation
         p(2, 3)  = -40.0F;  // Z-Translation
         pose_t r = relative_pose(p, pose_t::Identity(4, 4));
-        REQUIRE(r == p.inverse());
+        REQUIRE((r - p.inverse()).norm() == Approx(0.0F));
     }
     SUBCASE("general pose to general pose") {
         string s0 = "0.956278 0.021462 -0.291671 -2.260386\n"
