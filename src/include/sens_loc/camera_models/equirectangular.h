@@ -125,6 +125,14 @@ class equirectangular {
     [[nodiscard]] math::sphere_coord<Real>
     pixel_to_sphere(const math::pixel_coord<_Real>& p) const noexcept;
 
+    /// Project points in camera coordinates to pixel coordinates.
+    /// \note if the point can not be projected (coordinate not in view) the
+    /// pixel coordinate {-1, -1} is returned.
+    /// \sa equirectangular::project_to_sphere
+    template <typename _Real = Real>
+    [[nodiscard]] math::pixel_coord<_Real>
+    camera_to_pixel(const math::camera_coord<Real>& p) const noexcept;
+
   private:
     void ensure_invariant() const noexcept {
         Ensures(d_phi > Real(0.));
@@ -155,7 +163,7 @@ equirectangular<Real>::pixel_to_sphere(const math::pixel_coord<_Real>& p) const
 
     Ensures(phi >= -math::pi<Real>);
     Ensures(phi <= math::pi<Real>);
-    Ensures(theta >= 0.);
+    Ensures(theta >= Real(0.));
     Ensures(theta <= math::pi<Real>);
 
     using std::cos;
@@ -165,6 +173,33 @@ equirectangular<Real>::pixel_to_sphere(const math::pixel_coord<_Real>& p) const
     // NOLINTNEXTLINE(cppcoreguidelines-avoid-magic-numbers)
     Ensures(std::abs(s.norm() - Real(1.0)) < 0.000001);
     return s;
+}
+
+template <typename Real>
+template <typename _Real>
+inline math::pixel_coord<_Real>
+equirectangular<Real>::camera_to_pixel(const math::camera_coord<Real>& p) const
+    noexcept {
+    static_assert(std::is_arithmetic_v<_Real>);
+
+    const Real r     = std::sqrt(p.X() * p.X() + p.Y() * p.Y() + p.Z() * p.Z());
+    const Real theta = std::acos(p.Z() / r);
+    const Real phi   = std::atan2(p.Y(), p.X());
+
+    Ensures(r >= Real(0.0));
+    Ensures(phi >= -math::pi<Real>);
+    Ensures(phi <= math::pi<Real>);
+    Ensures(theta >= Real(0.));
+    Ensures(theta <= math::pi<Real>);
+
+    const _Real u = gsl::narrow_cast<_Real>((phi + math::pi<Real>) / d_phi);
+    const _Real v = gsl::narrow_cast<_Real>(theta / d_theta);
+
+    if (u < _Real(0.0) || u > gsl::narrow_cast<Real>(w()) || v < _Real(0.0) ||
+        v > gsl::narrow_cast<Real>(h()))
+        return {_Real(-1), _Real(-1)};
+
+    return {u, v};
 }
 }  // namespace sens_loc::camera_models
 

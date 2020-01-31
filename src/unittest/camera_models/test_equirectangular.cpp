@@ -140,5 +140,17 @@ TEST_CASE("projection to sphere") {
     }
 }
 
-TEST_CASE("angular resolution") {
+TEST_CASE("projection to pixel") {
+    equirectangular<double>   e(100, 50);
+    const pixel_coord<double> pixel(25, 25);
+
+    const sphere_coord<double> P_s_pixel = e.pixel_to_sphere(pixel);
+    const pixel_coord<double>  back0     = e.camera_to_pixel(1.0 * P_s_pixel);
+    const pixel_coord<double>  back1     = e.camera_to_pixel(10.0 * P_s_pixel);
+
+    CHECK(back0.u() == Approx(back1.u()));
+    CHECK(back0.v() == Approx(back1.v()));
+
+    CHECK(back0.u() == Approx(pixel.u()));
+    CHECK(back0.v() == Approx(pixel.v()));
 }

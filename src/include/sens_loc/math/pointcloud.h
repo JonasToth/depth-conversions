@@ -9,23 +9,28 @@
 
 namespace sens_loc::math {
 
-/// A pointcloud is a set of coordinates relative to a camera.
-using pointcloud_t = std::vector<camera_coord<float>>;
+/// A pointcloud is a set of camera coordinates.
+template <typename Real>
+using pointcloud   = std::vector<camera_coord<Real>>;
+using pointcloud_t = pointcloud<float>;
 
-/// A set of points in homogeneous pixel coordinates.
-using imagepoints_t = std::vector<pixel_coord<float>>;
+/// A set of pixel coordinates.
+template <typename Real>
+using imagepoints   = std::vector<pixel_coord<Real>>;
+using imagepoints_t = imagepoints<float>;
 
 /// Calculate the point-wise euclidean distance between each point in \c c0
 /// and \c c1.
 /// The result is a row-vector with the distance for point 'i' at position 'i'.
-/// \pre c0.cols() == c1.cols() => the same number of points
+/// \tparam one of \c pointcloud or \c imagepoints.
+/// \pre c0.size() == c1.size() => the same number of points
 /// \post each element in the result is non-negative.
-template <typename points>
-std::vector<float> pointwise_distance(const points& c0,
-                                      const points& c1) noexcept {
+template <typename Points>
+std::vector<typename Points::value_type::real>
+pointwise_distance(const Points& c0, const Points& c1) noexcept {
     Expects(c0.size() == c1.size());
 
-    std::vector<float> distances;
+    std::vector<typename Points::value_type::real> distances;
     if (c0.empty())
         return distances;
 

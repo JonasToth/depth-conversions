@@ -109,6 +109,8 @@ class coordinate
                                           detail::coordinate3d<Real>>;
 
   public:
+    using real = Real;
+
     // Reuse constructors of baseclass
     using base_class::base_class;
 

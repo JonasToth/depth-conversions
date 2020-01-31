@@ -3,7 +3,6 @@
 
 #include <cmath>
 #include <gsl/gsl>
-#include <iostream>
 #include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/math/constants.h>
 #include <sens_loc/math/coordinate.h>
@@ -98,7 +97,8 @@ class pinhole {
     /// \note if the point can not be projected (\c p.z() == 0) the pixel
     /// coordinate {-1, -1} is returned.
     /// \sa pinhole::project_to_sphere
-    [[nodiscard]] math::pixel_coord<Real>
+    template <typename _Real = Real>
+    [[nodiscard]] math::pixel_coord<_Real>
     camera_to_pixel(const math::camera_coord<Real>& p) const noexcept;
 
   private:
@@ -170,10 +170,11 @@ pinhole<Real>::image_to_sphere(const math::image_coord<Real>& p) const
     return res;
 }
 template <typename Real>
-math::pixel_coord<Real>
+template <typename _Real>
+math::pixel_coord<_Real>
 pinhole<Real>::camera_to_pixel(const math::camera_coord<Real>& p) const
     noexcept {
-    static_assert(std::is_arithmetic_v<Real>);
+    static_assert(std::is_arithmetic_v<_Real>);
     Expects(fx() > 0.);
     Expects(fy() > 0.);
     Expects(cx() > 0.);
@@ -184,18 +185,16 @@ pinhole<Real>::camera_to_pixel(const math::camera_coord<Real>& p) const
     Expects(k2 == 0.);
     Expects(k3 == 0.);
 
-    if (p.Z() == 0.0F)
-        return {Real(-1), Real(-1)};
+    if (p.Z() == Real(0.0))
+        return {_Real(-1), _Real(-1)};
 
     const math::image_coord<Real> i{p.X() / p.Z(), p.Y() / p.Z()};
-    const Real                    u{fx() * i.x() + cx()};
-    const Real                    v{fy() * i.y() + cy()};
+    const _Real u = gsl::narrow_cast<_Real>(fx() * i.x() + cx());
+    const _Real v = gsl::narrow_cast<_Real>(fy() * i.y() + cy());
 
-    if (u < 0.0F || u > gsl::narrow_cast<Real>(w()) || v < 0.0F ||
-        v > gsl::narrow_cast<Real>(h())) {
-        // std::cerr << "out of image; " << u << " / " << v << "\n";
-        return {Real(-1), Real(-1)};
-    }
+    if (u < _Real(0.0) || u > gsl::narrow_cast<Real>(w()) || v < _Real(0.0) ||
+        v > gsl::narrow_cast<Real>(h()))
+        return {_Real(-1), _Real(-1)};
 
     return {u, v};
 }

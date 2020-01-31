@@ -127,4 +127,20 @@ TEST_CASE("Project camera coordinates into the image") {
         // Both coordinates needed to be identical. This can be checked
         // with 'v \cdot v == abs(v) * abs(v)'.
     }
+
+    SUBCASE("out of range coordinate") {
+        auto back0 = p.camera_to_pixel({0.5, 0.5, 5.0});
+        CHECK(back0.u() > 0.0);
+        CHECK(back0.v() > 0.0);
+
+        auto back1 = p.camera_to_pixel({20.0, 20.0, 10.0});
+        CHECK(back1.u() == Approx(-1.0));
+        CHECK(back1.v() == Approx(-1.0));
+    }
+
+    SUBCASE("singularity point") {
+        auto back0 = p.camera_to_pixel({0.5, 0.5, 0.0});
+        CHECK(back0.u() == Approx(-1.0));
+        CHECK(back0.v() == Approx(-1.0));
+    }
 }

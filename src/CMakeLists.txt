@@ -38,7 +38,6 @@ target_sources(sens_loc PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/lib/analysis/distance.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/analysis/keypoints.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/analysis/match.cpp"
-    "${CMAKE_CURRENT_LIST_DIR}/lib/camera_models/projection.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/io/pose.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/util/correctness_util.cpp"
     )

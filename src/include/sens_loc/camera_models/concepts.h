@@ -49,16 +49,24 @@ inline constexpr bool is_intrinsic_v =
                           Intrinsic<Real>>
     && 
     std::is_invocable_r_v<math::sphere_coord<Real>,
-                          decltype(
-                            &Intrinsic<Real>::template pixel_to_sphere<int>),
+                          decltype(&Intrinsic<Real>::template pixel_to_sphere<int>),
                           Intrinsic<Real>,
                           math::pixel_coord<int>>
     &&
     std::is_invocable_r_v<math::sphere_coord<Real>,
-                          decltype(
-                            &Intrinsic<Real>::template pixel_to_sphere<Real>),
+                          decltype(&Intrinsic<Real>::template pixel_to_sphere<Real>),
                           Intrinsic<Real>,
-                          math::pixel_coord<Real>>;
+                          math::pixel_coord<Real>>
+    &&
+    std::is_invocable_r_v<math::pixel_coord<Real>,
+                          decltype(&Intrinsic<Real>::template camera_to_pixel<Real>),
+                          Intrinsic<Real>,
+                          math::camera_coord<Real>>
+    &&
+    std::is_invocable_r_v<math::pixel_coord<int>,
+                          decltype(&Intrinsic<Real>::template camera_to_pixel<int>),
+                          Intrinsic<Real>,
+                          math::camera_coord<Real>>;
 // clang-format on
 
 }  // namespace sens_loc::camera_models

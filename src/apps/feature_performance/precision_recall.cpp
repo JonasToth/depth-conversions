@@ -77,7 +77,8 @@ inline void plot_keypoints(string_view             background_file,
 }
 #endif
 
-inline Mat cv_camera_matrix(const camera_models::pinhole<float>& i) {
+template <typename Real = float>
+inline Mat cv_camera_matrix(const camera_models::pinhole<Real>& i) {
     Mat K             = Mat::eye(3, 3, CV_32F);
     K.at<float>(0, 0) = i.fx();
     K.at<float>(1, 1) = i.fy();
@@ -88,6 +89,8 @@ inline Mat cv_camera_matrix(const camera_models::pinhole<float>& i) {
 constexpr float unit_factor = 0.001F;
 mutex           stdio_mutex;
 
+template <template <typename> typename Model = sens_loc::camera_models::pinhole,
+          typename Real                      = float>
 class prec_recall_analysis {
   public:
     prec_recall_analysis(string_view              feature_file_pattern,
@@ -121,7 +124,7 @@ class prec_recall_analysis {
         _intrinsic = *maybe_intrinsic;
 
         if constexpr (is_same_v<decltype(_intrinsic),
-                                camera_models::pinhole<float>>) {
+                                camera_models::pinhole<Real>>) {
             _icp = rgbd::FastICPOdometry::create(cv_camera_matrix(_intrinsic)
 #if 0
                 ,
@@ -361,11 +364,11 @@ class prec_recall_analysis {
     }
 
   private:
-    string_view                   _feature_file_pattern;
-    string_view                   _depth_image_pattern;
-    string_view                   _pose_file_pattern;
-    camera_models::pinhole<float> _intrinsic;
-    Ptr<BFMatcher>                _matcher;
+    string_view    _feature_file_pattern;
+    string_view    _depth_image_pattern;
+    string_view    _pose_file_pattern;
+    Model<Real>    _intrinsic;
+    Ptr<BFMatcher> _matcher;
 
     not_null<mutex*>         _distance_mutex;
     not_null<vector<float>*> _global_distances;
@@ -393,7 +396,7 @@ int analyze_precision_recall(string_view           feature_file_pattern,
     // The code will load all data directly and does not rely on loading through
     // the statistics code.
     using visitor =
-        statistic_visitor<prec_recall_analysis, required_data::none>;
+        statistic_visitor<prec_recall_analysis<>, required_data::none>;
     mutex         distance_mutex;
     vector<float> global_distances;
 
