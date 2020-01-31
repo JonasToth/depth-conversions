@@ -16,8 +16,8 @@ namespace sens_loc::analysis {
 /// \pre \c kp1 is the training set in \c matches.
 std::pair<std::vector<cv::KeyPoint>, std::vector<cv::KeyPoint>>
 gather_matches(const std::vector<cv::DMatch>&   matches,
-               const std::vector<cv::KeyPoint>& kp0,
-               const std::vector<cv::KeyPoint>& kp1) noexcept;
+               const std::vector<cv::KeyPoint>& query,
+               const std::vector<cv::KeyPoint>& train) noexcept;
 }  // namespace sens_loc::analysis
 
 #endif /* end of include guard: MATCH_H_COIEXYNJ */

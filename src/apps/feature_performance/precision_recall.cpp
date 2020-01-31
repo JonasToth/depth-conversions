@@ -62,6 +62,7 @@ struct reprojection_data {
     }
 };
 
+#if DEBUG_OUT
 inline void plot_keypoints(string_view             background_file,
                            const vector<KeyPoint>& kps,
                            const Scalar&           color,
@@ -74,6 +75,7 @@ inline void plot_keypoints(string_view             background_file,
                   DrawMatchesFlags::DRAW_OVER_OUTIMG);
     imwrite(string(output_file), out_img);
 }
+#endif
 
 inline Mat cv_camera_matrix(const camera_models::pinhole<float>& i) {
     Mat K             = Mat::eye(3, 3, CV_32F);
@@ -132,8 +134,12 @@ class prec_recall_analysis {
     }
 
     void operator()(int idx,
-                    optional<vector<KeyPoint>> /*keypoints*/,
-                    optional<Mat> /*descriptors*/) noexcept try {
+                    // NOLINTNEXTLINE(performance-unnecessary-value-param)
+                    optional<vector<KeyPoint>> keypoints,
+                    // NOLINTNEXTLINE(performance-unnecessary-value-param)
+                    optional<Mat> descriptors) noexcept try {
+        Expects(!keypoints);
+        Expects(!descriptors);
 #if DEBUG_OUT
         lock_guard guard{stdio_mutex};
 #endif
@@ -309,7 +315,7 @@ class prec_recall_analysis {
             for (std::size_t i = 0UL; i < kps.size(); ++i) {
                 line(out_img, kps[i].pt, prev_in_this_kps[i].pt,
                      /*color=*/Scalar(0, 255, 0),
-                     /*thickness=*/1,
+                     /*thickness=*/2,
                      /*linetype=*/LINE_AA);
             }
 
