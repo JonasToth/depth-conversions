@@ -70,7 +70,7 @@ project_to_sphere(const Model<Real>&             intrinsic,
     return sphere_coord;
 }
 
-/// Convert keypoints to homogeneous pixel coordinates.
+/// Convert keypoints to pixel coordinates.
 template <typename Real = float>
 math::imagepoints<Real>
 keypoint_to_coords(const std::vector<cv::KeyPoint>& kps) noexcept {
@@ -83,8 +83,7 @@ keypoint_to_coords(const std::vector<cv::KeyPoint>& kps) noexcept {
     return pixel_coord;
 }
 
-/// Convert homogeneous pixel coordinates back to keypoints to allow plotting
-/// with opencv.
+/// Convert pixel coordinates back to keypoints to allow plotting with opencv.
 /// \note Information like response, size and orientation are lost set to dummy
 /// values and not stored in \c imagepoints_t.
 template <typename Real = float>
@@ -99,7 +98,6 @@ coords_to_keypoint(const math::imagepoints<Real>& pts) noexcept {
     Ensures(kps.size() == pts.size());
     return kps;
 }
-
 }  // namespace sens_loc::camera_models
 
 #endif /* end of include guard: PROJECTION_H_GUWYAV5U */

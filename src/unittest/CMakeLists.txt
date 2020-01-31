@@ -8,6 +8,7 @@ test_add_file(analysis analysis/test_matches.cpp)
 create_test(camera_models camera_models/test_camera_models.cpp)
 test_add_file(camera_models camera_models/test_pinhole.cpp)
 test_add_file(camera_models camera_models/test_equirectangular.cpp)
+test_add_file(camera_models camera_models/test_projection.cpp)
 
 # Conversion tests all require this file.
 configure_file(conversion/data0-depth.png conversion/data0-depth.png COPYONLY)

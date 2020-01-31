@@ -158,6 +158,11 @@ inline math::sphere_coord<Real>
 equirectangular<Real>::pixel_to_sphere(const math::pixel_coord<_Real>& p) const
     noexcept {
     static_assert(std::is_arithmetic_v<_Real>);
+    Expects(p.u() >= Real(0.0));
+    Expects(p.v() < Real(w()));
+    Expects(p.u() >= Real(0.0));
+    Expects(p.v() < Real(h()));
+
     const Real phi   = p.u() * d_phi - math::pi<Real>;
     const Real theta = theta_min + (p.v() * d_theta);
 
@@ -182,7 +187,10 @@ equirectangular<Real>::camera_to_pixel(const math::camera_coord<Real>& p) const
     noexcept {
     static_assert(std::is_arithmetic_v<_Real>);
 
-    const Real r     = std::sqrt(p.X() * p.X() + p.Y() * p.Y() + p.Z() * p.Z());
+    const Real r = std::sqrt(p.X() * p.X() + p.Y() * p.Y() + p.Z() * p.Z());
+    if (r == Real(0.0))
+        return {_Real(-1), _Real(-1)};
+
     const Real theta = std::acos(p.Z() / r);
     const Real phi   = std::atan2(p.Y(), p.X());
 
