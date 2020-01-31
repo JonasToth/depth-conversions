@@ -15,21 +15,25 @@
 #include <util/io.h>
 #include <util/statistic_visitor.h>
 
+using namespace cv;
+using namespace std;
+using namespace gsl;
+
 namespace {
 class matching {
   public:
-    matching(gsl::not_null<std::mutex*>         distance_mutex,
-             gsl::not_null<std::vector<float>*> distances,
-             gsl::not_null<std::uint64_t*>      descriptor_count,
-             cv::NormTypes                      norm_to_use,
-             bool                               crosscheck,
-             std::string_view                   input_pattern,
-             std::optional<std::string_view>    output_pattern,
-             std::optional<std::string_view>    original_files) noexcept
+    matching(not_null<mutex*>         distance_mutex,
+             not_null<vector<float>*> distances,
+             not_null<uint64_t*>      descriptor_count,
+             NormTypes                norm_to_use,
+             bool                     crosscheck,
+             string_view              input_pattern,
+             optional<string_view>    output_pattern,
+             optional<string_view>    original_files) noexcept
         : distance_mutex{distance_mutex}
         , distances{distances}
         , total_descriptors{descriptor_count}
-        , matcher{cv::BFMatcher::create(norm_to_use, crosscheck)}
+        , matcher{BFMatcher::create(norm_to_use, crosscheck)}
         , input_pattern{input_pattern}
         , output_pattern{output_pattern}
         , original_images{original_files} {
@@ -38,119 +42,115 @@ class matching {
                 "Either both or none are set");
     }
 
-    void operator()(
-        int idx,
-        std::optional<std::vector<cv::KeyPoint>> /*keypoints*/,  // NOLINT
-        std::optional<cv::Mat> descriptors) noexcept {
+    void operator()(int idx,
+                    optional<vector<KeyPoint>> /*keypoints*/,  // NOLINT
+                    optional<Mat> descriptors) noexcept {
         Expects(descriptors);
         Expects(descriptors->rows > 0);
 
-        const int             previous_idx = idx - 1;
-        const cv::FileStorage previous_img = sens_loc::apps::open_feature_file(
+        const int         previous_idx = idx - 1;
+        const FileStorage previous_img = sens_loc::apps::open_feature_file(
             fmt::format(input_pattern, previous_idx));
-        cv::Mat previous_descriptors =
+        Mat previous_descriptors =
             sens_loc::apps::load_descriptors(previous_img);
 
-        std::vector<cv::DMatch> matches;
+        vector<DMatch> matches;
         matcher->match(*descriptors, previous_descriptors, matches);
 
         {
-            std::lock_guard guard{*distance_mutex};
+            lock_guard guard{*distance_mutex};
             // Insert all the distances into the global distances vector.
-            std::transform(std::begin(matches), std::end(matches),
-                           std::back_inserter(*distances),
-                           [](const cv::DMatch& m) { return m.distance; });
+            transform(begin(matches), end(matches), back_inserter(*distances),
+                      [](const DMatch& m) { return m.distance; });
             (*total_descriptors) += descriptors->rows;
         }
 
         if (output_pattern) {
-            const cv::FileStorage this_feature =
-                sens_loc::apps::open_feature_file(
-                    fmt::format(input_pattern, idx));
-            const std::vector<cv::KeyPoint> previous_keypoints =
+            const FileStorage this_feature = sens_loc::apps::open_feature_file(
+                fmt::format(input_pattern, idx));
+            const vector<KeyPoint> previous_keypoints =
                 sens_loc::apps::load_keypoints(this_feature);
 
-            const std::vector<cv::KeyPoint> this_keypoints =
+            const vector<KeyPoint> this_keypoints =
                 sens_loc::apps::load_keypoints(previous_img);
 
-            const std::string img_p1 = fmt::format(*original_images, idx - 1);
-            const std::string img_p2 = fmt::format(*original_images, idx);
-            auto              img1   = sens_loc::apps::load_file(img_p1);
-            auto              img2   = sens_loc::apps::load_file(img_p2);
+            const string img_p1 = fmt::format(*original_images, idx - 1);
+            const string img_p2 = fmt::format(*original_images, idx);
+            auto         img1   = sens_loc::apps::load_file(img_p1);
+            auto         img2   = sens_loc::apps::load_file(img_p2);
 
             if (!img1 || !img2)
                 return;
 
-            cv::Mat out_img;
-            cv::drawMatches(img1->data(), previous_keypoints, img2->data(),
-                            this_keypoints, matches, out_img,
-                            cv::Scalar(0, 0, 255), cv::Scalar(255, 0, 0));
+            Mat out_img;
+            drawMatches(img1->data(), previous_keypoints, img2->data(),
+                        this_keypoints, matches, out_img, Scalar(0, 0, 255),
+                        Scalar(255, 0, 0));
 
-            const std::string output = fmt::format(*output_pattern, idx);
-            cv::imwrite(output, out_img);
+            const string output = fmt::format(*output_pattern, idx);
+            imwrite(output, out_img);
         }
     }
 
     void postprocess() {
-        std::lock_guard guard{*distance_mutex};
+        lock_guard guard{*distance_mutex};
         Expects(!distances->empty());
 
         const auto                   dist_bins = 25;
         sens_loc::analysis::distance distance_stat{*distances, dist_bins};
 
-        std::cout << "==== Match Distances\n"
-                  << distance_stat.histogram() << "\n"
-                  << "total count:    " << *total_descriptors << "\n"
-                  << "matched count:  " << distances->size() << "\n"
-                  << "matched/total:  "
-                  << static_cast<double>(distances->size()) /
-                         static_cast<double>(*total_descriptors)
-                  << "\n"
-                  << "min:            " << distance_stat.min() << "\n"
-                  << "max:            " << distance_stat.max() << "\n"
-                  << "median:         " << distance_stat.median() << "\n"
-                  << "mean:           " << distance_stat.mean() << "\n"
-                  << "Variance:       " << distance_stat.variance() << "\n"
-                  << "StdDev:         " << distance_stat.stddev() << "\n"
-                  << "Skewness:       " << distance_stat.skewness() << "\n";
+        cout << "==== Match Distances\n"
+             << distance_stat.histogram() << "\n"
+             << "total count:    " << *total_descriptors << "\n"
+             << "matched count:  " << distances->size() << "\n"
+             << "matched/total:  "
+             << static_cast<double>(distances->size()) /
+                    static_cast<double>(*total_descriptors)
+             << "\n"
+             << "min:            " << distance_stat.min() << "\n"
+             << "max:            " << distance_stat.max() << "\n"
+             << "median:         " << distance_stat.median() << "\n"
+             << "mean:           " << distance_stat.mean() << "\n"
+             << "Variance:       " << distance_stat.variance() << "\n"
+             << "StdDev:         " << distance_stat.stddev() << "\n"
+             << "Skewness:       " << distance_stat.skewness() << "\n";
     }
 
   private:
-    gsl::not_null<std::mutex*>         distance_mutex;
-    gsl::not_null<std::vector<float>*> distances;
-    gsl::not_null<std::uint64_t*>      total_descriptors;
-    cv::Ptr<cv::BFMatcher>             matcher;
-    std::string_view                   input_pattern;
-    std::optional<std::string_view>    output_pattern;
-    std::optional<std::string_view>    original_images;
+    not_null<mutex*>         distance_mutex;
+    not_null<vector<float>*> distances;
+    not_null<uint64_t*>      total_descriptors;
+    Ptr<BFMatcher>           matcher;
+    string_view              input_pattern;
+    optional<string_view>    output_pattern;
+    optional<string_view>    original_images;
 };
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_matching(std::string_view                input_pattern,
-                     int                             start_idx,
-                     int                             end_idx,
-                     cv::NormTypes                   norm_to_use,
-                     bool                            crosscheck,
-                     std::optional<std::string_view> output_pattern,
-                     std::optional<std::string_view> original_files) {
+int analyze_matching(string_view           input_pattern,
+                     int                   start_idx,
+                     int                   end_idx,
+                     NormTypes             norm_to_use,
+                     bool                  crosscheck,
+                     optional<string_view> output_pattern,
+                     optional<string_view> original_files) {
     Expects(start_idx < end_idx && "Matching requires at least 2 images");
 
-    std::mutex         distance_mutex;
-    std::vector<float> global_minimal_distances;
-    std::uint64_t      total_descriptors;
+    mutex         distance_mutex;
+    vector<float> global_minimal_distances;
+    uint64_t      total_descriptors;
 
-    using visitor = statistic_visitor<matching, required_data::descriptors>;
-    auto analysis_v =
-        visitor{/*input_pattern=*/input_pattern,
-                /*distance_mutex=*/gsl::not_null{&distance_mutex},
-                /*distances=*/gsl::not_null{&global_minimal_distances},
-                /*descriptor_count=*/gsl::not_null{&total_descriptors},
-                /*norm_to_use=*/norm_to_use,
-                /*crosscheck=*/crosscheck,
-                /*input_pattern=*/input_pattern,
-                /*output_pattern=*/output_pattern,
-                /*original_files=*/original_files};
+    using visitor   = statistic_visitor<matching, required_data::descriptors>;
+    auto analysis_v = visitor{/*input_pattern=*/input_pattern,
+                              /*distance_mutex=*/not_null{&distance_mutex},
+                              /*distances=*/not_null{&global_minimal_distances},
+                              /*descriptor_count=*/not_null{&total_descriptors},
+                              /*norm_to_use=*/norm_to_use,
+                              /*crosscheck=*/crosscheck,
+                              /*input_pattern=*/input_pattern,
+                              /*output_pattern=*/output_pattern,
+                              /*original_files=*/original_files};
 
     auto f = parallel_visitation(
         start_idx + 1,  // Because two consecutive images are matched, the first
