@@ -1,6 +1,4 @@
-#include <cstddef>
 #include <gsl/gsl>
-#include <iostream>
 #include <sens_loc/analysis/match.h>
 
 namespace sens_loc::analysis {

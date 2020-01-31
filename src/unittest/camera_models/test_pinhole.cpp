@@ -1,11 +1,10 @@
-#include "sens_loc/math/coordinate.h"
-
 #include <cmath>
 #include <doctest/doctest.h>
 #include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/camera_models/utility.h>
 #include <sens_loc/math/angle_conversion.h>
+#include <sens_loc/math/coordinate.h>
 
 using namespace sens_loc::camera_models;
 using namespace sens_loc::math;
