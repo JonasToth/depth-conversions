@@ -65,6 +65,7 @@ test_add_file(math math/test_coordinate.cpp)
 test_add_file(math math/test_curvature.cpp)
 test_add_file(math math/test_derivatives.cpp)
 test_add_file(math math/test_image.cpp)
+test_add_file(math math/test_pointcloud.cpp)
 test_add_file(math math/test_scaling.cpp)
 test_add_file(math math/test_triangles.cpp)
 

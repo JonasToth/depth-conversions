@@ -226,8 +226,8 @@ coordinate<Real, frame::camera>
 operator*(Real factor, const coordinate<Real, frame::sphere>& pt) noexcept {
     static_assert(std::is_floating_point_v<Real>,
                   "Real must be a floating point type for scaling operations!");
-    coordinate<Real, frame::camera> result{factor * pt.X(), factor * pt.Y(),
-                                           factor * pt.Z()};
+    coordinate<Real, frame::camera> result{factor * pt.Xs(), factor * pt.Ys(),
+                                           factor * pt.Zs()};
     Ensures(std::abs(factor * pt.norm() - result.norm()) < Real(0.0001));
     return result;
 }
