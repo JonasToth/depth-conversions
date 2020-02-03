@@ -24,6 +24,7 @@ if ! ${exe} \
     exit 1
 fi
 
+rm -f backprojected-1.png
 if ! ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
     --start 0 --end 1 \

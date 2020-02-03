@@ -2,6 +2,7 @@
 #define BACKPROJECTION_H_Y2GMMJKT
 
 #include <opencv2/core/mat.hpp>
+#include <opencv2/imgproc.hpp>
 #include <sens_loc/math/image.h>
 #include <sens_loc/math/pointcloud.h>
 
@@ -31,9 +32,12 @@ namespace plot {
 /// \returns image where the keypoints are plotted in different colors and
 /// a connecting line between each match is drawn.
 cv::Mat backprojection_correspondence(
-    const math::image<uchar>&  feature_file,
+    const cv::Mat&             feature_file,
     const math::imagepoints_t& keypoints_this,
-    const math::imagepoints_t& keypoints_other) noexcept;
+    const math::imagepoints_t& keypoints_other,
+    const cv::Scalar&          color_this  = CV_RGB(0, 0, 255),
+    const cv::Scalar&          color_other = CV_RGB(255, 0, 0),
+    const cv::Scalar&          color_line  = CV_RGB(0, 255, 0)) noexcept;
 
 }  // namespace plot
 }  // namespace sens_loc

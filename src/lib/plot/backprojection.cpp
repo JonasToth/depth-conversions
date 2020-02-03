@@ -13,18 +13,28 @@ invalid_keypoint(const cv::Point2f& p, int width, int height) noexcept {
 
 namespace sens_loc::plot {
 
-cv::Mat backprojection_correspondence(
-    const math::image<uchar>&  feature_file,
-    const math::imagepoints_t& keypoints_this,
-    const math::imagepoints_t& keypoints_other) noexcept {
+cv::Mat
+backprojection_correspondence(const cv::Mat&             feature_file,
+                              const math::imagepoints_t& keypoints_this,
+                              const math::imagepoints_t& keypoints_other,
+                              const cv::Scalar&          color_this,
+                              const cv::Scalar&          color_other,
+                              const cv::Scalar&          color_line) noexcept {
     using namespace cv;
     using namespace std;
 
     Expects(keypoints_this.size() == keypoints_other.size());
-    Expects(!feature_file.data().empty());
+    Expects(!feature_file.empty());
 
     cv::Mat underground;
-    cvtColor(feature_file.data(), underground, COLOR_GRAY2BGR);
+    if (feature_file.channels() == 1) {
+        Expects(feature_file.type() == CV_8U);
+        cvtColor(feature_file, underground, COLOR_GRAY2BGR);
+    } else {
+        Expects(feature_file.channels() == 3);
+        Expects(feature_file.type() == CV_8UC3);
+        underground = feature_file;
+    }
 
     using camera_models::coords_to_keypoint;
     vector<KeyPoint> kps_in_this    = coords_to_keypoint(keypoints_this);
@@ -32,21 +42,21 @@ cv::Mat backprojection_correspondence(
     Ensures(kps_in_this.size() == kps_from_other.size());
 
     // Draw keypoints as circles.
-    drawKeypoints(underground, kps_in_this, underground, Scalar(255, 0, 0),
+    drawKeypoints(underground, kps_in_this, underground, color_this,
                   DrawMatchesFlags::DRAW_OVER_OUTIMG);
-    drawKeypoints(underground, kps_from_other, underground, Scalar(0, 0, 255),
+    drawKeypoints(underground, kps_from_other, underground, color_other,
                   DrawMatchesFlags::DRAW_OVER_OUTIMG);
 
     // Draw lines between matching keypoints to visualize their distance in
     // pixel.
     for (std::size_t i = 0UL; i < kps_in_this.size(); ++i) {
-        if (invalid_keypoint(kps_from_other[i].pt, feature_file.w(),
-                             feature_file.h()))
+        if (invalid_keypoint(kps_from_other[i].pt, feature_file.cols,
+                             feature_file.rows))
             continue;
 
         line(underground, kps_in_this[i].pt, kps_from_other[i].pt,
-             /*color=*/Scalar(0, 255, 0),
-             /*thickness=*/2,
+             /*color=*/color_line,
+             /*thickness=*/1,
              /*linetype=*/LINE_AA);
     }
     return underground;

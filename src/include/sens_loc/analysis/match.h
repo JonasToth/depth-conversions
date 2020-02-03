@@ -2,8 +2,8 @@
 #define MATCH_H_COIEXYNJ
 
 #include <gsl/gsl>
-#include <opencv2/core/types.hpp>
-#include <opencv2/features2d.hpp>
+#include <sens_loc/analysis/precision_recall.h>
+#include <sens_loc/math/pointcloud.h>
 #include <utility>
 #include <vector>
 
@@ -19,10 +19,10 @@ namespace sens_loc::analysis {
 /// \param train Set of keypoints that were matched as the training set.
 /// \returns \c pair{QueriedKps, TrainedKps} were each vector contains only
 /// matched keypoints. All other keypoints are discarded in the result.
-std::pair<std::vector<cv::KeyPoint>, std::vector<cv::KeyPoint>>
-gather_matches(const std::vector<cv::DMatch>&   matches,
-               const std::vector<cv::KeyPoint>& query,
-               const std::vector<cv::KeyPoint>& train) noexcept;
+std::pair<math::imagepoints_t, math::imagepoints_t>
+gather_correspondences(gsl::span<const keypoint_correspondence> matches,
+                       const math::imagepoints_t&               query,
+                       const math::imagepoints_t&               train) noexcept;
 }  // namespace sens_loc::analysis
 
 #endif /* end of include guard: MATCH_H_COIEXYNJ */

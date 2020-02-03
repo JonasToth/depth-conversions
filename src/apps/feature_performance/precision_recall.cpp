@@ -35,6 +35,41 @@ using namespace cv;
 
 namespace {
 
+/// Capsulate all required data for back-and-forth projection as well
+/// as precision-recall computation.
+struct reprojection_data {
+    std::vector<cv::KeyPoint> keypoints;
+    cv::Mat                   descriptors;
+    math::image<ushort>       depth_image;
+    math::pose_t              absolute_pose;
+
+    reprojection_data(std::string_view feature_path,
+                      std::string_view depth_path,
+                      std::string_view pose_path) noexcept(false) {
+        const FileStorage fs = io::open_feature_file(string(feature_path));
+        keypoints            = io::load_keypoints(fs);
+        descriptors          = io::load_descriptors(fs);
+
+        optional<math::image<ushort>> d_img =
+            io::load_image<ushort>(string(depth_path), IMREAD_UNCHANGED);
+        if (!d_img) {
+            ostringstream oss;
+            oss << "Could not load depth image from " << depth_path << "!";
+            throw std::runtime_error{oss.str()};
+        }
+        depth_image = move(*d_img);
+
+        ifstream               pose_file{string(pose_path)};
+        optional<math::pose_t> pose = io::load_pose(pose_file);
+        if (!pose) {
+            ostringstream oss;
+            oss << "Could not load pose from " << pose_path << "!";
+            throw std::runtime_error{oss.str()};
+        }
+        absolute_pose = move(*pose);
+    }
+};
+
 template <template <typename> typename Model = sens_loc::camera_models::pinhole,
           typename Real                      = float>
 class prec_recall_analysis {
@@ -45,8 +80,8 @@ class prec_recall_analysis {
                          float                    unit_factor,
                          string_view              intrinsic_file,
                          NormTypes                matching_norm,
-                         not_null<mutex*>         distance_mutex,
-                         not_null<vector<float>*> global_distances,
+                         not_null<mutex*>         inserter_mutex,
+                         not_null<vector<float>*> selected_elements_distance,
                          optional<string_view>    backproject_pattern,
                          optional<string_view>    original_files) noexcept
         : _feature_file_pattern{feature_file_pattern}
@@ -54,8 +89,8 @@ class prec_recall_analysis {
         , _pose_file_pattern{pose_file_pattern}
         , _unit_factor{unit_factor}
         , _matcher{cv::BFMatcher::create(matching_norm, /*crosscheck=*/true)}
-        , _distance_mutex{distance_mutex}
-        , _global_distances{global_distances}
+        , _inserter_mutex{inserter_mutex}
+        , _selected_elements_distances{selected_elements_distance}
         , _backproject_pattern{backproject_pattern}
         , _original_files{original_files} {
         Expects(!_feature_file_pattern.empty());
@@ -91,14 +126,12 @@ class prec_recall_analysis {
         using namespace math;
         using namespace apps;
 
-        const analysis::reprojection_data prev{
-            fmt::format(_feature_file_pattern, previous_idx),
-            fmt::format(_depth_image_pattern, previous_idx),
-            fmt::format(_pose_file_pattern, previous_idx)};
-        const analysis::reprojection_data curr{
-            fmt::format(_feature_file_pattern, idx),
-            fmt::format(_depth_image_pattern, idx),
-            fmt::format(_pose_file_pattern, idx)};
+        reprojection_data prev{fmt::format(_feature_file_pattern, previous_idx),
+                               fmt::format(_depth_image_pattern, previous_idx),
+                               fmt::format(_pose_file_pattern, previous_idx)};
+        reprojection_data curr{fmt::format(_feature_file_pattern, idx),
+                               fmt::format(_depth_image_pattern, idx),
+                               fmt::format(_pose_file_pattern, idx)};
 
         // == Calculate relative pose between the two frames.
         pose_t rel_pose = relative_pose(prev.absolute_pose, curr.absolute_pose);
@@ -117,39 +150,77 @@ class prec_recall_analysis {
             }
         }
 
+        // == get keypoints as world points
+        pointcloud_t prev_points = keypoints_to_pointcloud(
+            prev.keypoints, prev.depth_image, _intrinsic, _unit_factor);
+
+        imagepoints_t prev_in_img =
+            project_to_other_camera(rel_pose, prev_points, _intrinsic);
+        Expects(prev_in_img.size() == prev.keypoints.size());
+        Expects(prev_in_img.size() == prev.keypoints.size());
+
         // == Match the keypoints with cross-checking.
         vector<DMatch> matches;
         // QueryDescriptors: first argument
         // TrainDescriptors: second argument
         _matcher->match(curr.descriptors, prev.descriptors, matches);
 
-        // == get keypoints as world points
-        // Extract the pixels that are the center of the keypoint and use
-        // their depth value to create the 3D point.
-        // Trainpointcloud: Previous
-        const auto [kps, prev_kps] =
-            analysis::gather_matches(matches, curr.keypoints, prev.keypoints);
-        Expects(kps.size() == prev_kps.size());
-
-        pointcloud_t prev_points = keypoints_to_pointcloud(
-            prev_kps, prev.depth_image, _intrinsic, _unit_factor);
-
-        imagepoints_t prev_in_img =
-            project_to_other_camera(rel_pose, prev_points, _intrinsic);
-        Expects(prev_in_img.size() == prev_kps.size());
-
-        // == Calculate the distance between the previous keypoints
-        // backprojected in the current image and the keypoints in this image.
-        imagepoints_t img_kps   = camera_models::keypoint_to_coords(kps);
-        auto          distances = pointwise_distance(img_kps, prev_in_img);
+        using analysis::element_categories;
+        using camera_models::keypoint_to_coords;
+        const imagepoints_t curr_keypoints = keypoint_to_coords(curr.keypoints);
+        const float         threshold      = 5.0F;
+        const element_categories classification(curr_keypoints, prev_in_img,
+                                                matches, threshold);
+        // True positives keypoints from this and previous frame in this
+        // frames coordinate system.
+        auto [t_p_t, t_p_o] = analysis::gather_correspondences(
+            classification.true_positives, curr_keypoints, prev_in_img);
 
         if (_backproject_pattern) {
             optional<math::image<uchar>> orig_img =
                 io::load_as_8bit_gray(fmt::format(*_original_files, idx));
+
             if (orig_img) {
+                // Plot true positives.
                 Mat out_img = plot::backprojection_correspondence(
-                    *orig_img, img_kps, prev_in_img);
-                imwrite(fmt::format(*_backproject_pattern, idx), out_img);
+                    orig_img->data(), t_p_t, t_p_o,  // Keypoints
+                    CV_RGB(19, 187, 92),             // Green
+                    CV_RGB(19, 186, 174),            // Cyan
+                    CV_RGB(0, 100, 0)                // Dark Green
+                );
+
+                // Plot false positives with orange distance line
+                auto [f_p_t, f_p_o] = analysis::gather_correspondences(
+                    classification.false_positives, curr_keypoints,
+                    prev_in_img);
+                out_img = plot::backprojection_correspondence(
+                    out_img, f_p_t, f_p_o,  // Base image and keypoints
+                    CV_RGB(30, 39, 140),    // Dark Blueish
+                    CV_RGB(140, 30, 30),    // Dark Red
+                    CV_RGB(252, 108, 12)    // Orangy
+                );
+
+                // Plot false negatives with purple line
+                auto [f_n_t, f_n_o] = analysis::gather_correspondences(
+                    classification.false_negatives, curr_keypoints,
+                    prev_in_img);
+                out_img = plot::backprojection_correspondence(
+                    out_img, f_n_t, f_n_o,  // Base image and keypoints
+                    CV_RGB(244, 158, 78),   // ocre orange
+                    CV_RGB(244, 78, 81),    // pastell red
+                    CV_RGB(244, 78, 164)    // Pinkish
+                );
+
+                const bool write_success =
+                    imwrite(fmt::format(*_backproject_pattern, idx), out_img);
+
+                if (!write_success) {
+                    lock_guard g{this->_stdio_mutex};
+                    cerr << util::err{}
+                         << "Could not write backprojection correspondence to "
+                            "disk for: "
+                         << idx << "!\n";
+                }
             } else {
                 lock_guard g{this->_stdio_mutex};
                 cerr << util::warn{} << "Original file for: " << idx
@@ -157,10 +228,13 @@ class prec_recall_analysis {
             }
         }
 
+        auto distances = pointwise_distance(t_p_t, t_p_o);
+
         {
-            lock_guard guard{*_distance_mutex};
-            _global_distances->insert(_global_distances->end(),
-                                      distances.begin(), distances.end());
+            lock_guard guard{*_inserter_mutex};
+            _selected_elements_distances->insert(
+                _selected_elements_distances->end(), distances.begin(),
+                distances.end());
         }
     } catch (const std::exception& e) {
         lock_guard g{_stdio_mutex};
@@ -170,29 +244,22 @@ class prec_recall_analysis {
     }
 
     void postprocess() noexcept {
-        lock_guard guard{*_distance_mutex};
+        lock_guard guard{*_inserter_mutex};
 
-        // Calculate the median of the distances by partial sorting until
-        // the middle element.
-        auto median_it =
-            _global_distances->begin() + _global_distances->size() / 2UL;
-        nth_element(_global_distances->begin(), median_it,
-                    _global_distances->end());
-        _global_distances->erase(median_it, _global_distances->end());
-
-        const auto         dist_bins = 50;
-        analysis::distance distance_stat{*_global_distances, dist_bins,
+        const auto         dist_bins = 20;
+        analysis::distance distance_stat{*_selected_elements_distances,
+                                         dist_bins,
                                          "backprojection error pixels"};
 
         cout << distance_stat.histogram() << "\n"
-             << "matched count:  " << distance_stat.count() << "\n"
-             << "min:            " << distance_stat.min() << "\n"
-             << "max:            " << distance_stat.max() << "\n"
-             << "median:         " << distance_stat.median() << "\n"
-             << "mean:           " << distance_stat.mean() << "\n"
-             << "Variance:       " << distance_stat.variance() << "\n"
-             << "StdDev:         " << distance_stat.stddev() << "\n"
-             << "Skewness:       " << distance_stat.skewness() << "\n";
+             << "tp count:  " << distance_stat.count() << "\n"
+             << "min:       " << distance_stat.min() << "\n"
+             << "max:       " << distance_stat.max() << "\n"
+             << "median:    " << distance_stat.median() << "\n"
+             << "mean:      " << distance_stat.mean() << "\n"
+             << "Variance:  " << distance_stat.variance() << "\n"
+             << "StdDev:    " << distance_stat.stddev() << "\n"
+             << "Skewness:  " << distance_stat.skewness() << "\n";
     }
 
   private:
@@ -203,9 +270,10 @@ class prec_recall_analysis {
     Model<Real>    _intrinsic;
     Ptr<BFMatcher> _matcher;
 
-    static mutex             _stdio_mutex;
-    not_null<mutex*>         _distance_mutex;
-    not_null<vector<float>*> _global_distances;
+    static mutex _stdio_mutex;
+
+    not_null<mutex*>         _inserter_mutex;
+    not_null<vector<float>*> _selected_elements_distances;
 
     optional<string_view> _backproject_pattern;
     optional<string_view> _original_files;
@@ -234,18 +302,20 @@ int analyze_precision_recall(string_view           feature_file_pattern,
     // the statistics code.
     using visitor =
         statistic_visitor<prec_recall_analysis<>, required_data::none>;
-    mutex         distance_mutex;
-    vector<float> global_distances;
-    const float   unit_factor = 0.001F;
-    auto          analysis_v  = visitor{feature_file_pattern,
+
+    mutex         inserter_mutex;
+    vector<float> selected_elements_distance;
+
+    const float unit_factor = 0.001F;
+    auto        analysis_v  = visitor{feature_file_pattern,
                               feature_file_pattern,
                               depth_image_pattern,
                               pose_file_pattern,
                               unit_factor,
                               intrinsic_file,
                               matching_norm,
-                              not_null{&distance_mutex},
-                              not_null{&global_distances},
+                              not_null{&inserter_mutex},
+                              not_null{&selected_elements_distance},
                               backproject_pattern,
                               original_files};
 
