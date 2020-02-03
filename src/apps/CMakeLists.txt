@@ -66,6 +66,7 @@ target_sources(feature_performance
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/icp.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/keypoint_distribution.h"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/keypoint_distribution.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/keypoint_transform.h"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.h"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/matching.h"

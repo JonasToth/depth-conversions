@@ -1,3 +1,6 @@
+#ifndef ICP_H_UEHTV2OD
+#define ICP_H_UEHTV2OD
+
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/math/pointcloud.h>
 
@@ -27,3 +30,5 @@ refine_pose(cv::rgbd::Odometry&        icp,
             double                     unit_factor,
             const math::pose_t&        initial_pose) noexcept;
 }  // namespace sens_loc::apps
+
+#endif /* end of include guard: ICP_H_UEHTV2OD */

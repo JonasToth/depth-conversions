@@ -1,6 +1,7 @@
 #include "precision_recall.h"
 
 #include "icp.h"
+#include "keypoint_transform.h"
 
 #include <boost/histogram/ostream.hpp>
 #include <fstream>
@@ -30,8 +31,6 @@ using namespace std;
 using namespace sens_loc;
 using namespace gsl;
 using namespace cv;
-
-#define DEBUG_OUT 0
 
 namespace {
 
@@ -79,17 +78,7 @@ inline void plot_keypoints(string_view             background_file,
 }
 #endif
 
-template <typename Real = float>
-inline Mat cv_camera_matrix(const camera_models::pinhole<Real>& i) {
-    Mat K             = Mat::eye(3, 3, CV_32F);
-    K.at<float>(0, 0) = i.fx();
-    K.at<float>(1, 1) = i.fy();
-    K.at<float>(0, 2) = i.cx();
-    K.at<float>(1, 2) = i.cy();
-    return K;
-}
 constexpr float unit_factor = 0.001F;
-mutex           stdio_mutex;
 
 template <template <typename> typename Model = sens_loc::camera_models::pinhole,
           typename Real                      = float>
@@ -127,7 +116,8 @@ class prec_recall_analysis {
 
         if constexpr (is_same_v<decltype(_intrinsic),
                                 camera_models::pinhole<Real>>) {
-            _icp = rgbd::FastICPOdometry::create(cv_camera_matrix(_intrinsic));
+            _icp = rgbd::FastICPOdometry::create(
+                apps::cv_camera_matrix(_intrinsic));
         }
     }
 
@@ -138,92 +128,19 @@ class prec_recall_analysis {
                     optional<Mat> descriptors) noexcept try {
         Expects(!keypoints);
         Expects(!descriptors);
-#if DEBUG_OUT
-        lock_guard guard{stdio_mutex};
-#endif
 
         const int previous_idx = idx - 1;
 
-        using namespace camera_models;
         using namespace math;
         using namespace apps;
 
-        reprojection_data prev{fmt::format(_feature_file_pattern, previous_idx),
-                               fmt::format(_depth_image_pattern, previous_idx),
-                               fmt::format(_pose_file_pattern, previous_idx)};
-        reprojection_data curr{fmt::format(_feature_file_pattern, idx),
-                               fmt::format(_depth_image_pattern, idx),
-                               fmt::format(_pose_file_pattern, idx)};
-
-        // == Match the keypoints with cross-checking.
-        vector<DMatch> matches;
-        // QueryDescriptors: first argument
-        // TrainDescriptors: second argument
-        _matcher->match(curr.descriptors, prev.descriptors, matches);
-#if DEBUG_OUT
-        cerr << "First pixel after match from idx " << idx << ":\n"
-             << "Train: " << prev.keypoints[matches[0].trainIdx].pt << "\n"
-             << "Query: " << curr.keypoints[matches[0].queryIdx].pt << "\n";
-#endif
-
-        // == get keypoints as world points
-        // Extract the pixels that are the center of the keypoint and use
-        // their depth value to create the 3D point.
-        // Trainpointcloud: Previous
-        const auto [kps, prev_kps] =
-            analysis::gather_matches(matches, curr.keypoints, prev.keypoints);
-#if DEBUG_OUT
-        cerr << "After gathering\n"
-             << "Train: " << prev_kps[0].pt << "\n"
-             << "Query: " << kps[0].pt << "\n";
-
-        // == Debug plot the keypoints from the gathered matches.
-        plot_keypoints(fmt::format(*_original_files, idx), curr.keypoints,
-                       Scalar(255, 0, 0),
-                       fmt::format(*_backproject_pattern, idx));
-        int idx_fun = 100 * previous_idx + idx;
-        plot_keypoints(fmt::format(*_original_files, previous_idx),
-                       prev.keypoints, Scalar(0, 0, 255),
-                       fmt::format(*_backproject_pattern, idx_fun));
-        return;
-#endif
-
-        imagepoints_t img_previous = keypoint_to_coords(prev_kps);
-#if DEBUG_OUT
-        cerr << "pixel coordinates on previous image: " << img_previous[0].u()
-             << " / " << img_previous[0].v() << "\n";
-#endif
-
-        pointcloud_t prev_points = project_to_sphere(_intrinsic, img_previous);
-#if DEBUG_OUT
-        cerr << "Project to sphere: " << prev_points[0].X() << " / "
-             << prev_points[0].Y() << " / " << prev_points[0].Z() << "\n";
-#endif
-
-        Expects(kps.size() == prev_kps.size());
-        for (unsigned int match_idx = 0; match_idx < kps.size(); ++match_idx) {
-            auto orig_depth = prev.depth_image.at(img_previous[match_idx]);
-            auto t_d        = unit_factor * narrow_cast<float>(orig_depth);
-            prev_points[match_idx] = t_d * prev_points[match_idx];
-        }
-
-#if DEBUG_OUT
-        cerr << "Project to Space: " << prev_points[0].X() << " / "
-             << prev_points[0].Y() << " / " << prev_points[0].Z() << "\n";
-
-        imagepoints_t prev_backprojected_to_prev =
-            project_to_image(_intrinsic, prev_points);
-        cerr << "pixel coordinates on previous image backprojected: "
-             << prev_backprojected_to_prev[0].u() << " / "
-             << prev_backprojected_to_prev[0].v() << "\n";
-
-        vector<KeyPoint> prev_back_img =
-            coords_to_keypoint(prev_backprojected_to_prev);
-        int idx_fun = 100 * previous_idx + idx;
-        plot_keypoints(fmt::format(*_original_files, previous_idx),
-                       prev_back_img, Scalar(70, 70, 180),
-                       fmt::format(*_backproject_pattern, idx_fun));
-#endif
+        const reprojection_data prev{
+            fmt::format(_feature_file_pattern, previous_idx),
+            fmt::format(_depth_image_pattern, previous_idx),
+            fmt::format(_pose_file_pattern, previous_idx)};
+        const reprojection_data curr{fmt::format(_feature_file_pattern, idx),
+                                     fmt::format(_depth_image_pattern, idx),
+                                     fmt::format(_pose_file_pattern, idx)};
 
         // == Calculate relative pose between the two frames.
         pose_t rel_pose = relative_pose(prev.absolute_pose, curr.absolute_pose);
@@ -236,36 +153,41 @@ class prec_recall_analysis {
             if (icp_success) {
                 rel_pose = icp_pose;
             } else {
-                lock_guard g{stdio_mutex};
+                lock_guard g{this->_stdio_mutex};
                 cerr << util::warn{} << "No ICP result for idx: " << idx
                      << "!\n";
             }
         }
 
-        // == Transform matches from previous frame into this coordinate
-        // frame.
-        pointcloud_t prev_in_this_frame = rel_pose * prev_points;
-#if DEBUG_OUT
-        cerr << "Project into this frame: " << prev_in_this_frame[0].X()
-             << " / " << prev_in_this_frame[0].Y() << " / "
-             << prev_in_this_frame[0].Z() << "\n";
-#endif
+        // == Match the keypoints with cross-checking.
+        vector<DMatch> matches;
+        // QueryDescriptors: first argument
+        // TrainDescriptors: second argument
+        _matcher->match(curr.descriptors, prev.descriptors, matches);
 
-        // == Project the points back into the current image.
+        // == get keypoints as world points
+        // Extract the pixels that are the center of the keypoint and use
+        // their depth value to create the 3D point.
+        // Trainpointcloud: Previous
+        const auto [kps, prev_kps] =
+            analysis::gather_matches(matches, curr.keypoints, prev.keypoints);
+        Expects(kps.size() == prev_kps.size());
+
+        pointcloud_t prev_points = keypoints_to_pointcloud(
+            prev_kps, prev.depth_image, _intrinsic, unit_factor);
+
         imagepoints_t prev_in_img =
-            project_to_image(_intrinsic, prev_in_this_frame);
-#if DEBUG_OUT
-        cerr << "Pixel in this frame: " << prev_in_img[0].u() << " / "
-             << prev_in_img[0].v() << "\n";
-#endif
+            project_to_other_camera(rel_pose, prev_points, _intrinsic);
+        Expects(prev_in_img.size() == prev_kps.size());
 
         // == Calculate the distance between the previous keypoints
         // backprojected in the current image and the keypoints in this image.
-        imagepoints_t img_kps   = keypoint_to_coords(kps);
+        imagepoints_t img_kps   = camera_models::keypoint_to_coords(kps);
         auto          distances = pointwise_distance(img_kps, prev_in_img);
 
         if (_backproject_pattern) {
             // == Plot the keypoints in one image.
+            using camera_models::coords_to_keypoint;
             auto orig_img = load_file(fmt::format(*_original_files, idx));
             vector<KeyPoint> prev_in_this_kps = coords_to_keypoint(prev_in_img);
 
@@ -296,7 +218,7 @@ class prec_recall_analysis {
                                       distances.begin(), distances.end());
         }
     } catch (const std::exception& e) {
-        lock_guard g{stdio_mutex};
+        lock_guard g{_stdio_mutex};
         cerr << util::err{} << "Could not analyze data for " << idx << "!\n"
              << e.what() << "\n";
         return;
@@ -335,6 +257,7 @@ class prec_recall_analysis {
     Model<Real>    _intrinsic;
     Ptr<BFMatcher> _matcher;
 
+    static mutex             _stdio_mutex;
     not_null<mutex*>         _distance_mutex;
     not_null<vector<float>*> _global_distances;
 
@@ -343,6 +266,9 @@ class prec_recall_analysis {
 
     Ptr<rgbd::Odometry> _icp;
 };
+template <template <typename> typename Model, typename Real>
+mutex prec_recall_analysis<Model, Real>::_stdio_mutex{};
+
 }  // namespace
 
 namespace sens_loc::apps {
