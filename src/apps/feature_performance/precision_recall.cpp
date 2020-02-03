@@ -1,5 +1,7 @@
 #include "precision_recall.h"
 
+#include "icp.h"
+
 #include <boost/histogram/ostream.hpp>
 #include <fstream>
 #include <gsl/gsl>
@@ -125,14 +127,7 @@ class prec_recall_analysis {
 
         if constexpr (is_same_v<decltype(_intrinsic),
                                 camera_models::pinhole<Real>>) {
-            _icp = rgbd::FastICPOdometry::create(cv_camera_matrix(_intrinsic)
-#if 0
-                ,
-                /*minDepth=*/0.1F,      // Distance in meters.
-                /*maxDepth=*/10.0F,     // Distance in meters.
-                /*maxDepthDiff=*/0.05F  // Distance in meters.
-#endif
-            );
+            _icp = rgbd::FastICPOdometry::create(cv_camera_matrix(_intrinsic));
         }
     }
 
@@ -235,41 +230,11 @@ class prec_recall_analysis {
 
         // Refine that pose with an ICP if possible.
         if (_icp) {
-
-            Mat Rt;
-            Mat initial = Mat::eye(4, 4, CV_64FC1);
-            // Copy rotation part.
-            for (int i = 0; i < 4; ++i)
-                for (int j = 0; j < 4; ++j)
-                    initial.at<double>(i, j) = rel_pose(i, j);
-
-            Mat prev_mask;
-            prev.depth_image.data().convertTo(prev_mask, CV_8UC1);
-
-            Mat this_mask;
-            curr.depth_image.data().convertTo(this_mask, CV_8UC1);
-
-            Mat cvt_prev_depth;
-            prev.depth_image.data().convertTo(cvt_prev_depth, CV_32F,
-                                              unit_factor);
-
-            Mat cvt_this_depth;
-            curr.depth_image.data().convertTo(cvt_this_depth, CV_32F,
-                                              unit_factor);
-
-            const bool icp_success = _icp->compute(/*srcImage=*/Mat(),
-                                                   /*srcDepth=*/cvt_prev_depth,
-                                                   /*srcMask=*/prev_mask,
-                                                   /*dstImage=*/Mat(),
-                                                   /*dstDepth=*/cvt_this_depth,
-                                                   /*dstMask=*/this_mask,
-                                                   /*Rt=*/Rt,
-                                                   /*initRt=*/initial);
-
+            auto [icp_pose, icp_success] =
+                refine_pose(*_icp, prev.depth_image, curr.depth_image,
+                            unit_factor, rel_pose);
             if (icp_success) {
-                for (int i = 0; i < 4; ++i)
-                    for (int j = 0; j < 4; ++j)
-                        rel_pose(i, j) = Rt.at<double>(i, j);
+                rel_pose = icp_pose;
             } else {
                 lock_guard g{stdio_mutex};
                 cerr << util::warn{} << "No ICP result for idx: " << idx

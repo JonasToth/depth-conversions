@@ -62,6 +62,8 @@ add_tool(feature_performance
          "${CMAKE_CURRENT_LIST_DIR}/feature_performance/main.cpp")
 target_sources(feature_performance
     PRIVATE
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/icp.h"
+    "${CMAKE_CURRENT_LIST_DIR}/feature_performance/icp.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/keypoint_distribution.h"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/keypoint_distribution.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/feature_performance/min_dist.h"
