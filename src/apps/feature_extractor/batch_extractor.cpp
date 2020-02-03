@@ -6,6 +6,7 @@
 #include <opencv2/core.hpp>
 #include <opencv2/core/persistence.hpp>
 #include <opencv2/features2d.hpp>
+#include <sens_loc/io/image.h>
 #include <sens_loc/math/image.h>
 #include <sens_loc/util/console.h>
 #include <taskflow/taskflow.hpp>
@@ -22,7 +23,7 @@ bool batch_extractor::process_batch(int start, int end) const noexcept {
 
 bool batch_extractor::process_index(int idx) const noexcept {
     const std::string                 p = fmt::format(_input_pattern, idx);
-    std::optional<math::image<uchar>> f = load_file(p);
+    std::optional<math::image<uchar>> f = io::load_as_8bit_gray(p);
 
     if (!f)
         return false;

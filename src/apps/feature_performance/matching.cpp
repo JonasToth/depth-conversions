@@ -76,8 +76,8 @@ class matching {
 
             const string img_p1 = fmt::format(*original_images, idx - 1);
             const string img_p2 = fmt::format(*original_images, idx);
-            auto         img1   = sens_loc::apps::load_file(img_p1);
-            auto         img2   = sens_loc::apps::load_file(img_p2);
+            auto         img1   = sens_loc::io::load_as_8bit_gray(img_p1);
+            auto         img2   = sens_loc::io::load_as_8bit_gray(img_p2);
 
             if (!img1 || !img2)
                 return;

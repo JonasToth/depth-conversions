@@ -43,7 +43,7 @@ struct reprojection_data {
 
     reprojection_data(string_view feature_path,
                       string_view depth_path,
-                      string_view pose_path) {
+                      string_view pose_path) noexcept(false) {
         const FileStorage fs = apps::open_feature_file(string(feature_path));
         keypoints            = apps::load_keypoints(fs);
         descriptors          = apps::load_descriptors(fs);
@@ -173,7 +173,7 @@ class prec_recall_analysis {
 
         if (_backproject_pattern) {
             optional<math::image<uchar>> orig_img =
-                load_file(fmt::format(*_original_files, idx));
+                io::load_as_8bit_gray(fmt::format(*_original_files, idx));
             if (orig_img) {
                 Mat out_img = plot::backprojection_correspondence(
                     *orig_img, img_kps, prev_in_img);

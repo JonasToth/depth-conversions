@@ -16,6 +16,7 @@ list(APPEND sens_loc_headers
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/conversion/depth_to_max_curve.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/conversion/depth_scaling.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/conversion/util.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/feature.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/image.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/intrinsics.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/io/pose.h"

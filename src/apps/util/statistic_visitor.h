@@ -4,9 +4,8 @@
 #include <cstdint>
 #include <fmt/core.h>
 #include <iostream>
-#include <opencv2/core/mat.hpp>
-#include <opencv2/core/persistence.hpp>
 #include <optional>
+#include <sens_loc/io/feature.h>
 #include <sens_loc/util/console.h>
 #include <string_view>
 #include <type_traits>
@@ -36,26 +35,6 @@ constexpr required_data operator&(required_data element1,
                                       static_cast<T>(element2));
 }
 
-inline cv::FileStorage open_feature_file(const std::string& f_path) {
-    using cv::FileStorage;
-    const FileStorage fs{f_path, FileStorage::READ | FileStorage::FORMAT_YAML};
-    return fs;
-}
-
-inline std::vector<cv::KeyPoint> load_keypoints(const cv::FileStorage& fs) {
-    const cv::FileNode        descriptors_node = fs["keypoints"];
-    std::vector<cv::KeyPoint> k;
-    cv::read(descriptors_node, k);
-    return k;
-}
-
-inline cv::Mat load_descriptors(const cv::FileStorage& fs) {
-    const cv::FileNode descriptors_node = fs["descriptors"];
-    cv::Mat            d;
-    cv::read(descriptors_node, d);
-    return d;
-}
-
 /// Load the calculated data like keypoints and descriptors in (optionally)
 /// and execute the statistical analysis by \c Analysor on it.
 /// \tparam Analysor Functor that gets optional<> arguments for each possible
@@ -83,11 +62,11 @@ struct statistic_visitor : Analysor {
 
             if constexpr ((data_elements & required_data::keypoints) !=
                           required_data::none)
-                keypoints = load_keypoints(fs);
+                keypoints = io::load_keypoints(fs);
 
             if constexpr ((data_elements & required_data::descriptors) !=
                           required_data::none)
-                descriptors = load_descriptors(fs);
+                descriptors = io::load_descriptors(fs);
 
             // Call the base-classes analysis operator to actually analyse the
             // data.

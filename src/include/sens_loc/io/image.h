@@ -28,6 +28,21 @@ std::optional<math::image<PixelType>> load_image(Arg&&... args) {
         return std::nullopt;
     return {math::image<PixelType>(std::move(result))};
 }
+
+/// Expects to load a 16bit grayscale image.
+/// It converts those images to 8bit grayscale images that will be processed.
+inline std::optional<math::image<uchar>>
+load_as_8bit_gray(const std::string& name) noexcept {
+    std::optional<math::image<ushort>> depth_image =
+        io::load_image<ushort>(name, cv::IMREAD_UNCHANGED);
+
+    if (!depth_image)
+        return {};
+
+    return math::convert<uchar>(
+        math::image<ushort>(depth_image->data() / 255.));  // NOLINT
+}
+
 }  // namespace io
 }  // namespace sens_loc
 
