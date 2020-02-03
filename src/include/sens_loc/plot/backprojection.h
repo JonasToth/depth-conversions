@@ -5,7 +5,12 @@
 #include <sens_loc/math/image.h>
 #include <sens_loc/math/pointcloud.h>
 
-namespace sens_loc::plot {
+namespace sens_loc {
+
+/// This namespace contains useful functions for plotting results,
+/// matches and other utility for visualization.
+namespace plot {
+
 /// Plot matching keypoints onto the original images to display the accuracy
 /// of a backprojection from one frame to another frame.
 ///
@@ -30,6 +35,6 @@ cv::Mat backprojection_correspondence(
     const math::imagepoints_t& keypoints_this,
     const math::imagepoints_t& keypoints_other) noexcept;
 
-}  // namespace sens_loc::plot
+}  // namespace plot
 
 #endif /* end of include guard: BACKPROJECTION_H_Y2GMMJKT */
