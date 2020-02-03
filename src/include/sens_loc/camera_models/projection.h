@@ -1,9 +1,8 @@
 #ifndef PROJECTION_H_GUWYAV5U
 #define PROJECTION_H_GUWYAV5U
 
-#include "sens_loc/camera_models/concepts.h"
-
 #include <opencv2/core/types.hpp>
+#include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/math/coordinate.h>
 #include <sens_loc/math/pointcloud.h>
