@@ -14,6 +14,7 @@
 #include <opencv2/rgbd/depth.hpp>
 #include <sens_loc/analysis/distance.h>
 #include <sens_loc/analysis/match.h>
+#include <sens_loc/analysis/precision_recall.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/camera_models/projection.h>
 #include <sens_loc/io/image.h>
@@ -25,7 +26,6 @@
 #include <sens_loc/plot/backprojection.h>
 #include <sens_loc/util/console.h>
 #include <util/batch_visitor.h>
-#include <util/io.h>
 #include <util/statistic_visitor.h>
 
 using namespace std;
@@ -34,35 +34,6 @@ using namespace gsl;
 using namespace cv;
 
 namespace {
-
-struct reprojection_data {
-    vector<KeyPoint>    keypoints;
-    Mat                 descriptors;
-    math::image<ushort> depth_image;
-    math::pose_t        absolute_pose;
-
-    reprojection_data(string_view feature_path,
-                      string_view depth_path,
-                      string_view pose_path) noexcept(false) {
-        const FileStorage fs = apps::open_feature_file(string(feature_path));
-        keypoints            = apps::load_keypoints(fs);
-        descriptors          = apps::load_descriptors(fs);
-
-        optional<math::image<ushort>> d_img =
-            io::load_image<ushort>(string(depth_path), cv::IMREAD_UNCHANGED);
-        if (!d_img)
-            throw std::runtime_error{
-                fmt::format("Could not load depth image from {}!", depth_path)};
-        depth_image = move(*d_img);
-
-        ifstream               pose_file{string(pose_path)};
-        optional<math::pose_t> pose = io::load_pose(pose_file);
-        if (!pose)
-            throw std::runtime_error{
-                fmt::format("Could not load pose from {}!", pose_path)};
-        absolute_pose = move(*pose);
-    }
-};
 
 template <template <typename> typename Model = sens_loc::camera_models::pinhole,
           typename Real                      = float>
@@ -120,13 +91,14 @@ class prec_recall_analysis {
         using namespace math;
         using namespace apps;
 
-        const reprojection_data prev{
+        const analysis::reprojection_data prev{
             fmt::format(_feature_file_pattern, previous_idx),
             fmt::format(_depth_image_pattern, previous_idx),
             fmt::format(_pose_file_pattern, previous_idx)};
-        const reprojection_data curr{fmt::format(_feature_file_pattern, idx),
-                                     fmt::format(_depth_image_pattern, idx),
-                                     fmt::format(_pose_file_pattern, idx)};
+        const analysis::reprojection_data curr{
+            fmt::format(_feature_file_pattern, idx),
+            fmt::format(_depth_image_pattern, idx),
+            fmt::format(_pose_file_pattern, idx)};
 
         // == Calculate relative pose between the two frames.
         pose_t rel_pose = relative_pose(prev.absolute_pose, curr.absolute_pose);

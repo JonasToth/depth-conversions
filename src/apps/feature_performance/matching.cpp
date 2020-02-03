@@ -11,8 +11,8 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <sens_loc/analysis/distance.h>
+#include <sens_loc/io/image.h>
 #include <util/batch_visitor.h>
-#include <util/io.h>
 #include <util/statistic_visitor.h>
 
 using namespace cv;
@@ -49,10 +49,9 @@ class matching {
         Expects(descriptors->rows > 0);
 
         const int         previous_idx = idx - 1;
-        const FileStorage previous_img = sens_loc::apps::open_feature_file(
+        const FileStorage previous_img = sens_loc::io::open_feature_file(
             fmt::format(input_pattern, previous_idx));
-        Mat previous_descriptors =
-            sens_loc::apps::load_descriptors(previous_img);
+        Mat previous_descriptors = sens_loc::io::load_descriptors(previous_img);
 
         vector<DMatch> matches;
         matcher->match(*descriptors, previous_descriptors, matches);
@@ -66,13 +65,13 @@ class matching {
         }
 
         if (output_pattern) {
-            const FileStorage this_feature = sens_loc::apps::open_feature_file(
+            const FileStorage this_feature = sens_loc::io::open_feature_file(
                 fmt::format(input_pattern, idx));
             const vector<KeyPoint> previous_keypoints =
-                sens_loc::apps::load_keypoints(this_feature);
+                sens_loc::io::load_keypoints(this_feature);
 
             const vector<KeyPoint> this_keypoints =
-                sens_loc::apps::load_keypoints(previous_img);
+                sens_loc::io::load_keypoints(previous_img);
 
             const string img_p1 = fmt::format(*original_images, idx - 1);
             const string img_p2 = fmt::format(*original_images, idx);

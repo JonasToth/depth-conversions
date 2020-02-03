@@ -55,7 +55,7 @@ struct statistic_visitor : Analysor {
     void operator()(int i) noexcept {
         try {
             const cv::FileStorage fs =
-                open_feature_file(fmt::format(input_pattern, i));
+                io::open_feature_file(fmt::format(input_pattern, i));
 
             std::optional<std::vector<cv::KeyPoint>> keypoints   = std::nullopt;
             std::optional<cv::Mat>                   descriptors = std::nullopt;

@@ -10,7 +10,6 @@
 #include <sens_loc/math/image.h>
 #include <sens_loc/util/console.h>
 #include <taskflow/taskflow.hpp>
-#include <util/io.h>
 #include <util/parallel_processing.h>
 #include <utility>
 

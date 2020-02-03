@@ -2,6 +2,7 @@
 #define IMAGE_H_WIIAQPH0
 
 #include <opencv2/imgcodecs.hpp>
+#include <opencv2/imgproc.hpp>
 #include <optional>
 #include <sens_loc/math/image.h>
 #include <type_traits>
