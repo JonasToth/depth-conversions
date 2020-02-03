@@ -36,5 +36,6 @@ cv::Mat backprojection_correspondence(
     const math::imagepoints_t& keypoints_other) noexcept;
 
 }  // namespace plot
+}  // namespace sens_loc
 
 #endif /* end of include guard: BACKPROJECTION_H_Y2GMMJKT */
