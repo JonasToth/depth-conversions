@@ -29,6 +29,7 @@ list(APPEND sens_loc_headers
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/pointcloud.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/scaling.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/math/triangles.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/plot/backprojection.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/preprocess/filter.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/console.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/correctness_util.h"
@@ -39,6 +40,7 @@ target_sources(sens_loc PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/lib/analysis/keypoints.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/analysis/match.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/io/pose.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/lib/plot/backprojection.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/util/correctness_util.cpp"
     )
 common_target_properties(sens_loc)

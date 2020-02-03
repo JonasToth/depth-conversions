@@ -6,11 +6,11 @@
 #include <boost/histogram/ostream.hpp>
 #include <fstream>
 #include <gsl/gsl>
+#include <iterator>
 #include <opencv2/core/hal/interface.h>
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
-#include <opencv2/imgproc.hpp>
 #include <opencv2/rgbd/depth.hpp>
 #include <sens_loc/analysis/distance.h>
 #include <sens_loc/analysis/match.h>
@@ -22,6 +22,7 @@
 #include <sens_loc/math/coordinate.h>
 #include <sens_loc/math/image.h>
 #include <sens_loc/math/pointcloud.h>
+#include <sens_loc/plot/backprojection.h>
 #include <sens_loc/util/console.h>
 #include <util/batch_visitor.h>
 #include <util/io.h>
@@ -63,23 +64,6 @@ struct reprojection_data {
     }
 };
 
-#if DEBUG_OUT
-inline void plot_keypoints(string_view             background_file,
-                           const vector<KeyPoint>& kps,
-                           const Scalar&           color,
-                           string_view             output_file) {
-    auto orig_img = apps::load_file(string(background_file));
-    Mat  out_img;
-    cvtColor(orig_img->data(), out_img, cv::COLOR_GRAY2BGR);
-    // Draw the keypoints detected in this image.
-    drawKeypoints(out_img, kps, out_img, color,
-                  DrawMatchesFlags::DRAW_OVER_OUTIMG);
-    imwrite(string(output_file), out_img);
-}
-#endif
-
-constexpr float unit_factor = 0.001F;
-
 template <template <typename> typename Model = sens_loc::camera_models::pinhole,
           typename Real                      = float>
 class prec_recall_analysis {
@@ -87,6 +71,7 @@ class prec_recall_analysis {
     prec_recall_analysis(string_view              feature_file_pattern,
                          string_view              depth_image_pattern,
                          string_view              pose_file_pattern,
+                         float                    unit_factor,
                          string_view              intrinsic_file,
                          NormTypes                matching_norm,
                          not_null<mutex*>         distance_mutex,
@@ -96,6 +81,7 @@ class prec_recall_analysis {
         : _feature_file_pattern{feature_file_pattern}
         , _depth_image_pattern{depth_image_pattern}
         , _pose_file_pattern{pose_file_pattern}
+        , _unit_factor{unit_factor}
         , _matcher{cv::BFMatcher::create(matching_norm, /*crosscheck=*/true)}
         , _distance_mutex{distance_mutex}
         , _global_distances{global_distances}
@@ -149,7 +135,7 @@ class prec_recall_analysis {
         if (_icp) {
             auto [icp_pose, icp_success] =
                 refine_pose(*_icp, prev.depth_image, curr.depth_image,
-                            unit_factor, rel_pose);
+                            _unit_factor, rel_pose);
             if (icp_success) {
                 rel_pose = icp_pose;
             } else {
@@ -174,7 +160,7 @@ class prec_recall_analysis {
         Expects(kps.size() == prev_kps.size());
 
         pointcloud_t prev_points = keypoints_to_pointcloud(
-            prev_kps, prev.depth_image, _intrinsic, unit_factor);
+            prev_kps, prev.depth_image, _intrinsic, _unit_factor);
 
         imagepoints_t prev_in_img =
             project_to_other_camera(rel_pose, prev_points, _intrinsic);
@@ -186,30 +172,17 @@ class prec_recall_analysis {
         auto          distances = pointwise_distance(img_kps, prev_in_img);
 
         if (_backproject_pattern) {
-            // == Plot the keypoints in one image.
-            using camera_models::coords_to_keypoint;
-            auto orig_img = load_file(fmt::format(*_original_files, idx));
-            vector<KeyPoint> prev_in_this_kps = coords_to_keypoint(prev_in_img);
-
-            Mat out_img;
-            cvtColor(orig_img->data(), out_img, cv::COLOR_GRAY2BGR);
-            // Draw the keypoints detected in this image.
-            drawKeypoints(out_img, kps, out_img, Scalar(255, 0, 0),
-                          DrawMatchesFlags::DRAW_OVER_OUTIMG);
-            // Draw the keypoints detected in the previous image,
-            // backprojected into this image.
-            drawKeypoints(out_img, prev_in_this_kps, out_img, Scalar(0, 0, 255),
-                          DrawMatchesFlags::DRAW_OVER_OUTIMG);
-
-            Ensures(kps.size() == prev_in_this_kps.size());
-            for (std::size_t i = 0UL; i < kps.size(); ++i) {
-                line(out_img, kps[i].pt, prev_in_this_kps[i].pt,
-                     /*color=*/Scalar(0, 255, 0),
-                     /*thickness=*/2,
-                     /*linetype=*/LINE_AA);
+            optional<math::image<uchar>> orig_img =
+                load_file(fmt::format(*_original_files, idx));
+            if (orig_img) {
+                Mat out_img = plot::backprojection_correspondence(
+                    *orig_img, img_kps, prev_in_img);
+                imwrite(fmt::format(*_backproject_pattern, idx), out_img);
+            } else {
+                lock_guard g{this->_stdio_mutex};
+                cerr << util::warn{} << "Original file for: " << idx
+                     << "could not be loaded for backprojection plot!\n";
             }
-
-            imwrite(fmt::format(*_backproject_pattern, idx), out_img);
         }
 
         {
@@ -254,6 +227,7 @@ class prec_recall_analysis {
     string_view    _feature_file_pattern;
     string_view    _depth_image_pattern;
     string_view    _pose_file_pattern;
+    float          _unit_factor;
     Model<Real>    _intrinsic;
     Ptr<BFMatcher> _matcher;
 
@@ -290,11 +264,12 @@ int analyze_precision_recall(string_view           feature_file_pattern,
         statistic_visitor<prec_recall_analysis<>, required_data::none>;
     mutex         distance_mutex;
     vector<float> global_distances;
-
-    auto analysis_v = visitor{feature_file_pattern,
+    const float   unit_factor = 0.001F;
+    auto          analysis_v  = visitor{feature_file_pattern,
                               feature_file_pattern,
                               depth_image_pattern,
                               pose_file_pattern,
+                              unit_factor,
                               intrinsic_file,
                               matching_norm,
                               not_null{&distance_mutex},
