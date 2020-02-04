@@ -1,6 +1,8 @@
 #ifndef PRECISION_RECALL_H_0COUZXGS
 #define PRECISION_RECALL_H_0COUZXGS
 
+#include "sens_loc/analysis/distance.h"
+
 #include <iterator>
 #include <limits>
 #include <opencv2/features2d.hpp>
@@ -69,6 +71,34 @@ struct element_categories {
                        const math::imagepoints_t&     train_data,
                        const std::vector<cv::DMatch>& matches,
                        float                          threshold) noexcept;
+};
+
+/// Statistical evaluation for precision-recall of a whole dataset.
+struct precision_recall_statistic {
+    std::size_t n_true_pos  = 0UL;
+    std::size_t n_false_pos = 0UL;
+    std::size_t n_true_neg  = 0UL;
+    std::size_t n_false_neg = 0UL;
+
+    [[nodiscard]] double precision() const noexcept {
+        std::size_t selected = n_true_pos + n_false_pos;
+        return selected == 0UL ? 0.0
+                               : gsl::narrow_cast<double>(n_true_pos) /
+                                     gsl::narrow_cast<double>(selected);
+    }
+    [[nodiscard]] double recall() const noexcept {
+        std::size_t relevant = n_true_pos + n_false_neg;
+        return relevant == 0UL ? 0.0
+                               : gsl::narrow_cast<double>(n_true_pos) /
+                                     gsl::narrow_cast<double>(relevant);
+    }
+    [[nodiscard]] double relevant_ratio() const noexcept {
+        std::size_t relevant   = n_true_pos + n_false_neg;
+        std::size_t irrelevant = n_false_pos + n_true_neg;
+        return irrelevant == 0UL ? 0.0
+                                 : gsl::narrow_cast<double>(relevant) /
+                                       gsl::narrow_cast<double>(irrelevant);
+    }
 };
 
 }  // namespace sens_loc::analysis

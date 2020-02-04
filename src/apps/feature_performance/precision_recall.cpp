@@ -74,23 +74,26 @@ template <template <typename> typename Model = sens_loc::camera_models::pinhole,
           typename Real                      = float>
 class prec_recall_analysis {
   public:
-    prec_recall_analysis(string_view              feature_file_pattern,
-                         string_view              depth_image_pattern,
-                         string_view              pose_file_pattern,
-                         float                    unit_factor,
-                         string_view              intrinsic_file,
-                         NormTypes                matching_norm,
-                         not_null<mutex*>         inserter_mutex,
-                         not_null<vector<float>*> selected_elements_distance,
-                         optional<string_view>    backproject_pattern,
-                         optional<string_view>    original_files) noexcept
+    prec_recall_analysis(
+        string_view              feature_file_pattern,
+        string_view              depth_image_pattern,
+        string_view              pose_file_pattern,
+        float                    unit_factor,
+        string_view              intrinsic_file,
+        NormTypes                matching_norm,
+        not_null<mutex*>         inserter_mutex,
+        not_null<vector<float>*> selected_elements_distance,
+        not_null<analysis::precision_recall_statistic*> prec_recall_stat,
+        optional<string_view>                           backproject_pattern,
+        optional<string_view>                           original_files) noexcept
         : _feature_file_pattern{feature_file_pattern}
         , _depth_image_pattern{depth_image_pattern}
         , _pose_file_pattern{pose_file_pattern}
         , _unit_factor{unit_factor}
         , _matcher{cv::BFMatcher::create(matching_norm, /*crosscheck=*/true)}
         , _inserter_mutex{inserter_mutex}
-        , _selected_elements_distances{selected_elements_distance}
+        , _selected_elements_dist{selected_elements_distance}
+        , _stats{prec_recall_stat}
         , _backproject_pattern{backproject_pattern}
         , _original_files{original_files} {
         Expects(!_feature_file_pattern.empty());
@@ -232,9 +235,12 @@ class prec_recall_analysis {
 
         {
             lock_guard guard{*_inserter_mutex};
-            _selected_elements_distances->insert(
-                _selected_elements_distances->end(), distances.begin(),
-                distances.end());
+            _selected_elements_dist->insert(_selected_elements_dist->end(),
+                                            distances.begin(), distances.end());
+            _stats->n_true_pos += classification.true_positives.size();
+            _stats->n_false_pos += classification.false_positives.size();
+            _stats->n_true_neg += classification.true_negatives.size();
+            _stats->n_false_neg += classification.false_negatives.size();
         }
     } catch (const std::exception& e) {
         lock_guard g{_stdio_mutex};
@@ -247,19 +253,21 @@ class prec_recall_analysis {
         lock_guard guard{*_inserter_mutex};
 
         const auto         dist_bins = 20;
-        analysis::distance distance_stat{*_selected_elements_distances,
-                                         dist_bins,
+        analysis::distance distance_stat{*_selected_elements_dist, dist_bins,
                                          "backprojection error pixels"};
 
         cout << distance_stat.histogram() << "\n"
-             << "tp count:  " << distance_stat.count() << "\n"
-             << "min:       " << distance_stat.min() << "\n"
-             << "max:       " << distance_stat.max() << "\n"
-             << "median:    " << distance_stat.median() << "\n"
-             << "mean:      " << distance_stat.mean() << "\n"
-             << "Variance:  " << distance_stat.variance() << "\n"
-             << "StdDev:    " << distance_stat.stddev() << "\n"
-             << "Skewness:  " << distance_stat.skewness() << "\n";
+             << "# relevant: " << distance_stat.count() << "\n"
+             << "min:        " << distance_stat.min() << "\n"
+             << "max:        " << distance_stat.max() << "\n"
+             << "median:     " << distance_stat.median() << "\n"
+             << "mean:       " << distance_stat.mean() << "\n"
+             << "Variance:   " << distance_stat.variance() << "\n"
+             << "StdDev:     " << distance_stat.stddev() << "\n"
+             << "Skewness:   " << distance_stat.skewness() << "\n"
+             << "Precision   " << _stats->precision() << "\n"
+             << "Recall:     " << _stats->recall() << "\n"
+             << "Relevance:  " << _stats->relevant_ratio() << "\n";
     }
 
   private:
@@ -272,8 +280,9 @@ class prec_recall_analysis {
 
     static mutex _stdio_mutex;
 
-    not_null<mutex*>         _inserter_mutex;
-    not_null<vector<float>*> _selected_elements_distances;
+    not_null<mutex*>                                _inserter_mutex;
+    not_null<vector<float>*>                        _selected_elements_dist;
+    not_null<analysis::precision_recall_statistic*> _stats;
 
     optional<string_view> _backproject_pattern;
     optional<string_view> _original_files;
@@ -303,8 +312,9 @@ int analyze_precision_recall(string_view           feature_file_pattern,
     using visitor =
         statistic_visitor<prec_recall_analysis<>, required_data::none>;
 
-    mutex         inserter_mutex;
-    vector<float> selected_elements_distance;
+    mutex                                inserter_mutex;
+    vector<float>                        selected_elements_distance;
+    analysis::precision_recall_statistic stats;
 
     const float unit_factor = 0.001F;
     auto        analysis_v  = visitor{feature_file_pattern,
@@ -316,6 +326,7 @@ int analyze_precision_recall(string_view           feature_file_pattern,
                               matching_norm,
                               not_null{&inserter_mutex},
                               not_null{&selected_elements_distance},
+                              not_null{&stats},
                               backproject_pattern,
                               original_files};
 
