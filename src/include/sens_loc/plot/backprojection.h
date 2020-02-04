@@ -31,13 +31,12 @@ namespace plot {
 /// and \c feature_file live.
 /// \returns image where the keypoints are plotted in different colors and
 /// a connecting line between each match is drawn.
-cv::Mat backprojection_correspondence(
-    const cv::Mat&             feature_file,
-    const math::imagepoints_t& keypoints_this,
-    const math::imagepoints_t& keypoints_other,
-    const cv::Scalar&          color_this  = CV_RGB(0, 0, 255),
-    const cv::Scalar&          color_other = CV_RGB(255, 0, 0),
-    const cv::Scalar&          color_line  = CV_RGB(0, 255, 0)) noexcept;
+cv::Mat
+backprojection_correspondence(const cv::Mat&             feature_file,
+                              const math::imagepoints_t& keypoints_this,
+                              const math::imagepoints_t& keypoints_other,
+                              const cv::Scalar& line_color = CV_RGB(0, 0, 255),
+                              int               strength_relevant = 2) noexcept;
 
 }  // namespace plot
 }  // namespace sens_loc

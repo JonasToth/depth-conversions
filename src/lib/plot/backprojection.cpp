@@ -5,10 +5,32 @@
 #include <sens_loc/camera_models/projection.h>
 #include <sens_loc/plot/backprojection.h>
 
-static bool
-invalid_keypoint(const cv::Point2f& p, int width, int height) noexcept {
+using namespace cv;
+using namespace std;
+
+static bool invalid_keypoint(const Point2f& p, int width, int height) noexcept {
     return p.x < 0.0F || p.y < 0.0F || p.x > gsl::narrow<float>(width) ||
            p.y > gsl::narrow_cast<float>(height);
+}
+
+static void draw_line_correspondence(Mat&                    underground,
+                                     const vector<KeyPoint>& set1,
+                                     const vector<KeyPoint>& set2,
+                                     const Scalar&           line_color,
+                                     int                     line_thickness,
+                                     int                     img_width,
+                                     int img_height) noexcept {
+    Expects(set1.size() == set2.size());
+
+    for (std::size_t i = 0UL; i < set1.size(); ++i) {
+        if (invalid_keypoint(set2[i].pt, img_width, img_height))
+            continue;
+
+        line(underground, set1[i].pt, set2[i].pt,
+             /*color=*/line_color,
+             /*thickness=*/line_thickness,
+             /*linetype=*/LINE_AA);
+    }
 }
 
 namespace sens_loc::plot {
@@ -17,11 +39,8 @@ cv::Mat
 backprojection_correspondence(const cv::Mat&             feature_file,
                               const math::imagepoints_t& keypoints_this,
                               const math::imagepoints_t& keypoints_other,
-                              const cv::Scalar&          color_this,
-                              const cv::Scalar&          color_other,
-                              const cv::Scalar&          color_line) noexcept {
-    using namespace cv;
-    using namespace std;
+                              const cv::Scalar&          line_color,
+                              const int strength_relevant) noexcept {
 
     Expects(keypoints_this.size() == keypoints_other.size());
     Expects(!feature_file.empty());
@@ -42,23 +61,9 @@ backprojection_correspondence(const cv::Mat&             feature_file,
     Ensures(kps_in_this.size() == kps_from_other.size());
 
     // Draw keypoints as circles.
-    drawKeypoints(underground, kps_in_this, underground, color_this,
-                  DrawMatchesFlags::DRAW_OVER_OUTIMG);
-    drawKeypoints(underground, kps_from_other, underground, color_other,
-                  DrawMatchesFlags::DRAW_OVER_OUTIMG);
-
-    // Draw lines between matching keypoints to visualize their distance in
-    // pixel.
-    for (std::size_t i = 0UL; i < kps_in_this.size(); ++i) {
-        if (invalid_keypoint(kps_from_other[i].pt, feature_file.cols,
-                             feature_file.rows))
-            continue;
-
-        line(underground, kps_in_this[i].pt, kps_from_other[i].pt,
-             /*color=*/color_line,
-             /*thickness=*/1,
-             /*linetype=*/LINE_AA);
-    }
+    draw_line_correspondence(underground, kps_in_this, kps_from_other,
+                             line_color, strength_relevant, feature_file.cols,
+                             feature_file.rows);
     return underground;
 }
 }  // namespace sens_loc::plot

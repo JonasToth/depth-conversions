@@ -187,20 +187,8 @@ class prec_recall_analysis {
                 // Plot true positives.
                 Mat out_img = plot::backprojection_correspondence(
                     orig_img->data(), t_p_t, t_p_o,  // Keypoints
-                    CV_RGB(19, 187, 92),             // Green
-                    CV_RGB(19, 186, 174),            // Cyan
-                    CV_RGB(0, 100, 0)                // Dark Green
-                );
-
-                // Plot false positives with orange distance line
-                auto [f_p_t, f_p_o] = analysis::gather_correspondences(
-                    classification.false_positives, curr_keypoints,
-                    prev_in_img);
-                out_img = plot::backprojection_correspondence(
-                    out_img, f_p_t, f_p_o,  // Base image and keypoints
-                    CV_RGB(30, 39, 140),    // Dark Blueish
-                    CV_RGB(140, 30, 30),    // Dark Red
-                    CV_RGB(252, 108, 12)    // Orangy
+                    CV_RGB(0, 120, 0),               // Dark Green
+                    6                                // Thickness
                 );
 
                 // Plot false negatives with purple line
@@ -209,10 +197,20 @@ class prec_recall_analysis {
                     prev_in_img);
                 out_img = plot::backprojection_correspondence(
                     out_img, f_n_t, f_n_o,  // Base image and keypoints
-                    CV_RGB(244, 158, 78),   // ocre orange
-                    CV_RGB(244, 78, 81),    // pastell red
-                    CV_RGB(244, 78, 164)    // Pinkish
+                    CV_RGB(30, 39, 140),    // Dark Blueish
+                    6                       // Thickness
                 );
+
+                // Plot false positives with orange distance line
+                auto [f_p_t, f_p_o] = analysis::gather_correspondences(
+                    classification.false_positives, curr_keypoints,
+                    prev_in_img);
+                out_img = plot::backprojection_correspondence(
+                    out_img, f_p_t, f_p_o,  // Base image and keypoints
+                    CV_RGB(245, 130, 50),   // ocre orange
+                    1                       // Thickness
+                );
+
 
                 const bool write_success =
                     imwrite(fmt::format(*_backproject_pattern, idx), out_img);
