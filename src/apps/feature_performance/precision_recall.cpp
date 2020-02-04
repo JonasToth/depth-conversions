@@ -11,6 +11,7 @@
 #include <opencv2/core/mat.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
+#include <opencv2/imgcodecs.hpp>
 #include <opencv2/rgbd/depth.hpp>
 #include <sens_loc/analysis/distance.h>
 #include <sens_loc/analysis/match.h>
@@ -70,6 +71,20 @@ struct reprojection_data {
     }
 };
 
+size_t mask_backprojection(const math::image<uchar>& mask,
+                           math::imagepoints_t&      points) noexcept {
+    size_t counter = 0UL;
+    for (math::pixel_coord<float>& p : points) {
+        if (p.u() < 0.0F || p.v() < 0.0F ||
+            p.u() > narrow_cast<float>(mask.w()) ||
+            p.v() > narrow_cast<float>(mask.h()) || mask.at(p) == 0U) {
+            p = {-1.0F, -1.0F};
+            ++counter;
+        }
+    }
+    return counter;
+}
+
 template <template <typename> typename Model = sens_loc::camera_models::pinhole,
           typename Real                      = float>
 class prec_recall_analysis {
@@ -80,10 +95,12 @@ class prec_recall_analysis {
         string_view              pose_file_pattern,
         float                    unit_factor,
         string_view              intrinsic_file,
+        optional<string_view>    mask_file,
         NormTypes                matching_norm,
         not_null<mutex*>         inserter_mutex,
         not_null<vector<float>*> selected_elements_distance,
         not_null<analysis::precision_recall_statistic*> prec_recall_stat,
+        not_null<size_t*>                               totally_masked,
         optional<string_view>                           backproject_pattern,
         optional<string_view>                           original_files) noexcept
         : _feature_file_pattern{feature_file_pattern}
@@ -94,6 +111,7 @@ class prec_recall_analysis {
         , _inserter_mutex{inserter_mutex}
         , _selected_elements_dist{selected_elements_distance}
         , _stats{prec_recall_stat}
+        , _totally_masked{totally_masked}
         , _backproject_pattern{backproject_pattern}
         , _original_files{original_files} {
         Expects(!_feature_file_pattern.empty());
@@ -108,6 +126,32 @@ class prec_recall_analysis {
                 intrinsic);
         Expects(maybe_intrinsic.has_value());
         _intrinsic = *maybe_intrinsic;
+
+        if (mask_file) {
+            _mask = io::load_image<uchar>(string(*mask_file), IMREAD_GRAYSCALE);
+            if (!_mask) {
+                cerr << util::err{} << "Could not load mask file '"
+                     << *mask_file << "'!\n"
+                     << "Continuing without masking.\n";
+            }
+            // The mask file is loaded. It is necessary to check, that the
+            // dimensions match the loaded intrinsic. If not, masking is
+            // disabled.
+            else {
+                if (_mask->w() != _intrinsic.w() ||
+                    _mask->h() != _intrinsic.h()) {
+                    cerr << util::err{}
+                         << "Dimensions of the mask mismatch the dimensions of "
+                            "the intrinsic!\n"
+                         << "Disabling masking.\n"
+                         << "Mask {" << _mask->w() << ", " << _mask->h()
+                         << "} vs Intrinsic {" << _intrinsic.w() << ", "
+                         << _intrinsic.h() << "}\n";
+                    _mask = nullopt;
+                }
+            }
+        } else
+            _mask = nullopt;
 
         if constexpr (is_same_v<decltype(_intrinsic),
                                 camera_models::pinhole<Real>>) {
@@ -159,7 +203,13 @@ class prec_recall_analysis {
 
         imagepoints_t prev_in_img =
             project_to_other_camera(rel_pose, prev_points, _intrinsic);
-        Expects(prev_in_img.size() == prev.keypoints.size());
+
+        // Some backprojected points might land outside of the viewport of
+        // the camera model, but still on valid pixel coordinates (inside the
+        // image). This can be detected with using a mask.
+        // Such points are set to {-1, -1} to be recognizable invalid.
+        const size_t masked_points =
+            _mask ? mask_backprojection(*_mask, prev_in_img) : 0;
         Expects(prev_in_img.size() == prev.keypoints.size());
 
         // == Match the keypoints with cross-checking.
@@ -172,6 +222,7 @@ class prec_recall_analysis {
         using camera_models::keypoint_to_coords;
         const imagepoints_t curr_keypoints = keypoint_to_coords(curr.keypoints);
         const float         threshold      = 5.0F;
+
         const element_categories classification(curr_keypoints, prev_in_img,
                                                 matches, threshold);
         // True positives keypoints from this and previous frame in this
@@ -239,6 +290,7 @@ class prec_recall_analysis {
             _stats->n_false_pos += classification.false_positives.size();
             _stats->n_true_neg += classification.true_negatives.size();
             _stats->n_false_neg += classification.false_negatives.size();
+            *_totally_masked += masked_points;
         }
     } catch (const std::exception& e) {
         lock_guard g{_stdio_mutex};
@@ -265,22 +317,25 @@ class prec_recall_analysis {
              << "Skewness:   " << distance_stat.skewness() << "\n"
              << "Precision   " << _stats->precision() << "\n"
              << "Recall:     " << _stats->recall() << "\n"
-             << "Relevance:  " << _stats->relevant_ratio() << "\n";
+             << "Relevance:  " << _stats->relevant_ratio() << "\n"
+             << "Masked pts: " << *_totally_masked << "\n";
     }
 
   private:
-    string_view    _feature_file_pattern;
-    string_view    _depth_image_pattern;
-    string_view    _pose_file_pattern;
-    float          _unit_factor;
-    Model<Real>    _intrinsic;
-    Ptr<BFMatcher> _matcher;
+    string_view                  _feature_file_pattern;
+    string_view                  _depth_image_pattern;
+    string_view                  _pose_file_pattern;
+    float                        _unit_factor;
+    Model<Real>                  _intrinsic;
+    Ptr<BFMatcher>               _matcher;
+    optional<math::image<uchar>> _mask;
 
     static mutex _stdio_mutex;
 
     not_null<mutex*>                                _inserter_mutex;
     not_null<vector<float>*>                        _selected_elements_dist;
     not_null<analysis::precision_recall_statistic*> _stats;
+    not_null<size_t*>                               _totally_masked;
 
     optional<string_view> _backproject_pattern;
     optional<string_view> _original_files;
@@ -299,6 +354,7 @@ int analyze_precision_recall(string_view           feature_file_pattern,
                              string_view           depth_image_pattern,
                              string_view           pose_file_pattern,
                              string_view           intrinsic_file,
+                             optional<string_view> mask_file,
                              NormTypes             matching_norm,
                              optional<string_view> backproject_pattern,
                              optional<string_view> original_files) {
@@ -313,6 +369,7 @@ int analyze_precision_recall(string_view           feature_file_pattern,
     mutex                                inserter_mutex;
     vector<float>                        selected_elements_distance;
     analysis::precision_recall_statistic stats;
+    size_t                               totally_masked = 0UL;
 
     const float unit_factor = 0.001F;
     auto        analysis_v  = visitor{feature_file_pattern,
@@ -321,10 +378,12 @@ int analyze_precision_recall(string_view           feature_file_pattern,
                               pose_file_pattern,
                               unit_factor,
                               intrinsic_file,
+                              mask_file,
                               matching_norm,
                               not_null{&inserter_mutex},
                               not_null{&selected_elements_distance},
                               not_null{&stats},
+                              not_null{&totally_masked},
                               backproject_pattern,
                               original_files};
 

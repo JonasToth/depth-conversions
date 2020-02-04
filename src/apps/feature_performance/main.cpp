@@ -5,7 +5,6 @@
 
 #include <CLI/CLI.hpp>
 #include <boost/histogram.hpp>
-#include <iostream>
 #include <opencv2/core/base.hpp>
 #include <sens_loc/util/console.h>
 #include <sens_loc/util/correctness_util.h>
@@ -124,6 +123,13 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
         ->add_option("--intrinsic", intrinsic_file,
                      "File path to the intrinsic - currently only pinhole!")
         ->required();
+    optional<string> mask_file;
+    cmd_prec_rec->add_option(
+        "--mask", mask_file,
+        "Image-mask with intrinsic dimenstion. Every black pixel "
+        "means the camera has no vision there. White means, the "
+        "camera sees these pixels. Use for distortion masking."
+        "(8-bit grayscale png!)");
     cmd_prec_rec->add_set("-d,--match-norm", norm_name,
                           {"L1", "L2", "L2SQR", "HAMMING", "HAMMING2"},
                           "Set the norm that shall be used as distance measure",
@@ -162,8 +168,8 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     if (*cmd_prec_rec)
         return analyze_precision_recall(
             feature_file_input_pattern, start_idx, end_idx, depth_image_path,
-            pose_file_pattern, intrinsic_file, str_to_norm(norm_name),
-            backproject_pattern, original_images);
+            pose_file_pattern, intrinsic_file, mask_file,
+            str_to_norm(norm_name), backproject_pattern, original_images);
 
     UNREACHABLE("Expected to end program with "  // LCOV_EXCL_LINE
                 "subcommand processing");        // LCOV_EXCL_LINE

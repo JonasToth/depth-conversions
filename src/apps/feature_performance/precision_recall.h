@@ -27,6 +27,7 @@ int analyze_precision_recall(
     std::string_view                depth_image_pattern,
     std::string_view                pose_file_pattern,
     std::string_view                intrinsic_file,
+    std::optional<std::string_view> mask_file,
     cv::NormTypes                   matching_norm,
     std::optional<std::string_view> backproject_pattern,
     std::optional<std::string_view> original_files);
