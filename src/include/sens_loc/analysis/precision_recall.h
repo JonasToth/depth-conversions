@@ -65,6 +65,13 @@ struct element_categories {
 };
 
 /// Statistical evaluation for precision-recall of a whole dataset.
+///
+/// This class keeps track of all relevant information to evaluate the
+/// performance of the classifier "keypoints are matching".
+///
+/// \note See https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers for
+/// general information about the statistical relationships.
+///
 class precision_recall_statistic {
   public:
     precision_recall_statistic() = default;
@@ -72,51 +79,102 @@ class precision_recall_statistic {
     /// Track true/false negative/positive for each image.
     void account(const element_categories& classification) noexcept;
 
+    /// Number \f$P\f$ of all keypoints that have a corresponding keypoint in
+    /// another frame.
     [[nodiscard]] std::int64_t relevant_elements() const noexcept {
         return n_true_pos + n_false_neg;
     }
+    /// Number \f$N\f$ of all keypoints that do NOT have a corresponding
+    /// keypoint in another frame.
     [[nodiscard]] std::int64_t irrelevant_elements() const noexcept {
         return n_false_pos + n_true_neg;
     }
-    [[nodiscard]] std::int64_t total_elements() const noexcept {
-        return relevant_elements() + irrelevant_elements();
-    }
-    [[nodiscard]] std::int64_t selected_elements() const noexcept {
-        return n_true_pos + n_false_pos;
-    }
+    /// Number \f$TP\f$ of keypoints that were correctly identified to have a
+    /// correspondence.
     [[nodiscard]] std::int64_t true_positives() const noexcept {
         return n_true_pos;
     }
+    /// Number \f$FP\f$ of keypoints that were incorrectly identified to have a
+    /// correspondence.
     [[nodiscard]] std::int64_t false_positives() const noexcept {
         return n_false_pos;
     }
+    /// Number \f$TN\f$ of keypoints that were correctly revoked to have a
+    /// correspondence.
     [[nodiscard]] std::int64_t true_negatives() const noexcept {
         return n_true_neg;
     }
+    /// Number \f$FN\f$ of keypoints that do have a correspondence, but did not
+    /// get identified to have one.
     [[nodiscard]] std::int64_t false_negatives() const noexcept {
         return n_false_neg;
     }
+    /// Number of all keypoints analyzed.
+    [[nodiscard]] std::int64_t total_elements() const noexcept {
+        return relevant_elements() + irrelevant_elements();
+    }
+    /// Number \f$TP + FP\f$ of keypoints that were matched. This means the
+    /// classifier considers them to have a correspondence.
+    [[nodiscard]] std::int64_t selected_elements() const noexcept {
+        return n_true_pos + n_false_pos;
+    }
 
+    /// The ratio of true positives to total selected elements. The ratio
+    /// indicates how many selected elements are relevant.
+    //
+    /// \f$\frac{TP}{TP + FP}\f$
+    /// The higher this values becomes, the lower the false positive ratio is.
+    /// \post \f$0.0 <= precision <= 1.0\f$
     [[nodiscard]] double precision() const noexcept {
         std::int64_t selected = selected_elements();
         return selected == 0L ? 0.0
                               : gsl::narrow_cast<double>(true_positives()) /
                                     gsl::narrow_cast<double>(selected);
     }
+    /// The ratio of corresponding keypoints to all selected keypoints.
+    ///
+    /// \f$\frac{TP}{TP + FN}\f$
+    /// A high number means, that corresponding keypoints are detected better.
+    /// \note this is also called \c sensitivity
+    /// \sa sensitivity
+    /// \post \f$0.0 <= recall <= 1.0\f$
     [[nodiscard]] double recall() const noexcept {
         std::int64_t relevant = relevant_elements();
         return relevant == 0L ? 0.0
                               : gsl::narrow_cast<double>(true_positives()) /
                                     gsl::narrow_cast<double>(relevant);
     }
-    [[nodiscard]] double sensitivity() const noexcept { return recall(); }
-    [[nodiscard]] double specificity() const noexcept {
-        std::int64_t relevant   = relevant_elements();
+    /// The ratio of keypoints that are incorrectly classified of having a
+    /// correspondince to all not-corresponding keypoints. This is the false
+    /// alarm rate.
+    ///
+    /// \f$\frac{FP}{TN + FP}\f$
+    /// \post \f$0.0 <= fallout <= 1.0\f$
+    [[nodiscard]] double fallout() const noexcept {
         std::int64_t irrelevant = irrelevant_elements();
         return irrelevant == 0L ? 0.0
-                                : gsl::narrow_cast<double>(relevant) /
+                                : gsl::narrow_cast<double>(false_positives()) /
                                       gsl::narrow_cast<double>(irrelevant);
     }
+    /// The same as recall.
+    /// \sa recall
+    [[nodiscard]] double sensitivity() const noexcept { return recall(); }
+    /// The ratio of keypoints that are correctly identified of not having a
+    /// correspondence. This is the correct rejection ratio.
+    ///
+    /// \f$\frac{TN}{TN + FP}\f$
+    /// \post \f$0.0 <= specificity <= 1.0\f$
+    [[nodiscard]] double specificity() const noexcept {
+        std::int64_t irrelevant = irrelevant_elements();
+        return irrelevant == 0L ? 0.0
+                                : gsl::narrow_cast<double>(true_negatives()) /
+                                      gsl::narrow_cast<double>(irrelevant);
+    }
+    /// The ratio of correct classifications of keypoints into having a
+    /// correspondence or not, also called Accuracy
+    ///
+    /// \f$\frac{TP + TN}{TP + FP + TN + FN}\f$
+    /// \post \f$0.0 <= RandIndex <= 1.0\f$
     [[nodiscard]] double rand_index() const noexcept {
         std::int64_t total = total_elements();
         return total == 0L ? 0.0
@@ -124,6 +182,12 @@ class precision_recall_statistic {
                                                       true_negatives()) /
                                  gsl::narrow_cast<double>(total);
     }
+    /// Probability of an informed decision of the classifier.
+    ///
+    /// \f$J = sensitivity + specificity - 1\f$
+    /// \post \f$-1. <= youden <= 1.\f$
+    /// \note Negative values indicate bad labeling, for "normal" conditions
+    /// the value will be between \c 0 and \c 1.
     [[nodiscard]] double youden_index() const noexcept {
         return sensitivity() + specificity() - 1.0;
     }

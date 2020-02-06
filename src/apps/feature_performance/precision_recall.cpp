@@ -315,7 +315,9 @@ class prec_recall_analysis {
              << "Skewness:     " << distance_stat.skewness() << "\n"
              << "Precision     " << _stats->precision() << "\n"
              << "Recall:       " << _stats->recall() << "\n"
+             << "Sensitivity:  " << _stats->sensitivity() << "\n"
              << "Specificity:  " << _stats->specificity() << "\n"
+             << "Fallout:      " << _stats->fallout() << "\n"
              << "Rand-Index:   " << _stats->rand_index() << "\n"
              << "Youden-Index: " << _stats->youden_index() << "\n"
              << "Masked pts:   " << *_totally_masked << "\n";

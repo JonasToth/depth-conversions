@@ -24,6 +24,9 @@ namespace plot {
 /// \param keypoints_this keypoints detected on \c feature_file and matched
 /// with keypoints of another frame.
 /// \param keypoints_other matched keypoints to \c keypoints_this
+/// \param line_color color of the line that connects the keypoints.
+/// Keypoints itself are not plotted.
+/// \param strength_relevant strenght of the line.
 /// \pre keypoints_this.size() == keypoints_other.size()
 /// \pre the keypoints must have been matched before
 /// \pre keypoints_this[i] corresponds to keypoints_other[i] for all i

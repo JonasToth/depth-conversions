@@ -16,6 +16,7 @@ cd "${SCRIPT_PATH}/../.."
 
 print_info "Build Debug build with coverage instrumentation"
 mkdir -p build && cd build
+CC=gcc-7 CXX=g++-7 \
 cmake .. -G Ninja \
     -DCMAKE_BUILD_TYPE=RelWithDebInfo \
     -DWITH_TESTING=ON \
