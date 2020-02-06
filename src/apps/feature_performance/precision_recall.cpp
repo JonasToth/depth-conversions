@@ -299,6 +299,8 @@ class prec_recall_analysis {
 
     void postprocess() noexcept {
         lock_guard guard{*_inserter_mutex};
+        if (_stats->total_elements() == 0L)
+            return;
 
         const auto         dist_bins = 20;
         analysis::distance distance_stat{*_selected_elements_dist, dist_bins,
@@ -397,7 +399,7 @@ int analyze_precision_recall(string_view           feature_file_pattern,
     auto f = parallel_visitation(start_idx + 1, end_idx, analysis_v);
     f.postprocess();
 
-    return 0;
+    return stats.total_elements() > 0L ? 0 : 1;
 }
 
 }  // namespace sens_loc::apps

@@ -25,3 +25,11 @@ if ! ${exe} --input "orb-{}.feature" \
     print_error "Could not analyze orb features under Hamming norm"
     exit 1
 fi
+
+print_info "Testing for bad input files"
+if ${exe} --input "does-not-exist-{}.feature" \
+    --start 0 --end 1 \
+    min-distance ; then
+    print_error "Did not signal failure for non-existing descriptors."
+    exit 1
+fi

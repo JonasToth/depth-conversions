@@ -12,6 +12,7 @@
 #include <opencv2/imgproc.hpp>
 #include <sens_loc/analysis/distance.h>
 #include <sens_loc/io/image.h>
+#include <sens_loc/util/console.h>
 #include <util/batch_visitor.h>
 #include <util/statistic_visitor.h>
 
@@ -45,55 +46,64 @@ class matching {
     void operator()(int idx,
                     optional<vector<KeyPoint>> /*keypoints*/,  // NOLINT
                     optional<Mat> descriptors) noexcept {
-        Expects(descriptors);
-        Expects(descriptors->rows > 0);
+        if (!descriptors || (descriptors->rows == 0))
+            return;
+        try {
+            const int         previous_idx = idx - 1;
+            const FileStorage previous_img = sens_loc::io::open_feature_file(
+                fmt::format(input_pattern, previous_idx));
+            Mat previous_descriptors =
+                sens_loc::io::load_descriptors(previous_img);
 
-        const int         previous_idx = idx - 1;
-        const FileStorage previous_img = sens_loc::io::open_feature_file(
-            fmt::format(input_pattern, previous_idx));
-        Mat previous_descriptors = sens_loc::io::load_descriptors(previous_img);
+            vector<DMatch> matches;
+            matcher->match(*descriptors, previous_descriptors, matches);
 
-        vector<DMatch> matches;
-        matcher->match(*descriptors, previous_descriptors, matches);
+            {
+                lock_guard guard{*distance_mutex};
+                // Insert all the distances into the global distances vector.
+                transform(begin(matches), end(matches),
+                          back_inserter(*distances),
+                          [](const DMatch& m) { return m.distance; });
+                (*total_descriptors) += descriptors->rows;
+            }
 
-        {
-            lock_guard guard{*distance_mutex};
-            // Insert all the distances into the global distances vector.
-            transform(begin(matches), end(matches), back_inserter(*distances),
-                      [](const DMatch& m) { return m.distance; });
-            (*total_descriptors) += descriptors->rows;
-        }
+            if (output_pattern) {
+                const FileStorage this_feature =
+                    sens_loc::io::open_feature_file(
+                        fmt::format(input_pattern, idx));
+                const vector<KeyPoint> previous_keypoints =
+                    sens_loc::io::load_keypoints(this_feature);
 
-        if (output_pattern) {
-            const FileStorage this_feature = sens_loc::io::open_feature_file(
-                fmt::format(input_pattern, idx));
-            const vector<KeyPoint> previous_keypoints =
-                sens_loc::io::load_keypoints(this_feature);
+                const vector<KeyPoint> this_keypoints =
+                    sens_loc::io::load_keypoints(previous_img);
 
-            const vector<KeyPoint> this_keypoints =
-                sens_loc::io::load_keypoints(previous_img);
+                const string img_p1 = fmt::format(*original_images, idx - 1);
+                const string img_p2 = fmt::format(*original_images, idx);
+                auto         img1   = sens_loc::io::load_as_8bit_gray(img_p1);
+                auto         img2   = sens_loc::io::load_as_8bit_gray(img_p2);
 
-            const string img_p1 = fmt::format(*original_images, idx - 1);
-            const string img_p2 = fmt::format(*original_images, idx);
-            auto         img1   = sens_loc::io::load_as_8bit_gray(img_p1);
-            auto         img2   = sens_loc::io::load_as_8bit_gray(img_p2);
+                if (!img1 || !img2)
+                    return;
 
-            if (!img1 || !img2)
-                return;
+                Mat out_img;
+                drawMatches(img1->data(), previous_keypoints, img2->data(),
+                            this_keypoints, matches, out_img, Scalar(0, 0, 255),
+                            Scalar(255, 0, 0));
 
-            Mat out_img;
-            drawMatches(img1->data(), previous_keypoints, img2->data(),
-                        this_keypoints, matches, out_img, Scalar(0, 0, 255),
-                        Scalar(255, 0, 0));
-
-            const string output = fmt::format(*output_pattern, idx);
-            imwrite(output, out_img);
+                const string output = fmt::format(*output_pattern, idx);
+                imwrite(output, out_img);
+            }
+        } catch (...) {
+            std::cerr << sens_loc::util::err{}
+                      << "Could not initialize data for idx: " << idx << "\n";
+            return;
         }
     }
 
     void postprocess() {
         lock_guard guard{*distance_mutex};
-        Expects(!distances->empty());
+        if (distances->empty())
+            return;
 
         const auto                   dist_bins = 25;
         sens_loc::analysis::distance distance_stat{*distances, dist_bins};
@@ -158,6 +168,6 @@ int analyze_matching(string_view           input_pattern,
 
     f.postprocess();
 
-    return 0;
+    return !global_minimal_distances.empty() ? 0 : 1;
 }
 }  // namespace sens_loc::apps

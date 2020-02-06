@@ -100,7 +100,8 @@ class min_descriptor_distance {
         // Lock the mutex, just in case. This method is not expected to be
         // run in parallel, but it could.
         std::lock_guard guard{*process_mutex};
-        Expects(!global_min_distances->empty());
+        if (global_min_distances->empty())
+            return;
 
         const auto                   bins = 25UL;
         sens_loc::analysis::distance distance_stat{
@@ -144,7 +145,7 @@ int analyze_min_distance_impl(std::string_view input_pattern,
 
     f.postprocess();
 
-    return 0;
+    return !global_min_distances.empty() ? 0 : 1;
 }
 }  // namespace
 

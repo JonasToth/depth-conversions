@@ -114,9 +114,9 @@ class keypoint_distribution {
         }
     }
 
-    auto postprocess(unsigned int image_width, unsigned int image_height) {
-        Expects(!global_keypoints->empty());
-        Expects(!global_distances->empty());
+    void postprocess(unsigned int image_width, unsigned int image_height) {
+        if (global_keypoints->empty() || global_distances->empty())
+            return;
 
         sens_loc::analysis::keypoints kp{image_width, image_height};
 
@@ -203,6 +203,6 @@ int analyze_keypoint_distribution(std::string_view input_pattern,
 
     f.postprocess(image_width, image_height);
 
-    return 0;
+    return !global_minimal_distances.empty() ? 0 : 1;
 }
 }  // namespace sens_loc::apps

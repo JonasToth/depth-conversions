@@ -21,3 +21,16 @@ if ! ${exe} --version ; then
     print_error "Printing the version is required to work"
     exit 1
 fi
+
+print_info "Testing that bad files are causing breakage."
+if ${exe} \
+    --input sift-{}.feature \
+    --output keypoints-{}.not-an-image \
+    --start 0 --end 1 ; then
+    print_error "Non-existing file formats should not be outputted by the plotter"
+    exit 1
+fi
+if [ -f keypoints-0.not-an-image ] ; then
+    print_error "Created bad image format"
+    exit 1
+fi

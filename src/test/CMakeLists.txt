@@ -89,11 +89,22 @@ configure_file(feature_performance/orb-0.feature
                feature_performance/orb-0.feature COPYONLY)
 configure_file(feature_performance/orb-1.feature
                feature_performance/orb-1.feature COPYONLY)
-
 configure_file(feature_performance/surf-1-octave-0.feature.gz
                feature_performance/surf-1-octave-0.feature.gz COPYONLY)
 configure_file(feature_performance/surf-1-octave-1.feature.gz
                feature_performance/surf-1-octave-1.feature.gz COPYONLY)
+configure_file(feature_performance/surf-1-octave-0.feature.gz
+               feature_performance/surf-1-octave-0.feature.gz COPYONLY)
+configure_file(feature_performance/does-not-exist-1.feature.gz
+               feature_performance/does-not-exist-1.feature.gz COPYONLY)
+configure_file(feature_performance/does-not-exist-0.feature.gz
+               feature_performance/does-not-exist-0.feature.gz COPYONLY)
+configure_file(feature_performance/does-not-exist-1.feature.gz
+               feature_performance/does-not-exist-1.feature.gz COPYONLY)
+configure_file(feature_performance/does-not-exist-0.feature.gz
+               feature_performance/does-not-exist-0.feature.gz COPYONLY)
+configure_file(feature_performance/does-not-exist-1.feature.gz
+               feature_performance/does-not-exist-1.feature.gz COPYONLY)
 configure_file(feature_performance/kinect_intrinsic.txt
                feature_performance/kinect_intrinsic.txt COPYONLY)
 configure_file(feature_performance/filtered-0.png
@@ -106,6 +117,10 @@ configure_file(feature_performance/pose-0.pose
                feature_performance/pose-0.pose COPYONLY)
 configure_file(feature_performance/pose-1.pose
                feature_performance/pose-1.pose COPYONLY)
+configure_file(feature_performance/distortion_mask.png
+               feature_performance/distortion_mask.png COPYONLY)
+configure_file(feature_performance/distortion_mask_bad.png
+               feature_performance/distortion_mask_bad.png COPYONLY)
 add_tool_test(feature_performance test_feature_performance)
 add_tool_test(feature_performance test_feature_performance_min_distance)
 add_tool_test(feature_performance test_feature_performance_keypoints)

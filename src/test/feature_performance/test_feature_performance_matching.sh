@@ -40,3 +40,25 @@ if  [ ! -f surf-matched-1.png ] ; then
     print_error "Did not create expected output files."
     exit 1
 fi
+
+print_info "Test for bad output-path after matching"
+if ! ${exe} \
+    --input "surf-1-octave-{}.feature.gz" \
+    --start 0 --end 1 \
+    matching --match-output "does-not-exist/surf-matched-{}.png" --original-images "../feature_extractor/flexion-{}.png" ; then
+    print_error "Did not ignore failure of writing match-output"
+    exit 1
+fi
+if  [ -f does-not-exist/surf-matched-1.png ] ; then
+    print_error "Unexpected file created."
+    exit 1
+fi
+
+print_info "Test for non-existing features."
+if ${exe} \
+    --input "does-not-exist-{}.feature.gz" \
+    --start 0 --end 1 \
+    matching ; then
+    print_error "Did not signal failure for non-existing features"
+    exit 1
+fi
