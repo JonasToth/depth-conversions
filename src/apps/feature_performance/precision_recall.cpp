@@ -97,6 +97,7 @@ class prec_recall_analysis {
         string_view              intrinsic_file,
         optional<string_view>    mask_file,
         NormTypes                matching_norm,
+        float                    keypoint_distances_threshold,
         not_null<mutex*>         inserter_mutex,
         not_null<vector<float>*> selected_elements_distance,
         not_null<analysis::precision_recall_statistic*> prec_recall_stat,
@@ -107,6 +108,7 @@ class prec_recall_analysis {
         , _depth_image_pattern{depth_image_pattern}
         , _pose_file_pattern{pose_file_pattern}
         , _unit_factor{unit_factor}
+        , _keypoint_distance_threshold{keypoint_distances_threshold}
         , _matcher{cv::BFMatcher::create(matching_norm, /*crosscheck=*/true)}
         , _inserter_mutex{inserter_mutex}
         , _selected_elements_dist{selected_elements_distance}
@@ -221,10 +223,9 @@ class prec_recall_analysis {
         using analysis::element_categories;
         using camera_models::keypoint_to_coords;
         const imagepoints_t curr_keypoints = keypoint_to_coords(curr.keypoints);
-        const float         threshold      = 5.0F;
 
-        const element_categories classification(curr_keypoints, prev_in_img,
-                                                matches, threshold);
+        const element_categories classification(
+            curr_keypoints, prev_in_img, matches, _keypoint_distance_threshold);
         // True positives keypoints from this and previous frame in this
         // frames coordinate system.
         auto [t_p_t, t_p_o] = analysis::gather_correspondences(
@@ -286,10 +287,7 @@ class prec_recall_analysis {
             lock_guard guard{*_inserter_mutex};
             _selected_elements_dist->insert(_selected_elements_dist->end(),
                                             distances.begin(), distances.end());
-            _stats->n_true_pos += classification.true_positives.size();
-            _stats->n_false_pos += classification.false_positives.size();
-            _stats->n_true_neg += classification.true_negatives.size();
-            _stats->n_false_neg += classification.false_negatives.size();
+            _stats->account(classification);
             *_totally_masked += masked_points;
         }
     } catch (const std::exception& e) {
@@ -307,18 +305,20 @@ class prec_recall_analysis {
                                          "backprojection error pixels"};
 
         cout << distance_stat.histogram() << "\n"
-             << "# relevant: " << distance_stat.count() << "\n"
-             << "min:        " << distance_stat.min() << "\n"
-             << "max:        " << distance_stat.max() << "\n"
-             << "median:     " << distance_stat.median() << "\n"
-             << "mean:       " << distance_stat.mean() << "\n"
-             << "Variance:   " << distance_stat.variance() << "\n"
-             << "StdDev:     " << distance_stat.stddev() << "\n"
-             << "Skewness:   " << distance_stat.skewness() << "\n"
-             << "Precision   " << _stats->precision() << "\n"
-             << "Recall:     " << _stats->recall() << "\n"
-             << "Relevance:  " << _stats->relevant_ratio() << "\n"
-             << "Masked pts: " << *_totally_masked << "\n";
+             << "# relevant:   " << distance_stat.count() << "\n"
+             << "min:          " << distance_stat.min() << "\n"
+             << "max:          " << distance_stat.max() << "\n"
+             << "median:       " << distance_stat.median() << "\n"
+             << "mean:         " << distance_stat.mean() << "\n"
+             << "Variance:     " << distance_stat.variance() << "\n"
+             << "StdDev:       " << distance_stat.stddev() << "\n"
+             << "Skewness:     " << distance_stat.skewness() << "\n"
+             << "Precision     " << _stats->precision() << "\n"
+             << "Recall:       " << _stats->recall() << "\n"
+             << "Specificity:  " << _stats->specificity() << "\n"
+             << "Rand-Index:   " << _stats->rand_index() << "\n"
+             << "Youden-Index: " << _stats->youden_index() << "\n"
+             << "Masked pts:   " << *_totally_masked << "\n";
     }
 
   private:
@@ -326,6 +326,7 @@ class prec_recall_analysis {
     string_view                  _depth_image_pattern;
     string_view                  _pose_file_pattern;
     float                        _unit_factor;
+    float                        _keypoint_distance_threshold;
     Model<Real>                  _intrinsic;
     Ptr<BFMatcher>               _matcher;
     optional<math::image<uchar>> _mask;
@@ -356,6 +357,7 @@ int analyze_precision_recall(string_view           feature_file_pattern,
                              string_view           intrinsic_file,
                              optional<string_view> mask_file,
                              NormTypes             matching_norm,
+                             float                 keypoint_distances_threshold,
                              optional<string_view> backproject_pattern,
                              optional<string_view> original_files) {
     Expects(start_idx < end_idx &&
@@ -380,6 +382,7 @@ int analyze_precision_recall(string_view           feature_file_pattern,
                               intrinsic_file,
                               mask_file,
                               matching_norm,
+                              keypoint_distances_threshold,
                               not_null{&inserter_mutex},
                               not_null{&selected_elements_distance},
                               not_null{&stats},

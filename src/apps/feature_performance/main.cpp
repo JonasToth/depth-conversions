@@ -134,6 +134,12 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                           {"L1", "L2", "L2SQR", "HAMMING", "HAMMING2"},
                           "Set the norm that shall be used as distance measure",
                           /*defaulted=*/true);
+    float keypoint_distance_threshold = 3.0F;
+    cmd_prec_rec->add_option("--keypoint-distance-threshold",
+                             keypoint_distance_threshold,
+                             "Threshold for the reprojection error of "
+                             "keypoints to be considered a correspondence",
+                             /*defaulted=*/true);
     optional<string> backproject_pattern;
     CLI::Option*     backproject_opt = cmd_prec_rec->add_option(
         "--backprojection", backproject_pattern,
@@ -169,7 +175,8 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
         return analyze_precision_recall(
             feature_file_input_pattern, start_idx, end_idx, depth_image_path,
             pose_file_pattern, intrinsic_file, mask_file,
-            str_to_norm(norm_name), backproject_pattern, original_images);
+            str_to_norm(norm_name), keypoint_distance_threshold,
+            backproject_pattern, original_images);
 
     UNREACHABLE("Expected to end program with "  // LCOV_EXCL_LINE
                 "subcommand processing");        // LCOV_EXCL_LINE

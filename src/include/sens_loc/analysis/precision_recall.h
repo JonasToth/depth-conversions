@@ -1,16 +1,10 @@
 #ifndef PRECISION_RECALL_H_0COUZXGS
 #define PRECISION_RECALL_H_0COUZXGS
 
-#include "sens_loc/analysis/distance.h"
-
-#include <iterator>
-#include <limits>
+#include <cstdint>
 #include <opencv2/features2d.hpp>
-#include <sens_loc/camera_models/pinhole.h>
-#include <sens_loc/camera_models/projection.h>
-#include <sens_loc/math/image.h>
 #include <sens_loc/math/pointcloud.h>
-#include <unordered_set>
+#include <vector>
 
 namespace sens_loc::analysis {
 
@@ -44,9 +38,6 @@ struct element_categories {
     std::vector<keypoint_correspondence> false_negatives;
     std::vector<keypoint_correspondence> true_negatives;
 
-    double precision = 0.;
-    double recall    = 0.;
-
     /// Classify every point in 'query_data' according to the allowed pixel
     /// error \c threshold.
     /// \param query_data set of keypoints that are detected in an image
@@ -74,31 +65,81 @@ struct element_categories {
 };
 
 /// Statistical evaluation for precision-recall of a whole dataset.
-struct precision_recall_statistic {
-    std::size_t n_true_pos  = 0UL;
-    std::size_t n_false_pos = 0UL;
-    std::size_t n_true_neg  = 0UL;
-    std::size_t n_false_neg = 0UL;
+class precision_recall_statistic {
+  public:
+    precision_recall_statistic() = default;
+
+    /// Track true/false negative/positive for each image.
+    void account(const element_categories& classification) noexcept;
+
+    [[nodiscard]] std::int64_t relevant_elements() const noexcept {
+        return n_true_pos + n_false_neg;
+    }
+    [[nodiscard]] std::int64_t irrelevant_elements() const noexcept {
+        return n_false_pos + n_true_neg;
+    }
+    [[nodiscard]] std::int64_t total_elements() const noexcept {
+        return relevant_elements() + irrelevant_elements();
+    }
+    [[nodiscard]] std::int64_t selected_elements() const noexcept {
+        return n_true_pos + n_false_pos;
+    }
+    [[nodiscard]] std::int64_t true_positives() const noexcept {
+        return n_true_pos;
+    }
+    [[nodiscard]] std::int64_t false_positives() const noexcept {
+        return n_false_pos;
+    }
+    [[nodiscard]] std::int64_t true_negatives() const noexcept {
+        return n_true_neg;
+    }
+    [[nodiscard]] std::int64_t false_negatives() const noexcept {
+        return n_false_neg;
+    }
 
     [[nodiscard]] double precision() const noexcept {
-        std::size_t selected = n_true_pos + n_false_pos;
-        return selected == 0UL ? 0.0
-                               : gsl::narrow_cast<double>(n_true_pos) /
-                                     gsl::narrow_cast<double>(selected);
+        std::int64_t selected = selected_elements();
+        return selected == 0L ? 0.0
+                              : gsl::narrow_cast<double>(true_positives()) /
+                                    gsl::narrow_cast<double>(selected);
     }
     [[nodiscard]] double recall() const noexcept {
-        std::size_t relevant = n_true_pos + n_false_neg;
-        return relevant == 0UL ? 0.0
-                               : gsl::narrow_cast<double>(n_true_pos) /
-                                     gsl::narrow_cast<double>(relevant);
+        std::int64_t relevant = relevant_elements();
+        return relevant == 0L ? 0.0
+                              : gsl::narrow_cast<double>(true_positives()) /
+                                    gsl::narrow_cast<double>(relevant);
     }
-    [[nodiscard]] double relevant_ratio() const noexcept {
-        std::size_t relevant   = n_true_pos + n_false_neg;
-        std::size_t irrelevant = n_false_pos + n_true_neg;
-        return irrelevant == 0UL ? 0.0
-                                 : gsl::narrow_cast<double>(relevant) /
-                                       gsl::narrow_cast<double>(irrelevant);
+    [[nodiscard]] double sensitivity() const noexcept { return recall(); }
+    [[nodiscard]] double specificity() const noexcept {
+        std::int64_t relevant   = relevant_elements();
+        std::int64_t irrelevant = irrelevant_elements();
+        return irrelevant == 0L ? 0.0
+                                : gsl::narrow_cast<double>(relevant) /
+                                      gsl::narrow_cast<double>(irrelevant);
     }
+    [[nodiscard]] double rand_index() const noexcept {
+        std::int64_t total = total_elements();
+        return total == 0L ? 0.0
+                           : gsl::narrow_cast<double>(true_positives() +
+                                                      true_negatives()) /
+                                 gsl::narrow_cast<double>(total);
+    }
+    [[nodiscard]] double youden_index() const noexcept {
+        return sensitivity() + specificity() - 1.0;
+    }
+
+  private:
+    // Keep track on the true/false positives/negatives per image.
+    std::vector<std::int64_t> t_p_per_image;
+    std::vector<std::int64_t> f_p_per_image;
+    std::vector<std::int64_t> t_n_per_image;
+    std::vector<std::int64_t> f_n_per_image;
+
+    // Keep track of the global count of elements.
+    std::int64_t n_true_pos  = 0L;
+    std::int64_t n_false_pos = 0L;
+    std::int64_t n_true_neg  = 0L;
+    std::int64_t n_false_neg = 0L;
 };
 
 }  // namespace sens_loc::analysis

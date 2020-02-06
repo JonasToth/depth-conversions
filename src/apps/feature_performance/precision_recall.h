@@ -29,6 +29,7 @@ int analyze_precision_recall(
     std::string_view                intrinsic_file,
     std::optional<std::string_view> mask_file,
     cv::NormTypes                   matching_norm,
+    float                           keypoint_distance_threshold,
     std::optional<std::string_view> backproject_pattern,
     std::optional<std::string_view> original_files);
 

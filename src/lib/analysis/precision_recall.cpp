@@ -4,6 +4,7 @@
 #include <sens_loc/io/feature.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/pose.h>
+#include <unordered_set>
 
 using namespace std;
 using namespace cv;
@@ -146,15 +147,21 @@ element_categories::element_categories(const math::imagepoints_t& query_data,
     Ensures((true_positives.size() + false_positives.size() +
              false_negatives.size() + true_negatives.size()) ==
             query_data.size());
-
-    using gsl::narrow_cast;
-    precision =
-        narrow_cast<double>(true_positives.size()) /
-        narrow_cast<double>(true_positives.size() + false_positives.size());
-    recall =
-        narrow_cast<double>(true_positives.size()) /
-        narrow_cast<double>(true_positives.size() + false_negatives.size());
 }
 
+void precision_recall_statistic::account(
+    const element_categories& classification) noexcept {
+    // Relevant elements
+    n_true_pos += classification.true_positives.size();
+    t_p_per_image.emplace_back(classification.true_positives.size());
+    n_false_neg += classification.false_negatives.size();
+    f_n_per_image.emplace_back(classification.false_negatives.size());
+
+    // Irrelevant elements
+    n_false_pos += classification.false_positives.size();
+    f_p_per_image.emplace_back(classification.false_positives.size());
+    n_true_neg += classification.true_negatives.size();
+    t_n_per_image.emplace_back(classification.true_negatives.size());
+}
 
 }  // namespace sens_loc::analysis
