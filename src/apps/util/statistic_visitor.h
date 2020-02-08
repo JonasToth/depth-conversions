@@ -62,20 +62,12 @@ struct statistic_visitor : Analysor {
             std::optional<cv::Mat>                   descriptors = std::nullopt;
 
             if constexpr ((data_elements & required_data::keypoints) !=
-                          required_data::none) {
+                          required_data::none)
                 keypoints = io::load_keypoints(fs);
-                if (!keypoints)
-                    throw std::invalid_argument{
-                        "Could not extract keypoints from input file."};
-            }
 
             if constexpr ((data_elements & required_data::descriptors) !=
-                          required_data::none) {
+                          required_data::none)
                 descriptors = io::load_descriptors(fs);
-                if (!descriptors)
-                    throw std::invalid_argument{
-                        "Could not extract descriptors from input file."};
-            }
 
             // Call the base-classes analysis operator to actually analyse the
             // data.
