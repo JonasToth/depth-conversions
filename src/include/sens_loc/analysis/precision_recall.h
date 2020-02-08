@@ -1,9 +1,18 @@
 #ifndef PRECISION_RECALL_H_0COUZXGS
 #define PRECISION_RECALL_H_0COUZXGS
 
+#include <boost/accumulators/accumulators.hpp>
+#include <boost/accumulators/framework/accumulator_set.hpp>
+#include <boost/accumulators/statistics/mean.hpp>
+#include <boost/accumulators/statistics/median.hpp>
+#include <boost/accumulators/statistics/skewness.hpp>
+#include <boost/accumulators/statistics/stats.hpp>
+#include <boost/accumulators/statistics/variance.hpp>
+#include <boost/histogram.hpp>
 #include <cstdint>
 #include <opencv2/features2d.hpp>
 #include <sens_loc/math/pointcloud.h>
+#include <string>
 #include <vector>
 
 namespace sens_loc::analysis {
@@ -62,6 +71,35 @@ struct element_categories {
                        const math::imagepoints_t&     train_data,
                        const std::vector<cv::DMatch>& matches,
                        float                          threshold) noexcept;
+};
+
+/// Keep track of statistical properties and histogram the appearance of
+/// keypoint classifications per image.
+/// \sa element_categories
+/// \sa precision_recall_statistic
+struct category_statistic {
+    using accumulator_t = boost::accumulators::accumulator_set<
+        float,
+        boost::accumulators::stats<boost::accumulators::tag::count,
+                                   boost::accumulators::tag::min,
+                                   boost::accumulators::tag::max,
+                                   boost::accumulators::tag::median,
+                                   boost::accumulators::tag::mean,
+                                   boost::accumulators::tag::variance(
+                                       boost::accumulators::lazy)>>;
+    using axis_t = boost::histogram::axis::regular<
+        // 'float' values are tracked with the histogram.
+        float,
+        // do no transformation before insertion
+        boost::histogram::axis::transform::id,
+        // a string is the metadata for the axis (=title)
+        std::string,
+        // no overflow/underflow by construction.
+        boost::histogram::axis::option::none_t>;
+    using histo_t = decltype(boost::histogram::make_histogram(axis_t{}));
+
+    accumulator_t stat;
+    histo_t       histo;
 };
 
 /// Statistical evaluation for precision-recall of a whole dataset.
@@ -192,6 +230,11 @@ class precision_recall_statistic {
         return sensitivity() + specificity() - 1.0;
     }
 
+    /// Create the histograms for 'relevant elements', 'true positives' and
+    /// 'false positives' to better understand the distribution of these
+    /// elements.
+    void make_histogram();
+
   private:
     // Keep track on the true/false positives/negatives per image.
     std::vector<std::int64_t> t_p_per_image;
@@ -204,6 +247,16 @@ class precision_recall_statistic {
     std::int64_t n_false_pos = 0L;
     std::int64_t n_true_neg  = 0L;
     std::int64_t n_false_neg = 0L;
+
+    // Make histograms to see the distribution of each element category per
+    // image. This allows a judgement of e.g. "how many true positives are at
+    // least in an image". This helps ruling out different kinds of algorithms.
+    // TODO: - accumulator for each category
+    // TODO: - histogram for each category --> make a class that does that, use
+    // the vectors
+    category_statistic _relevant_elements;
+    category_statistic _true_positives;
+    category_statistic _false_positives;
 };
 
 }  // namespace sens_loc::analysis

@@ -162,6 +162,18 @@ void precision_recall_statistic::account(
     f_p_per_image.emplace_back(classification.false_positives.size());
     n_true_neg += classification.true_negatives.size();
     t_n_per_image.emplace_back(classification.true_negatives.size());
+
+    // Keep track for interesting statistical insights and finally
+    // histogramming.
+    _relevant_elements.stat(classification.true_positives.size() +
+                            classification.false_negatives.size());
+    _true_positives.stat(classification.true_positives.size());
+    _false_positives.stat(classification.false_positives.size());
+}
+
+void precision_recall_statistic::make_histogram() {
+    // TODO: everything, see other analysis code for histo creation and
+    // insertion.
 }
 
 }  // namespace sens_loc::analysis
