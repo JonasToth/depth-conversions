@@ -79,7 +79,7 @@ struct element_categories {
 /// \sa precision_recall_statistic
 struct category_statistic {
     using accumulator_t = boost::accumulators::accumulator_set<
-        float,
+        std::int64_t,
         boost::accumulators::stats<boost::accumulators::tag::count,
                                    boost::accumulators::tag::min,
                                    boost::accumulators::tag::max,
@@ -235,6 +235,16 @@ class precision_recall_statistic {
     /// elements.
     void make_histogram();
 
+    // Make histograms to see the distribution of each element category per
+    // image. This allows a judgement of e.g. "how many true positives are at
+    // least in an image". This helps ruling out different kinds of algorithms.
+    // TODO: - accumulator for each category
+    // TODO: - histogram for each category --> make a class that does that, use
+    // the vectors
+    category_statistic _relevant_elements;
+    category_statistic _true_positives;
+    category_statistic _false_positives;
+
   private:
     // Keep track on the true/false positives/negatives per image.
     std::vector<std::int64_t> t_p_per_image;
@@ -247,16 +257,6 @@ class precision_recall_statistic {
     std::int64_t n_false_pos = 0L;
     std::int64_t n_true_neg  = 0L;
     std::int64_t n_false_neg = 0L;
-
-    // Make histograms to see the distribution of each element category per
-    // image. This allows a judgement of e.g. "how many true positives are at
-    // least in an image". This helps ruling out different kinds of algorithms.
-    // TODO: - accumulator for each category
-    // TODO: - histogram for each category --> make a class that does that, use
-    // the vectors
-    category_statistic _relevant_elements;
-    category_statistic _true_positives;
-    category_statistic _false_positives;
 };
 
 }  // namespace sens_loc::analysis

@@ -306,6 +306,7 @@ class prec_recall_analysis {
         analysis::distance distance_stat{*_selected_elements_dist, dist_bins,
                                          "backprojection error pixels"};
 
+        using namespace boost;
         cout << distance_stat.histogram() << "\n"
              << "# relevant:   " << distance_stat.count() << "\n"
              << "min:          " << distance_stat.min() << "\n"
@@ -322,6 +323,16 @@ class prec_recall_analysis {
              << "Fallout:      " << _stats->fallout() << "\n"
              << "Rand-Index:   " << _stats->rand_index() << "\n"
              << "Youden-Index: " << _stats->youden_index() << "\n"
+             << "Min-TruePos:  "
+             << accumulators::min(_stats->_true_positives.stat) << "\n"
+             << "Avg-TruePos:  "
+             << accumulators::mean(_stats->_true_positives.stat) << "\n"
+             << "Min-Relevant: "
+             << accumulators::min(_stats->_relevant_elements.stat) << "\n"
+             << "Avg-Relevant: "
+             << accumulators::mean(_stats->_relevant_elements.stat) << "\n"
+             << "Avg-FalsePos: "
+             << accumulators::mean(_stats->_false_positives.stat) << "\n"
              << "Masked pts:   " << *_totally_masked << "\n";
     }
 
