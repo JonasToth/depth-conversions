@@ -15,7 +15,7 @@ print_info "Using \"${exe}\" as driver executable"
 if ! ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
     --start 0 --end 1 \
-    precision-recall \
+    recognition-performance \
     --depth-image "filtered-{}.png" \
     --pose-file "pose-{}.pose" \
     --intrinsic "kinect_intrinsic.txt" \
@@ -29,7 +29,7 @@ rm -f backprojected-1.png
 if ! ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
     --start 0 --end 1 \
-    precision-recall \
+    recognition-performance \
     --depth-image "filtered-{}.png" \
     --pose-file "pose-{}.pose" \
     --intrinsic "kinect_intrinsic.txt" \
@@ -49,7 +49,7 @@ rm -f masked-backprojected-1.png
 if ! ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
     --start 0 --end 1 \
-    precision-recall \
+    recognition-performance \
     --depth-image "filtered-{}.png" \
     --pose-file "pose-{}.pose" \
     --intrinsic "kinect_intrinsic.txt" \
@@ -70,7 +70,7 @@ rm -f unmasked-backprojected-1.png
 if ! ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
     --start 0 --end 1 \
-    precision-recall \
+    recognition-performance \
     --depth-image "filtered-{}.png" \
     --pose-file "pose-{}.pose" \
     --intrinsic "kinect_intrinsic.txt" \
@@ -89,7 +89,7 @@ rm -f unmasked-backprojected-1.png
 if ! ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
     --start 0 --end 1 \
-    precision-recall \
+    recognition-performance \
     --depth-image "filtered-{}.png" \
     --pose-file "pose-{}.pose" \
     --intrinsic "kinect_intrinsic.txt" \
@@ -109,7 +109,7 @@ print_info "Testing bad file input for depth images"
 if ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
     --start 0 --end 1 \
-    precision-recall \
+    recognition-performance \
     --depth-image "does-not-exist-{}.png" \
     --pose-file "pose-{}.pose" \
     --intrinsic "kinect_intrinsic.txt" \
@@ -122,7 +122,7 @@ print_info "Testing bad file input for poses"
 if ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
     --start 0 --end 1 \
-    precision-recall \
+    recognition-performance \
     --depth-image "filtered-{}.png" \
     --pose-file "does-not-exist-pose-{}.pose" \
     --intrinsic "kinect_intrinsic.txt" \
@@ -136,7 +136,7 @@ rm -f backprojected-1.png
 if ! ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
     --start 0 --end 1 \
-    precision-recall \
+    recognition-performance \
     --depth-image "filtered-{}.png" \
     --pose-file "pose-{}.pose" \
     --intrinsic "kinect_intrinsic.txt" \
@@ -156,7 +156,7 @@ rm -f backprojected-1.jpg
 if ! ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
     --start 0 --end 1 \
-    precision-recall \
+    recognition-performance \
     --depth-image "filtered-{}.png" \
     --pose-file "pose-{}.pose" \
     --intrinsic "kinect_intrinsic.txt" \

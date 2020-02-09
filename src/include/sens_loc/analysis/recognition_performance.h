@@ -110,9 +110,9 @@ struct category_statistic {
 /// \note See https://en.wikipedia.org/wiki/Evaluation_of_binary_classifiers for
 /// general information about the statistical relationships.
 ///
-class precision_recall_statistic {
+class recognition_statistic {
   public:
-    precision_recall_statistic() = default;
+    recognition_statistic() = default;
 
     /// Track true/false negative/positive for each image.
     void account(const element_categories& classification) noexcept;

@@ -1,6 +1,6 @@
 #include <fstream>
 #include <limits>
-#include <sens_loc/analysis/precision_recall.h>
+#include <sens_loc/analysis/recognition_performance.h>
 #include <sens_loc/io/feature.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/pose.h>
@@ -149,7 +149,7 @@ element_categories::element_categories(const math::imagepoints_t& query_data,
             query_data.size());
 }
 
-void precision_recall_statistic::account(
+void recognition_statistic::account(
     const element_categories& classification) noexcept {
     // Relevant elements
     n_true_pos += classification.true_positives.size();
@@ -175,7 +175,7 @@ void precision_recall_statistic::account(
         narrow_cast<int64_t>(classification.false_positives.size()));
 }
 
-void precision_recall_statistic::make_histogram(std::int32_t bin_count) {
+void recognition_statistic::make_histogram(std::int32_t bin_count) {
     using namespace std;
 
     // Every category needs to have the same number of entries in the

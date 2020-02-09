@@ -1,7 +1,7 @@
 #include "keypoint_distribution.h"
 #include "matching.h"
 #include "min_dist.h"
-#include "precision_recall.h"
+#include "recognition_performance.h"
 
 #include <CLI/CLI.hpp>
 #include <boost/histogram.hpp>
@@ -105,48 +105,48 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     match_output_opt->needs(orig_imgs_opt);
 
 
-    CLI::App* cmd_prec_rec = app.add_subcommand(
-        "precision-recall",
+    CLI::App* cmd_rec_perf = app.add_subcommand(
+        "recognition-performance",
         "Calculate precision and recall for consecutive image matching");
     string depth_image_path;
-    cmd_prec_rec
+    cmd_rec_perf
         ->add_option("--depth-image", depth_image_path,
                      "File pattern for the original depth images")
         ->required();
     string pose_file_pattern;
-    cmd_prec_rec
+    cmd_rec_perf
         ->add_option("--pose-file", pose_file_pattern,
                      "File pattern for the poses of each camera-idx.")
         ->required();
     string intrinsic_file;
-    cmd_prec_rec
+    cmd_rec_perf
         ->add_option("--intrinsic", intrinsic_file,
                      "File path to the intrinsic - currently only pinhole!")
         ->required();
     optional<string> mask_file;
-    cmd_prec_rec->add_option(
+    cmd_rec_perf->add_option(
         "--mask", mask_file,
         "Image-mask with intrinsic dimenstion. Every black pixel "
         "means the camera has no vision there. White means, the "
         "camera sees these pixels. Use for distortion masking."
         "(8-bit grayscale png!)");
-    cmd_prec_rec->add_set("-d,--match-norm", norm_name,
+    cmd_rec_perf->add_set("-d,--match-norm", norm_name,
                           {"L1", "L2", "L2SQR", "HAMMING", "HAMMING2"},
                           "Set the norm that shall be used as distance measure",
                           /*defaulted=*/true);
     float keypoint_distance_threshold = 3.0F;
-    cmd_prec_rec->add_option("--keypoint-distance-threshold",
+    cmd_rec_perf->add_option("--keypoint-distance-threshold",
                              keypoint_distance_threshold,
                              "Threshold for the reprojection error of "
                              "keypoints to be considered a correspondence",
                              /*defaulted=*/true);
     optional<string> backproject_pattern;
-    CLI::Option*     backproject_opt = cmd_prec_rec->add_option(
+    CLI::Option*     backproject_opt = cmd_rec_perf->add_option(
         "--backprojection", backproject_pattern,
         "Provide a file-pattern to optionally print the "
         "backprojection for matched keypoints");
     CLI::Option* orig_imgs =
-        cmd_prec_rec
+        cmd_rec_perf
             ->add_option("--orig-images", original_images,
                          "Provide the file pattern for the original image "
                          "the features were calculated on. Must be provided "
@@ -171,8 +171,8 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                                 str_to_norm(norm_name), !no_crosscheck,
                                 match_output, original_images);
 
-    if (*cmd_prec_rec)
-        return analyze_precision_recall(
+    if (*cmd_rec_perf)
+        return analyze_recognition_performance(
             feature_file_input_pattern, start_idx, end_idx, depth_image_path,
             pose_file_pattern, intrinsic_file, mask_file,
             str_to_norm(norm_name), keypoint_distance_threshold,

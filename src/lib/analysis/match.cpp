@@ -1,5 +1,5 @@
 #include <sens_loc/analysis/match.h>
-#include <sens_loc/analysis/precision_recall.h>
+#include <sens_loc/analysis/recognition_performance.h>
 #include <sens_loc/math/pointcloud.h>
 
 namespace sens_loc::analysis {

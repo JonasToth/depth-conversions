@@ -7,20 +7,7 @@
 
 namespace sens_loc::apps {
 
-// - Load the pose of frame one and two                                       X
-// - Load the Keypoints and Descriptors for image one and two.                X
-// - Load the original depth image of frame one and two and camera intrinsic  X
-// - Match keypoints them with cross-checking.                                X
-// - Create the list of Keypoints that matched                                X
-// - Project Matched Keypoints Points into 3D-Space for each image            X
-// - Calculate the relative pose of these two
-// - Transform the points of image 2 into the coordinate frame of image 1
-//   with the transformation matrix of '2.'.
-// - Calculate the distance between each point-pair
-// - Insert the distances into a vector.
-// - Statistical analysis of these distances.
-
-int analyze_precision_recall(
+int analyze_recognition_performance(
     std::string_view                feature_file_pattern,
     int                             start_idx,
     int                             end_idx,

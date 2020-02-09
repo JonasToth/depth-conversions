@@ -1,4 +1,4 @@
-#include "precision_recall.h"
+#include "recognition_performance.h"
 
 #include "icp.h"
 #include "keypoint_transform.h"
@@ -15,7 +15,7 @@
 #include <opencv2/rgbd/depth.hpp>
 #include <sens_loc/analysis/distance.h>
 #include <sens_loc/analysis/match.h>
-#include <sens_loc/analysis/precision_recall.h>
+#include <sens_loc/analysis/recognition_performance.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/camera_models/projection.h>
 #include <sens_loc/io/image.h>
@@ -90,20 +90,20 @@ template <template <typename> typename Model = sens_loc::camera_models::pinhole,
 class prec_recall_analysis {
   public:
     prec_recall_analysis(
-        string_view              feature_file_pattern,
-        string_view              depth_image_pattern,
-        string_view              pose_file_pattern,
-        float                    unit_factor,
-        string_view              intrinsic_file,
-        optional<string_view>    mask_file,
-        NormTypes                matching_norm,
-        float                    keypoint_distances_threshold,
-        not_null<mutex*>         inserter_mutex,
-        not_null<vector<float>*> selected_elements_distance,
-        not_null<analysis::precision_recall_statistic*> prec_recall_stat,
-        not_null<size_t*>                               totally_masked,
-        optional<string_view>                           backproject_pattern,
-        optional<string_view>                           original_files) noexcept
+        string_view                                feature_file_pattern,
+        string_view                                depth_image_pattern,
+        string_view                                pose_file_pattern,
+        float                                      unit_factor,
+        string_view                                intrinsic_file,
+        optional<string_view>                      mask_file,
+        NormTypes                                  matching_norm,
+        float                                      keypoint_distances_threshold,
+        not_null<mutex*>                           inserter_mutex,
+        not_null<vector<float>*>                   selected_elements_distance,
+        not_null<analysis::recognition_statistic*> prec_recall_stat,
+        not_null<size_t*>                          totally_masked,
+        optional<string_view>                      backproject_pattern,
+        optional<string_view>                      original_files) noexcept
         : _feature_file_pattern{feature_file_pattern}
         , _depth_image_pattern{depth_image_pattern}
         , _pose_file_pattern{pose_file_pattern}
@@ -359,10 +359,10 @@ class prec_recall_analysis {
 
     static mutex _stdio_mutex;
 
-    not_null<mutex*>                                _inserter_mutex;
-    not_null<vector<float>*>                        _selected_elements_dist;
-    not_null<analysis::precision_recall_statistic*> _stats;
-    not_null<size_t*>                               _totally_masked;
+    not_null<mutex*>                           _inserter_mutex;
+    not_null<vector<float>*>                   _selected_elements_dist;
+    not_null<analysis::recognition_statistic*> _stats;
+    not_null<size_t*>                          _totally_masked;
 
     optional<string_view> _backproject_pattern;
     optional<string_view> _original_files;
@@ -375,17 +375,17 @@ mutex prec_recall_analysis<Model, Real>::_stdio_mutex{};
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_precision_recall(string_view           feature_file_pattern,
-                             int                   start_idx,
-                             int                   end_idx,
-                             string_view           depth_image_pattern,
-                             string_view           pose_file_pattern,
-                             string_view           intrinsic_file,
-                             optional<string_view> mask_file,
-                             NormTypes             matching_norm,
-                             float                 keypoint_distance_threshold,
-                             optional<string_view> backproject_pattern,
-                             optional<string_view> original_files) {
+int analyze_recognition_performance(string_view           feature_file_pattern,
+                                    int                   start_idx,
+                                    int                   end_idx,
+                                    string_view           depth_image_pattern,
+                                    string_view           pose_file_pattern,
+                                    string_view           intrinsic_file,
+                                    optional<string_view> mask_file,
+                                    NormTypes             matching_norm,
+                                    float keypoint_distance_threshold,
+                                    optional<string_view> backproject_pattern,
+                                    optional<string_view> original_files) {
     Expects(start_idx < end_idx &&
             "Precision-Recall calculation requires at least two images");
 
@@ -394,10 +394,10 @@ int analyze_precision_recall(string_view           feature_file_pattern,
     using visitor =
         statistic_visitor<prec_recall_analysis<>, required_data::none>;
 
-    mutex                                inserter_mutex;
-    vector<float>                        selected_elements_distance;
-    analysis::precision_recall_statistic stats;
-    size_t                               totally_masked = 0UL;
+    mutex                           inserter_mutex;
+    vector<float>                   selected_elements_distance;
+    analysis::recognition_statistic stats;
+    size_t                          totally_masked = 0UL;
 
     const float unit_factor = 0.001F;
     auto        analysis_v  = visitor{feature_file_pattern,

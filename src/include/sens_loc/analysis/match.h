@@ -2,7 +2,7 @@
 #define MATCH_H_COIEXYNJ
 
 #include <gsl/gsl>
-#include <sens_loc/analysis/precision_recall.h>
+#include <sens_loc/analysis/recognition_performance.h>
 #include <sens_loc/math/pointcloud.h>
 #include <utility>
 #include <vector>
