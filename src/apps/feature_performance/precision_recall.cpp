@@ -324,22 +324,27 @@ class prec_recall_analysis {
              << "Rand-Index:   " << _stats->rand_index() << "\n"
              << "Youden-Index: " << _stats->youden_index() << "\n"
              << "Min-TruePos:  "
-             << accumulators::min(_stats->_true_positives.stat) << "\n"
+             << accumulators::min(_stats->true_positive_distribution().stat)
+             << "\n"
              << "Avg-TruePos:  "
-             << accumulators::mean(_stats->_true_positives.stat) << "\n"
+             << accumulators::mean(_stats->true_positive_distribution().stat)
+             << "\n"
              << "Min-Relevant: "
-             << accumulators::min(_stats->_relevant_elements.stat) << "\n"
+             << accumulators::min(_stats->relevant_element_distribution().stat)
+             << "\n"
              << "Avg-Relevant: "
-             << accumulators::mean(_stats->_relevant_elements.stat) << "\n"
+             << accumulators::mean(_stats->relevant_element_distribution().stat)
+             << "\n"
              << "Avg-FalsePos: "
-             << accumulators::mean(_stats->_false_positives.stat) << "\n"
+             << accumulators::mean(_stats->false_positive_distribution().stat)
+             << "\n"
              << "Masked pts:   " << *_totally_masked << "\n";
 
-        _stats->make_histogram();
+        _stats->make_histogram(10);
         cout << "\n"
-             << _stats->_relevant_elements.histo << "\n"
-             << _stats->_true_positives.histo << "\n"
-             << _stats->_false_positives.histo << "\n";
+             << _stats->relevant_element_distribution().histo << "\n"
+             << _stats->true_positive_distribution().histo << "\n"
+             << _stats->false_positive_distribution().histo << "\n";
     }
 
   private:

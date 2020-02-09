@@ -233,14 +233,29 @@ class precision_recall_statistic {
     /// Create the histograms for 'relevant elements', 'true positives' and
     /// 'false positives' to better understand the distribution of these
     /// elements.
-    void make_histogram();
+    void make_histogram(std::int32_t bin_count = 10);
 
-    // Make histograms to see the distribution of each element category per
-    // image. This allows a judgement of e.g. "how many true positives are at
-    // least in an image". This helps ruling out different kinds of algorithms.
-    category_statistic _relevant_elements;
-    category_statistic _true_positives;
-    category_statistic _false_positives;
+    /// Provide a histogram and statistic counters for the distribution of
+    /// relevant elements per frame.
+    /// \sa make_histogram
+    /// \sa relevant_elements
+    const category_statistic& relevant_element_distribution() const noexcept {
+        return _relevant_elements;
+    }
+    /// Provide a histogram and statistic counters for the distribution of
+    /// true positives per frame.
+    /// \sa make_histogram
+    /// \sa true_positives
+    const category_statistic& true_positive_distribution() const noexcept {
+        return _true_positives;
+    }
+    /// Provide a histogram and statistic counters for the distribution of
+    /// false positives per frame.
+    /// \sa make_histogram
+    /// \sa false_positives
+    const category_statistic& false_positive_distribution() const noexcept {
+        return _false_positives;
+    }
 
   private:
     // Keep track on the true/false positives/negatives per image.
@@ -254,6 +269,13 @@ class precision_recall_statistic {
     std::int64_t n_false_pos = 0L;
     std::int64_t n_true_neg  = 0L;
     std::int64_t n_false_neg = 0L;
+
+    // Make histograms to see the distribution of each element category per
+    // image. This allows a judgement of e.g. "how many true positives are at
+    // least in an image". This helps ruling out different kinds of algorithms.
+    category_statistic _relevant_elements;
+    category_statistic _true_positives;
+    category_statistic _false_positives;
 };
 
 }  // namespace sens_loc::analysis

@@ -175,9 +175,9 @@ void precision_recall_statistic::account(
         narrow_cast<int64_t>(classification.false_positives.size()));
 }
 
-void precision_recall_statistic::make_histogram() {
+void precision_recall_statistic::make_histogram(std::int32_t bin_count) {
     using namespace std;
-    int32_t bin_count = 20;
+
     // Every category needs to have the same number of entries in the
     // statistics.
     Expects(size(t_p_per_image) == size(f_p_per_image));
