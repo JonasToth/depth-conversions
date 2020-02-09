@@ -238,9 +238,6 @@ class precision_recall_statistic {
     // Make histograms to see the distribution of each element category per
     // image. This allows a judgement of e.g. "how many true positives are at
     // least in an image". This helps ruling out different kinds of algorithms.
-    // TODO: - accumulator for each category
-    // TODO: - histogram for each category --> make a class that does that, use
-    // the vectors
     category_statistic _relevant_elements;
     category_statistic _true_positives;
     category_statistic _false_positives;

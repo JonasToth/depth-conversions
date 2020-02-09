@@ -165,15 +165,45 @@ void precision_recall_statistic::account(
 
     // Keep track for interesting statistical insights and finally
     // histogramming.
-    _relevant_elements.stat(classification.true_positives.size() +
-                            classification.false_negatives.size());
-    _true_positives.stat(classification.true_positives.size());
-    _false_positives.stat(classification.false_positives.size());
+    using gsl::narrow_cast;
+    _relevant_elements.stat(
+        narrow_cast<int64_t>(classification.true_positives.size()) +
+        narrow_cast<int64_t>(classification.false_negatives.size()));
+    _true_positives.stat(
+        narrow_cast<int64_t>(classification.true_positives.size()));
+    _false_positives.stat(
+        narrow_cast<int64_t>(classification.false_positives.size()));
 }
 
 void precision_recall_statistic::make_histogram() {
-    // TODO: everything, see other analysis code for histo creation and
-    // insertion.
+    using namespace std;
+    int32_t bin_count = 20;
+    // Every category needs to have the same number of entries in the
+    // statistics.
+    Expects(size(t_p_per_image) == size(f_p_per_image));
+    Expects(size(t_p_per_image) == size(t_n_per_image));
+    Expects(size(t_p_per_image) == size(f_n_per_image));
+
+    _true_positives.histo =
+        boost::histogram::make_histogram(category_statistic::axis_t(
+            bin_count, 0, boost::accumulators::max(_true_positives.stat) + 1,
+            "True Positives per Frame"));
+    _true_positives.histo.fill(t_p_per_image);
+
+    _false_positives.histo =
+        boost::histogram::make_histogram(category_statistic::axis_t(
+            bin_count, 0, boost::accumulators::max(_false_positives.stat) + 1,
+            "False Positives per Frame"));
+    _false_positives.histo.fill(f_p_per_image);
+
+    _relevant_elements.histo =
+        boost::histogram::make_histogram(category_statistic::axis_t(
+            bin_count, 0, boost::accumulators::max(_relevant_elements.stat) + 1,
+            "Relevant Elements per Frame"));
+    vector<int64_t> sum_elements(size(t_p_per_image));
+    transform(begin(t_p_per_image), end(t_p_per_image), begin(f_n_per_image),
+              begin(sum_elements), plus<int32_t>{});
+    _relevant_elements.histo.fill(sum_elements);
 }
 
 }  // namespace sens_loc::analysis

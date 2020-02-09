@@ -334,6 +334,12 @@ class prec_recall_analysis {
              << "Avg-FalsePos: "
              << accumulators::mean(_stats->_false_positives.stat) << "\n"
              << "Masked pts:   " << *_totally_masked << "\n";
+
+        _stats->make_histogram();
+        cout << "\n"
+             << _stats->_relevant_elements.histo << "\n"
+             << _stats->_true_positives.histo << "\n"
+             << _stats->_false_positives.histo << "\n";
     }
 
   private:
