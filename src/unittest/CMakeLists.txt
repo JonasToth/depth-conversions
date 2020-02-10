@@ -4,6 +4,7 @@ create_test(analysis analysis/test_analysis.cpp)
 test_add_file(analysis analysis/test_distance.cpp)
 test_add_file(analysis analysis/test_keypoints.cpp)
 test_add_file(analysis analysis/test_matches.cpp)
+test_add_file(analysis analysis/test_recognition.cpp)
 
 create_test(camera_models camera_models/test_camera_models.cpp)
 test_add_file(camera_models camera_models/test_pinhole.cpp)

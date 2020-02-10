@@ -24,7 +24,7 @@ element_categories::element_categories(const math::imagepoints_t& query_data,
     Expects(query_data.size() < numeric_limits<int>::max());
     Expects(train_data.size() < numeric_limits<int>::max());
 
-    if (query_data.empty())
+    if (query_data.empty() || train_data.empty())
         return;
 
     const int query_data_size = gsl::narrow_cast<int>(query_data.size());
@@ -78,7 +78,11 @@ element_categories::element_categories(const math::imagepoints_t& query_data,
         size_t removed = remaining_query_indices.erase(m.queryIdx);
         Ensures(removed == 1UL);
     }
-    Ensures(!true_positives.empty() || !false_positives.empty());
+    // The number of total points to query is a constant, so the sum of false
+    // positives and true positives plus everything that is unclassified needs
+    // to be the number of total points to classify.
+    Ensures((true_positives.size() + false_positives.size() +
+             remaining_query_indices.size()) == query_data.size());
 
     // 2. Search for false negatives in the remain query-points.
     // Note: This has quadratic complexity, because there is a linear search
