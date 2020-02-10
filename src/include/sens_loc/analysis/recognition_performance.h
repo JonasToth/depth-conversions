@@ -92,11 +92,9 @@ struct category_statistic {
                                    boost::accumulators::tag::mean,
                                    boost::accumulators::tag::variance(
                                        boost::accumulators::lazy)>>;
-    using axis_t = boost::histogram::axis::regular<
+    using axis_t = boost::histogram::axis::integer<
         // 'float' values are tracked with the histogram.
-        float,
-        // do no transformation before insertion
-        boost::histogram::axis::transform::id,
+        std::int64_t,
         // a string is the metadata for the axis (=title)
         std::string,
         // no overflow/underflow by construction.
@@ -238,7 +236,7 @@ class recognition_statistic {
     /// Create the histograms for 'relevant elements', 'true positives' and
     /// 'false positives' to better understand the distribution of these
     /// elements.
-    void make_histogram(std::int32_t bin_count = 10);
+    void make_histogram();
 
     /// Provide a histogram and statistic counters for the distribution of
     /// relevant elements per frame.

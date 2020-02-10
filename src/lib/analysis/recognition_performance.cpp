@@ -180,7 +180,7 @@ void recognition_statistic::account(
         narrow_cast<int64_t>(classification.false_positives.size()));
 }
 
-void recognition_statistic::make_histogram(std::int32_t bin_count) {
+void recognition_statistic::make_histogram() {
     using namespace std;
 
     // Every category needs to have the same number of entries in the
@@ -191,19 +191,19 @@ void recognition_statistic::make_histogram(std::int32_t bin_count) {
 
     _true_positives.histo =
         boost::histogram::make_histogram(category_statistic::axis_t(
-            bin_count, 0, boost::accumulators::max(_true_positives.stat) + 1,
+            0, boost::accumulators::max(_true_positives.stat) + 1,
             "True Positives per Frame"));
     _true_positives.histo.fill(t_p_per_image);
 
     _false_positives.histo =
         boost::histogram::make_histogram(category_statistic::axis_t(
-            bin_count, 0, boost::accumulators::max(_false_positives.stat) + 1,
+            0, boost::accumulators::max(_false_positives.stat) + 1,
             "False Positives per Frame"));
     _false_positives.histo.fill(f_p_per_image);
 
     _relevant_elements.histo =
         boost::histogram::make_histogram(category_statistic::axis_t(
-            bin_count, 0, boost::accumulators::max(_relevant_elements.stat) + 1,
+            0, boost::accumulators::max(_relevant_elements.stat) + 1,
             "Relevant Elements per Frame"));
     vector<int64_t> sum_elements(size(t_p_per_image));
     transform(begin(t_p_per_image), end(t_p_per_image), begin(f_n_per_image),

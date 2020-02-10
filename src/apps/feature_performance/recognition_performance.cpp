@@ -297,7 +297,7 @@ class prec_recall_analysis {
         return;
     }
 
-    void postprocess() noexcept {
+    void postprocess() {
         lock_guard guard{*_inserter_mutex};
         if (_stats->total_elements() == 0L)
             return;
@@ -340,7 +340,7 @@ class prec_recall_analysis {
              << "\n"
              << "Masked pts:   " << *_totally_masked << "\n";
 
-        _stats->make_histogram(10);
+        _stats->make_histogram();
         cout << "\n"
              << _stats->relevant_element_distribution().histo << "\n"
              << _stats->true_positive_distribution().histo << "\n"
