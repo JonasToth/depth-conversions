@@ -58,10 +58,15 @@ struct element_categories {
     /// \param threshold in pixel-distance for two point to be relevant (== to
     /// be considered an actual correspondence of keypoints)
     /// \pre threshold > 0.0F
-    /// \pre query_data.size() >= matche.size()
+    /// \pre query_data.size() >= matches.size()
+    /// \pre train_data.size() >= matches.size()
     /// \pre query_data.size() < numeric_limits<int>::max() because the
     /// correspondence is stored as an int. The same constraints i put onto
     /// train_data.
+    /// \pre indices in \c matches are valid in the range for \c query_data and
+    /// \c train_data accoringly
+    /// \pre matching is actually done on the keypoints that are equal to
+    /// \c query_data and \c train_data.
     /// \post correspondences are stored as indices into \c
     /// query_data and \c train_data
     /// \post index {-1} is used to signal that no correspondence exists.

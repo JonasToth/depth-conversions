@@ -21,6 +21,7 @@ element_categories::element_categories(const math::imagepoints_t& query_data,
 
     Expects(threshold > 0.0F);
     Expects(query_data.size() >= matches.size());
+    Expects(train_data.size() >= matches.size());
     Expects(query_data.size() < numeric_limits<int>::max());
     Expects(train_data.size() < numeric_limits<int>::max());
 
@@ -57,7 +58,7 @@ element_categories::element_categories(const math::imagepoints_t& query_data,
     // "reuse" such a keypoint for a correspondence.
     for (const auto& m : matches) {
         const float px_dist =
-            (query_data[m.queryIdx] - train_data[m.trainIdx]).norm();
+            (query_data.at(m.queryIdx) - train_data.at(m.trainIdx)).norm();
 
         // This match is a true positive
         if (px_dist <= threshold) {
