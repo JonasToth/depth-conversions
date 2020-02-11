@@ -1,8 +1,8 @@
 [![pipeline status](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/badges/master/pipeline.svg?style=flat-square)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/commits/master)
 [![coverage report](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/badges/master/coverage.svg?style=flat-square)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/commits/master)
-[![standard](docs/cxx17.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
-[![download](docs/download.svg)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/-/archive/master/master-thesis-master.tar.gz)
-[![troll quality](docs/troll_quality.svg)](https://i.kym-cdn.com/entries/icons/original/000/000/091/TrollFace.jpg)
+[![standard](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/raw/master/docs/cxx17.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
+[![download](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/raw/master/docs/download.svg)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/-/archive/master/master-thesis-master.tar.gz)
+[![troll quality](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/raw/master/docs/troll_quality.svg)](https://i.kym-cdn.com/entries/icons/original/000/000/091/TrollFace.jpg)
 
 # master-thesis
 
