@@ -9,6 +9,7 @@
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/histogram.hpp>
 #include <gsl/gsl>
+#include <opencv2/core/persistence.hpp>
 
 namespace sens_loc {
 
@@ -64,6 +65,9 @@ struct statistic {
     }
 };
 
+/// Write-Functionality for OpenCVs-Filestorage API.
+void write(cv::FileStorage& fs, const std::string& name, const statistic& stat);
+
 /// This class processes 'float' datapoints and calculates both histograms
 /// and basic statistical quantities, like the 'min', 'max', 'mean' and
 /// others.
@@ -111,6 +115,9 @@ class distance {
     [[nodiscard]] float       variance() const noexcept { return _s.variance; }
     [[nodiscard]] float       stddev() const noexcept { return _s.stddev; }
     [[nodiscard]] float       skewness() const noexcept { return _s.skewness; }
+
+    /// Read-Only access to underlying statistical data.
+    [[nodiscard]] const statistic& get_statistic() const noexcept { return _s; }
 
   private:
     unsigned int _bin_count  = 50UL;

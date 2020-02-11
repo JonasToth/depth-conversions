@@ -3,6 +3,7 @@
 
 #include <boost/histogram.hpp>
 #include <gsl/gsl>
+#include <opencv2/core/persistence.hpp>
 #include <opencv2/core/types.hpp>
 #include <sens_loc/analysis/distance.h>
 
@@ -120,6 +121,10 @@ class keypoints {
     std::string          _dist_w_title = "width - distribution of keypoints";
     std::string          _dist_h_title = "height - distribution of keypoints";
 };
+
+/// Write the statistics for the keypoint distribution in a file with OpenCVs
+/// FileStorage API.
+void write(cv::FileStorage& fs, const std::string& name, const keypoints& kp);
 
 }  // namespace sens_loc::analysis
 

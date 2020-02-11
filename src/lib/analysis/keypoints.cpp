@@ -109,4 +109,12 @@ void keypoints::analyze(gsl::span<const cv::KeyPoint> points,
         return;
     }
 }
+
+void write(cv::FileStorage& fs, const std::string& name, const keypoints& kp) {
+    fs << name << "{";
+    write(fs, "response", kp.response());
+    write(fs, "size", kp.size());
+    fs << "}";
+}
+
 }  // namespace sens_loc::analysis

@@ -10,6 +10,7 @@
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/histogram.hpp>
 #include <cstdint>
+#include <opencv2/core/persistence.hpp>
 #include <opencv2/features2d.hpp>
 #include <sens_loc/math/pointcloud.h>
 #include <string>
@@ -130,6 +131,15 @@ class recognition_statistic {
     [[nodiscard]] std::int64_t irrelevant_elements() const noexcept {
         return n_false_pos + n_true_neg;
     }
+    /// Number of all keypoints analyzed.
+    [[nodiscard]] std::int64_t total_elements() const noexcept {
+        return relevant_elements() + irrelevant_elements();
+    }
+    /// Number \f$TP + FP\f$ of keypoints that were matched. This means the
+    /// classifier considers them to have a correspondence.
+    [[nodiscard]] std::int64_t selected_elements() const noexcept {
+        return n_true_pos + n_false_pos;
+    }
     /// Number \f$TP\f$ of keypoints that were correctly identified to have a
     /// correspondence.
     [[nodiscard]] std::int64_t true_positives() const noexcept {
@@ -149,15 +159,6 @@ class recognition_statistic {
     /// get identified to have one.
     [[nodiscard]] std::int64_t false_negatives() const noexcept {
         return n_false_neg;
-    }
-    /// Number of all keypoints analyzed.
-    [[nodiscard]] std::int64_t total_elements() const noexcept {
-        return relevant_elements() + irrelevant_elements();
-    }
-    /// Number \f$TP + FP\f$ of keypoints that were matched. This means the
-    /// classifier considers them to have a correspondence.
-    [[nodiscard]] std::int64_t selected_elements() const noexcept {
-        return n_true_pos + n_false_pos;
     }
 
     /// The ratio of true positives to total selected elements. The ratio
@@ -280,6 +281,11 @@ class recognition_statistic {
     category_statistic _true_positives;
     category_statistic _false_positives;
 };
+
+/// Write statistical information to file.
+void write(cv::FileStorage&             fs,
+           const std::string&           name,
+           const recognition_statistic& s);
 
 }  // namespace sens_loc::analysis
 

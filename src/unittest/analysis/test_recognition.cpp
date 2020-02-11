@@ -10,13 +10,13 @@ using namespace math;
 using namespace cv;
 using doctest::Approx;
 
-TEST_CASE("Pathological case - no query data") {
-    vector<DMatch> matches;
-    float          threshold = 5.0F;
-    imagepoints_t  empty_points;
-    imagepoints_t  some_points{{15.0F, 20.0F}, {18.0F, 30.0F}, {2.0F, 10.0F}};
-    imagepoints_t  bad_points{{-1.0F, -1.0F}, {-1.0F, -1.0F}, {-1.0F, -1.0F}};
+const vector<DMatch> matches;
+const float          threshold = 5.0F;
+const imagepoints_t  empty_points;
+const imagepoints_t  some_points{{15.0F, 20.0F}, {18.0F, 30.0F}, {2.0F, 10.0F}};
+const imagepoints_t  bad_points{{-1.0F, -1.0F}, {-1.0F, -1.0F}, {-1.0F, -1.0F}};
 
+TEST_CASE("Pathological case - no query data") {
     SUBCASE("no query points") {
         element_categories ec{empty_points, some_points, matches, threshold};
 
@@ -106,4 +106,35 @@ TEST_CASE("Pathological case - no query data") {
         CHECK(rs.rand_index() == 1.0F);   // == Accuracy
         CHECK(rs.youden_index() == Approx(0.0F));
     }
+}
+
+TEST_CASE("writing result with filestorage") {
+    element_categories    ec{some_points, bad_points, matches, threshold};
+    recognition_statistic rs;
+    rs.account(ec);
+
+    cv::FileStorage recognition{
+        "recognition.stat", cv::FileStorage::MEMORY | cv::FileStorage::WRITE |
+                                cv::FileStorage::FORMAT_YAML};
+    write(recognition, "classification", rs);
+    std::string written = recognition.releaseAndGetString();
+
+    REQUIRE(written == "%YAML:1.0\n"
+                       "---\n"
+                       "classification:\n"
+                       "   relevant_elements: 0\n"
+                       "   irrelevant_elements: 3\n"
+                       "   total_elements: 3\n"
+                       "   selected_elements: 0\n"
+                       "   true_positives: 0\n"
+                       "   false_positives: 0\n"
+                       "   true_negatives: 3\n"
+                       "   false_negatives: 0\n"
+                       "   precision: 0.\n"
+                       "   recall: 0.\n"
+                       "   fallout: 0.\n"
+                       "   sensitivity: 0.\n"
+                       "   specificity: 1.\n"
+                       "   rand_index: 1.\n"
+                       "   youden_index: 0.\n");
 }

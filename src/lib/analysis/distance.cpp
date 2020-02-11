@@ -1,11 +1,27 @@
 #include <cmath>
 #include <iostream>
 #include <limits>
+#include <opencv2/core/persistence.hpp>
 #include <sens_loc/analysis/distance.h>
 #include <sens_loc/util/console.h>
 #include <stdexcept>
 
 namespace sens_loc::analysis {
+
+void write(cv::FileStorage&   fs,
+           const std::string& name,
+           const statistic&   stat) {
+    fs << name << "{";
+    fs << "count" << gsl::narrow<int>(stat.count);
+    fs << "min" << stat.min;
+    fs << "max" << stat.max;
+    fs << "median" << stat.median;
+    fs << "mean" << stat.mean;
+    fs << "variance" << stat.variance;
+    fs << "stddev" << stat.stddev;
+    fs << "skewness" << stat.skewness;
+    fs << "}";
+}
 
 void distance::analyze(gsl::span<const float> distances, bool histo) noexcept {
     _histo.reset();

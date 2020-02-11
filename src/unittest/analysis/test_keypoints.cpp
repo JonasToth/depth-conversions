@@ -131,3 +131,69 @@ TEST_CASE("No keypoints") {
     CHECK(kp_ana.size().max == 0.0F);
     CHECK(kp_ana.distribution().rank() == 2UL);
 }
+
+TEST_CASE("write with filestorage") {
+    keypoints kp_ana;
+    SUBCASE("empty") {
+        cv::FileStorage kp_statistic{
+            "keypoint.stat", cv::FileStorage::MEMORY | cv::FileStorage::WRITE |
+                                 cv::FileStorage::FORMAT_YAML};
+        write(kp_statistic, "empty", kp_ana);
+        std::string written = kp_statistic.releaseAndGetString();
+        REQUIRE(written == "%YAML:1.0\n"
+                           "---\n"
+                           "empty:\n"
+                           "   response:\n"
+                           "      count: 0\n"
+                           "      min: 0.\n"
+                           "      max: 0.\n"
+                           "      median: 0.\n"
+                           "      mean: 0.\n"
+                           "      variance: 0.\n"
+                           "      stddev: 0.\n"
+                           "      skewness: 0.\n"
+                           "   size:\n"
+                           "      count: 0\n"
+                           "      min: 0.\n"
+                           "      max: 0.\n"
+                           "      median: 0.\n"
+                           "      mean: 0.\n"
+                           "      variance: 0.\n"
+                           "      stddev: 0.\n"
+                           "      skewness: 0.\n");
+    }
+
+    SUBCASE("normal analysis of everything") {
+        kp_ana.enable_response_histo(true);
+        kp_ana.enable_size_histo(true);
+        kp_ana.configure_distribution(3U, 2U);
+        kp_ana.analyze(pts);
+
+        cv::FileStorage kp_statistic{
+            "keypoint.stat", cv::FileStorage::MEMORY | cv::FileStorage::WRITE |
+                                 cv::FileStorage::FORMAT_YAML};
+        write(kp_statistic, "everything", kp_ana);
+        std::string written = kp_statistic.releaseAndGetString();
+        REQUIRE(written == "%YAML:1.0\n"
+                           "---\n"
+                           "everything:\n"
+                           "   response:\n"
+                           "      count: 7\n"
+                           "      min: 0.\n"
+                           "      max: 0.\n"
+                           "      median: 0.\n"
+                           "      mean: 0.\n"
+                           "      variance: 0.\n"
+                           "      stddev: 0.\n"
+                           "      skewness: .Nan\n"
+                           "   size:\n"
+                           "      count: 7\n"
+                           "      min: 5.\n"
+                           "      max: 5.\n"
+                           "      median: 5.\n"
+                           "      mean: 5.\n"
+                           "      variance: 1.9073486328125000e-06\n"
+                           "      stddev: 1.3810679083690047e-03\n"
+                           "      skewness: -7.9648510742187500e+03\n");
+    }
+}

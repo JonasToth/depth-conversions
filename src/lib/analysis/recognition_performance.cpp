@@ -211,4 +211,27 @@ void recognition_statistic::make_histogram() {
     _relevant_elements.histo.fill(sum_elements);
 }
 
+void write(cv::FileStorage&             fs,
+           const std::string&           name,
+           const recognition_statistic& s) {
+    using gsl::narrow;
+    fs << name << "{";
+    fs << "relevant_elements" << narrow<int>(s.relevant_elements());
+    fs << "irrelevant_elements" << narrow<int>(s.irrelevant_elements());
+    fs << "total_elements" << narrow<int>(s.total_elements());
+    fs << "selected_elements" << narrow<int>(s.selected_elements());
+    fs << "true_positives" << narrow<int>(s.true_positives());
+    fs << "false_positives" << narrow<int>(s.false_positives());
+    fs << "true_negatives" << narrow<int>(s.true_negatives());
+    fs << "false_negatives" << narrow<int>(s.false_negatives());
+    fs << "precision" << s.precision();
+    fs << "recall" << s.recall();
+    fs << "fallout" << s.fallout();
+    fs << "sensitivity" << s.sensitivity();
+    fs << "specificity" << s.specificity();
+    fs << "rand_index" << s.rand_index();
+    fs << "youden_index" << s.youden_index();
+    fs << "}";
+}
+
 }  // namespace sens_loc::analysis

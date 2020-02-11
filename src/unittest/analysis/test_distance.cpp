@@ -1,4 +1,5 @@
 #include <doctest/doctest.h>
+#include <opencv2/core/persistence.hpp>
 #include <sens_loc/analysis/distance.h>
 #include <vector>
 
@@ -76,5 +77,49 @@ TEST_CASE("normal analysis") {
     SUBCASE("Empty Data") {
         analysis::distance d_ana{{}, 4U, "Quantity"};
         CHECK(d_ana.count() == 0UL);
+    }
+}
+
+TEST_CASE("write with filestorage") {
+    SUBCASE("Write Empty Statistic") {
+        analysis::distance d_ana{{}, 4U, "Quantity"};
+
+        cv::FileStorage kp_statistic{
+            "keypoint.stat", cv::FileStorage::MEMORY | cv::FileStorage::WRITE |
+                                 cv::FileStorage::FORMAT_YAML};
+        analysis::write(kp_statistic, "test_empty", d_ana.get_statistic());
+
+        std::string written = kp_statistic.releaseAndGetString();
+        REQUIRE(written == "%YAML:1.0\n"
+                           "---\n"
+                           "test_empty:\n"
+                           "   count: 0\n"
+                           "   min: 0.\n"
+                           "   max: 0.\n"
+                           "   median: 0.\n"
+                           "   mean: 0.\n"
+                           "   variance: 0.\n"
+                           "   stddev: 0.\n"
+                           "   skewness: 0.\n");
+    }
+
+    SUBCASE("Basic Analysis") {
+        analysis::distance d_ana{distances, 4U, "Quantity"};
+        cv::FileStorage    kp_statistic{
+            "keypoint.stat", cv::FileStorage::MEMORY | cv::FileStorage::WRITE |
+                                 cv::FileStorage::FORMAT_YAML};
+        analysis::write(kp_statistic, "test_basic", d_ana.get_statistic());
+        std::string written = kp_statistic.releaseAndGetString();
+        REQUIRE(written == "%YAML:1.0\n"
+                           "---\n"
+                           "test_basic:\n"
+                           "   count: 7\n"
+                           "   min: -10.\n"
+                           "   max: 10.\n"
+                           "   median: 3.3333349227905273e-01\n"
+                           "   mean: 9.2857146263122559e-01\n"
+                           "   variance: 3.2744899749755859e+01\n"
+                           "   stddev: 5.7223157882690430e+00\n"
+                           "   skewness: -3.9321494102478027e-01\n");
     }
 }

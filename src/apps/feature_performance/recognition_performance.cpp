@@ -340,6 +340,14 @@ class prec_recall_analysis {
              << "\n"
              << "Masked pts:   " << *_totally_masked << "\n";
 
+        cv::FileStorage recognize_some_things{"recognition.stat",
+                                              cv::FileStorage::WRITE |
+                                                  cv::FileStorage::FORMAT_YAML};
+        write(recognize_some_things, "classification", *_stats);
+        write(recognize_some_things, "masked_points",
+              gsl::narrow<int>(*_totally_masked));
+        recognize_some_things.release();
+
         _stats->make_histogram();
         cout << "\n"
              << _stats->relevant_element_distribution().histo << "\n"

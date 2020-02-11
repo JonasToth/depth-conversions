@@ -5,33 +5,16 @@
 #include <gsl/gsl>
 #include <opencv2/core/base.hpp>
 #include <opencv2/core/mat.hpp>
+#include <opencv2/core/persistence.hpp>
 #include <opencv2/core/types.hpp>
 #include <optional>
 #include <sens_loc/analysis/distance.h>
 #include <sens_loc/analysis/keypoints.h>
-#include <sstream>
+#include <sens_loc/io/histogram.h>
 #include <util/batch_visitor.h>
 #include <util/statistic_visitor.h>
 
 namespace {
-
-template <typename Histogram2D>
-std::string histogram_to_gnuplot(const Histogram2D& h) noexcept {
-    std::ostringstream os;
-
-    // The second index is running slow, so that needs to be check for
-    // line separation, which is expected by gnuplot.
-    int previous_index = 0;
-    for (auto&& cell : boost::histogram::indexed(h)) {
-        // Add a additional new line if there was a jump in the slow running
-        // index.
-        os << (cell.index(1) > previous_index ? "\n" : "") << cell.index(0)
-           << " " << cell.index(1) << " " << *cell << "\n";
-        previous_index = cell.index(1);
-    }
-
-    return os.str();
-}
 
 /// Calculate the 2-dimensional distribution of the keypoints for a dataset.
 class keypoint_distribution {
@@ -135,6 +118,16 @@ class keypoint_distribution {
         sens_loc::analysis::distance distance_stat{*global_distances, dist_bins,
                                                    "minimal keypoint distance"};
 
+        cv::FileStorage kp_statistic{"keypoint.stat",
+                                     cv::FileStorage::WRITE |
+                                         cv::FileStorage::FORMAT_YAML};
+        kp_statistic.writeComment(
+            "The following values contain the results of the statistical "
+            "analysis for the keypoint distribution and detector results.");
+        write(kp_statistic, "characteristics", kp);
+        write(kp_statistic, "distance", distance_stat.get_statistic());
+        kp_statistic.release();
+
         std::cout << "==== Response\n"
                   << "count:  " << kp.response().count << "\n"
                   << "min:    " << kp.response().min << "\n"
@@ -165,7 +158,8 @@ class keypoint_distribution {
                   << distance_stat.histogram() << "\n";
 
         std::ofstream gnuplot_data{"location_histo.data"};
-        gnuplot_data << histogram_to_gnuplot(kp.distribution()) << std::endl;
+        gnuplot_data << sens_loc::io::to_gnuplot(kp.distribution())
+                     << std::endl;
     }
 
   private:
