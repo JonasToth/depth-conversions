@@ -1,5 +1,6 @@
 #include <doctest/doctest.h>
 #include <sens_loc/analysis/keypoints.h>
+#include <sstream>
 #include <vector>
 
 using namespace std;
@@ -173,27 +174,35 @@ TEST_CASE("write with filestorage") {
             "keypoint.stat", cv::FileStorage::MEMORY | cv::FileStorage::WRITE |
                                  cv::FileStorage::FORMAT_YAML};
         write(kp_statistic, "everything", kp_ana);
-        std::string written = kp_statistic.releaseAndGetString();
-        REQUIRE(written == "%YAML:1.0\n"
-                           "---\n"
-                           "everything:\n"
-                           "   response:\n"
-                           "      count: 7\n"
-                           "      min: 0.\n"
-                           "      max: 0.\n"
-                           "      median: 0.\n"
-                           "      mean: 0.\n"
-                           "      variance: 0.\n"
-                           "      stddev: 0.\n"
-                           "      skewness: .Nan\n"
-                           "   size:\n"
-                           "      count: 7\n"
-                           "      min: 5.\n"
-                           "      max: 5.\n"
-                           "      median: 5.\n"
-                           "      mean: 5.\n"
-                           "      variance: 0.\n"
-                           "      stddev: 1.3999999500811100e-03\n"
-                           "      skewness: -7.9648510742187500e+03\n");
+        std::string              written = kp_statistic.releaseAndGetString();
+        std::istringstream       ss(written);
+        std::vector<std::string> lines;
+        for (std::string line; std::getline(ss, line);)
+            lines.emplace_back(line);
+        REQUIRE(lines[0] == "%YAML:1.0");
+        REQUIRE(lines[1] == "---");
+        REQUIRE(lines[2] == "everything:");
+        REQUIRE(lines[3] == "   response:");
+        REQUIRE(lines[4] == "      count: 7");
+        REQUIRE(lines[5] == "      min: 0.");
+        REQUIRE(lines[6] == "      max: 0.");
+        REQUIRE(lines[7] == "      median: 0.");
+        REQUIRE(lines[8] == "      mean: 0.");
+        REQUIRE(lines[9] == "      variance: 0.");
+        REQUIRE(lines[10] == "      stddev: 0.");
+        REQUIRE(lines[11] == "      skewness: .Nan");
+        REQUIRE(lines[12] == "   size:");
+        REQUIRE(lines[13] == "      count: 7");
+        REQUIRE(lines[14] == "      min: 5.");
+        REQUIRE(lines[15] == "      max: 5.");
+        REQUIRE(lines[16] == "      median: 5.");
+        REQUIRE(lines[17] == "      mean: 5.");
+        REQUIRE(lines[18] == "      variance: 0.");
+        std::string prefix = "      stddev: ";
+        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[19].begin())
+                    .first == prefix.end());
+        prefix = "      skewness: ";
+        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[20].begin())
+                    .first == prefix.end());
     }
 }
