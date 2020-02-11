@@ -96,7 +96,7 @@ class min_descriptor_distance {
     /// Postprocess the findings of the minimal distances for each image to
     /// a coherent statistical finding. This will overwrite previous analysis
     /// and should only be called once.
-    void postprocess() noexcept {
+    void postprocess(const std::optional<std::string>& stat_file) noexcept {
         // Lock the mutex, just in case. This method is not expected to be
         // run in parallel, but it could.
         std::lock_guard guard{*process_mutex};
@@ -108,15 +108,27 @@ class min_descriptor_distance {
             *global_min_distances, bins,
             "Minimal Intra Image Descriptor Distances"};
 
-        std::cout << distance_stat.histogram() << "\n"
-                  << "==== Descriptor Distances\n"
-                  << "min:       " << distance_stat.min() << "\n"
-                  << "max:       " << distance_stat.max() << "\n"
-                  << "Mean:      " << distance_stat.mean() << "\n"
-                  << "Median:    " << distance_stat.median() << "\n"
-                  << "Variance:  " << distance_stat.variance() << "\n"
-                  << "StdDev:    " << distance_stat.stddev() << "\n"
-                  << "Skewness:  " << distance_stat.skewness() << "\n";
+        std::cout << distance_stat.histogram() << "\n";
+
+        if (stat_file) {
+            cv::FileStorage stat_out{*stat_file,
+                                     cv::FileStorage::WRITE |
+                                         cv::FileStorage::FORMAT_YAML};
+            stat_out.writeComment("This file contains the statistical data for "
+                                  "the distance to the closest descriptor.");
+            write(stat_out, "descriptor_distance",
+                  distance_stat.get_statistic());
+            stat_out.release();
+        } else {
+            std::cout << "==== Descriptor Distances\n"
+                      << "min:       " << distance_stat.min() << "\n"
+                      << "max:       " << distance_stat.max() << "\n"
+                      << "Mean:      " << distance_stat.mean() << "\n"
+                      << "Median:    " << distance_stat.median() << "\n"
+                      << "Variance:  " << distance_stat.variance() << "\n"
+                      << "StdDev:    " << distance_stat.stddev() << "\n"
+                      << "Skewness:  " << distance_stat.skewness() << "\n";
+        }
     }
 
   private:
@@ -126,9 +138,10 @@ class min_descriptor_distance {
 };
 
 template <cv::NormTypes NT>
-int analyze_min_distance_impl(std::string_view input_pattern,
-                              int              start_idx,
-                              int              end_idx) {
+int analyze_min_distance_impl(std::string_view           input_pattern,
+                              int                        start_idx,
+                              int                        end_idx,
+                              std::optional<std::string> stat_file) {
     using namespace sens_loc::apps;
     /// Guards min_distances in parallel access.
     std::mutex process_mutex;
@@ -143,22 +156,23 @@ int analyze_min_distance_impl(std::string_view input_pattern,
                                          gsl::not_null{&process_mutex},
                                          gsl::not_null{&global_min_distances}});
 
-    f.postprocess();
+    f.postprocess(stat_file);
 
     return !global_min_distances.empty() ? 0 : 1;
 }
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_min_distance(std::string_view input_pattern,
-                         int              start_idx,
-                         int              end_idx,
-                         cv::NormTypes    norm_to_use) {
+int analyze_min_distance(std::string_view                  input_pattern,
+                         int                               start_idx,
+                         int                               end_idx,
+                         cv::NormTypes                     norm_to_use,
+                         const std::optional<std::string>& stat_file) {
 
 #define SWITCH_CV_NORM(NORM_NAME)                                              \
     if (norm_to_use == cv::NormTypes::NORM_##NORM_NAME)                        \
         return analyze_min_distance_impl<cv::NormTypes::NORM_##NORM_NAME>(     \
-            input_pattern, start_idx, end_idx);
+            input_pattern, start_idx, end_idx, stat_file);
     SWITCH_CV_NORM(L1)
     SWITCH_CV_NORM(L2)
     SWITCH_CV_NORM(L2SQR)

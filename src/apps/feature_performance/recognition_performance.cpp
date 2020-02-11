@@ -297,7 +297,7 @@ class prec_recall_analysis {
         return;
     }
 
-    void postprocess() {
+    void postprocess(const optional<string>& stat_file) {
         lock_guard guard{*_inserter_mutex};
         if (_stats->total_elements() == 0L)
             return;
@@ -306,47 +306,53 @@ class prec_recall_analysis {
         analysis::distance distance_stat{*_selected_elements_dist, dist_bins,
                                          "backprojection error pixels"};
 
-        using namespace boost;
-        cout << distance_stat.histogram() << "\n"
-             << "# relevant:   " << distance_stat.count() << "\n"
-             << "min:          " << distance_stat.min() << "\n"
-             << "max:          " << distance_stat.max() << "\n"
-             << "median:       " << distance_stat.median() << "\n"
-             << "mean:         " << distance_stat.mean() << "\n"
-             << "Variance:     " << distance_stat.variance() << "\n"
-             << "StdDev:       " << distance_stat.stddev() << "\n"
-             << "Skewness:     " << distance_stat.skewness() << "\n"
-             << "Precision     " << _stats->precision() << "\n"
-             << "Recall:       " << _stats->recall() << "\n"
-             << "Sensitivity:  " << _stats->sensitivity() << "\n"
-             << "Specificity:  " << _stats->specificity() << "\n"
-             << "Fallout:      " << _stats->fallout() << "\n"
-             << "Rand-Index:   " << _stats->rand_index() << "\n"
-             << "Youden-Index: " << _stats->youden_index() << "\n"
-             << "Min-TruePos:  "
-             << accumulators::min(_stats->true_positive_distribution().stat)
-             << "\n"
-             << "Avg-TruePos:  "
-             << accumulators::mean(_stats->true_positive_distribution().stat)
-             << "\n"
-             << "Min-Relevant: "
-             << accumulators::min(_stats->relevant_element_distribution().stat)
-             << "\n"
-             << "Avg-Relevant: "
-             << accumulators::mean(_stats->relevant_element_distribution().stat)
-             << "\n"
-             << "Avg-FalsePos: "
-             << accumulators::mean(_stats->false_positive_distribution().stat)
-             << "\n"
-             << "Masked pts:   " << *_totally_masked << "\n";
-
-        cv::FileStorage recognize_some_things{"recognition.stat",
-                                              cv::FileStorage::WRITE |
-                                                  cv::FileStorage::FORMAT_YAML};
-        write(recognize_some_things, "classification", *_stats);
-        write(recognize_some_things, "masked_points",
-              gsl::narrow<int>(*_totally_masked));
-        recognize_some_things.release();
+        if (stat_file) {
+            cv::FileStorage recognize_out{*stat_file,
+                                          cv::FileStorage::WRITE |
+                                              cv::FileStorage::FORMAT_YAML};
+            write(recognize_out, "classification", *_stats);
+            write(recognize_out, "masked_points",
+                  gsl::narrow<int>(*_totally_masked));
+            recognize_out.release();
+        } else {
+            using namespace boost;
+            cout << "# relevant:   " << distance_stat.count() << "\n"
+                 << "min:          " << distance_stat.min() << "\n"
+                 << "max:          " << distance_stat.max() << "\n"
+                 << "median:       " << distance_stat.median() << "\n"
+                 << "mean:         " << distance_stat.mean() << "\n"
+                 << "Variance:     " << distance_stat.variance() << "\n"
+                 << "StdDev:       " << distance_stat.stddev() << "\n"
+                 << "Skewness:     " << distance_stat.skewness() << "\n"
+                 << "Precision     " << _stats->precision() << "\n"
+                 << "Recall:       " << _stats->recall() << "\n"
+                 << "Sensitivity:  " << _stats->sensitivity() << "\n"
+                 << "Specificity:  " << _stats->specificity() << "\n"
+                 << "Fallout:      " << _stats->fallout() << "\n"
+                 << "Rand-Index:   " << _stats->rand_index() << "\n"
+                 << "Youden-Index: " << _stats->youden_index() << "\n"
+                 << "Min-TruePos:  "
+                 << accumulators::min(_stats->true_positive_distribution().stat)
+                 << "\n"
+                 << "Avg-TruePos:  "
+                 << accumulators::mean(
+                        _stats->true_positive_distribution().stat)
+                 << "\n"
+                 << "Min-Relevant: "
+                 << accumulators::min(
+                        _stats->relevant_element_distribution().stat)
+                 << "\n"
+                 << "Avg-Relevant: "
+                 << accumulators::mean(
+                        _stats->relevant_element_distribution().stat)
+                 << "\n"
+                 << "Avg-FalsePos: "
+                 << accumulators::mean(
+                        _stats->false_positive_distribution().stat)
+                 << "\n"
+                 << "Masked pts:   " << *_totally_masked << "\n";
+        }
+        cout << distance_stat.histogram() << "\n";
 
         _stats->make_histogram();
         cout << "\n"
@@ -392,8 +398,9 @@ int analyze_recognition_performance(string_view           feature_file_pattern,
                                     optional<string_view> mask_file,
                                     NormTypes             matching_norm,
                                     float keypoint_distance_threshold,
-                                    optional<string_view> backproject_pattern,
-                                    optional<string_view> original_files) {
+                                    optional<string_view>   backproject_pattern,
+                                    optional<string_view>   original_files,
+                                    const optional<string>& stat_file) {
     Expects(start_idx < end_idx &&
             "Precision-Recall calculation requires at least two images");
 
@@ -427,7 +434,7 @@ int analyze_recognition_performance(string_view           feature_file_pattern,
     // Consecutive images are matched and analysed, therefore the first
     // index must be skipped.
     auto f = parallel_visitation(start_idx + 1, end_idx, analysis_v);
-    f.postprocess();
+    f.postprocess(stat_file);
 
     return stats.total_elements() > 0L ? 0 : 1;
 }

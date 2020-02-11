@@ -24,6 +24,24 @@ if ! ${exe} \
     exit 1
 fi
 
+rm -f recognition.stat
+if ! ${exe} \
+    --input "surf-1-octave-{}.feature.gz" \
+    --start 0 --end 1 \
+    --output recognition.stat \
+    recognition-performance \
+    --depth-image "filtered-{}.png" \
+    --pose-file "pose-{}.pose" \
+    --intrinsic "kinect_intrinsic.txt" \
+    --match-norm "L2" ; then
+    print_error "Could not calculate precision and recall"
+    exit 1
+fi
+if [ ! -f recognition.stat ] ; then
+    print_error "Did not create statistic file with recognition performance"
+    exit 1
+fi
+
 print_info "Testing Plotting the backprojections of keypoints"
 rm -f backprojected-1.png
 if ! ${exe} \

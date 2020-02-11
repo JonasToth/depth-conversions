@@ -97,7 +97,9 @@ class keypoint_distribution {
         }
     }
 
-    void postprocess(unsigned int image_width, unsigned int image_height) {
+    void postprocess(unsigned int                      image_width,
+                     unsigned int                      image_height,
+                     const std::optional<std::string>& stat_file) {
         if (global_keypoints->empty() || global_distances->empty())
             return;
 
@@ -118,44 +120,46 @@ class keypoint_distribution {
         sens_loc::analysis::distance distance_stat{*global_distances, dist_bins,
                                                    "minimal keypoint distance"};
 
-        cv::FileStorage kp_statistic{"keypoint.stat",
-                                     cv::FileStorage::WRITE |
-                                         cv::FileStorage::FORMAT_YAML};
-        kp_statistic.writeComment(
-            "The following values contain the results of the statistical "
-            "analysis for the keypoint distribution and detector results.");
-        write(kp_statistic, "characteristics", kp);
-        write(kp_statistic, "distance", distance_stat.get_statistic());
-        kp_statistic.release();
+        if (stat_file) {
+            cv::FileStorage kp_statistic{*stat_file,
+                                         cv::FileStorage::WRITE |
+                                             cv::FileStorage::FORMAT_YAML};
+            kp_statistic.writeComment(
+                "The following values contain the results of the statistical "
+                "analysis for the keypoint distribution and detector results.");
+            write(kp_statistic, "characteristics", kp);
+            write(kp_statistic, "distance", distance_stat.get_statistic());
+            kp_statistic.release();
+        } else {
+            std::cout << "==== Response\n"
+                      << "count:  " << kp.response().count << "\n"
+                      << "min:    " << kp.response().min << "\n"
+                      << "max:    " << kp.response().max << "\n"
+                      << "median: " << kp.response().median << "\n"
+                      << "mean:   " << kp.response().mean << "\n"
+                      << "var:    " << kp.response().variance << "\n"
+                      << "stddev: " << kp.response().stddev << "\n";
+            std::cout << kp.response_histo() << "\n"
 
-        std::cout << "==== Response\n"
-                  << "count:  " << kp.response().count << "\n"
-                  << "min:    " << kp.response().min << "\n"
-                  << "max:    " << kp.response().max << "\n"
-                  << "median: " << kp.response().median << "\n"
-                  << "mean:   " << kp.response().mean << "\n"
-                  << "var:    " << kp.response().variance << "\n"
-                  << "stddev: " << kp.response().stddev << "\n"
-                  << kp.response_histo() << "\n"
+                      << "==== Size\n"
+                      << "count:  " << kp.size().count << "\n"
+                      << "min:    " << kp.size().min << "\n"
+                      << "max:    " << kp.size().max << "\n"
+                      << "median: " << kp.size().median << "\n"
+                      << "mean:   " << kp.size().mean << "\n"
+                      << "var:    " << kp.size().variance << "\n"
+                      << "stddev: " << kp.size().stddev << "\n";
+            std::cout << kp.size_histo() << "\n"
 
-                  << "==== Size\n"
-                  << "count:  " << kp.size().count << "\n"
-                  << "min:    " << kp.size().min << "\n"
-                  << "max:    " << kp.size().max << "\n"
-                  << "median: " << kp.size().median << "\n"
-                  << "mean:   " << kp.size().mean << "\n"
-                  << "var:    " << kp.size().variance << "\n"
-                  << "stddev: " << kp.size().stddev << "\n"
-                  << kp.size_histo() << "\n"
-
-                  << "=== Distance\n"
-                  << "count:  " << distance_stat.count() << "\n"
-                  << "min:    " << distance_stat.min() << "\n"
-                  << "max:    " << distance_stat.max() << "\n"
-                  << "median: " << distance_stat.median() << "\n"
-                  << "mean:   " << distance_stat.mean() << "\n"
-                  << "stddev: " << distance_stat.stddev() << "\n"
-                  << distance_stat.histogram() << "\n";
+                      << "=== Distance\n"
+                      << "count:  " << distance_stat.count() << "\n"
+                      << "min:    " << distance_stat.min() << "\n"
+                      << "max:    " << distance_stat.max() << "\n"
+                      << "median: " << distance_stat.median() << "\n"
+                      << "mean:   " << distance_stat.mean() << "\n"
+                      << "stddev: " << distance_stat.stddev() << "\n";
+            std::cout << distance_stat.histogram() << "\n";
+        }
 
         std::ofstream gnuplot_data{"location_histo.data"};
         gnuplot_data << sens_loc::io::to_gnuplot(kp.distribution())
@@ -178,7 +182,8 @@ int analyze_keypoint_distribution(std::string_view input_pattern,
                                   int              start_idx,
                                   int              end_idx,
                                   unsigned int     image_width,
-                                  unsigned int     image_height) {
+                                  unsigned int     image_height,
+                                  const std::optional<std::string>& stat_file) {
     using visitor =
         statistic_visitor<keypoint_distribution, required_data::keypoints>;
 
@@ -195,7 +200,7 @@ int analyze_keypoint_distribution(std::string_view input_pattern,
                 gsl::not_null{&distance_mutex},
                 gsl::not_null{&global_minimal_distances}});
 
-    f.postprocess(image_width, image_height);
+    f.postprocess(image_width, image_height, stat_file);
 
     return !global_minimal_distances.empty() ? 0 : 1;
 }

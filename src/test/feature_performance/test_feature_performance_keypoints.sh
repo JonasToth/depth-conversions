@@ -29,6 +29,20 @@ if ! ${exe} --input "orb-{}.feature" \
     exit 1
 fi
 
+print_info "Test if statistics are written to a file if requested"
+rm -f orb.stat
+if ! ${exe} --input "orb-{}.feature" \
+    --start 0 --end 1 \
+    --output orb.stat \
+    keypoint-distribution \
+    --image-width 960 --image-height 540 ; then
+    print_error "Could not analyze orb keypoints and write statistics to file"
+    exit 1
+fi
+if [ ! -f orb.stat ] ; then
+    print_error "Expected file with statistics!"
+    exit 1
+fi
 
 print_info "Testing for bad input files"
 if ${exe} --input "does-not-exist-{}.feature" \

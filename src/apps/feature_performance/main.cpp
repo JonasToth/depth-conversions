@@ -51,6 +51,10 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     int end_idx;
     app.add_option("-e,--end", end_idx, "End index for processing.")
         ->required();
+    optional<string> statistics_file;
+    app.add_option(
+        "-o,--output", statistics_file,
+        "Write the result of the analysis into a yaml-file instead to stdout");
 
     CLI::App* cmd_keypoint_dist = app.add_subcommand(
         "keypoint-distribution",
@@ -158,25 +162,26 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
 
     if (*cmd_min_dist) {
         return analyze_min_distance(feature_file_input_pattern, start_idx,
-                                    end_idx, str_to_norm(norm_name));
+                                    end_idx, str_to_norm(norm_name),
+                                    statistics_file);
     }
 
     if (*cmd_keypoint_dist)
         return analyze_keypoint_distribution(feature_file_input_pattern,
                                              start_idx, end_idx, image_width,
-                                             image_height);
+                                             image_height, statistics_file);
 
     if (*cmd_matcher)
         return analyze_matching(feature_file_input_pattern, start_idx, end_idx,
                                 str_to_norm(norm_name), !no_crosscheck,
-                                match_output, original_images);
+                                statistics_file, match_output, original_images);
 
     if (*cmd_rec_perf)
         return analyze_recognition_performance(
             feature_file_input_pattern, start_idx, end_idx, depth_image_path,
             pose_file_pattern, intrinsic_file, mask_file,
             str_to_norm(norm_name), keypoint_distance_threshold,
-            backproject_pattern, original_images);
+            backproject_pattern, original_images, statistics_file);
 
     UNREACHABLE("Expected to end program with "  // LCOV_EXCL_LINE
                 "subcommand processing");        // LCOV_EXCL_LINE

@@ -100,7 +100,7 @@ class matching {
         }
     }
 
-    void postprocess() {
+    void postprocess(const std::optional<std::string>& stat_file) {
         lock_guard guard{*distance_mutex};
         if (distances->empty())
             return;
@@ -108,21 +108,33 @@ class matching {
         const auto                   dist_bins = 25;
         sens_loc::analysis::distance distance_stat{*distances, dist_bins};
 
-        cout << "==== Match Distances\n"
-             << distance_stat.histogram() << "\n"
-             << "total count:    " << *total_descriptors << "\n"
-             << "matched count:  " << distances->size() << "\n"
-             << "matched/total:  "
-             << static_cast<double>(distances->size()) /
-                    static_cast<double>(*total_descriptors)
-             << "\n"
-             << "min:            " << distance_stat.min() << "\n"
-             << "max:            " << distance_stat.max() << "\n"
-             << "median:         " << distance_stat.median() << "\n"
-             << "mean:           " << distance_stat.mean() << "\n"
-             << "Variance:       " << distance_stat.variance() << "\n"
-             << "StdDev:         " << distance_stat.stddev() << "\n"
-             << "Skewness:       " << distance_stat.skewness() << "\n";
+        cout << distance_stat.histogram() << "\n";
+        if (stat_file) {
+            cv::FileStorage stat_out{*stat_file,
+                                     cv::FileStorage::WRITE |
+                                         cv::FileStorage::FORMAT_YAML};
+            stat_out.writeComment(
+                "The following values contain the results of the statistical "
+                "analysis for descriptor distance to the closest descriptor "
+                "after matching");
+            write(stat_out, "match_distance", distance_stat.get_statistic());
+            stat_out.release();
+        } else {
+            cout << "==== Match Distances\n"
+                 << "total count:    " << *total_descriptors << "\n"
+                 << "matched count:  " << distances->size() << "\n"
+                 << "matched/total:  "
+                 << static_cast<double>(distances->size()) /
+                        static_cast<double>(*total_descriptors)
+                 << "\n"
+                 << "min:            " << distance_stat.min() << "\n"
+                 << "max:            " << distance_stat.max() << "\n"
+                 << "median:         " << distance_stat.median() << "\n"
+                 << "mean:           " << distance_stat.mean() << "\n"
+                 << "Variance:       " << distance_stat.variance() << "\n"
+                 << "StdDev:         " << distance_stat.stddev() << "\n"
+                 << "Skewness:       " << distance_stat.skewness() << "\n";
+        }
     }
 
   private:
@@ -137,13 +149,14 @@ class matching {
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_matching(string_view           input_pattern,
-                     int                   start_idx,
-                     int                   end_idx,
-                     NormTypes             norm_to_use,
-                     bool                  crosscheck,
-                     optional<string_view> output_pattern,
-                     optional<string_view> original_files) {
+int analyze_matching(string_view                  input_pattern,
+                     int                          start_idx,
+                     int                          end_idx,
+                     NormTypes                    norm_to_use,
+                     bool                         crosscheck,
+                     const optional<string>&      stat_file,
+                     const optional<string_view>& output_pattern,
+                     const optional<string_view>& original_files) {
     Expects(start_idx < end_idx && "Matching requires at least 2 images");
 
     mutex         distance_mutex;
@@ -166,7 +179,7 @@ int analyze_matching(string_view           input_pattern,
                         // index is skipped. This requires "backwards" matching.
         end_idx, analysis_v);
 
-    f.postprocess();
+    f.postprocess(stat_file);
 
     return !global_minimal_distances.empty() ? 0 : 1;
 }

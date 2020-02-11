@@ -26,6 +26,19 @@ if ! ${exe} --input "orb-{}.feature" \
     exit 1
 fi
 
+rm -f orb-minimal-distance.stat
+if ! ${exe} --input "orb-{}.feature" \
+    --start 0 --end 1 \
+    --output orb-minimal-distance.stat \
+    min-distance --norm HAMMING ; then
+    print_error "Could not analyze orb features under Hamming norm"
+    exit 1
+fi
+if [ ! -f orb-minimal-distance.stat ] ; then
+    print_error "Did not create file for descriptor distances!"
+    exit 1
+fi
+
 print_info "Testing for bad input files"
 if ${exe} --input "does-not-exist-{}.feature" \
     --start 0 --end 1 \

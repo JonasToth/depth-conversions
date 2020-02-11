@@ -24,7 +24,21 @@ if ! ${exe} --input "orb-{}.feature" \
     --start 0 --end 1 \
     matching \
     --distance-norm HAMMING --no-crosscheck ; then
-    print_error "Could not analyze orb matching"
+    print_error "Could not analyze orb matching without crosscheck"
+    exit 1
+fi
+
+rm -f orb-match.stat
+if ! ${exe} --input "orb-{}.feature" \
+    --start 0 --end 1 \
+    --output orb-match.stat \
+    matching \
+    --distance-norm HAMMING --no-crosscheck ; then
+    print_error "Could not analyze orb matching without crosscheck"
+    exit 1
+fi
+if [ ! -f orb-match.stat ] ; then
+    print_error "Expected statistic file for orb matching"
     exit 1
 fi
 
