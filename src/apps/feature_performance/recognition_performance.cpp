@@ -18,6 +18,7 @@
 #include <sens_loc/analysis/recognition_performance.h>
 #include <sens_loc/camera_models/pinhole.h>
 #include <sens_loc/camera_models/projection.h>
+#include <sens_loc/io/histogram.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/intrinsics.h>
 #include <sens_loc/io/pose.h>
@@ -297,7 +298,12 @@ class prec_recall_analysis {
         return;
     }
 
-    void postprocess(const optional<string>& stat_file) {
+    void
+    postprocess(const optional<string>&           stat_file,
+                const std::optional<std::string>& backprojection_selected_histo,
+                const std::optional<std::string>& relevant_histo,
+                const std::optional<std::string>& true_positive_histo,
+                const std::optional<std::string>& false_positive_histo) {
         lock_guard guard{*_inserter_mutex};
         if (_stats->total_elements() == 0L)
             return;
@@ -352,13 +358,41 @@ class prec_recall_analysis {
                  << "\n"
                  << "Masked pts:   " << *_totally_masked << "\n";
         }
-        cout << distance_stat.histogram() << "\n";
+
+        if (backprojection_selected_histo) {
+            std::ofstream gnuplot_data{*backprojection_selected_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(distance_stat.histogram())
+                         << std::endl;
+        } else {
+            cout << distance_stat.histogram() << "\n";
+        }
 
         _stats->make_histogram();
-        cout << "\n"
-             << _stats->relevant_element_distribution().histo << "\n"
-             << _stats->true_positive_distribution().histo << "\n"
-             << _stats->false_positive_distribution().histo << "\n";
+
+        if (relevant_histo) {
+            std::ofstream gnuplot_data{*relevant_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(
+                                _stats->relevant_element_distribution().histo)
+                         << std::endl;
+        } else {
+            cout << _stats->relevant_element_distribution().histo << "\n";
+        }
+        if (true_positive_histo) {
+            std::ofstream gnuplot_data{*true_positive_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(
+                                _stats->true_positive_distribution().histo)
+                         << std::endl;
+        } else {
+            cout << _stats->true_positive_distribution().histo << "\n";
+        }
+        if (false_positive_histo) {
+            std::ofstream gnuplot_data{*false_positive_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(
+                                _stats->false_positive_distribution().histo)
+                         << std::endl;
+        } else {
+            cout << _stats->false_positive_distribution().histo << "\n";
+        }
     }
 
   private:
@@ -389,18 +423,23 @@ mutex prec_recall_analysis<Model, Real>::_stdio_mutex{};
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_recognition_performance(string_view           feature_file_pattern,
-                                    int                   start_idx,
-                                    int                   end_idx,
-                                    string_view           depth_image_pattern,
-                                    string_view           pose_file_pattern,
-                                    string_view           intrinsic_file,
-                                    optional<string_view> mask_file,
-                                    NormTypes             matching_norm,
-                                    float keypoint_distance_threshold,
-                                    optional<string_view>   backproject_pattern,
-                                    optional<string_view>   original_files,
-                                    const optional<string>& stat_file) {
+int analyze_recognition_performance(
+    string_view                       feature_file_pattern,
+    int                               start_idx,
+    int                               end_idx,
+    string_view                       depth_image_pattern,
+    string_view                       pose_file_pattern,
+    string_view                       intrinsic_file,
+    optional<string_view>             mask_file,
+    NormTypes                         matching_norm,
+    float                             keypoint_distance_threshold,
+    optional<string_view>             backproject_pattern,
+    optional<string_view>             original_files,
+    const optional<string>&           stat_file,
+    const std::optional<std::string>& backprojection_selected_histo,
+    const std::optional<std::string>& relevant_histo,
+    const std::optional<std::string>& true_positive_histo,
+    const std::optional<std::string>& false_positive_histo) {
     Expects(start_idx < end_idx &&
             "Precision-Recall calculation requires at least two images");
 
@@ -434,7 +473,8 @@ int analyze_recognition_performance(string_view           feature_file_pattern,
     // Consecutive images are matched and analysed, therefore the first
     // index must be skipped.
     auto f = parallel_visitation(start_idx + 1, end_idx, analysis_v);
-    f.postprocess(stat_file);
+    f.postprocess(stat_file, backprojection_selected_histo, relevant_histo,
+                  true_positive_histo, false_positive_histo);
 
     return stats.total_elements() > 0L ? 0 : 1;
 }

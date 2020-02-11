@@ -6,12 +6,13 @@
 #include <string_view>
 
 namespace sens_loc::apps {
-int analyze_matching(std::string_view                       input_pattern,
-                     int                                    start_idx,
-                     int                                    end_idx,
-                     cv::NormTypes                          norm_to_use,
-                     bool                                   crosscheck,
-                     const std::optional<std::string>&      stat_file,
+int analyze_matching(std::string_view                  input_pattern,
+                     int                               start_idx,
+                     int                               end_idx,
+                     cv::NormTypes                     norm_to_use,
+                     bool                              crosscheck,
+                     const std::optional<std::string>& stat_file,
+                     const std::optional<std::string>& matched_distance_histo,
                      const std::optional<std::string_view>& output_pattern,
                      const std::optional<std::string_view>& original_files);
 }  // namespace sens_loc::apps

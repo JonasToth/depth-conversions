@@ -28,6 +28,7 @@ if ! ${exe} --input "orb-{}.feature" \
     exit 1
 fi
 
+print_info "Test if statistic files are written"
 rm -f orb-match.stat
 if ! ${exe} --input "orb-{}.feature" \
     --start 0 --end 1 \
@@ -39,6 +40,21 @@ if ! ${exe} --input "orb-{}.feature" \
 fi
 if [ ! -f orb-match.stat ] ; then
     print_error "Expected statistic file for orb matching"
+    exit 1
+fi
+
+print_info "Test if histograms are written for matching distance"
+rm -f orb_match_distance.dat
+if ! ${exe} --input "orb-{}.feature" \
+    --start 0 --end 1 \
+    matching \
+    --distance-norm HAMMING --no-crosscheck \
+    --matched-distance-histo orb_match_distance.dat; then
+    print_error "Could not analyze orb matching and write histogram"
+    exit 1
+fi
+if [ ! -f orb_match_distance.dat ] ; then
+    print_error "Expected Histogram file for match distance"
     exit 1
 fi
 

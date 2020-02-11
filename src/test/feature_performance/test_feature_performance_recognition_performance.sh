@@ -24,6 +24,7 @@ if ! ${exe} \
     exit 1
 fi
 
+print_info "Write the statistics to a file"
 rm -f recognition.stat
 if ! ${exe} \
     --input "surf-1-octave-{}.feature.gz" \
@@ -39,6 +40,30 @@ if ! ${exe} \
 fi
 if [ ! -f recognition.stat ] ; then
     print_error "Did not create statistic file with recognition performance"
+    exit 1
+fi
+print_info "Write the histograms to a file"
+rm -f backprojection_error.dat relevant_histo.dat tp_histo.dat fp_histo.dat
+if ! ${exe} \
+    --input "surf-1-octave-{}.feature.gz" \
+    --start 0 --end 1 \
+    recognition-performance \
+    --depth-image "filtered-{}.png" \
+    --pose-file "pose-{}.pose" \
+    --intrinsic "kinect_intrinsic.txt" \
+    --match-norm "L2" \
+    --backprojection-selected-histo backprojection_error.dat \
+    --relevant-elements-histo relevant_histo.dat \
+    --true-positive-histo tp_histo.dat \
+    --false-positive-histo fp_histo.dat ; then
+    print_error "Could not evaluate classification performance and write histograms"
+    exit 1
+fi
+if [ ! -f backprojection_error.dat ] ||
+   [ ! -f relevant_histo.dat ] ||
+   [ ! -f tp_histo.dat ] ||
+   [ ! -f fp_histo.dat ] ; then
+    print_error "Did not create histogram file with recognition performance"
     exit 1
 fi
 

@@ -2,6 +2,7 @@
 
 #include <boost/histogram/ostream.hpp>
 #include <cstdint>
+#include <fstream>
 #include <gsl/gsl>
 #include <iterator>
 #include <opencv2/core/base.hpp>
@@ -11,6 +12,7 @@
 #include <opencv2/imgcodecs.hpp>
 #include <opencv2/imgproc.hpp>
 #include <sens_loc/analysis/distance.h>
+#include <sens_loc/io/histogram.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/util/console.h>
 #include <util/batch_visitor.h>
@@ -100,7 +102,8 @@ class matching {
         }
     }
 
-    void postprocess(const std::optional<std::string>& stat_file) {
+    void postprocess(const optional<string>& stat_file,
+                     const optional<string>& matched_distance_histo) {
         lock_guard guard{*distance_mutex};
         if (distances->empty())
             return;
@@ -108,7 +111,6 @@ class matching {
         const auto                   dist_bins = 25;
         sens_loc::analysis::distance distance_stat{*distances, dist_bins};
 
-        cout << distance_stat.histogram() << "\n";
         if (stat_file) {
             cv::FileStorage stat_out{*stat_file,
                                      cv::FileStorage::WRITE |
@@ -135,6 +137,13 @@ class matching {
                  << "StdDev:         " << distance_stat.stddev() << "\n"
                  << "Skewness:       " << distance_stat.skewness() << "\n";
         }
+        if (matched_distance_histo) {
+            std::ofstream gnuplot_data{*matched_distance_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(distance_stat.histogram())
+                         << std::endl;
+        } else {
+            cout << distance_stat.histogram() << "\n";
+        }
     }
 
   private:
@@ -155,6 +164,7 @@ int analyze_matching(string_view                  input_pattern,
                      NormTypes                    norm_to_use,
                      bool                         crosscheck,
                      const optional<string>&      stat_file,
+                     const optional<string>&      matched_distance_histo,
                      const optional<string_view>& output_pattern,
                      const optional<string_view>& original_files) {
     Expects(start_idx < end_idx && "Matching requires at least 2 images");
@@ -179,7 +189,7 @@ int analyze_matching(string_view                  input_pattern,
                         // index is skipped. This requires "backwards" matching.
         end_idx, analysis_v);
 
-    f.postprocess(stat_file);
+    f.postprocess(stat_file, matched_distance_histo);
 
     return !global_minimal_distances.empty() ? 0 : 1;
 }

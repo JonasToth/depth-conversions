@@ -26,6 +26,7 @@ if ! ${exe} --input "orb-{}.feature" \
     exit 1
 fi
 
+print_info "Test if statistics are written to file"
 rm -f orb-minimal-distance.stat
 if ! ${exe} --input "orb-{}.feature" \
     --start 0 --end 1 \
@@ -36,6 +37,20 @@ if ! ${exe} --input "orb-{}.feature" \
 fi
 if [ ! -f orb-minimal-distance.stat ] ; then
     print_error "Did not create file for descriptor distances!"
+    exit 1
+fi
+
+print_info "Test if histogram is written"
+rm -f orb_minimal_distance.dat
+if ! ${exe} --input "orb-{}.feature" \
+    --start 0 --end 1 \
+    min-distance --norm HAMMING \
+    --min-distance-histo orb_minimal_distance.dat; then
+    print_error "Could not analyze orb features under Hamming norm"
+    exit 1
+fi
+if [ ! -f orb_minimal_distance.dat ] ; then
+    print_error "Did not create file for histogram of descriptor distances!"
     exit 1
 fi
 

@@ -19,7 +19,12 @@ int analyze_recognition_performance(
     float                             keypoint_distance_threshold,
     std::optional<std::string_view>   backproject_pattern,
     std::optional<std::string_view>   original_files,
-    const std::optional<std::string>& stat_file);
+    const std::optional<std::string>& stat_file,
+    const std::optional<std::string>& backprojection_selected_histo,
+    const std::optional<std::string>& relevant_histo,
+    const std::optional<std::string>& true_positive_histo,
+    const std::optional<std::string>& false_positive_histo
+    );
 
 }  // namespace sens_loc::apps
 

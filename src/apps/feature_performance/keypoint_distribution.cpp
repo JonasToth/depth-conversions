@@ -99,7 +99,11 @@ class keypoint_distribution {
 
     void postprocess(unsigned int                      image_width,
                      unsigned int                      image_height,
-                     const std::optional<std::string>& stat_file) {
+                     const std::optional<std::string>& stat_file,
+                     const std::optional<std::string>& response_histo,
+                     const std::optional<std::string>& size_histo,
+                     const std::optional<std::string>& kp_distance_histo,
+                     const std::optional<std::string>& kp_distribution_histo) {
         if (global_keypoints->empty() || global_distances->empty())
             return;
 
@@ -138,9 +142,7 @@ class keypoint_distribution {
                       << "median: " << kp.response().median << "\n"
                       << "mean:   " << kp.response().mean << "\n"
                       << "var:    " << kp.response().variance << "\n"
-                      << "stddev: " << kp.response().stddev << "\n";
-            std::cout << kp.response_histo() << "\n"
-
+                      << "stddev: " << kp.response().stddev << "\n"
                       << "==== Size\n"
                       << "count:  " << kp.size().count << "\n"
                       << "min:    " << kp.size().min << "\n"
@@ -148,9 +150,7 @@ class keypoint_distribution {
                       << "median: " << kp.size().median << "\n"
                       << "mean:   " << kp.size().mean << "\n"
                       << "var:    " << kp.size().variance << "\n"
-                      << "stddev: " << kp.size().stddev << "\n";
-            std::cout << kp.size_histo() << "\n"
-
+                      << "stddev: " << kp.size().stddev << "\n"
                       << "=== Distance\n"
                       << "count:  " << distance_stat.count() << "\n"
                       << "min:    " << distance_stat.min() << "\n"
@@ -158,12 +158,36 @@ class keypoint_distribution {
                       << "median: " << distance_stat.median() << "\n"
                       << "mean:   " << distance_stat.mean() << "\n"
                       << "stddev: " << distance_stat.stddev() << "\n";
+        }
+        if (response_histo) {
+            std::ofstream gnuplot_data{*response_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(kp.response_histo())
+                         << std::endl;
+        } else {
+            std::cout << kp.response_histo() << "\n";
+        }
+
+        if (size_histo) {
+            std::ofstream gnuplot_data{*size_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(kp.size_histo())
+                         << std::endl;
+        } else {
+            std::cout << kp.size_histo() << "\n";
+        }
+
+        if (kp_distance_histo) {
+            std::ofstream gnuplot_data{*kp_distance_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(distance_stat.histogram())
+                         << std::endl;
+        } else {
             std::cout << distance_stat.histogram() << "\n";
         }
 
-        std::ofstream gnuplot_data{"location_histo.data"};
-        gnuplot_data << sens_loc::io::to_gnuplot(kp.distribution())
-                     << std::endl;
+        if (kp_distribution_histo) {
+            std::ofstream gnuplot_data{*kp_distribution_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(kp.distribution())
+                         << std::endl;
+        }
     }
 
   private:
@@ -178,12 +202,17 @@ class keypoint_distribution {
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_keypoint_distribution(std::string_view input_pattern,
-                                  int              start_idx,
-                                  int              end_idx,
-                                  unsigned int     image_width,
-                                  unsigned int     image_height,
-                                  const std::optional<std::string>& stat_file) {
+int analyze_keypoint_distribution(
+    std::string_view                  input_pattern,
+    int                               start_idx,
+    int                               end_idx,
+    unsigned int                      image_width,
+    unsigned int                      image_height,
+    const std::optional<std::string>& stat_file,
+    const std::optional<std::string>& response_histo,
+    const std::optional<std::string>& size_histo,
+    const std::optional<std::string>& kp_distance_histo,
+    const std::optional<std::string>& kp_distribution_histo) {
     using visitor =
         statistic_visitor<keypoint_distribution, required_data::keypoints>;
 
@@ -200,7 +229,8 @@ int analyze_keypoint_distribution(std::string_view input_pattern,
                 gsl::not_null{&distance_mutex},
                 gsl::not_null{&global_minimal_distances}});
 
-    f.postprocess(image_width, image_height, stat_file);
+    f.postprocess(image_width, image_height, stat_file, response_histo,
+                  size_histo, kp_distance_histo, kp_distribution_histo);
 
     return !global_minimal_distances.empty() ? 0 : 1;
 }

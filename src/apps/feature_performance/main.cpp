@@ -73,6 +73,24 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                      "the intrinsic!")
         ->required()
         ->check(CLI::Range(65'535));
+    optional<string> response_histo;
+    cmd_keypoint_dist->add_option(
+        "--response-histo", response_histo,
+        "Filepath where the keypoint response histogram shall be written to.");
+    optional<string> size_histo;
+    cmd_keypoint_dist->add_option(
+        "--size-histo", size_histo,
+        "Filepath where the keypoint size histogram shall be written to.");
+    optional<string> kp_distance_histo;
+    cmd_keypoint_dist->add_option(
+        "--kp-distance-histo", kp_distance_histo,
+        "Filepath where the histogram of the distance to the nearest neighbour "
+        "of the keypoints shall be written to.");
+    optional<string> kp_distribution_histo;
+    cmd_keypoint_dist->add_option(
+        "--kp-distribution-histo", kp_distribution_histo,
+        "Filepath where the histogram of the distribution of the keypoints "
+        "shall be written to.");
 
     CLI::App* cmd_min_dist = app.add_subcommand(
         "min-distance", "Calculate the minimum distance of descriptors within "
@@ -82,6 +100,10 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                           {"L1", "L2", "L2SQR", "HAMMING", "HAMMING2"},
                           "Set the norm that shall be used as distance measure",
                           /*defaulted=*/true);
+    optional<string> min_distance_histo;
+    cmd_min_dist->add_option(
+        "--min-distance-histo", min_distance_histo,
+        "Write the histogram of minimal descriptor distance to this file");
 
     CLI::App* cmd_matcher = app.add_subcommand(
         "matching",
@@ -93,7 +115,6 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     bool no_crosscheck = false;
     cmd_matcher->add_flag("--no-crosscheck", no_crosscheck,
                           "Disable crosschecking");
-
     optional<string> match_output;
     CLI::Option*     match_output_opt = cmd_matcher->add_option(
         "--match-output", match_output,
@@ -107,6 +128,10 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                          "for plotting.")
             ->needs(match_output_opt);
     match_output_opt->needs(orig_imgs_opt);
+    optional<string> matched_distance_histo;
+    cmd_matcher->add_option(
+        "--matched-distance-histo", matched_distance_histo,
+        "Write histogram data of the descriptor distance of matches");
 
 
     CLI::App* cmd_rec_perf = app.add_subcommand(
@@ -157,31 +182,53 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                          "for plotting.")
             ->needs(backproject_opt);
     backproject_opt->needs(orig_imgs);
+    optional<string> backprojection_selected_histo;
+    cmd_rec_perf->add_option("--backprojection-selected-histo",
+                             backprojection_selected_histo,
+                             "File for the histogram of the backprojection "
+                             "error of the selected elements");
+    optional<string> relevant_histo;
+    cmd_rec_perf->add_option(
+        "--relevant-elements-histo", relevant_histo,
+        "File for the histogram for the number of relevant elements per frame");
+    optional<string> true_positive_histo;
+    cmd_rec_perf->add_option(
+        "--true-positive-histo", true_positive_histo,
+        "File for the histogram for the number of true positives per frame.");
+    optional<string> false_positive_histo;
+    cmd_rec_perf->add_option(
+        "--false-positive-histo", false_positive_histo,
+        "File for the histogram for the number of false postives per frame.");
+
 
     COLORED_APP_PARSE(app, argc, argv);
 
     if (*cmd_min_dist) {
         return analyze_min_distance(feature_file_input_pattern, start_idx,
                                     end_idx, str_to_norm(norm_name),
-                                    statistics_file);
+                                    statistics_file, min_distance_histo);
     }
 
     if (*cmd_keypoint_dist)
-        return analyze_keypoint_distribution(feature_file_input_pattern,
-                                             start_idx, end_idx, image_width,
-                                             image_height, statistics_file);
+        return analyze_keypoint_distribution(
+            feature_file_input_pattern, start_idx, end_idx, image_width,
+            image_height, statistics_file, response_histo, size_histo,
+            kp_distance_histo, kp_distribution_histo);
 
     if (*cmd_matcher)
         return analyze_matching(feature_file_input_pattern, start_idx, end_idx,
                                 str_to_norm(norm_name), !no_crosscheck,
-                                statistics_file, match_output, original_images);
+                                statistics_file, matched_distance_histo,
+                                match_output, original_images);
 
     if (*cmd_rec_perf)
         return analyze_recognition_performance(
             feature_file_input_pattern, start_idx, end_idx, depth_image_path,
             pose_file_pattern, intrinsic_file, mask_file,
             str_to_norm(norm_name), keypoint_distance_threshold,
-            backproject_pattern, original_images, statistics_file);
+            backproject_pattern, original_images, statistics_file,
+            backprojection_selected_histo, relevant_histo, true_positive_histo,
+            false_positive_histo);
 
     UNREACHABLE("Expected to end program with "  // LCOV_EXCL_LINE
                 "subcommand processing");        // LCOV_EXCL_LINE
