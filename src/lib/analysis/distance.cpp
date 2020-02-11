@@ -3,6 +3,7 @@
 #include <limits>
 #include <opencv2/core/persistence.hpp>
 #include <sens_loc/analysis/distance.h>
+#include <sens_loc/math/rounding.h>
 #include <sens_loc/util/console.h>
 #include <stdexcept>
 
@@ -13,13 +14,13 @@ void write(cv::FileStorage&   fs,
            const statistic&   stat) {
     fs << name << "{";
     fs << "count" << gsl::narrow<int>(stat.count);
-    fs << "min" << stat.min;
-    fs << "max" << stat.max;
-    fs << "median" << stat.median;
-    fs << "mean" << stat.mean;
-    fs << "variance" << stat.variance;
-    fs << "stddev" << stat.stddev;
-    fs << "skewness" << stat.skewness;
+    fs << "min" << math::roundn(stat.min, 4);
+    fs << "max" << math::roundn(stat.max, 4);
+    fs << "median" << math::roundn(stat.median, 4);
+    fs << "mean" << math::roundn(stat.mean, 4);
+    fs << "variance" << math::roundn(stat.variance, 4);
+    fs << "stddev" << math::roundn(stat.stddev, 4);
+    fs << "skewness" << math::roundn(stat.skewness, 4);
     fs << "}";
 }
 

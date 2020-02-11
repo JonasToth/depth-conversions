@@ -1,6 +1,8 @@
 #include <doctest/doctest.h>
 #include <opencv2/core/persistence.hpp>
 #include <sens_loc/analysis/distance.h>
+#include <sstream>
+#include <string>
 #include <vector>
 
 using namespace std;
@@ -109,17 +111,37 @@ TEST_CASE("write with filestorage") {
             "keypoint.stat", cv::FileStorage::MEMORY | cv::FileStorage::WRITE |
                                  cv::FileStorage::FORMAT_YAML};
         analysis::write(kp_statistic, "test_basic", d_ana.get_statistic());
-        std::string written = kp_statistic.releaseAndGetString();
-        REQUIRE(written == "%YAML:1.0\n"
-                           "---\n"
-                           "test_basic:\n"
-                           "   count: 7\n"
-                           "   min: -10.\n"
-                           "   max: 10.\n"
-                           "   median: 3.3333349227905273e-01\n"
-                           "   mean: 9.2857146263122559e-01\n"
-                           "   variance: 3.2744899749755859e+01\n"
-                           "   stddev: 5.7223157882690430e+00\n"
-                           "   skewness: -3.9321494102478027e-01\n");
+        std::string              written = kp_statistic.releaseAndGetString();
+        std::istringstream       ss(written);
+        std::vector<std::string> lines;
+        for (std::string line; std::getline(ss, line);)
+            lines.emplace_back(line);
+
+        REQUIRE(lines[0] == "%YAML:1.0");
+        REQUIRE(lines[1] == "---");
+        REQUIRE(lines[2] == "test_basic:");
+        REQUIRE(lines[3] == "   count: 7");
+        REQUIRE(lines[4] == "   min: -10.");
+        REQUIRE(lines[5] == "   max: 10.");
+
+        // Because boost::accumulators estimates the median the calculation
+        // is not exact. For some reason, this differs on machines in the
+        // floating point representation.
+        // So insteaf of checking the exact value, only the prefix is checked.
+        std::string prefix = "   median: 3.33";
+        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[6].begin())
+                    .first == prefix.end());
+        prefix = "   mean: 9.28";
+        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[7].begin())
+                    .first == prefix.end());
+        prefix = "   variance: 3.27";
+        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[8].begin())
+                    .first == prefix.end());
+        prefix = "   stddev: 5.72";
+        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[9].begin())
+                    .first == prefix.end());
+        prefix = "   skewness: -3.93";
+        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[10].begin())
+                    .first == prefix.end());
     }
 }

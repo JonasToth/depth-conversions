@@ -1,6 +1,7 @@
 #include <boost/histogram.hpp>
 #include <iostream>
 #include <sens_loc/analysis/keypoints.h>
+#include <sens_loc/math/rounding.h>
 #include <sens_loc/util/console.h>
 #include <stdexcept>
 

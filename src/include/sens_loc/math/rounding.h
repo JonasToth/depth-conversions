@@ -15,9 +15,9 @@ namespace sens_loc::math {
 /// values indicate the position behind the comma for rational numbers, a
 /// negative number indicates a position before the comma.
 /// \pre \c std::is_arithmetic_v<Number>
-/// \pre \c val must be a finite number, so no NaN or Inf is allowed.
 /// \post the result is rounded to the nth digit
 /// \post \f$digit == 0 => result == val\f$
+/// \post \f$!std::isfinite(val) => result == val\f$
 /// \code
 /// roundn(10.055, 2) == 10.06;
 /// roundn(10.055, 0) == 10.055;
@@ -28,13 +28,14 @@ namespace sens_loc::math {
 /// \endcode
 template <typename Number>
 Number roundn(Number val, int digit) noexcept {
-    Expects(std::isfinite(val));
     static_assert(std::is_arithmetic_v<Number>);
 
     if (digit == 0)
         return val;
 
     if constexpr (std::is_floating_point_v<Number>) {
+        if (!std::isfinite(val))
+            return val;
         Number potence_10 = std::pow(Number(10), digit);
         return std::round(val * potence_10) / potence_10;
     } else {

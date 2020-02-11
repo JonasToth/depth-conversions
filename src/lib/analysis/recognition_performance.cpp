@@ -4,6 +4,7 @@
 #include <sens_loc/io/feature.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/io/pose.h>
+#include <sens_loc/math/rounding.h>
 #include <unordered_set>
 
 using namespace std;
@@ -224,13 +225,13 @@ void write(cv::FileStorage&             fs,
     fs << "false_positives" << narrow<int>(s.false_positives());
     fs << "true_negatives" << narrow<int>(s.true_negatives());
     fs << "false_negatives" << narrow<int>(s.false_negatives());
-    fs << "precision" << s.precision();
-    fs << "recall" << s.recall();
-    fs << "fallout" << s.fallout();
-    fs << "sensitivity" << s.sensitivity();
-    fs << "specificity" << s.specificity();
-    fs << "rand_index" << s.rand_index();
-    fs << "youden_index" << s.youden_index();
+    fs << "precision" << math::roundn(s.precision(), 4);
+    fs << "recall" << math::roundn(s.recall(), 4);
+    fs << "fallout" << math::roundn(s.fallout(), 4);
+    fs << "sensitivity" << math::roundn(s.sensitivity(), 4);
+    fs << "specificity" << math::roundn(s.specificity(), 4);
+    fs << "rand_index" << math::roundn(s.rand_index(), 4);
+    fs << "youden_index" << math::roundn(s.youden_index(), 4);
     fs << "}";
 }
 

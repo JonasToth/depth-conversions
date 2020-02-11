@@ -192,8 +192,8 @@ TEST_CASE("write with filestorage") {
                            "      max: 5.\n"
                            "      median: 5.\n"
                            "      mean: 5.\n"
-                           "      variance: 1.9073486328125000e-06\n"
-                           "      stddev: 1.3810679083690047e-03\n"
+                           "      variance: 0.\n"
+                           "      stddev: 1.3999999500811100e-03\n"
                            "      skewness: -7.9648510742187500e+03\n");
     }
 }
