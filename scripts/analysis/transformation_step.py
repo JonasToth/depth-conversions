@@ -17,6 +17,8 @@ __cmds = {
     'converter': 'depth2x',
     'extractor': 'feature_extractor',
     'plotter': 'keypoint_plotter',
+    'distribution': 'feature_performance',
+    'recognition': 'feature_performance',
 }
 
 
@@ -130,6 +132,25 @@ def run_plotting(config_args, source_info):
     command_invocer(invocation, config_args, source_info)
 
 
+def run_distribution(config_args, source_info):
+    invocation = __cmd_prefix
+    invocation.append(__cmds['distribution'])
+    invocation.extend(['--input', source_info['pattern']])
+    invocation.extend(['--output', config_args['target']])
+    invocation.extend(['--start', source_info['start']])
+    invocation.extend(['--end', source_info['end']])
+    invocation.append('keypoint-distribution')
+    invocation.extend(['--image-width', config_args['width']])
+    invocation.extend(['--image-height', config_args['height']])
+    invocation.extend(['--response-histo', config_args['response']])
+    invocation.extend(['--size-histo', config_args['size']])
+    invocation.extend(['--kp-distance-histo', config_args['kp_distance']])
+    invocation.extend(['--kp-distribution-histo',
+                       config_args['kp_distribution']])
+
+    command_invocer(invocation, config_args, source_info)
+
+
 def create_video(config_args):
     __l.debug('Creating video \'%s\'' % config_args['output'])
     # Adjusted from
@@ -182,12 +203,17 @@ def main():
     Path(dirs_to_output).mkdir(parents=True, exist_ok=True)
 
     if not args.force:
-        # Check if any work has to be done, if yes, do it.
-        # Otherwise just return.
-        start_idx = source_data_cfg.getint('data', 'start')
-        end_idx = source_data_cfg.getint('data', 'end')
-        # Counting is inclusive in the processing tools.
-        n_elements = end_idx - start_idx + 1
+        n_elements = 0
+        if int(toplevel_cfg['data'].get('expected_elements', -1)) != -1:
+            n_elements = int(toplevel_cfg['data']['expected_elements'])
+        else:
+            # Check if any work has to be done, if yes, do it.
+            # Otherwise just return.
+            start_idx = source_data_cfg.getint('data', 'start')
+            end_idx = source_data_cfg.getint('data', 'end')
+            # Counting is inclusive in the processing tools.
+            n_elements = end_idx - start_idx + 1
+
         __l.debug('Expect %d elements' % n_elements)
 
         globbed = glob.glob(toplevel_cfg['data']['test_glob'])
@@ -217,6 +243,22 @@ def main():
     elif 'plot' in toplevel_cfg:
         toplevel_cfg['plot']['target'] = toplevel_cfg['data']['target']
         run_plotting(toplevel_cfg['plot'], source_data_cfg['data'])
+
+    elif 'distribution' in toplevel_cfg:
+        toplevel_cfg['distribution']['target'] = toplevel_cfg['data']['target']
+        toplevel_cfg['distribution']['response'] = \
+            abspath(join(dirname(toplevel_cfg['data']['target']),
+                         toplevel_cfg['distribution']['response']))
+        toplevel_cfg['distribution']['size'] = \
+            abspath(join(dirname(toplevel_cfg['data']['target']),
+                         toplevel_cfg['distribution']['size']))
+        toplevel_cfg['distribution']['kp_distance'] = \
+            abspath(join(dirname(toplevel_cfg['data']['target']),
+                         toplevel_cfg['distribution']['kp_distance']))
+        toplevel_cfg['distribution']['kp_distribution'] = \
+            abspath(join(dirname(toplevel_cfg['data']['target']),
+                         toplevel_cfg['distribution']['kp_distribution']))
+        run_distribution(toplevel_cfg['distribution'], source_data_cfg['data'])
 
     # Creating a video from the frames helps with visualization.
     if 'video' in toplevel_cfg:
