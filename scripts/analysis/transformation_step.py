@@ -29,6 +29,10 @@ def arguments():
                              ' command. This can be used to run the commands'
                              ' with \'docker run\'',
                         default='')
+    parser.add_argument('--force',
+                        help='Force execution of the transformation, even'
+                             ' if the files already exist.',
+                        action='store_true')
     return parser.parse_args()
 
 
@@ -124,24 +128,26 @@ def main():
     dirs_to_output = dirname(toplevel_cfg['data']['target'])
     Path(dirs_to_output).mkdir(parents=True, exist_ok=True)
 
-    # Check if any work has to be done, if yes, do it.
-    # Otherwise just return.
-    start_idx = source_data_cfg.getint('data', 'start')
-    end_idx = source_data_cfg.getint('data', 'end')
-    # Counting is inclusive in the processing tools.
-    n_elements = end_idx - start_idx + 1
-    __l.debug('Expect %d elements' % n_elements)
+    if not args.force:
+        # Check if any work has to be done, if yes, do it.
+        # Otherwise just return.
+        start_idx = source_data_cfg.getint('data', 'start')
+        end_idx = source_data_cfg.getint('data', 'end')
+        # Counting is inclusive in the processing tools.
+        n_elements = end_idx - start_idx + 1
+        __l.debug('Expect %d elements' % n_elements)
 
-    globbed = glob.glob(toplevel_cfg['data']['test_glob'])
-    __l.debug('Glob detects %d elements' % len(globbed))
-    if len(globbed) == n_elements:
-        __l.info('Detected that the output files already exist.'
-                 ' Skipping processing!')
-        return
-    if len(globbed) > n_elements:
-        __l.error('Test expression resulted in more files then the original'
-                  ' dataset has. Check you configuration! No processing!')
-        return
+        globbed = glob.glob(toplevel_cfg['data']['test_glob'])
+        __l.debug('Glob detects %d elements' % len(globbed))
+        if len(globbed) == n_elements:
+            __l.info('Detected that the output files already exist.'
+                     ' Skipping processing!')
+            return
+        if len(globbed) > n_elements:
+            __l.error('Test expression resulted in more files then the'
+                      ' original dataset has. Check you configuration!'
+                      ' No processing!')
+            return
 
     if 'filter' in toplevel_cfg:
         toplevel_cfg['filter']['target'] = toplevel_cfg['data']['target']
