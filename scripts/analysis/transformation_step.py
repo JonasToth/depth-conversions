@@ -79,8 +79,16 @@ def run_converter(config_args, source_info):
     invocation.extend(['--start', source_info['start']])
     invocation.extend(['--end', source_info['end']])
     invocation.append(config_args['type'])
-    invocation.extend(['--output', config_args['target']])
-    invocation.extend(config_args.get('arguments', '').split(' '))
+
+    if config_args['type'] == 'bearing':
+        add_args = config_args.get('arguments', '').split(' ')
+        assert len(add_args) == 1, "Too many argument for bearing angle"
+        invocation.extend(add_args)
+        invocation.append(config_args['target'])
+    else:
+        invocation.extend(['--output', config_args['target']])
+        invocation.extend(config_args.get('arguments', '').split(' '))
+
     filtered = [s for s in invocation if len(s) > 0]
     __l.debug('Final invocation: %s' % filtered)
 
@@ -88,6 +96,20 @@ def run_converter(config_args, source_info):
     __l.info(' '.join(filtered))
 
     return_code = subprocess.run(filtered, shell=False, stdin=None,
+                                 stdout=sys.stdout, stderr=sys.stderr)
+    return_code.check_returncode()
+
+
+def create_video(config_args):
+    __l.debug('Creating video \'%s\'' % config_args['output'])
+    # Adjusted from
+    # https://stackoverflow.com/questions/24961127/how-to-create-a-video-from-images-with-ffmpeg
+    ffmpeg_call = ['ffmpeg', '-r', config_args['rate'], '-i',
+                   config_args['source'], '-c:v', 'libx264',
+                   '-y',  # overwrite the output-file automatically
+                   '-vf', 'fps=25', '-pix_fmt', 'yuv420p',
+                   config_args['output']]
+    return_code = subprocess.run(ffmpeg_call, shell=False, stdin=None,
                                  stdout=sys.stdout, stderr=sys.stderr)
     return_code.check_returncode()
 
@@ -156,6 +178,16 @@ def main():
     elif 'converter' in toplevel_cfg:
         toplevel_cfg['converter']['target'] = toplevel_cfg['data']['target']
         run_converter(toplevel_cfg['converter'], source_data_cfg['data'])
+
+    # Creating a video from the frames helps with visualization.
+    if 'video' in toplevel_cfg:
+        toplevel_cfg['video']['output'] = \
+            abspath(join(dirname(args.config),
+                         toplevel_cfg['video']['output']))
+        toplevel_cfg['video']['source'] = \
+            abspath(join(dirname(args.config),
+                         toplevel_cfg['video']['source'])).replace('%', '%%')
+        create_video(toplevel_cfg['video'])
 
 
 if __name__ == '__main__':
