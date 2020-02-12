@@ -15,6 +15,8 @@ __cmd_prefix = ['']
 __cmds = {
     'filter': 'depth_filter',
     'converter': 'depth2x',
+    'extractor': 'feature_extractor',
+    'plotter': 'keypoint_plotter',
 }
 
 
@@ -36,21 +38,9 @@ def arguments():
     return parser.parse_args()
 
 
-def run_filter(config_args, source_info):
-    __l.debug('Filter command: %s' % config_args['filter'])
-    __l.debug('Filter arguments: %s' % config_args['arguments'])
-
-    invocation = __cmd_prefix
-    invocation.append(__cmds['filter'])
-    invocation.extend(['--input', source_info['pattern']])
-    invocation.extend(['--output', config_args['target']])
-    invocation.extend(['--start', source_info['start']])
-    invocation.extend(['--end', source_info['end']])
-    invocation.append(config_args['filter'])
-    invocation.extend(config_args['arguments'].split(' '))
+def command_invocer(invocation, config_args, source_info):
     filtered = [s for s in invocation if len(s) > 0]
     __l.debug('Final invocation: %s' % filtered)
-
     __l.info('Running filter with the following command:')
     __l.info(' '.join(filtered))
 
@@ -64,7 +54,23 @@ def run_filter(config_args, source_info):
     new_cfg['data'] = source_info
     new_cfg['data']['pattern'] = basename(config_args['target'])
     new_cfg.write(open(join(dirname(config_args['target']),
-                            'dataset.config'), 'w'))
+                            config_args.get('config', 'dataset.config')), 'w'))
+
+
+def run_filter(config_args, source_info):
+    __l.debug('Filter command: %s' % config_args['filter'])
+    __l.debug('Filter arguments: %s' % config_args['arguments'])
+
+    invocation = __cmd_prefix
+    invocation.append(__cmds['filter'])
+    invocation.extend(['--input', source_info['pattern']])
+    invocation.extend(['--output', config_args['target']])
+    invocation.extend(['--start', source_info['start']])
+    invocation.extend(['--end', source_info['end']])
+    invocation.append(config_args['filter'])
+    invocation.extend(config_args['arguments'].split(' '))
+
+    command_invocer(invocation, config_args, source_info)
 
 
 def run_converter(config_args, source_info):
@@ -89,15 +95,39 @@ def run_converter(config_args, source_info):
         invocation.extend(['--output', config_args['target']])
         invocation.extend(config_args.get('arguments', '').split(' '))
 
-    filtered = [s for s in invocation if len(s) > 0]
-    __l.debug('Final invocation: %s' % filtered)
+    command_invocer(invocation, config_args, source_info)
 
-    __l.info('Running filter with the following command:')
-    __l.info(' '.join(filtered))
 
-    return_code = subprocess.run(filtered, shell=False, stdin=None,
-                                 stdout=sys.stdout, stderr=sys.stderr)
-    return_code.check_returncode()
+def run_extraction(config_args, source_info):
+    __l.debug('Detector: %s' % config_args['detector'])
+    __l.debug('Descriptor: %s' % config_args['descriptor'])
+
+    invocation = __cmd_prefix
+    invocation.append(__cmds['extractor'])
+    invocation.extend(['--input', source_info['pattern']])
+    invocation.extend(['--output', config_args['target']])
+    invocation.extend(['--start', source_info['start']])
+    invocation.extend(['--end', source_info['end']])
+    invocation.extend(['detector', config_args['detector']])
+    add_args = config_args.get('detector_args', '').split(' ')
+    invocation.extend(add_args)
+    invocation.extend(['descriptor', config_args['descriptor']])
+    add_args = config_args.get('descriptor_args', '').split(' ')
+    invocation.extend(add_args)
+
+    command_invocer(invocation, config_args, source_info)
+
+
+def run_plotting(config_args, source_info):
+    invocation = __cmd_prefix
+    invocation.append(__cmds['plotter'])
+    invocation.extend(['--input', source_info['pattern']])
+    invocation.extend(['--output', config_args['target']])
+    invocation.extend(['--start', source_info['start']])
+    invocation.extend(['--end', source_info['end']])
+    invocation.extend(['--color', config_args.get('color', 'all')])
+
+    command_invocer(invocation, config_args, source_info)
 
 
 def create_video(config_args):
@@ -139,9 +169,10 @@ def main():
     source_data_cfg.read(toplevel_cfg['data']['source'], encoding='utf-8')
 
     # Substitute paths in source-configuration as well.
-    source_data_cfg['data']['intrinsic'] = \
-        abspath(join(dirname(toplevel_cfg['data']['source']),
-                     source_data_cfg['data']['intrinsic']))
+    if 'intrinsic' in source_data_cfg['data']:
+        source_data_cfg['data']['intrinsic'] = \
+            abspath(join(dirname(toplevel_cfg['data']['source']),
+                         source_data_cfg['data']['intrinsic']))
     source_data_cfg['data']['pattern'] = \
         abspath(join(dirname(toplevel_cfg['data']['source']),
                      source_data_cfg['data']['pattern']))
@@ -178,6 +209,14 @@ def main():
     elif 'converter' in toplevel_cfg:
         toplevel_cfg['converter']['target'] = toplevel_cfg['data']['target']
         run_converter(toplevel_cfg['converter'], source_data_cfg['data'])
+
+    elif 'extract' in toplevel_cfg:
+        toplevel_cfg['extract']['target'] = toplevel_cfg['data']['target']
+        run_extraction(toplevel_cfg['extract'], source_data_cfg['data'])
+
+    elif 'plot' in toplevel_cfg:
+        toplevel_cfg['plot']['target'] = toplevel_cfg['data']['target']
+        run_plotting(toplevel_cfg['plot'], source_data_cfg['data'])
 
     # Creating a video from the frames helps with visualization.
     if 'video' in toplevel_cfg:
