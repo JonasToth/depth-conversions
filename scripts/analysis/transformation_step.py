@@ -184,6 +184,38 @@ def run_matching(config_args, source_info):
     command_invocer(invocation, config_args, source_info)
 
 
+def run_recognition(config_args, source_info):
+    invocation = __cmd_prefix
+    invocation.append(__cmds['recognition'])
+    invocation.extend(['--input', source_info['pattern']])
+    invocation.extend(['--output', config_args['target']])
+    invocation.extend(['--start', source_info['start']])
+    invocation.extend(['--end', source_info['end']])
+    invocation.append('recognition-performance')
+    invocation.extend(['--depth-image', config_args['depth_images']])
+    invocation.extend(['--pose-file', source_info['pose']])
+    invocation.extend(['--intrinsic', source_info['intrinsic']])
+    if 'mask' in source_info:
+        invocation.extend(['--mask', source_info['mask']])
+    invocation.extend(['--match-norm', config_args['norm']])
+    invocation.extend(['--keypoint-distance-threshold',
+                       config_args['distance_threshold']])
+
+    invocation.extend(['--backprojection', config_args['backprojection']])
+    invocation.extend(['--orig-images', config_args['original_images']])
+
+    invocation.extend(['--backprojection-selected-histo',
+                       config_args['backprojection_selected_histo']])
+    invocation.extend(['--relevant-elements-histo',
+                       config_args['relevant_elements_histo']])
+    invocation.extend(['--true-positive-histo',
+                       config_args['true_positive_histo']])
+    invocation.extend(['--false-positive-histo',
+                       config_args['false_positive_histo']])
+
+    command_invocer(invocation, config_args, source_info)
+
+
 def create_video(config_args):
     __l.debug('Creating video \'%s\'' % config_args['output'])
     # Adjusted from
@@ -285,7 +317,14 @@ def main():
         run_matching(toplevel_cfg['matching'], source_data_cfg['data'])
 
     elif 'recognition' in toplevel_cfg:
-        pass
+        toplevel_cfg['recognition']['target'] = toplevel_cfg['data']['target']
+        path_adjustment(toplevel_cfg['recognition'],
+                        ['depth_images', 'backprojection', 'original_images',
+                         'backprojection_selected_histo',
+                         'relevant_elements_histo', 'true_positive_histo',
+                         'false_positive_histo'],
+                        args.config)
+        run_recognition(toplevel_cfg['recognition'], source_data_cfg['data'])
 
     # Creating a video from the frames helps with visualization.
     if 'video' in toplevel_cfg:
