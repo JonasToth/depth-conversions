@@ -4,7 +4,7 @@ import argparse
 import configparser
 import glob
 import logging as log
-from os.path import abspath, basename, dirname, join
+from os.path import abspath, basename, dirname, join, exists
 from pathlib import Path
 import subprocess
 import sys
@@ -237,6 +237,10 @@ def main():
     __cmd_prefix = args.command_prefix.split(' ')
     __l.debug('Command prefix: %s' % __cmd_prefix)
 
+    if not exists(args.config):
+        __l.error('Configuration path \'%s\' does not exist!' % args.config)
+        sys.exit(1)
+
     toplevel_cfg = configparser.ConfigParser()
     __l.debug('Reading configuration from file: %s' % args.config)
     toplevel_cfg.read(args.config, encoding='utf-8')
@@ -246,6 +250,10 @@ def main():
                     args.config)
     __l.debug('Source Data configuration expected here: %s' %
               toplevel_cfg['data']['source'])
+
+    if not exists(toplevel_cfg['data']['source']):
+        __l.error('Configuration path \'%s\' does not exist!' % args.config)
+        sys.exit(1)
 
     source_data_cfg = configparser.ConfigParser()
     source_data_cfg.read(toplevel_cfg['data']['source'], encoding='utf-8')

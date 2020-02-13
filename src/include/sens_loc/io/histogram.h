@@ -28,10 +28,11 @@ std::string to_gnuplot(const Histogram& h) {
         }
     } else if (h.rank() == 1U) {
         // Output comment for each columns meaning
-        os << "# Quantity\tCount\n";
+        os << "# Lower Bound\tCount\tWidth\n";
 
         for (auto&& cell : boost::histogram::indexed(h))
-            os << cell.index(0) << "\t" << *cell << "\n";
+            os << cell.bin(0).lower() << "\t" << *cell << "\t"
+               << cell.bin(0).upper() - cell.bin(0).lower() << "\n";
     } else {
         throw std::invalid_argument{
             "Only 1D and 2D histograms are supported for output to gnuplot"};
