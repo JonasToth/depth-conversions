@@ -18,6 +18,7 @@ __cmds = {
     'extractor': 'feature_extractor',
     'plotter': 'keypoint_plotter',
     'distribution': 'feature_performance',
+    'matching': 'feature_performance',
     'recognition': 'feature_performance',
 }
 
@@ -57,6 +58,16 @@ def command_invocer(invocation, config_args, source_info):
     new_cfg['data']['pattern'] = basename(config_args['target'])
     new_cfg.write(open(join(dirname(config_args['target']),
                             config_args.get('config', 'dataset.config')), 'w'))
+
+
+def path_adjustment(dictionary, keys, path):
+    """
+    Iterates :param: keys in the :param: dictionary and replaces each value
+    with the 'abspath(join(path, dictionary[key]))'.
+    """
+    for key in keys:
+        assert key in dictionary, "Bad key provided for dictionary"
+        dictionary[key] = abspath(join(dirname(path), dictionary[key]))
 
 
 def run_filter(config_args, source_info):
@@ -110,9 +121,14 @@ def run_extraction(config_args, source_info):
     invocation.extend(['--output', config_args['target']])
     invocation.extend(['--start', source_info['start']])
     invocation.extend(['--end', source_info['end']])
-    invocation.extend(['detector', config_args['detector']])
+    invocation.append('detector')
+    det_args = config_args.get('detector_filter', '').split(' ')
+    invocation.extend(det_args)
+
+    invocation.append(config_args['detector'])
     add_args = config_args.get('detector_args', '').split(' ')
     invocation.extend(add_args)
+
     invocation.extend(['descriptor', config_args['descriptor']])
     add_args = config_args.get('descriptor_args', '').split(' ')
     invocation.extend(add_args)
@@ -151,6 +167,23 @@ def run_distribution(config_args, source_info):
     command_invocer(invocation, config_args, source_info)
 
 
+def run_matching(config_args, source_info):
+    invocation = __cmd_prefix
+    invocation.append(__cmds['distribution'])
+    invocation.extend(['--input', source_info['pattern']])
+    invocation.extend(['--output', config_args['target']])
+    invocation.extend(['--start', source_info['start']])
+    invocation.extend(['--end', source_info['end']])
+    invocation.append('matching')
+    invocation.extend(['--distance-norm', config_args['norm']])
+    invocation.extend(['--match-output', config_args['match_output']])
+    invocation.extend(['--original-images', config_args['original_images']])
+    invocation.extend(['--matched-distance-histo',
+                       config_args['match_distances']])
+
+    command_invocer(invocation, config_args, source_info)
+
+
 def create_video(config_args):
     __l.debug('Creating video \'%s\'' % config_args['output'])
     # Adjusted from
@@ -177,12 +210,8 @@ def main():
     toplevel_cfg.read(args.config, encoding='utf-8')
 
     # Substitute paths in the configurations with absolute paths.
-    toplevel_cfg['data']['target'] = \
-        abspath(join(dirname(args.config), toplevel_cfg['data']['target']))
-    toplevel_cfg['data']['test_glob'] = \
-        abspath(join(dirname(args.config), toplevel_cfg['data']['test_glob']))
-    toplevel_cfg['data']['source'] = \
-        abspath(join(dirname(args.config), toplevel_cfg['data']['source']))
+    path_adjustment(toplevel_cfg['data'], ['target', 'test_glob', 'source'],
+                    args.config)
     __l.debug('Source Data configuration expected here: %s' %
               toplevel_cfg['data']['source'])
 
@@ -190,13 +219,9 @@ def main():
     source_data_cfg.read(toplevel_cfg['data']['source'], encoding='utf-8')
 
     # Substitute paths in source-configuration as well.
-    if 'intrinsic' in source_data_cfg['data']:
-        source_data_cfg['data']['intrinsic'] = \
-            abspath(join(dirname(toplevel_cfg['data']['source']),
-                         source_data_cfg['data']['intrinsic']))
-    source_data_cfg['data']['pattern'] = \
-        abspath(join(dirname(toplevel_cfg['data']['source']),
-                     source_data_cfg['data']['pattern']))
+    path_adjustment(source_data_cfg['data'],
+                    ['pattern', 'pose', 'mask', 'intrinsic'],
+                    toplevel_cfg['data']['source'])
 
     # Create directories for the output, if they do not exist.
     dirs_to_output = dirname(toplevel_cfg['data']['target'])
@@ -204,8 +229,9 @@ def main():
 
     if not args.force:
         n_elements = 0
-        if int(toplevel_cfg['data'].get('expected_elements', -1)) != -1:
-            n_elements = int(toplevel_cfg['data']['expected_elements'])
+        provided_count = int(toplevel_cfg['data'].get('expected_elements', -1))
+        if provided_count != -1:
+            n_elements = provided_count
         else:
             # Check if any work has to be done, if yes, do it.
             # Otherwise just return.
@@ -220,7 +246,7 @@ def main():
         __l.debug('Glob detects %d elements' % len(globbed))
         if len(globbed) == n_elements:
             __l.info('Detected that the output files already exist.'
-                     ' Skipping processing!')
+                     ' Skipping processing of %s!' % args.config)
             return
         if len(globbed) > n_elements:
             __l.error('Test expression resulted in more files then the'
@@ -246,28 +272,30 @@ def main():
 
     elif 'distribution' in toplevel_cfg:
         toplevel_cfg['distribution']['target'] = toplevel_cfg['data']['target']
-        toplevel_cfg['distribution']['response'] = \
-            abspath(join(dirname(toplevel_cfg['data']['target']),
-                         toplevel_cfg['distribution']['response']))
-        toplevel_cfg['distribution']['size'] = \
-            abspath(join(dirname(toplevel_cfg['data']['target']),
-                         toplevel_cfg['distribution']['size']))
-        toplevel_cfg['distribution']['kp_distance'] = \
-            abspath(join(dirname(toplevel_cfg['data']['target']),
-                         toplevel_cfg['distribution']['kp_distance']))
-        toplevel_cfg['distribution']['kp_distribution'] = \
-            abspath(join(dirname(toplevel_cfg['data']['target']),
-                         toplevel_cfg['distribution']['kp_distribution']))
+        path_adjustment(toplevel_cfg['distribution'],
+                        ['response', 'size', 'kp_distance', 'kp_distribution'],
+                        args.config)
         run_distribution(toplevel_cfg['distribution'], source_data_cfg['data'])
+
+    elif 'matching' in toplevel_cfg:
+        toplevel_cfg['matching']['target'] = toplevel_cfg['data']['target']
+        path_adjustment(toplevel_cfg['matching'],
+                        ['match_output', 'original_images', 'match_distances'],
+                        args.config)
+        run_matching(toplevel_cfg['matching'], source_data_cfg['data'])
+
+    elif 'recognition' in toplevel_cfg:
+        pass
 
     # Creating a video from the frames helps with visualization.
     if 'video' in toplevel_cfg:
-        toplevel_cfg['video']['output'] = \
-            abspath(join(dirname(args.config),
-                         toplevel_cfg['video']['output']))
+        # Replacing '%' with '%%' to mask interpolation of the ConfigParser.
+        # ffmpeg uses '%' as placeholder for indices in filenames
+        # (printf-syntax).
         toplevel_cfg['video']['source'] = \
-            abspath(join(dirname(args.config),
-                         toplevel_cfg['video']['source'])).replace('%', '%%')
+            toplevel_cfg['video']['source'].replace('%', '%%%%')
+        path_adjustment(toplevel_cfg['video'], ['output', 'source'],
+                        args.config)
         create_video(toplevel_cfg['video'])
 
 
