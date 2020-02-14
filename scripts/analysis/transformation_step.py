@@ -252,7 +252,8 @@ def main():
               toplevel_cfg['data']['source'])
 
     if not exists(toplevel_cfg['data']['source']):
-        __l.error('Configuration path \'%s\' does not exist!' % args.config)
+        __l.error('Configuration path \'%s\' does not exist!' %
+                  toplevel_cfg['data']['source'])
         sys.exit(1)
 
     source_data_cfg = configparser.ConfigParser()
