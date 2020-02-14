@@ -21,10 +21,17 @@ void write(cv::FileStorage&   fs,
     fs << "variance" << math::roundn(stat.variance, 4);
     fs << "stddev" << math::roundn(stat.stddev, 4);
     fs << "skewness" << math::roundn(stat.skewness, 4);
+    fs << "decentils"
+       << "[";
+    for (float decentil : stat.decentils)
+        fs << decentil;
+    fs << "]";
+
     fs << "}";
 }
 
 void distance::analyze(gsl::span<const float> distances, bool histo) noexcept {
+    Expects(std::is_sorted(std::begin(distances), std::end(distances)));
     _histo.reset();
     _s.reset();
 
@@ -33,20 +40,9 @@ void distance::analyze(gsl::span<const float> distances, bool histo) noexcept {
 
     _s.count = distances.size();
 
-    statistic::accumulator_t stat;
-    try {
-        std::for_each(std::begin(distances), std::end(distances),
-                      [&](auto e) { stat(e); });
-    } catch (const std::exception& e) {
-        std::cerr << sens_loc::util::err{}
-                  << "Could not create statistics for distance.\n"
-                  << "Message: " << e.what() << "\n";
-        return;
-    }
-
     try {
         // If the namespace is not provided, the call is ambigous.
-        _s = statistic::make(stat);
+        _s = statistic::make(distances);
     } catch (const std::exception& e) {
         std::cerr << sens_loc::util::err{} << "Can not extract accumulator.\n"
                   << "Message: " << e.what() << "\n";

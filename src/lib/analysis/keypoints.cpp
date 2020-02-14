@@ -20,21 +20,24 @@ void keypoints::analyze(gsl::span<const cv::KeyPoint> points,
     if (points.empty())
         return;
 
-    statistic::accumulator_t response_stat;
-    statistic::accumulator_t size_stat;
-
     try {
+        std::vector<float> responses;
+        std::vector<float> sizes;
         std::for_each(points.begin(), points.end(),
                       [&](const cv::KeyPoint& kp) {
                           if (size)
-                              size_stat(kp.size);
+                              sizes.emplace_back(kp.size);
                           if (response)
-                              response_stat(kp.response);
+                              responses.emplace_back(kp.response);
                       });
-        if (size)
-            _size = statistic::make(size_stat);
-        if (response)
-            _response = statistic::make(response_stat);
+        if (size) {
+            std::sort(std::begin(sizes), std::end(sizes));
+            _size = statistic::make(sizes);
+        }
+        if (response) {
+            std::sort(std::begin(responses), std::end(responses));
+            _response = statistic::make(responses);
+        }
     } catch (const std::exception& e) {
         std::cerr << sens_loc::util::err{}
                   << "Could not create statistics for size and response.\n"

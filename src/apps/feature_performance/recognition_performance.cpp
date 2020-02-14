@@ -40,14 +40,14 @@ namespace {
 /// Capsulate all required data for back-and-forth projection as well
 /// as precision-recall computation.
 struct reprojection_data {
-    std::vector<cv::KeyPoint> keypoints;
-    cv::Mat                   descriptors;
-    math::image<ushort>       depth_image;
-    math::pose_t              absolute_pose;
+    vector<cv::KeyPoint> keypoints;
+    cv::Mat              descriptors;
+    math::image<ushort>  depth_image;
+    math::pose_t         absolute_pose;
 
-    reprojection_data(std::string_view feature_path,
-                      std::string_view depth_path,
-                      std::string_view pose_path) noexcept(false) {
+    reprojection_data(string_view feature_path,
+                      string_view depth_path,
+                      string_view pose_path) noexcept(false) {
         const FileStorage fs = io::open_feature_file(string(feature_path));
         keypoints            = io::load_keypoints(fs);
         descriptors          = io::load_descriptors(fs);
@@ -57,7 +57,7 @@ struct reprojection_data {
         if (!d_img) {
             ostringstream oss;
             oss << "Could not load depth image from " << depth_path << "!";
-            throw std::runtime_error{oss.str()};
+            throw runtime_error{oss.str()};
         }
         depth_image = move(*d_img);
 
@@ -66,7 +66,7 @@ struct reprojection_data {
         if (!pose) {
             ostringstream oss;
             oss << "Could not load pose from " << pose_path << "!";
-            throw std::runtime_error{oss.str()};
+            throw runtime_error{oss.str()};
         }
         absolute_pose = move(*pose);
     }
@@ -291,23 +291,23 @@ class prec_recall_analysis {
             _stats->account(classification);
             *_totally_masked += masked_points;
         }
-    } catch (const std::exception& e) {
+    } catch (const exception& e) {
         lock_guard g{_stdio_mutex};
         cerr << util::err{} << "Could not analyze data for " << idx << "!\n"
              << e.what() << "\n";
         return;
     }
 
-    void
-    postprocess(const optional<string>&           stat_file,
-                const std::optional<std::string>& backprojection_selected_histo,
-                const std::optional<std::string>& relevant_histo,
-                const std::optional<std::string>& true_positive_histo,
-                const std::optional<std::string>& false_positive_histo) {
+    void postprocess(const optional<string>& stat_file,
+                     const optional<string>& backprojection_selected_histo,
+                     const optional<string>& relevant_histo,
+                     const optional<string>& true_positive_histo,
+                     const optional<string>& false_positive_histo) {
         lock_guard guard{*_inserter_mutex};
         if (_stats->total_elements() == 0L)
             return;
 
+        sort(begin(*_selected_elements_dist), end(*_selected_elements_dist));
         const auto         dist_bins = 20;
         analysis::distance distance_stat{*_selected_elements_dist, dist_bins,
                                          "backprojection error pixels"};
@@ -360,9 +360,9 @@ class prec_recall_analysis {
         }
 
         if (backprojection_selected_histo) {
-            std::ofstream gnuplot_data{*backprojection_selected_histo};
+            ofstream gnuplot_data{*backprojection_selected_histo};
             gnuplot_data << sens_loc::io::to_gnuplot(distance_stat.histogram())
-                         << std::endl;
+                         << endl;
         } else {
             cout << distance_stat.histogram() << "\n";
         }
@@ -370,26 +370,26 @@ class prec_recall_analysis {
         _stats->make_histogram();
 
         if (relevant_histo) {
-            std::ofstream gnuplot_data{*relevant_histo};
+            ofstream gnuplot_data{*relevant_histo};
             gnuplot_data << sens_loc::io::to_gnuplot(
                                 _stats->relevant_element_distribution().histo)
-                         << std::endl;
+                         << endl;
         } else {
             cout << _stats->relevant_element_distribution().histo << "\n";
         }
         if (true_positive_histo) {
-            std::ofstream gnuplot_data{*true_positive_histo};
+            ofstream gnuplot_data{*true_positive_histo};
             gnuplot_data << sens_loc::io::to_gnuplot(
                                 _stats->true_positive_distribution().histo)
-                         << std::endl;
+                         << endl;
         } else {
             cout << _stats->true_positive_distribution().histo << "\n";
         }
         if (false_positive_histo) {
-            std::ofstream gnuplot_data{*false_positive_histo};
+            ofstream gnuplot_data{*false_positive_histo};
             gnuplot_data << sens_loc::io::to_gnuplot(
                                 _stats->false_positive_distribution().histo)
-                         << std::endl;
+                         << endl;
         } else {
             cout << _stats->false_positive_distribution().histo << "\n";
         }
@@ -424,22 +424,22 @@ mutex prec_recall_analysis<Model, Real>::_stdio_mutex{};
 
 namespace sens_loc::apps {
 int analyze_recognition_performance(
-    string_view                       feature_file_pattern,
-    int                               start_idx,
-    int                               end_idx,
-    string_view                       depth_image_pattern,
-    string_view                       pose_file_pattern,
-    string_view                       intrinsic_file,
-    optional<string_view>             mask_file,
-    NormTypes                         matching_norm,
-    float                             keypoint_distance_threshold,
-    optional<string_view>             backproject_pattern,
-    optional<string_view>             original_files,
-    const optional<string>&           stat_file,
-    const std::optional<std::string>& backprojection_selected_histo,
-    const std::optional<std::string>& relevant_histo,
-    const std::optional<std::string>& true_positive_histo,
-    const std::optional<std::string>& false_positive_histo) {
+    string_view             feature_file_pattern,
+    int                     start_idx,
+    int                     end_idx,
+    string_view             depth_image_pattern,
+    string_view             pose_file_pattern,
+    string_view             intrinsic_file,
+    optional<string_view>   mask_file,
+    NormTypes               matching_norm,
+    float                   keypoint_distance_threshold,
+    optional<string_view>   backproject_pattern,
+    optional<string_view>   original_files,
+    const optional<string>& stat_file,
+    const optional<string>& backprojection_selected_histo,
+    const optional<string>& relevant_histo,
+    const optional<string>& true_positive_histo,
+    const optional<string>& false_positive_histo) {
     Expects(start_idx < end_idx &&
             "Precision-Recall calculation requires at least two images");
 

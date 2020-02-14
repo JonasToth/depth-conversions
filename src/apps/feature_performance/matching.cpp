@@ -108,6 +108,7 @@ class matching {
         if (distances->empty())
             return;
 
+        sort(begin(*distances), end(*distances));
         const auto                   dist_bins = 25;
         sens_loc::analysis::distance distance_stat{*distances, dist_bins};
 

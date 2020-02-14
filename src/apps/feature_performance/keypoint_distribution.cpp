@@ -120,6 +120,7 @@ class keypoint_distribution {
         kp.configure_size(size_bins, "keypoint size");
         kp.analyze(*global_keypoints);
 
+        sort(begin(*global_distances), end(*global_distances));
         const auto                   dist_bins = 50UL;
         sens_loc::analysis::distance distance_stat{*global_distances, dist_bins,
                                                    "minimal keypoint distance"};

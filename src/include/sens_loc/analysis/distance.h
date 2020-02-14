@@ -1,6 +1,7 @@
 #ifndef DISTANCE_H_MUJPGVJL
 #define DISTANCE_H_MUJPGVJL
 
+#include <algorithm>
 #include <boost/accumulators/accumulators.hpp>
 #include <boost/accumulators/statistics/mean.hpp>
 #include <boost/accumulators/statistics/median.hpp>
@@ -8,6 +9,7 @@
 #include <boost/accumulators/statistics/stats.hpp>
 #include <boost/accumulators/statistics/variance.hpp>
 #include <boost/histogram.hpp>
+#include <cstddef>
 #include <gsl/gsl>
 #include <opencv2/core/persistence.hpp>
 
@@ -30,22 +32,47 @@ struct statistic {
                                        boost::accumulators::lazy),
                                    boost::accumulators::tag::skewness>>;
 
-    std::size_t count    = 0UL;
-    float       min      = 0.0F;
-    float       max      = 0.0F;
-    float       median   = 0.0F;
-    float       mean     = 0.0F;
-    float       variance = 0.0F;
-    float       stddev   = 0.0F;
-    float       skewness = 0.0F;
+    std::size_t        count    = 0UL;
+    float              min      = 0.0F;
+    float              max      = 0.0F;
+    float              mean     = 0.0F;
+    float              variance = 0.0F;
+    float              stddev   = 0.0F;
+    float              skewness = 0.0F;
+    float              median   = 0.0F;
+    std::vector<float> decentils{0.0F, 0.0F, 0.0F, 0.0F, 0.0F,
+                                 0.0F, 0.0F, 0.0F, 0.0F};
 
-    static statistic make(const accumulator_t& accu) {
+    /// Extract the statistical values from the original data.
+    /// \pre the data must be sorted!
+    static statistic make(gsl::span<const float> data) {
+        using namespace std;
+        Expects(is_sorted(begin(data), end(data)));
+
         statistic s;
+
+        if (data.empty())
+            return s;
+
+        if (data.size() >= 10L) {
+            const int      number_quantils = 10;
+            std::ptrdiff_t delta           = data.size() / number_quantils;
+
+            Expects(s.decentils.size() == 9UL);
+            for (int i = 1; i < number_quantils; ++i) {
+                s.decentils[i - 1] = data[i * delta];
+            }
+            Ensures(s.decentils.size() == 9UL);
+        }
+        s.median = data[data.size() / 2];
+
+        accumulator_t accu;
+        std::for_each(std::begin(data), std::end(data),
+                      [&accu](float e) { accu(e); });
         using namespace boost::accumulators;
         s.count    = boost::accumulators::count(accu);
         s.min      = boost::accumulators::min(accu);
         s.max      = boost::accumulators::max(accu);
-        s.median   = boost::accumulators::median(accu);
         s.mean     = boost::accumulators::mean(accu);
         s.variance = boost::accumulators::variance(accu);
         s.stddev   = std::sqrt(s.variance);
@@ -54,14 +81,15 @@ struct statistic {
     }
 
     void reset() noexcept {
-        count    = 0UL;
-        min      = 0.0F;
-        max      = 0.0F;
-        median   = 0.0F;
-        mean     = 0.0F;
-        variance = 0.0F;
-        stddev   = 0.0F;
-        skewness = 0.0F;
+        count     = 0UL;
+        min       = 0.0F;
+        max       = 0.0F;
+        mean      = 0.0F;
+        variance  = 0.0F;
+        stddev    = 0.0F;
+        skewness  = 0.0F;
+        median    = 0.0F;
+        decentils = {0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F};
     }
 };
 
@@ -100,6 +128,7 @@ class distance {
     /// Analyses the provided distances. This will overwrite a previous
     /// analysis and dataset! Use this method to provide the data if the
     /// class was default constructed.
+    /// \pre is_sorted(distances)
     void analyze(gsl::span<const float> distances, bool histo = true) noexcept;
 
     /// Return the reference to the potentially created histogram in \c analyze.

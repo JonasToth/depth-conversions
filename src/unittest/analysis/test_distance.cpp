@@ -8,7 +8,7 @@
 using namespace std;
 using namespace sens_loc;
 
-const vector<float> distances{10.0F, 0.0F, 2.0F, 5.0F, -10.F, -2.0F, 1.5F};
+const vector<float> distances{-10.0F, -2.0F, 0.0F, 1.5F, 2.0F, 5.0F, 10.0F};
 
 TEST_CASE("normal analysis") {
     SUBCASE("Default construction and then analysis") {
@@ -21,7 +21,7 @@ TEST_CASE("normal analysis") {
             // The median is estimated through running quantiles or something
             // like this.
             // This is not so accurate with a small sample size.
-            CHECK(d_ana.median() == doctest::Approx(0.3333333F));
+            CHECK(d_ana.median() == doctest::Approx(1.5F));
             CHECK(d_ana.mean() ==
                   doctest::Approx((5.0F + 1.5F) / distances.size()));
             CHECK(d_ana.variance() != 0.0F);
@@ -42,7 +42,7 @@ TEST_CASE("normal analysis") {
             // The median is estimated through running quantiles or something
             // like this.
             // This is not so accurate with a small sample size.
-            CHECK(d_ana.median() == doctest::Approx(0.3333333F));
+            CHECK(d_ana.median() == doctest::Approx(1.5F));
             CHECK(d_ana.mean() ==
                   doctest::Approx((5.0F + 1.5F) / distances.size()));
             CHECK(d_ana.variance() != 0.0F);
@@ -63,7 +63,7 @@ TEST_CASE("normal analysis") {
         // The median is estimated through running quantiles or something
         // like this.
         // This is not so accurate with a small sample size.
-        CHECK(d_ana.median() == doctest::Approx(0.3333333F));
+        CHECK(d_ana.median() == doctest::Approx(1.5F));
         CHECK(d_ana.mean() ==
               doctest::Approx((5.0F + 1.5F) / distances.size()));
         CHECK(d_ana.variance() != 0.0F);
@@ -102,7 +102,18 @@ TEST_CASE("write with filestorage") {
                            "   mean: 0.\n"
                            "   variance: 0.\n"
                            "   stddev: 0.\n"
-                           "   skewness: 0.\n");
+                           "   skewness: 0.\n"
+                           "   decentils:\n"
+                           "      - 0.\n"
+                           "      - 0.\n"
+                           "      - 0.\n"
+                           "      - 0.\n"
+                           "      - 0.\n"
+                           "      - 0.\n"
+                           "      - 0.\n"
+                           "      - 0.\n"
+                           "      - 0.\n"
+        );
     }
 
     SUBCASE("Basic Analysis") {
@@ -128,7 +139,7 @@ TEST_CASE("write with filestorage") {
         // is not exact. For some reason, this differs on machines in the
         // floating point representation.
         // So insteaf of checking the exact value, only the prefix is checked.
-        std::string prefix = "   median: 3.33";
+        std::string prefix = "   median: 1.5";
         REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[6].begin())
                     .first == prefix.end());
         prefix = "   mean: 9.28";

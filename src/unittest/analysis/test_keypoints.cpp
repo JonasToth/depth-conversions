@@ -153,6 +153,16 @@ TEST_CASE("write with filestorage") {
                            "      variance: 0.\n"
                            "      stddev: 0.\n"
                            "      skewness: 0.\n"
+                           "      decentils:\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
                            "   size:\n"
                            "      count: 0\n"
                            "      min: 0.\n"
@@ -161,7 +171,17 @@ TEST_CASE("write with filestorage") {
                            "      mean: 0.\n"
                            "      variance: 0.\n"
                            "      stddev: 0.\n"
-                           "      skewness: 0.\n");
+                           "      skewness: 0.\n"
+                           "      decentils:\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n"
+                           "         - 0.\n");
     }
 
     SUBCASE("normal analysis of everything") {
@@ -175,6 +195,8 @@ TEST_CASE("write with filestorage") {
                                  cv::FileStorage::FORMAT_YAML};
         write(kp_statistic, "everything", kp_ana);
         std::string              written = kp_statistic.releaseAndGetString();
+        MESSAGE(written);
+
         std::istringstream       ss(written);
         std::vector<std::string> lines;
         for (std::string line; std::getline(ss, line);)
@@ -191,18 +213,18 @@ TEST_CASE("write with filestorage") {
         REQUIRE(lines[9] == "      variance: 0.");
         REQUIRE(lines[10] == "      stddev: 0.");
         REQUIRE(lines[11] == "      skewness: .Nan");
-        REQUIRE(lines[12] == "   size:");
-        REQUIRE(lines[13] == "      count: 7");
-        REQUIRE(lines[14] == "      min: 5.");
-        REQUIRE(lines[15] == "      max: 5.");
-        REQUIRE(lines[16] == "      median: 5.");
-        REQUIRE(lines[17] == "      mean: 5.");
-        REQUIRE(lines[18] == "      variance: 0.");
+        REQUIRE(lines[22] == "   size:");
+        REQUIRE(lines[23] == "      count: 7");
+        REQUIRE(lines[24] == "      min: 5.");
+        REQUIRE(lines[25] == "      max: 5.");
+        REQUIRE(lines[26] == "      median: 5.");
+        REQUIRE(lines[27] == "      mean: 5.");
+        REQUIRE(lines[28] == "      variance: 0.");
         std::string prefix = "      stddev: ";
-        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[19].begin())
+        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[29].begin())
                     .first == prefix.end());
         prefix = "      skewness: ";
-        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[20].begin())
+        REQUIRE(std::mismatch(prefix.begin(), prefix.end(), lines[30].begin())
                     .first == prefix.end());
     }
 }

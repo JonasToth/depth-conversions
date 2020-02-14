@@ -26,6 +26,8 @@
 #include <util/batch_visitor.h>
 #include <util/statistic_visitor.h>
 
+using namespace std;
+
 namespace {
 
 template <cv::NormTypes NT>
@@ -53,15 +55,14 @@ class min_descriptor_distance {
     static const int data_type = element_access<NT>::dtype;
     using access_type          = typename element_access<NT>::type;
 
-    min_descriptor_distance(gsl::not_null<std::mutex*>         m,
-                            gsl::not_null<std::vector<float>*> global_data)
+    min_descriptor_distance(gsl::not_null<mutex*>         m,
+                            gsl::not_null<vector<float>*> global_data)
         : process_mutex{m}
         , global_min_distances{global_data} {}
 
-    void
-    operator()(int /*idx*/,
-               std::optional<std::vector<cv::KeyPoint>> keypoints,  // NOLINT
-               std::optional<cv::Mat>                   descriptors) noexcept {
+    void operator()(int /*idx*/,
+                    optional<vector<cv::KeyPoint>> keypoints,  // NOLINT
+                    optional<cv::Mat>              descriptors) noexcept {
         Expects(!keypoints.has_value());
         Expects(descriptors.has_value());
 
@@ -71,42 +72,42 @@ class min_descriptor_distance {
                           /*normType=*/NT);
 
         // Calculate the minimal distances within that image.
-        std::vector<float> local_min_distances;
+        vector<float> local_min_distances;
         local_min_distances.reserve(distances.rows);
         for (decltype(distances.rows) row = 0; row < distances.rows; ++row) {
             // Make the distance to itself maximal, as that is known to
             // be zero and needs to be ignored.
             distances.at<access_type>(row, row) =
-                std::numeric_limits<access_type>::max();
+                numeric_limits<access_type>::max();
 
             cv::Mat r = distances.row(row);
-            auto    d = gsl::narrow<float>(*std::min_element(
-                r.begin<access_type>(), r.end<access_type>()));
+            auto    d = gsl::narrow<float>(
+                *min_element(r.begin<access_type>(), r.end<access_type>()));
 
             local_min_distances.push_back(d);
         }
 
         // Insert the findings into the global list of minimal distances.
         {
-            std::lock_guard guard{*process_mutex};
-            global_min_distances->insert(std::end(*global_min_distances),
-                                         std::begin(local_min_distances),
-                                         std::end(local_min_distances));
+            lock_guard guard{*process_mutex};
+            global_min_distances->insert(end(*global_min_distances),
+                                         begin(local_min_distances),
+                                         end(local_min_distances));
         }
     }
 
     /// Postprocess the findings of the minimal distances for each image to
     /// a coherent statistical finding. This will overwrite previous analysis
     /// and should only be called once.
-    void
-    postprocess(const std::optional<std::string>& stat_file,
-                const std::optional<std::string>& min_dist_histo) noexcept {
+    void postprocess(const optional<string>& stat_file,
+                     const optional<string>& min_dist_histo) noexcept {
         // Lock the mutex, just in case. This method is not expected to be
         // run in parallel, but it could.
-        std::lock_guard guard{*process_mutex};
+        lock_guard guard{*process_mutex};
         if (global_min_distances->empty())
             return;
 
+        sort(begin(*global_min_distances), end(*global_min_distances));
         const auto                   bins = 25UL;
         sens_loc::analysis::distance distance_stat{
             *global_min_distances, bins,
@@ -122,42 +123,41 @@ class min_descriptor_distance {
                   distance_stat.get_statistic());
             stat_out.release();
         } else {
-            std::cout << "==== Descriptor Distances\n"
-                      << "min:       " << distance_stat.min() << "\n"
-                      << "max:       " << distance_stat.max() << "\n"
-                      << "Mean:      " << distance_stat.mean() << "\n"
-                      << "Median:    " << distance_stat.median() << "\n"
-                      << "Variance:  " << distance_stat.variance() << "\n"
-                      << "StdDev:    " << distance_stat.stddev() << "\n"
-                      << "Skewness:  " << distance_stat.skewness() << "\n";
+            cout << "==== Descriptor Distances\n"
+                 << "min:       " << distance_stat.min() << "\n"
+                 << "max:       " << distance_stat.max() << "\n"
+                 << "Mean:      " << distance_stat.mean() << "\n"
+                 << "Median:    " << distance_stat.median() << "\n"
+                 << "Variance:  " << distance_stat.variance() << "\n"
+                 << "StdDev:    " << distance_stat.stddev() << "\n"
+                 << "Skewness:  " << distance_stat.skewness() << "\n";
         }
         if (min_dist_histo) {
-            std::ofstream gnuplot_data{*min_dist_histo};
+            ofstream gnuplot_data{*min_dist_histo};
             gnuplot_data << sens_loc::io::to_gnuplot(distance_stat.histogram())
-                         << std::endl;
+                         << endl;
         } else {
-            std::cout << distance_stat.histogram() << "\n";
+            cout << distance_stat.histogram() << "\n";
         }
     }
 
   private:
     // Data required for the parallel processing.
-    gsl::not_null<std::mutex*>         process_mutex;
-    gsl::not_null<std::vector<float>*> global_min_distances;
+    gsl::not_null<mutex*>         process_mutex;
+    gsl::not_null<vector<float>*> global_min_distances;
 };
 
 template <cv::NormTypes NT>
-int analyze_min_distance_impl(
-    std::string_view                  input_pattern,
-    int                               start_idx,
-    int                               end_idx,
-    const std::optional<std::string>& stat_file,
-    const std::optional<std::string>& min_dist_histo) {
+int analyze_min_distance_impl(string_view             input_pattern,
+                              int                     start_idx,
+                              int                     end_idx,
+                              const optional<string>& stat_file,
+                              const optional<string>& min_dist_histo) {
     using namespace sens_loc::apps;
     /// Guards min_distances in parallel access.
-    std::mutex process_mutex;
+    mutex process_mutex;
     /// contains all minimal distances of each descriptor within an image.
-    std::vector<float> global_min_distances;
+    vector<float> global_min_distances;
 
     using visitor = statistic_visitor<min_descriptor_distance<NT>,
                                       required_data::descriptors>;
@@ -174,12 +174,12 @@ int analyze_min_distance_impl(
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_min_distance(std::string_view                  input_pattern,
-                         int                               start_idx,
-                         int                               end_idx,
-                         cv::NormTypes                     norm_to_use,
-                         const std::optional<std::string>& stat_file,
-                         const std::optional<std::string>& min_dist_histo) {
+int analyze_min_distance(string_view             input_pattern,
+                         int                     start_idx,
+                         int                     end_idx,
+                         cv::NormTypes           norm_to_use,
+                         const optional<string>& stat_file,
+                         const optional<string>& min_dist_histo) {
 
 #define SWITCH_CV_NORM(NORM_NAME)                                              \
     if (norm_to_use == cv::NormTypes::NORM_##NORM_NAME)                        \
