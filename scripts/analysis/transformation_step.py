@@ -66,7 +66,8 @@ def path_adjustment(dictionary, keys, path):
     with the 'abspath(join(path, dictionary[key]))'.
     """
     for key in keys:
-        assert key in dictionary, "Bad key provided for dictionary"
+        if key not in dictionary:
+            continue
         dictionary[key] = abspath(join(dirname(path), dictionary[key]))
 
 
@@ -201,8 +202,9 @@ def run_recognition(config_args, source_info):
     invocation.extend(['--keypoint-distance-threshold',
                        config_args['distance_threshold']])
 
-    invocation.extend(['--backprojection', config_args['backprojection']])
-    invocation.extend(['--orig-images', config_args['original_images']])
+    if 'backprojection' in config_args:
+        invocation.extend(['--backprojection', config_args['backprojection']])
+        invocation.extend(['--orig-images', config_args['original_images']])
 
     invocation.extend(['--backprojection-selected-histo',
                        config_args['backprojection_selected_histo']])
@@ -333,6 +335,12 @@ def main():
                          'relevant_elements_histo', 'true_positive_histo',
                          'false_positive_histo'],
                         args.config)
+        depth_image_cfg = configparser.ConfigParser()
+        depth_image_cfg.read(toplevel_cfg['recognition']['depth_images'],
+                             encoding='utf-8')
+        toplevel_cfg['recognition']['depth_images'] = \
+            join(dirname(toplevel_cfg['recognition']['depth_images']),
+                         depth_image_cfg['data']['pattern'])
         run_recognition(toplevel_cfg['recognition'], source_data_cfg['data'])
 
     # Creating a video from the frames helps with visualization.

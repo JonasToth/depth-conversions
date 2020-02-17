@@ -15,7 +15,7 @@ gnuplot <<EOF
 set terminal postscript enhanced eps color
 set output "$output"
 
-set title "$title"
+set title "$title" noenhanced
 
 set mytics
 set grid ytics mytics back ls 0, ls 0

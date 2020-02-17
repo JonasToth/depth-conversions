@@ -15,7 +15,7 @@ gnuplot <<EOF
 set terminal postscript enhanced eps color
 set output "$output"
 
-set title "$title"
+set title "$title" noenhanced
 
 set yrange [200:0]
 set xrange [0:]
