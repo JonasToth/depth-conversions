@@ -90,7 +90,7 @@ struct SIFTArgs {
             ->check(CLI::Range(0., 10.));
     }
 
-    int    feature_count      = 0;
+    int    feature_count      = 700;
     int    octave_layers      = 3;
     double contrast_threshold = 0.04;
     double edge_threshold     = 10.;
