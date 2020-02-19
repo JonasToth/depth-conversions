@@ -51,7 +51,7 @@ bool parallel_indexed_file_processing(int          start,
                     std::cerr << util::err{};
                     std::cerr << "Could not process index \""
                               << rang::style::bold << idx << "\""
-                              << rang::style::reset << "!\n";
+                              << rang::style::reset << "!" << std::endl;
                     batch_success = false;
                 }
             },

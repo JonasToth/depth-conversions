@@ -1,6 +1,8 @@
 #ifndef PROGRESS_BAR_OBSERVER_H_0L8ZR7QT
 #define PROGRESS_BAR_OBSERVER_H_0L8ZR7QT
 
+#include "rang.hpp"
+
 #include <cmath>
 #include <cstdint>
 #include <gsl/gsl>
@@ -36,9 +38,10 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
         _done++;
         float progress = gsl::narrow_cast<float>(_done) /
                          gsl::narrow_cast<float>(_partitions);
-        std::cout << "\r " << std::setw(5)
+        std::cout << "\r" << rang::fg::green << rang::style::bold
+                  << std::setw(5)
                   << gsl::narrow_cast<int>(std::round(_done * _task_increment))
-                  << " [";
+                  << " ";
 
         // Progress bar is 30 characters wide.
         int bar_elements =
@@ -47,13 +50,15 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
         Ensures(bar_elements >= 0);
         int empty_elements = max_bars - bar_elements;
 
+        std::cout << rang::style::reset << rang::bg::green;
         for (int i = 0; i < bar_elements; ++i) {
-            std::cout << "#";
+            std::cout << " ";
         }
+        std::cout << rang::bg::blue;
         for (int i = 0; i < empty_elements; ++i) {
             std::cout << " ";
         }
-        std::cout << "]" << std::flush;
+        std::cout << rang::style::reset << std::flush;
     }
 
   private:
