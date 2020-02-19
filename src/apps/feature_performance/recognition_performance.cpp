@@ -233,8 +233,9 @@ class prec_recall_analysis {
             classification.true_positives, curr_keypoints, prev_in_img);
 
         if (_backproject_pattern) {
+            string orig_f_name = fmt::format(*_original_files, idx);
             optional<math::image<uchar>> orig_img =
-                io::load_as_8bit_gray(fmt::format(*_original_files, idx));
+                io::load_as_8bit_gray(orig_f_name);
 
             if (orig_img) {
                 // Plot true positives.
@@ -277,8 +278,9 @@ class prec_recall_analysis {
                 }
             } else {
                 lock_guard g{this->_stdio_mutex};
-                cerr << util::warn{} << "Original file for: " << idx
-                     << "could not be loaded for backprojection plot!\n";
+                cerr << util::warn{} << "Original file for index '" << idx
+                     << "' ('" << orig_f_name
+                     << "') could not be loaded for backprojection plot!\n";
             }
         }
 
