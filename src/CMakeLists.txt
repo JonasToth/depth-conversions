@@ -37,6 +37,7 @@ list(APPEND sens_loc_headers
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/preprocess/filter.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/console.h"
     "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/correctness_util.h"
+    "${CMAKE_CURRENT_LIST_DIR}/include/sens_loc/util/progress_bar_observer.h"
     )
 target_sources(sens_loc PUBLIC ${sens_loc_headers})
 target_sources(sens_loc PRIVATE

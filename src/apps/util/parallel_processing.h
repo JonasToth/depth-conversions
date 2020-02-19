@@ -5,6 +5,7 @@
 #include <gsl/gsl>
 #include <iostream>
 #include <sens_loc/util/console.h>
+#include <sens_loc/util/progress_bar_observer.h>
 #include <taskflow/taskflow.hpp>
 #include <type_traits>
 
@@ -28,29 +29,41 @@ bool parallel_indexed_file_processing(int          start,
         if (start > end)
             std::swap(start, end);
 
+        int total_tasks = end - start + 1;
+        int partitions =
+            std::min(util::progress_bar_observer::max_bars, total_tasks);
+
         tf::Executor executor;
+        executor.make_observer<util::progress_bar_observer>(partitions,
+                                                            total_tasks);
         tf::Taskflow tf;
 
         bool batch_success = true;
         int  fails         = 0;
 
-        tf.parallel_for(start, end + 1, 1,
-                        [&batch_success, &fails, &f](int idx) {
-                            const bool success = f(idx);
-                            if (!success) {
-                                auto s = synced();
-                                fails++;
-                                std::cerr << util::err{};
-                                std::cerr << "Could not process index \""
-                                          << rang::style::bold << idx << "\""
-                                          << rang::style::reset << "!\n";
-                                batch_success = false;
-                            }
-                        });
+        tf.parallel_for(
+            start, end + 1, 1,
+            [&batch_success, &fails, &f](int idx) {
+                const bool success = f(idx);
+                if (!success) {
+                    auto s = synced();
+                    fails++;
+                    std::cerr << util::err{};
+                    std::cerr << "Could not process index \""
+                              << rang::style::bold << idx << "\""
+                              << rang::style::reset << "!\n";
+                    batch_success = false;
+                }
+            },
+            // This defines the NUMBER OF PARTITIONS the algorithm
+            // creates. A higher number means more tasks that are
+            // processed.
+            partitions);
 
         const auto before = std::chrono::steady_clock::now();
         executor.run(tf).wait();
         const auto after = std::chrono::steady_clock::now();
+        std::cout << std::endl;
 
         Ensures(fails >= 0);
 
