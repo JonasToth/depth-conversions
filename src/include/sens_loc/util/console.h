@@ -1,8 +1,26 @@
 #ifndef CONSOLE_H_MZIDGR2K
 #define CONSOLE_H_MZIDGR2K
 
+#include <mutex>
 #include <ostream>
 #include <rang.hpp>
+
+namespace sens_loc {
+class synced {
+  public:
+    synced() { _stdio_mutex.lock(); }
+
+    synced(const synced&) = delete;
+    synced(synced&&)      = delete;
+    synced& operator=(synced&&) = delete;
+    synced& operator=(const synced&) = delete;
+
+    ~synced() { _stdio_mutex.unlock(); }
+
+  private:
+    static std::mutex _stdio_mutex;
+};
+}  // namespace sens_loc
 
 namespace sens_loc::util {
 /// Tag-type for overload resolution of output operations to signal error

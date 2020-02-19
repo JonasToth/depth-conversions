@@ -31,15 +31,14 @@ bool parallel_indexed_file_processing(int          start,
         tf::Executor executor;
         tf::Taskflow tf;
 
-        std::mutex cout_mutex;
-        bool       batch_success = true;
-        int        fails         = 0;
+        bool batch_success = true;
+        int  fails         = 0;
 
         tf.parallel_for(start, end + 1, 1,
-                        [&cout_mutex, &batch_success, &fails, &f](int idx) {
+                        [&batch_success, &fails, &f](int idx) {
                             const bool success = f(idx);
                             if (!success) {
-                                std::lock_guard l{cout_mutex};
+                                auto s = synced();
                                 fails++;
                                 std::cerr << util::err{};
                                 std::cerr << "Could not process index \""
@@ -56,19 +55,25 @@ bool parallel_indexed_file_processing(int          start,
         Ensures(fails >= 0);
 
         using namespace std::chrono;
-        std::cerr << util::info{};
-        std::cerr << "Processing " << rang::style::bold
-                  << std::abs(end - start) + 1 - fails << rang::style::reset
-                  << " images took " << rang::style::bold
-                  << duration_cast<seconds>(after - before).count()
-                  << rang::style::reset << " seconds!\n";
+        {
+            auto s = synced();
+            std::cerr << util::info{};
+            std::cerr << "Processing " << rang::style::bold
+                      << std::abs(end - start) + 1 - fails << rang::style::reset
+                      << " images took " << rang::style::bold
+                      << duration_cast<seconds>(after - before).count()
+                      << rang::style::reset << " seconds!\n";
+        }
 
-        if (fails > 0)
+        if (fails > 0) {
+            auto s = synced();
             std::cerr << util::warn{} << "Encountered " << rang::style::bold
                       << fails << rang::style::reset << " problematic files!\n";
+        }
 
         return batch_success;
     } catch (...) {
+        auto s = synced();
         std::cerr << util::err{} << "System error in batch processing!\n";
         return false;
     }
