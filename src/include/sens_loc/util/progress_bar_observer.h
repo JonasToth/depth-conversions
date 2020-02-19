@@ -14,14 +14,19 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
   public:
     constexpr static int max_bars = 50;
 
-    explicit progress_bar_observer(std::int64_t partitions,
-                                   std::int64_t total_tasks)
+    progress_bar_observer(std::int64_t partitions, std::int64_t total_tasks)
         : _partitions{partitions}
         , _task_increment{gsl::narrow_cast<float>(total_tasks) /
                           gsl::narrow_cast<float>(partitions)}
         , _done{0} {
         Expects(total_tasks >= 1);
     }
+
+    progress_bar_observer(const progress_bar_observer&) = delete;
+    progress_bar_observer(progress_bar_observer&&)      = delete;
+    progress_bar_observer& operator=(const progress_bar_observer&) = delete;
+    progress_bar_observer& operator=(progress_bar_observer&&) = delete;
+    ~progress_bar_observer() override                         = default;
 
     void set_up(unsigned /*num_workers*/) override {}
     void on_entry(unsigned /*worker_id*/, tf::TaskView /*task_view*/) override {
@@ -50,8 +55,6 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
         }
         std::cout << "]" << std::flush;
     }
-
-    ~progress_bar_observer() override = default;
 
   private:
     std::int64_t _partitions;
