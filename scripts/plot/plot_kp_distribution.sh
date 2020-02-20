@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/bin/sh
 
 if [ $# -ne 3 ]; then
     echo "$0 <input-file> <output-file> <title>"

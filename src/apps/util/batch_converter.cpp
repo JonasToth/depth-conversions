@@ -2,18 +2,10 @@
 
 #include "parallel_processing.h"
 
-#include <chrono>
 #include <fmt/core.h>
 #include <gsl/gsl>
-#include <iostream>
-#include <opencv2/core/mat.hpp>
-#include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/math/image.h>
-#include <sens_loc/util/console.h>
-#include <sens_loc/util/correctness_util.h>
-#include <taskflow/taskflow.hpp>
-#include <thread>
 
 namespace sens_loc::apps {
 
