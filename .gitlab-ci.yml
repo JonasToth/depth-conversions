@@ -384,6 +384,8 @@ create-alpine-image:
   tags:
     - docker-in-docker
 
-analyse_data:
+analyse-data:
   stage: analysis
-  trigger: jonas-toth/evaluation-data
+  trigger:
+    project: jtoth/evaluation-data
+    strategy: depend
