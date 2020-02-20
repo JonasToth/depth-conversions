@@ -352,7 +352,7 @@ create-production-image:
     - docker run --rm $CI_REGISTRY_IMAGE:latest depth_filter -h
     - docker run --rm $CI_REGISTRY_IMAGE:latest feature_extractor -h
     - docker run --rm $CI_REGISTRY_IMAGE:latest keypoint_plotter -h
-    - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge feature_performance -h
+    - docker run --rm $CI_REGISTRY_IMAGE:latest feature_performance -h
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
     refs:
