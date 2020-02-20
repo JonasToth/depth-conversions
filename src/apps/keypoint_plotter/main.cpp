@@ -1,7 +1,6 @@
 #include "batch_plotter.h"
 
 #include <CLI/CLI.hpp>
-#include <iostream>
 #include <sens_loc/util/console.h>
 #include <sens_loc/util/correctness_util.h>
 #include <stdexcept>
