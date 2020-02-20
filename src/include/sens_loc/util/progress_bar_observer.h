@@ -3,6 +3,7 @@
 
 #include "rang.hpp"
 
+#include <atomic>
 #include <cmath>
 #include <cstdint>
 #include <gsl/gsl>
@@ -32,10 +33,19 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
 
     void set_up(unsigned /*num_workers*/) override {}
     void on_entry(unsigned /*worker_id*/, tf::TaskView /*task_view*/) override {
+        if (!_inital_output) {
+            _inital_output = true;
+            print_bar();
+        }
     }
     void on_exit(unsigned /*worker_id*/, tf::TaskView /*task_view*/) override {
-        auto s = synced();
         _done++;
+        print_bar();
+    }
+
+  private:
+    void print_bar() {
+        auto  s        = synced();
         float progress = gsl::narrow_cast<float>(_done) /
                          gsl::narrow_cast<float>(_partitions);
         std::cout << "\r" << rang::fg::green << rang::style::bold
@@ -61,10 +71,10 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
         std::cout << rang::style::reset << std::flush;
     }
 
-  private:
-    std::int64_t _partitions;
-    float        _task_increment;
-    std::int64_t _done;
+    std::int64_t              _partitions;
+    float                     _task_increment;
+    std::atomic<std::int64_t> _done;
+    std::atomic<bool>         _inital_output = false;
 };
 }  // namespace sens_loc::util
 
