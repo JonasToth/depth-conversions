@@ -7,7 +7,7 @@ COPY feature_extractor /usr/bin/feature_extractor
 COPY keypoint_plotter /usr/bin/keypoint_plotter
 COPY feature_performance /usr/bin/feature_performance
 
-RUN apt add python3
+RUN apk add python3
 
 COPY transformation_step.py /usr/bin/transformation_step.py
 COPY plot_histogram.sh /usr/bin/plot_histogram.sh

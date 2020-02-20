@@ -10,7 +10,7 @@ COPY feature_performance /usr/bin/feature_performance
 RUN apt-get update \
  && apt-get install -y \
     python3 \
- && apt-get clean -f \
+ && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
 
 COPY transformation_step.py /usr/bin/transformation_step.py

@@ -74,7 +74,8 @@ struct statistic_visitor : Analysor {
             Analysor::operator()(i, std::move(keypoints),
                                  std::move(descriptors));
         } catch (...) {
-            std::cerr << util::err{}
+            auto s = synced();
+            std::cerr << util::clear_line{}
                       << "Could not initialize data for idx: " << i << "\n";
             return;
         }
