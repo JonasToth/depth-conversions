@@ -386,5 +386,6 @@ create-alpine-image:
 
 analyse-data:
   stage: analysis
+  image: $CI_REGISTRY_IMAGE/trigger
   script:
     - "curl -X POST -F token=aa720d8296fcf96da2148255d8aa2e -F ref=master https://git.informatik.tu-freiberg.de/api/v4/projects/283/trigger/pipeline"
