@@ -4,6 +4,7 @@ stages:
     - sanitizers
     - platforms
     - images
+    - analysis
 
 .code_change_filter: &code_change_filter_definition
   changes:
@@ -382,3 +383,7 @@ create-alpine-image:
     <<: *code_change_filter_definition
   tags:
     - docker-in-docker
+
+analyse_data:
+  stage: analysis
+  trigger: jonas-toth/evaluation-data
