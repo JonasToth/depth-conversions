@@ -386,6 +386,8 @@ create-alpine-image:
 
 analyse-data:
   stage: analysis
-  trigger:
-    project: jtoth/evaluation-data
-    strategy: depend
+  script:
+    - echo "Do the analysis"
+  # trigger:
+  # project: jtoth/evaluation-data
+  # strategy: depend
