@@ -345,6 +345,8 @@ create-production-image:
   script:
     - cd docker/.production
     - mv ../../build/src/apps/* .
+    - cp ../../scripts/analysis/* .
+    - cp ../../scripts/plot/* .
     - docker build --pull -t $CI_REGISTRY_IMAGE .
     - docker run --rm $CI_REGISTRY_IMAGE:latest depth2x -h
     - docker run --rm $CI_REGISTRY_IMAGE:latest depth_filter -h
@@ -370,6 +372,8 @@ create-alpine-image:
   script:
     - cd docker/.alpine-edge
     - mv ../../build/src/apps/* .
+    - cp ../../scripts/analysis/* .
+    - cp ../../scripts/plot/* .
     - docker build --pull -t $CI_REGISTRY_IMAGE:alpine-edge .
     - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge depth2x -h
     - docker run --rm $CI_REGISTRY_IMAGE:alpine-edge depth_filter -h
