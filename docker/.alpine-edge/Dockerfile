@@ -8,7 +8,4 @@ COPY keypoint_plotter /usr/bin/keypoint_plotter
 COPY feature_performance /usr/bin/feature_performance
 
 RUN apk add python3
-
 COPY transformation_step.py /usr/bin/transformation_step.py
-COPY plot_histogram.sh /usr/bin/plot_histogram.sh
-COPY plot_kp_distribution.sh /usr/bin/plot_kp_distribution.sh

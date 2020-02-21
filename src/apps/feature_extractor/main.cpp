@@ -1,7 +1,6 @@
 #include "batch_extractor.h"
 
 #include <CLI/CLI.hpp>
-#include <iostream>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d.hpp>

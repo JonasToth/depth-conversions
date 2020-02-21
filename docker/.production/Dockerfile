@@ -12,7 +12,4 @@ RUN apt-get update \
     python3 \
  && apt-get clean \
  && rm -rf /var/lib/apt/lists/*
-
 COPY transformation_step.py /usr/bin/transformation_step.py
-COPY plot_histogram.sh /usr/bin/plot_histogram.sh
-COPY plot_kp_distribution.sh /usr/bin/plot_kp_distribution.sh
