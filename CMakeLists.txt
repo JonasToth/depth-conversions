@@ -114,3 +114,6 @@ include(check_dependencies_built)
 if (${DEPENDENCIES_BUILT})
     add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/src")
 endif (${DEPENDENCIES_BUILT})
+
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/scripts/analysis/transformation_step.py"
+               "${CMAKE_CURRENT_BINARY_DIR}/src/apps" COPYONLY)
