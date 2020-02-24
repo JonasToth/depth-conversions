@@ -30,6 +30,8 @@ inline std::ostream& operator<<(std::ostream& os,
                                 clear_line /*clear_tag*/) noexcept {
     if (rang::rang_implementation::isTerminal(os.rdbuf()))
         os << "\033[2K\r";
+    else
+        os << "\n";
     return os;
 }
 

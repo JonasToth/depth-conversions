@@ -3,6 +3,7 @@
 
 #include <chrono>
 #include <gsl/gsl>
+#include <iomanip>
 #include <iostream>
 #include <sens_loc/util/console.h>
 #include <sens_loc/util/progress_bar_observer.h>
@@ -63,6 +64,9 @@ bool parallel_indexed_file_processing(int          start,
         const auto before = std::chrono::steady_clock::now();
         executor.run(tf).wait();
         const auto after = std::chrono::steady_clock::now();
+        const auto dur_deci_seconds =
+            std::chrono::duration_cast<std::chrono::duration<long, std::deci>>(
+                after - before);
         std::cout << std::endl;
 
         Ensures(fails >= 0);
@@ -74,8 +78,9 @@ bool parallel_indexed_file_processing(int          start,
             std::cerr << "Processing " << rang::style::bold
                       << std::abs(end - start) + 1 - fails << rang::style::reset
                       << " images took " << rang::style::bold
-                      << duration_cast<seconds>(after - before).count()
-                      << rang::style::reset << " seconds!\n";
+                      << std::setprecision(1)
+                      << (dur_deci_seconds.count() / 10.) << rang::style::reset
+                      << " seconds!\n";
         }
 
         if (fails > 0) {
