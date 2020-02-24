@@ -66,7 +66,7 @@ bool parallel_indexed_file_processing(int          start,
         executor.run(tf).wait();
         const auto after = std::chrono::steady_clock::now();
         const auto dur_deci_seconds =
-            std::chrono::duration_cast<std::chrono::duration<long, std::deci>>(
+            std::chrono::duration_cast<std::chrono::duration<long, std::centi>>(
                 after - before);
         std::cout << std::endl;
 
@@ -81,7 +81,7 @@ bool parallel_indexed_file_processing(int          start,
                       << " images took " << rang::style::bold
                       << std::fixed
                       << std::setprecision(2)
-                      << (dur_deci_seconds.count() / 10.) << rang::style::reset
+                      << (dur_deci_seconds.count() / 100.) << rang::style::reset
                       << " seconds!\n";
         }
 
