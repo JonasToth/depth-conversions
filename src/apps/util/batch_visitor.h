@@ -45,8 +45,8 @@ Functor parallel_visitation(int start, int end, Functor&& f) noexcept {
         std::cerr << util::info{};
         std::cerr << "Processing " << rang::style::bold
                   << std::abs(end - start) + 1 << rang::style::reset
-                  << " images took " << rang::style::bold
-                  << std::setprecision(1) << (dur_deci_seconds.count() / 10.)
+                  << " images took " << rang::style::bold << std::fixed
+                  << std::setprecision(2) << (dur_deci_seconds.count() / 10.)
                   << rang::style::reset << " seconds!\n";
     }
 

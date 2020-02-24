@@ -4,6 +4,7 @@
 #include <chrono>
 #include <gsl/gsl>
 #include <iomanip>
+#include <ios>
 #include <iostream>
 #include <sens_loc/util/console.h>
 #include <sens_loc/util/progress_bar_observer.h>
@@ -78,7 +79,8 @@ bool parallel_indexed_file_processing(int          start,
             std::cerr << "Processing " << rang::style::bold
                       << std::abs(end - start) + 1 - fails << rang::style::reset
                       << " images took " << rang::style::bold
-                      << std::setprecision(1)
+                      << std::fixed
+                      << std::setprecision(2)
                       << (dur_deci_seconds.count() / 10.) << rang::style::reset
                       << " seconds!\n";
         }
