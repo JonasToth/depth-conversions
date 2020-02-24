@@ -66,6 +66,9 @@ class min_descriptor_distance {
         Expects(!keypoints.has_value());
         Expects(descriptors.has_value());
 
+        if (descriptors->rows == 0)
+            return;
+
         cv::Mat distances;
         cv::batchDistance(*descriptors, *descriptors, distances, data_type,
                           cv::noArray(),

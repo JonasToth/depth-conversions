@@ -183,6 +183,9 @@ class prec_recall_analysis {
                                fmt::format(_depth_image_pattern, idx),
                                fmt::format(_pose_file_pattern, idx)};
 
+        if (prev.keypoints.empty() || curr.keypoints.empty())
+            return;
+
         // == Calculate relative pose between the two frames.
         pose_t rel_pose = relative_pose(prev.absolute_pose, curr.absolute_pose);
 
@@ -194,9 +197,9 @@ class prec_recall_analysis {
             if (icp_success) {
                 rel_pose = icp_pose;
             } else {
-                lock_guard g{this->_stdio_mutex};
-                cerr << util::warn{} << "No ICP result for idx: " << idx
-                     << "!\n";
+                auto s = synced();
+                cerr << util::warn{} << "No ICP result for index " << idx
+                     << "! Using loaded pose.\n";
             }
         }
 
@@ -270,14 +273,14 @@ class prec_recall_analysis {
                     imwrite(fmt::format(*_backproject_pattern, idx), out_img);
 
                 if (!write_success) {
-                    lock_guard g{this->_stdio_mutex};
+                    auto s = synced();
                     cerr << util::err{}
                          << "Could not write backprojection correspondence to "
                             "disk for: "
                          << idx << "!\n";
                 }
             } else {
-                lock_guard g{this->_stdio_mutex};
+                auto s = synced();
                 cerr << util::warn{} << "Original file for index '" << idx
                      << "' ('" << orig_f_name
                      << "') could not be loaded for backprojection plot!\n";
@@ -294,7 +297,7 @@ class prec_recall_analysis {
             *_totally_masked += masked_points;
         }
     } catch (const exception& e) {
-        lock_guard g{_stdio_mutex};
+        auto s = synced();
         cerr << util::err{} << "Could not analyze data for " << idx << "!\n"
              << e.what() << "\n";
         return;
@@ -407,8 +410,6 @@ class prec_recall_analysis {
     Ptr<BFMatcher>               _matcher;
     optional<math::image<uchar>> _mask;
 
-    static mutex _stdio_mutex;
-
     not_null<mutex*>                           _inserter_mutex;
     not_null<vector<float>*>                   _selected_elements_dist;
     not_null<analysis::recognition_statistic*> _stats;
@@ -419,9 +420,6 @@ class prec_recall_analysis {
 
     Ptr<rgbd::Odometry> _icp;
 };
-template <template <typename> typename Model, typename Real>
-mutex prec_recall_analysis<Model, Real>::_stdio_mutex{};
-
 }  // namespace
 
 namespace sens_loc::apps {

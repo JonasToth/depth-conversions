@@ -60,13 +60,13 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
         Ensures(bar_elements >= 0);
         int empty_elements = max_bars - bar_elements;
 
-        std::cout << rang::style::reset << rang::bg::green;
+        std::cout << rang::style::reset << rang::bg::green << rang::fg::green;
         for (int i = 0; i < bar_elements; ++i) {
-            std::cout << " ";
+            std::cout << "#";
         }
-        std::cout << rang::bg::blue;
+        std::cout << rang::bg::blue << rang::fg::blue;
         for (int i = 0; i < empty_elements; ++i) {
-            std::cout << " ";
+            std::cout << ".";
         }
         std::cout << rang::style::reset << std::flush;
     }
