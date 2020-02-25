@@ -167,6 +167,10 @@ struct AKAZEArgs {
                      "Which descriptor to use, upright means that no "
                      "orientation is computed",
                      /*defaulted=*/true);
+        cmd->add_set("--diffusity", diffusivity,
+                     {"WEICKERT", "CHARBONNIER", "PM_G1", "PM_G2"},
+                     "Choose type of diffusion calculation.",
+                     /*defaulted=*/true);
         cmd->add_option("-s,--descriptor-size", descriptor_size,
                         "Size of the descriptor in bits, 0 => full size",
                         /*defaulted=*/true)
