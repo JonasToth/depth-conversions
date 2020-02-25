@@ -12,7 +12,7 @@ output="$2"
 title="$3"
 
 gnuplot <<EOF
-set terminal postscript enhanced eps color
+set terminal pdf color
 set output "$output"
 
 set title "$title" noenhanced
