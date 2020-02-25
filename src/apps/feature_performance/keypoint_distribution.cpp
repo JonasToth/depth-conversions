@@ -14,33 +14,34 @@
 #include <util/batch_visitor.h>
 #include <util/statistic_visitor.h>
 
+using namespace std;
+using namespace gsl;
+
 namespace {
 
 /// Calculate the 2-dimensional distribution of the keypoints for a dataset.
 class keypoint_distribution {
   public:
-    keypoint_distribution(gsl::not_null<std::mutex*> points_mutex,
-                          gsl::not_null<std::vector<cv::KeyPoint>*> points,
-                          gsl::not_null<std::mutex*>         distance_mutex,
-                          gsl::not_null<std::vector<float>*> distances) noexcept
+    keypoint_distribution(not_null<mutex*>                points_mutex,
+                          not_null<vector<cv::KeyPoint>*> points,
+                          not_null<mutex*>                distance_mutex,
+                          not_null<vector<float>*>        distances) noexcept
         : keypoint_mutex{points_mutex}
         , global_keypoints{points}
         , distance_mutex{distance_mutex}
         , global_distances{distances} {}
 
-    void
-    operator()(int /*idx*/,
-               std::optional<std::vector<cv::KeyPoint>> keypoints,
-               std::optional<cv::Mat> /*descriptors*/) noexcept {  // NOLINT
+    void operator()(int /*idx*/,
+                    optional<vector<cv::KeyPoint>> keypoints,
+                    optional<cv::Mat> /*descriptors*/) noexcept {  // NOLINT
         if (keypoints->empty())
             return;
 
         // Simply insert the keypoints in the global keypoint vector.
         {
-            std::lock_guard guard{*keypoint_mutex};
-            global_keypoints->insert(std::end(*global_keypoints),
-                                     std::begin(*keypoints),
-                                     std::end(*keypoints));
+            lock_guard guard{*keypoint_mutex};
+            global_keypoints->insert(end(*global_keypoints), begin(*keypoints),
+                                     end(*keypoints));
         }
 
         // Calculate the minimal distance of each keypoint to all others
@@ -49,13 +50,13 @@ class keypoint_distribution {
         // This is the pixel-distance with euclidean norm.
         // NOTE: This is an inefficient implementation if O(n^2) complexity.
         {
-            const std::size_t n_points = keypoints->size();
+            const size_t n_points = keypoints->size();
             if (n_points < 2)
                 return;
 
-            std::vector<cv::KeyPoint>& kp_ref = *keypoints;
-            std::vector<float>         local_minima;
-            std::vector<float>         local_distances;
+            vector<cv::KeyPoint>& kp_ref = *keypoints;
+            vector<float>         local_minima;
+            vector<float>         local_distances;
             local_distances.reserve(n_points);
 
             // The upper triangle of the distance matrix needs to be calculated.
@@ -67,12 +68,12 @@ class keypoint_distribution {
             // p3 |          0 |
             // The result are 'n_points / 2' number of minimal distances.
             // Because there will
-            for (std::size_t i = 1; i < n_points - 1; ++i) {
+            for (size_t i = 1; i < n_points - 1; ++i) {
                 // loop-calculation
-                for (std::size_t k = i + 1; k < n_points; ++k) {
+                for (size_t k = i + 1; k < n_points; ++k) {
                     const float dx = kp_ref[i].pt.x - kp_ref[k].pt.x;
                     const float dy = kp_ref[i].pt.y - kp_ref[k].pt.y;
-                    const float d  = std::sqrt(dx * dx + dy * dy);
+                    const float d  = sqrt(dx * dx + dy * dy);
                     Ensures(d >= 0.0F);
                     local_distances.emplace_back(d);
                 }
@@ -80,8 +81,8 @@ class keypoint_distribution {
                 Ensures(!local_distances.empty());
 
                 // Store the minimal element for statistical evaluation.
-                local_minima.emplace_back(*std::min_element(
-                    std::begin(local_distances), std::end(local_distances)));
+                local_minima.emplace_back(
+                    *min_element(begin(local_distances), end(local_distances)));
 
                 // Ensure that local_distances is only allocated once.
                 local_distances.clear();
@@ -89,21 +90,21 @@ class keypoint_distribution {
 
             // Insertion
             {
-                std::lock_guard guard{*distance_mutex};
+                lock_guard guard{*distance_mutex};
                 global_distances->insert(global_distances->end(),
-                                         std::begin(local_minima),
-                                         std::end(local_minima));
+                                         begin(local_minima),
+                                         end(local_minima));
             }
         }
     }
 
-    void postprocess(unsigned int                      image_width,
-                     unsigned int                      image_height,
-                     const std::optional<std::string>& stat_file,
-                     const std::optional<std::string>& response_histo,
-                     const std::optional<std::string>& size_histo,
-                     const std::optional<std::string>& kp_distance_histo,
-                     const std::optional<std::string>& kp_distribution_histo) {
+    void postprocess(unsigned int            image_width,
+                     unsigned int            image_height,
+                     const optional<string>& stat_file,
+                     const optional<string>& response_histo,
+                     const optional<string>& size_histo,
+                     const optional<string>& kp_distance_histo,
+                     const optional<string>& kp_distribution_histo) {
         if (global_keypoints->empty() || global_distances->empty())
             return;
 
@@ -136,99 +137,96 @@ class keypoint_distribution {
             write(kp_statistic, "distance", distance_stat.get_statistic());
             kp_statistic.release();
         } else {
-            std::cout << "==== Response\n"
-                      << "count:  " << kp.response().count << "\n"
-                      << "min:    " << kp.response().min << "\n"
-                      << "max:    " << kp.response().max << "\n"
-                      << "median: " << kp.response().median << "\n"
-                      << "mean:   " << kp.response().mean << "\n"
-                      << "var:    " << kp.response().variance << "\n"
-                      << "stddev: " << kp.response().stddev << "\n"
-                      << "==== Size\n"
-                      << "count:  " << kp.size().count << "\n"
-                      << "min:    " << kp.size().min << "\n"
-                      << "max:    " << kp.size().max << "\n"
-                      << "median: " << kp.size().median << "\n"
-                      << "mean:   " << kp.size().mean << "\n"
-                      << "var:    " << kp.size().variance << "\n"
-                      << "stddev: " << kp.size().stddev << "\n"
-                      << "=== Distance\n"
-                      << "count:  " << distance_stat.count() << "\n"
-                      << "min:    " << distance_stat.min() << "\n"
-                      << "max:    " << distance_stat.max() << "\n"
-                      << "median: " << distance_stat.median() << "\n"
-                      << "mean:   " << distance_stat.mean() << "\n"
-                      << "stddev: " << distance_stat.stddev() << "\n";
+            cout << "==== Response\n"
+                 << "count:  " << kp.response().count << "\n"
+                 << "min:    " << kp.response().min << "\n"
+                 << "max:    " << kp.response().max << "\n"
+                 << "median: " << kp.response().median << "\n"
+                 << "mean:   " << kp.response().mean << "\n"
+                 << "var:    " << kp.response().variance << "\n"
+                 << "stddev: " << kp.response().stddev << "\n"
+                 << "==== Size\n"
+                 << "count:  " << kp.size().count << "\n"
+                 << "min:    " << kp.size().min << "\n"
+                 << "max:    " << kp.size().max << "\n"
+                 << "median: " << kp.size().median << "\n"
+                 << "mean:   " << kp.size().mean << "\n"
+                 << "var:    " << kp.size().variance << "\n"
+                 << "stddev: " << kp.size().stddev << "\n"
+                 << "=== Distance\n"
+                 << "count:  " << distance_stat.count() << "\n"
+                 << "min:    " << distance_stat.min() << "\n"
+                 << "max:    " << distance_stat.max() << "\n"
+                 << "median: " << distance_stat.median() << "\n"
+                 << "mean:   " << distance_stat.mean() << "\n"
+                 << "stddev: " << distance_stat.stddev() << "\n";
         }
         if (response_histo) {
-            std::ofstream gnuplot_data{*response_histo};
+            ofstream gnuplot_data{*response_histo};
             gnuplot_data << sens_loc::io::to_gnuplot(kp.response_histo())
-                         << std::endl;
+                         << endl;
         } else {
-            std::cout << kp.response_histo() << "\n";
+            cout << kp.response_histo() << "\n";
         }
 
         if (size_histo) {
-            std::ofstream gnuplot_data{*size_histo};
-            gnuplot_data << sens_loc::io::to_gnuplot(kp.size_histo())
-                         << std::endl;
+            ofstream gnuplot_data{*size_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(kp.size_histo()) << endl;
         } else {
-            std::cout << kp.size_histo() << "\n";
+            cout << kp.size_histo() << "\n";
         }
 
         if (kp_distance_histo) {
-            std::ofstream gnuplot_data{*kp_distance_histo};
+            ofstream gnuplot_data{*kp_distance_histo};
             gnuplot_data << sens_loc::io::to_gnuplot(distance_stat.histogram())
-                         << std::endl;
+                         << endl;
         } else {
-            std::cout << distance_stat.histogram() << "\n";
+            cout << distance_stat.histogram() << "\n";
         }
 
         if (kp_distribution_histo) {
-            std::ofstream gnuplot_data{*kp_distribution_histo};
-            gnuplot_data << sens_loc::io::to_gnuplot(kp.distribution())
-                         << std::endl;
+            ofstream gnuplot_data{*kp_distribution_histo};
+            gnuplot_data << sens_loc::io::to_gnuplot(kp.distribution()) << endl;
         }
     }
 
   private:
     // Data required for the parallel processing.
-    gsl::not_null<std::mutex*>                keypoint_mutex;
-    gsl::not_null<std::vector<cv::KeyPoint>*> global_keypoints;
+    not_null<mutex*>                keypoint_mutex;
+    not_null<vector<cv::KeyPoint>*> global_keypoints;
 
-    gsl::not_null<std::mutex*>         distance_mutex;
-    gsl::not_null<std::vector<float>*> global_distances;
+    not_null<mutex*>         distance_mutex;
+    not_null<vector<float>*> global_distances;
 };
 
 }  // namespace
 
 namespace sens_loc::apps {
 int analyze_keypoint_distribution(
-    std::string_view                  input_pattern,
-    int                               start_idx,
-    int                               end_idx,
-    unsigned int                      image_width,
-    unsigned int                      image_height,
-    const std::optional<std::string>& stat_file,
-    const std::optional<std::string>& response_histo,
-    const std::optional<std::string>& size_histo,
-    const std::optional<std::string>& kp_distance_histo,
-    const std::optional<std::string>& kp_distribution_histo) {
+    string_view             input_pattern,
+    int                     start_idx,
+    int                     end_idx,
+    unsigned int            image_width,
+    unsigned int            image_height,
+    const optional<string>& stat_file,
+    const optional<string>& response_histo,
+    const optional<string>& size_histo,
+    const optional<string>& kp_distance_histo,
+    const optional<string>& kp_distribution_histo) {
     using visitor =
         statistic_visitor<keypoint_distribution, required_data::keypoints>;
 
-    std::mutex                keypoint_mutex;
-    std::vector<cv::KeyPoint> global_keypoints;
+    mutex                keypoint_mutex;
+    vector<cv::KeyPoint> global_keypoints;
 
-    std::mutex         distance_mutex;
-    std::vector<float> global_minimal_distances;
+    mutex         distance_mutex;
+    vector<float> global_minimal_distances;
 
     auto f = parallel_visitation(
         start_idx, end_idx,
-        visitor{input_pattern, gsl::not_null{&keypoint_mutex},
-                gsl::not_null{&global_keypoints},
-                gsl::not_null{&distance_mutex},
-                gsl::not_null{&global_minimal_distances}});
+        visitor{input_pattern, not_null{&keypoint_mutex},
+                not_null{&global_keypoints}, not_null{&distance_mutex},
+                not_null{&global_minimal_distances}});
 
     f.postprocess(image_width, image_height, stat_file, response_histo,
                   size_histo, kp_distance_histo, kp_distribution_histo);
