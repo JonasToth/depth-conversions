@@ -116,7 +116,7 @@ cmake .. \
  -DWITH_UBSAN=${WITH_UBSAN} \
  -DWITH_MSAN=${WITH_MSAN} \
  -DWITH_ASAN=${WITH_ASAN} \
- -DWITH_TSAN=${WITH_TSAN}
+ -DWITH_TSAN=${WITH_TSAN} || cat CMakeFiles/*.log
 
 print_info "Building project"
 ninja dependencies

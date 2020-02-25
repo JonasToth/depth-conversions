@@ -30,7 +30,8 @@ target_sources(depth2x
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_laserscan.h.inl"
     "${CMAKE_CURRENT_LIST_DIR}/depth2x/converter_max_curve.h.inl"
     )
-configure_file(kinect_intrinsic.txt kinect_intrinsic.txt COPYONLY)
+configure_file("${CMAKE_CURRENT_LIST_DIR}/kinect_intrinsic.txt"
+               "${CMAKE_CURRENT_BINARY_DIR}/kinect_intrinsic.txt" COPYONLY)
 
 
 add_tool(depth_filter "${CMAKE_CURRENT_LIST_DIR}/depth_filter/main.cpp")
