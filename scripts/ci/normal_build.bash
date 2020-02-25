@@ -120,7 +120,7 @@ cmake .. \
 
 print_info "Building project"
 ninja dependencies
-cmake .
+cmake . || cat CMakeFiles/*.log
 ninja
 
 if [ "${WITH_TESTING}" == "ON" ]; then
