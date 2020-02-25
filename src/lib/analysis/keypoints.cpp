@@ -66,15 +66,17 @@ void keypoints::analyze(gsl::span<const cv::KeyPoint> points,
     const float delta = 5.0F * std::numeric_limits<float>::epsilon();
     if (size && _size_histo_enabled) {
         try {
-            const float s_min = _size.min - delta;
-            const float s_max = _size.max + delta;
+            const auto [s_min, s_max] = [&]() -> std::pair<float, float> {
+                if (std::abs(_size.min - _size.max) < 0.0001F)
+                    return {_size.min - 1.0F, _size.max + 1.0F};
+                return {_size.min - delta, _size.max + delta};
+            }();
             _size_histo =
                 make_histogram(axis_t{_size_bins, s_min, s_max, _size_title});
         } catch (const std::invalid_argument& e) {
-            std::cerr
-                << sens_loc::util::err{}
-                << "Could not create distribution histogram configuration!\n"
-                << "Message: " << e.what() << "\n";
+            std::cerr << sens_loc::util::err{}
+                      << "Could not create size histogram configuration!\n"
+                      << "Message: " << e.what() << "\n";
             return;
         }
     }
