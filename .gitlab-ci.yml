@@ -22,6 +22,7 @@ stages:
       - build/src/apps/feature_extractor
       - build/src/apps/keypoint_plotter
       - build/src/apps/feature_performance
+      - build/src/apps/transformation_step.py
 
 api-documentation:
   image: $CI_REGISTRY_IMAGE/base-image-documentation
