@@ -311,6 +311,7 @@ rosmelodic-image:
 ubuntu-rolling-image:
   image: $CI_REGISTRY_IMAGE/base-image-ubuntu-rolling
   stage: platforms
+  allow_failure: true
   <<: *platform_build_option_variables
   <<: *wide_test_filter_definition
   <<: *binary_artifact_paths
@@ -319,6 +320,7 @@ ubuntu-rolling-image:
 alpine-edge-image:
   image: $CI_REGISTRY_IMAGE/base-image-alpine-edge
   stage: platforms
+  allow_failure: true
   dependencies: []
   variables:
     CC: "gcc"
@@ -364,6 +366,7 @@ create-production-image:
 create-alpine-image:
   stage: images
   image: docker:git
+  allow_failure: true
   services:
     - docker:dind
   dependencies: ["alpine-edge-image"]
