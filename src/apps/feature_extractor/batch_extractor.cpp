@@ -66,19 +66,19 @@ batch_extractor::compute_features(const math::image<uchar>& img) const
     // That is the reason, because the pixels with 0 as value do not contain
     // any information on the geometry.
     vector<cv::KeyPoint> keypoints;
-    cv::UMat cl_i;
+    cv::UMat             cl_i;
     img.data().copyTo(cl_i);
     _detector->detect(cl_i, keypoints, cl_i);
 
     // Removes every keypoint that is matched by the '_keypoint_filter'.
-    if (_keypoint_filter) {
-        auto new_end =
-            remove_if(begin(keypoints), end(keypoints), *_keypoint_filter);
+    for (auto&& f : _keypoint_filter) {
+        auto new_end = f(keypoints);
         keypoints.erase(new_end, end(keypoints));
     }
 
     cv::Mat descriptors;
-    _descriptor->compute(cl_i, keypoints, descriptors);
+    if (!_descriptor.empty())
+        _descriptor->compute(cl_i, keypoints, descriptors);
 
     return make_pair(move(keypoints), move(descriptors));
 }

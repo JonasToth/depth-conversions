@@ -229,6 +229,37 @@ struct AKAZEArgs {
     std::string diffusivity         = "PM_G2";
 };
 
+struct AGASTArgs {
+    AGASTArgs() = default;
+    AGASTArgs(CLI::App* cmd) {
+        cmd->add_option("--agast-threshold", threshold,
+                        "Threshold for AGAST response",
+                        /*defaulted=*/true);
+    }
+    int threshold = 10;
+};
+
+struct BRISKArgs {
+    BRISKArgs() = default;
+    BRISKArgs(CLI::App* cmd) {
+        cmd->add_option("--n-octaves", n_octaves,
+                        "Number of Octaves for Detection");
+        cmd->add_option("--brisk-threshold", threshold,
+                        "Threshold for the AGAST detector in BRISK");
+        cmd->add_option("--pattern-scale", pattern_scale,
+                        "Option to control the sampling circle-scale");
+    }
+
+    int   n_octaves     = 3;
+    int   threshold     = 30;
+    float pattern_scale = 1.0F;
+};
+
+struct NULLArgs {
+    NULLArgs() = default;
+    NULLArgs(CLI::App* /*cmd*/) {}
+};
+
 /// Helper enum to provide information on the capability of an algorithm.
 /// This is used for registering the descriptors and detectors.
 /// \ingroup feature-extractor-driver
@@ -302,13 +333,19 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     detector_cmd->add_option(
         "--kp-response-threshold", keypoint_response_threshold,
         "Sets a minimum response to be considered as feasible keypoint");
+    unsigned int keypoint_count = 3000U;
+    detector_cmd->add_option("--kp-count", keypoint_count,
+                             "Set a maximum number of extracted keypoints. "
+                             "Filtered by response. Disabled with '0'",
+                             /*defaulted=*/true);
     detector_cmd->require_subcommand(1);
 
     CLI::App* descriptor_cmd = app.add_subcommand(
         "descriptor", "Configure the descriptor used for the keypoints");
     descriptor_cmd->require_subcommand(1);
 
-    using feature_args = variant<SURFArgs, SIFTArgs, AKAZEArgs, ORBArgs>;
+    using feature_args = variant<SURFArgs, SIFTArgs, AKAZEArgs, ORBArgs,
+                                 AGASTArgs, BRISKArgs, NULLArgs>;
     unordered_map<CLI::App*, feature_args> detector_params;
     unordered_map<CLI::App*, feature_args> descriptor_params;
 
@@ -321,6 +358,13 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
                         capability::detect | capability::describe),
              make_tuple("akaze", "Use AKAZE implementation",
                         capability::detect | capability::describe),
+             make_tuple("brisk",
+                        "Use BRISK (Agast + BRISK descriptor) implementation",
+                        capability::detect | capability::describe),
+             make_tuple("agast", "Use AGAST implementation",
+                        capability::detect),
+             make_tuple("null", "Do not extract descriptors",
+                        capability::describe),
          }}) {
         auto cmd_to_args = [&](string_view name,
                                CLI::App*   cmd) -> feature_args {
@@ -332,6 +376,12 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
                 return ORBArgs{cmd};
             if (name == "akaze")
                 return AKAZEArgs{cmd};
+            if (name == "brisk")
+                return BRISKArgs{cmd};
+            if (name == "agast")
+                return AGASTArgs{cmd};
+            if (name == "null")
+                return NULLArgs{cmd};
             UNREACHABLE(                                      // LCOV_EXCL_LINE
                 "Unexpected detector/descriptor provided!");  // LCOV_EXCL_LINE
         };
@@ -356,7 +406,9 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     // be executed in order.
     // Each element is created by one subcommand and its parameters.
     using namespace sens_loc::util;
+    using cv::AgastFeatureDetector;
     using cv::AKAZE;
+    using cv::BRISK;
     using cv::ORB;
     using cv::xfeatures2d::SIFT;
     using cv::xfeatures2d::SURF;
@@ -386,7 +438,14 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
                 akaze.threshold, akaze.n_octaves, akaze.n_octave_layers,
                 AKAZEArgs::string_to_diffusivity(akaze.diffusivity));
         },
-    };
+        [](const BRISKArgs& brisk) -> cv::Ptr<cv::Feature2D> {
+            return BRISK::create(brisk.threshold, brisk.n_octaves,
+                                 brisk.pattern_scale);
+        },
+        [](const AGASTArgs& agast) -> cv::Ptr<cv::Feature2D> {
+            return AgastFeatureDetector::create(agast.threshold);
+        },
+        [](const NULLArgs & /*null*/) -> cv::Ptr<cv::Feature2D> { return {}; }};
 
     CLI::App* provided_detector_cmd = detector_cmd->get_subcommands()[0];
     Ensures(detector_params.count(provided_detector_cmd) == 1);
@@ -397,23 +456,41 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     const feature_args& det_args{detector_params[provided_detector_cmd]};
     const feature_args& desc_args{descriptor_params[provided_descriptor_cmd]};
 
-    optional<batch_extractor::filter_func> filter;
+    vector<batch_extractor::filter_func> filter;
 
-    if (keypoint_size_threshold && !keypoint_response_threshold)
-        filter = [s = *keypoint_size_threshold](const cv::KeyPoint& kp) {
-            return kp.size < s;
-        };
+    using namespace cv;
+    if (keypoint_size_threshold)
+        filter.emplace_back([s = *keypoint_size_threshold](
+                                vector<KeyPoint>& kps) {
+            return remove_if(begin(kps), end(kps), [&](const cv::KeyPoint& kp) {
+                return kp.size < s;
+            });
+        });
 
-    else if (!keypoint_size_threshold && keypoint_response_threshold)
-        filter = [r = *keypoint_response_threshold](const cv::KeyPoint& kp) {
-            return kp.response < r;
-        };
+    if (keypoint_response_threshold)
+        filter.emplace_back([r = *keypoint_response_threshold](
+                                vector<KeyPoint>& kps) {
+            return remove_if(begin(kps), end(kps), [&](const cv::KeyPoint& kp) {
+                return kp.response < r;
+            });
+        });
 
-    else if (keypoint_size_threshold && keypoint_response_threshold)
-        filter = [s = *keypoint_size_threshold,
-                  r = *keypoint_response_threshold](const cv::KeyPoint& kp) {
-            return kp.size < s || kp.response < r;
-        };
+    // Because the keypoint count limit must be a limit, this filter needs to
+    // be applied last!
+    if (keypoint_count != 0U)
+        filter.emplace_back([c = keypoint_count](vector<KeyPoint>& kps) {
+            if (kps.size() > c) {
+                auto c_it = begin(kps) + c;
+                // Sort until the element 'c' by response. The range is
+                // partitioned afterwards.
+                nth_element(begin(kps), c_it, end(kps),
+                            [](const KeyPoint& kp1, const KeyPoint& kp2) {
+                                return kp1.response < kp2.response;
+                            });
+                return c_it;
+            }
+            return kps.end();
+        });
 
     const batch_extractor extractor(visit(argument_visitor, det_args),
                                     visit(argument_visitor, desc_args),

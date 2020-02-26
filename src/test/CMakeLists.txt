@@ -52,6 +52,8 @@ add_tool_test(feature_extractor test_feature_sift)
 add_tool_test(feature_extractor test_feature_surf)
 add_tool_test(feature_extractor test_feature_orb)
 add_tool_test(feature_extractor test_feature_akaze)
+add_tool_test(feature_extractor test_feature_agast)
+add_tool_test(feature_extractor test_feature_brisk)
 
 ################################################################################
 

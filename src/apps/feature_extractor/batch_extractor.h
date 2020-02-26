@@ -9,6 +9,9 @@
 #include <optional>
 #include <sens_loc/util/correctness_util.h>
 
+using namespace std;
+using namespace cv;
+
 namespace sens_loc::apps {
 
 /// Helper class that visits a list of images and extracts features with the
@@ -16,7 +19,7 @@ namespace sens_loc::apps {
 /// \ingroup feature-extractor-driver
 class batch_extractor {
   public:
-    using filter_func = std::function<bool(const cv::KeyPoint&)>;
+    using filter_func = function<vector<KeyPoint>::iterator(vector<KeyPoint>&)>;
 
     /// \param detector,descriptor Algorithms used for detection and
     /// description.
@@ -24,20 +27,19 @@ class batch_extractor {
     /// \param keypoint_filter Callable that determines if a keypoint shall be
     /// dropped from consideration. All keypoints with 'keypoint_filter(kp) ==
     /// true' are removed.
-    batch_extractor(cv::Ptr<cv::Feature2D>     detector,
-                    cv::Ptr<cv::Feature2D>     descriptor,
-                    std::string_view           input_pattern,
-                    std::string_view           output_pattern,
-                    std::optional<filter_func> keypoint_filter = std::nullopt)
-        : _detector{std::move(detector)}
-        , _descriptor{std::move(descriptor)}
+    batch_extractor(Ptr<Feature2D>      detector,
+                    Ptr<Feature2D>      descriptor,
+                    string_view         input_pattern,
+                    string_view         output_pattern,
+                    vector<filter_func> keypoint_filter)
+        : _detector{move(detector)}
+        , _descriptor{move(descriptor)}
         , _input_pattern{input_pattern}
         , _ouput_pattern{output_pattern}
-        , _keypoint_filter{std::move(keypoint_filter)} {
+        , _keypoint_filter{move(keypoint_filter)} {
         Expects(!_input_pattern.empty());
         Expects(!_ouput_pattern.empty());
         Expects(!_detector.empty());
-        Expects(!_descriptor.empty());
     }
 
     /// Process a whole batch of files in the range [start, end].
@@ -49,20 +51,20 @@ class batch_extractor {
 
     /// Do IO and handle detection down to \c compute_features.
     bool process_detector(const math::image<uchar>& image,
-                          const std::string&        out_file,
-                          const std::string&        in_file) const noexcept;
+                          const string&             out_file,
+                          const string&             in_file) const noexcept;
 
     /// Compute and filter keypoints and run the descriptor on them
     /// afterwards.
-    [[nodiscard]] std::pair<std::vector<cv::KeyPoint>, cv::Mat>
+    [[nodiscard]] pair<vector<KeyPoint>, Mat>
     compute_features(const math::image<uchar>& img) const noexcept;
 
 
-    mutable cv::Ptr<cv::Feature2D> _detector;
-    mutable cv::Ptr<cv::Feature2D> _descriptor;
-    std::string_view               _input_pattern;
-    std::string_view               _ouput_pattern;
-    std::optional<filter_func>     _keypoint_filter;
+    mutable Ptr<Feature2D> _detector;
+    mutable Ptr<Feature2D> _descriptor;
+    string_view            _input_pattern;
+    string_view            _ouput_pattern;
+    vector<filter_func>    _keypoint_filter;
 };
 }  // namespace sens_loc::apps
 
