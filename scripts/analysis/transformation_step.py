@@ -340,7 +340,7 @@ def main():
                              encoding='utf-8')
         toplevel_cfg['recognition']['depth_images'] = \
             join(dirname(toplevel_cfg['recognition']['depth_images']),
-                         depth_image_cfg['data']['pattern'])
+                 depth_image_cfg['data']['pattern'])
         run_recognition(toplevel_cfg['recognition'], source_data_cfg['data'])
 
     # Creating a video from the frames helps with visualization.
