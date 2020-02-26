@@ -16,6 +16,8 @@
 #include <variant>
 #include <vector>
 
+using namespace std;
+
 /// \defgroup feature-extractor-driver Feature detection and extraction
 ///
 /// This driver utilizes OpenCV for feature detection, extraction and
@@ -135,7 +137,7 @@ struct ORBArgs {
     }
 
     static cv::ORB::ScoreType
-    string_to_score_type(std::string_view picked) noexcept {
+    string_to_score_type(string_view picked) noexcept {
         Expects(!picked.empty());
 
 #define CHOICE(enumerator)                                                     \
@@ -147,15 +149,15 @@ struct ORBArgs {
         UNREACHABLE("Invalid choice for ScoreType!");  // LCOV_EXCL_LINE
     }
 
-    int         feature_count  = 700;
-    float       scale_factor   = 1.2F;
-    int         n_levels       = 8;
-    int         edge_threshold = 31;
-    int         first_level    = 0;
-    int         WTA_K          = 2;
-    std::string score_type     = "HARRIS";
-    int         path_size      = 31;
-    int         fast_threshold = 20;
+    int    feature_count  = 700;
+    float  scale_factor   = 1.2F;
+    int    n_levels       = 8;
+    int    edge_threshold = 31;
+    int    first_level    = 0;
+    int    WTA_K          = 2;
+    string score_type     = "HARRIS";
+    int    path_size      = 31;
+    int    fast_threshold = 20;
 };
 
 /// \ingroup feature-extractor-driver
@@ -191,7 +193,7 @@ struct AKAZEArgs {
     }
 
     static cv::AKAZE::DescriptorType
-    string_to_descriptor(std::string_view picked) noexcept {
+    string_to_descriptor(string_view picked) noexcept {
         Expects(!picked.empty());
 
 #define CHOICE(enumerator)                                                     \
@@ -206,7 +208,7 @@ struct AKAZEArgs {
     }
 
     static cv::KAZE::DiffusivityType
-    string_to_diffusivity(std::string_view picked) noexcept {
+    string_to_diffusivity(string_view picked) noexcept {
         Expects(!picked.empty());
 
 #define CHOICE(enumerator)                                                     \
@@ -220,13 +222,13 @@ struct AKAZEArgs {
         UNREACHABLE("Invalid Diffusivity Choice detected!");  // LCOV_EXCL_LINE
     }
 
-    std::string descriptor_type     = "MLDB";
-    int         descriptor_size     = 0;
-    int         descriptor_channels = 3;
-    float       threshold           = 0.001F;
-    int         n_octaves           = 4;
-    int         n_octave_layers     = 4;
-    std::string diffusivity         = "PM_G2";
+    string descriptor_type     = "MLDB";
+    int    descriptor_size     = 0;
+    int    descriptor_channels = 3;
+    float  threshold           = 0.001F;
+    int    n_octaves           = 4;
+    int    n_octave_layers     = 4;
+    string diffusivity         = "PM_G2";
 };
 
 struct AGASTArgs {
@@ -270,13 +272,13 @@ enum class capability : uint8_t {
 };
 constexpr capability operator|(capability element1,
                                capability element2) noexcept {
-    using T = std::underlying_type_t<capability>;
+    using T = underlying_type_t<capability>;
     return static_cast<capability>(static_cast<T>(element1) |
                                    static_cast<T>(element2));
 }
 constexpr capability operator&(capability element1,
                                capability element2) noexcept {
-    using T = std::underlying_type_t<capability>;
+    using T = underlying_type_t<capability>;
     return static_cast<capability>(static_cast<T>(element1) &
                                    static_cast<T>(element2));
 }
@@ -307,12 +309,12 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
                "                  descriptor akaze"
                "\n");
 
-    std::string arg_input_files;
+    string arg_input_files;
     app.add_option(
            "-i,--input", arg_input_files,
            "Input pattern for images to filter; e.g. \"flexion-{}.png\"")
         ->required();
-    std::string arg_out_path;
+    string arg_out_path;
     app.add_option("-o,--output", arg_out_path,
                    "Output file-pattern for the feature information")
         ->required();
@@ -325,11 +327,11 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
 
     CLI::App* detector_cmd =
         app.add_subcommand("detector", "Configure the detector");
-    std::optional<float> keypoint_size_threshold;
+    optional<float> keypoint_size_threshold;
     detector_cmd->add_option(
         "--kp-size-threshold", keypoint_size_threshold,
         "Sets a minimum keypoint size to be considered as feasible keypoint");
-    std::optional<float> keypoint_response_threshold;
+    optional<float> keypoint_response_threshold;
     detector_cmd->add_option(
         "--kp-response-threshold", keypoint_response_threshold,
         "Sets a minimum response to be considered as feasible keypoint");
