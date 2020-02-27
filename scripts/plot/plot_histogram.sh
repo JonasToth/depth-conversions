@@ -11,6 +11,7 @@ input="$1"
 output="$2"
 title="$3"
 
+echo "Plotting histogram with title \"$title\""
 gnuplot <<EOF
 set terminal pdf color
 set output "$output"
