@@ -64,11 +64,6 @@ struct SURFArgs {
 struct SIFTArgs {
     SIFTArgs() = default;
     SIFTArgs(CLI::App* cmd) {
-        cmd->add_option("-c,--feature-count", feature_count,
-                        "Number of features to retain after ranking, 0 means "
-                        "every feature is kept",
-                        /*defaulted=*/true)
-            ->check(CLI::Range(0, 10'000));
         cmd->add_option("-l,--octave-layers", octave_layers,
                         "Set the number of octaver layers",
                         /*defaulted=*/true)
@@ -91,7 +86,7 @@ struct SIFTArgs {
             ->check(CLI::Range(0., 10.));
     }
 
-    int    feature_count      = 700;
+    int    feature_count      = 0;
     int    octave_layers      = 3;
     double contrast_threshold = 0.04;
     double edge_threshold     = 10.;
@@ -102,11 +97,6 @@ struct SIFTArgs {
 struct ORBArgs {
     ORBArgs() = default;
     ORBArgs(CLI::App* cmd) {
-        cmd->add_option("-c,--feature-count", feature_count,
-                        "Number of features to retain after ranking, 0 means "
-                        "every feature is kept",
-                        /*defaulted=*/true)
-            ->check(CLI::Range(0, 10'000));
         cmd->add_option("-s,--scale-factor", scale_factor,
                         "Scale-Factor for the image pyramid. Value == 2. means "
                         "that the size is halfed",
@@ -149,7 +139,7 @@ struct ORBArgs {
         UNREACHABLE("Invalid choice for ScoreType!");  // LCOV_EXCL_LINE
     }
 
-    int    feature_count  = 700;
+    int    feature_count  = 0;
     float  scale_factor   = 1.2F;
     int    n_levels       = 8;
     int    edge_threshold = 31;
@@ -238,7 +228,7 @@ struct AGASTArgs {
                         "Threshold for AGAST response",
                         /*defaulted=*/true);
     }
-    int threshold = 10;
+    int threshold = 50;
 };
 
 struct BRISKArgs {
