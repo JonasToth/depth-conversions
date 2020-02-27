@@ -44,12 +44,18 @@ def arguments():
 def command_invocer(invocation, config_args, source_info):
     filtered = [s for s in invocation if len(s) > 0]
     __l.debug('Final invocation: %s' % filtered)
-    __l.info('Running filter with the following command:')
+    __l.info('Running the following command:')
     __l.info(' '.join(filtered))
 
     return_code = subprocess.run(filtered, shell=False, stdin=None,
                                  stdout=sys.stdout, stderr=sys.stderr)
-    return_code.check_returncode()
+    if return_code.returncode < 0:
+        __l.error("Command got terminated by signal %d" %
+                  -return_code.returncode)
+        __l.error("Invocation:\n%s" % '\n'.join(filtered))
+    elif return_code.returncode > 0:
+        __l.warn("Command terminated with error code!")
+        __l.warn("Invocation:\n%s" % '\n'.join(filtered))
 
     # Because filtering is a way to create a new base-dataset, a configuration
     # file must be written for the new dataset.
@@ -357,5 +363,5 @@ def main():
 
 if __name__ == '__main__':
     log.basicConfig(format='%(asctime)s, %(levelname)s: %(message)s',
-                    level=log.INFO)
+                    level=log.WARN)
     main()
