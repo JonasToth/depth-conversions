@@ -31,6 +31,7 @@ RUN mkdir -p /opencv/build_cv && cd /opencv \
     -DBUILD_opencv_python_bindings_generator=OFF \
     -DBUILD_opencv_python3=OFF \
     -DBUILD_SHARED_LIBS=OFF \
+    -DENABLE_BUILD_HARDENING=ON \
     -DENABLE_PRECOMPILED_HEADERS=OFF \
     -DCPU_BASELINE:STRING="SSE3" \
     -DCPU_DISPATCH:STRING="SSE4_1;SSE4_2;AVX;FP16;AVX2" \
