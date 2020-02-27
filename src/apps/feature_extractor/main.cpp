@@ -487,7 +487,7 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
                 // partitioned afterwards.
                 nth_element(begin(kps), c_it, end(kps),
                             [](const KeyPoint& kp1, const KeyPoint& kp2) {
-                                return kp1.response < kp2.response;
+                                return kp1.response > kp2.response;
                             });
                 return c_it;
             }
