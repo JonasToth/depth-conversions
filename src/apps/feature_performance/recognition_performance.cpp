@@ -125,44 +125,42 @@ template <template <typename> typename Model = sens_loc::camera_models::pinhole,
           typename Real                      = float>
 class prec_recall_analysis {
   public:
-    prec_recall_analysis(string_view           feature_file_pattern,
-                         string_view           depth_image_pattern,
-                         string_view           pose_file_pattern,
-                         float                 unit_factor,
-                         string_view           intrinsic_file,
-                         optional<string_view> mask_file,
-                         NormTypes             matching_norm,
-                         float                 keypoint_distances_threshold,
-                         recognition_data&     accumulated_data,
-                         optional<string_view> backproject_pattern,
-                         optional<string_view> original_files) noexcept
+    prec_recall_analysis(
+        string_view                                      feature_file_pattern,
+        const apps::recognition_analysis_input&          input,
+        const apps::recognition_analysis_output_options& output_options,
+        recognition_data&                                accumulated_data)
         : _feature_file_pattern{feature_file_pattern}
-        , _depth_image_pattern{depth_image_pattern}
-        , _pose_file_pattern{pose_file_pattern}
-        , _unit_factor{unit_factor}
-        , _keypoint_distance_threshold{keypoint_distances_threshold}
-        , _matcher{cv::BFMatcher::create(matching_norm, /*crosscheck=*/true)}
-        , _accumulated_data{accumulated_data}
-        , _backproject_pattern{backproject_pattern}
-        , _original_files{original_files} {
+        , _input{input}
+        , _output_options{output_options}
+        , _matcher{cv::BFMatcher::create(_input.matching_norm,
+                                         /*crosscheck=*/true)}
+        , _mask{nullopt}
+        , _accumulated_data{accumulated_data} {
         Expects(!_feature_file_pattern.empty());
-        Expects(!_depth_image_pattern.empty());
-        Expects(!_pose_file_pattern.empty());
-        Expects(!intrinsic_file.empty());
+        Expects(!_input.depth_image_pattern.empty());
+        Expects(!_input.pose_file_pattern.empty());
+        Expects(!_input.intrinsic_file.empty());
 
-        ifstream intrinsic{string(intrinsic_file)};
+        ifstream intrinsic{string(_input.intrinsic_file)};
 
         auto maybe_intrinsic =
-            io::camera<float, camera_models::pinhole>::load_intrinsic(
-                intrinsic);
-        Expects(maybe_intrinsic.has_value());
+            io::camera<Real, Model>::load_intrinsic(intrinsic);
+        if (!maybe_intrinsic.has_value()) {
+            stringstream ss;
+            ss << "Intrinsic file " << _input.intrinsic_file
+               << " could not be loaded!";
+            throw std::invalid_argument{ss.str()};
+        }
         _intrinsic = *maybe_intrinsic;
 
-        if (mask_file) {
-            _mask = io::load_image<uchar>(string(*mask_file), IMREAD_GRAYSCALE);
+        if (_input.mask_file) {
+            _mask = io::load_image<uchar>(string(*_input.mask_file),
+                                          IMREAD_GRAYSCALE);
             if (!_mask) {
+                auto s = synced();
                 cerr << util::err{} << "Could not load mask file '"
-                     << *mask_file << "'!\n"
+                     << *_input.mask_file << "'!\n"
                      << "Continuing without masking.\n";
             }
             // The mask file is loaded. It is necessary to check, that the
@@ -171,18 +169,19 @@ class prec_recall_analysis {
             else {
                 if (_mask->w() != _intrinsic.w() ||
                     _mask->h() != _intrinsic.h()) {
+                    auto s = synced();
                     cerr << util::err{}
                          << "Dimensions of the mask mismatch the dimensions of "
                             "the intrinsic!\n"
-                         << "Disabling masking.\n"
+                         << "Continuing without masking masking.\n"
                          << "Mask {" << _mask->w() << ", " << _mask->h()
                          << "} vs Intrinsic {" << _intrinsic.w() << ", "
                          << _intrinsic.h() << "}\n";
+                    // Resetting the mask to none!
                     _mask = nullopt;
                 }
             }
-        } else
-            _mask = nullopt;
+        }
 
         if constexpr (is_same_v<decltype(_intrinsic),
                                 camera_models::pinhole<Real>>) {
@@ -204,12 +203,13 @@ class prec_recall_analysis {
         using namespace math;
         using namespace apps;
 
-        reprojection_data prev{fmt::format(_feature_file_pattern, previous_idx),
-                               fmt::format(_depth_image_pattern, previous_idx),
-                               fmt::format(_pose_file_pattern, previous_idx)};
+        reprojection_data prev{
+            fmt::format(_feature_file_pattern, previous_idx),
+            fmt::format(_input.depth_image_pattern, previous_idx),
+            fmt::format(_input.pose_file_pattern, previous_idx)};
         reprojection_data curr{fmt::format(_feature_file_pattern, idx),
-                               fmt::format(_depth_image_pattern, idx),
-                               fmt::format(_pose_file_pattern, idx)};
+                               fmt::format(_input.depth_image_pattern, idx),
+                               fmt::format(_input.pose_file_pattern, idx)};
 
         if (prev.keypoints.empty() || curr.keypoints.empty())
             return;
@@ -221,7 +221,7 @@ class prec_recall_analysis {
         if (_icp) {
             auto [icp_pose, icp_success] =
                 refine_pose(*_icp, prev.depth_image, curr.depth_image,
-                            _unit_factor, rel_pose);
+                            _input.unit_factor, rel_pose);
             if (icp_success) {
                 rel_pose = icp_pose;
             } else {
@@ -233,7 +233,7 @@ class prec_recall_analysis {
 
         // == get keypoints as world points
         pointcloud_t prev_points = keypoints_to_pointcloud(
-            prev.keypoints, prev.depth_image, _intrinsic, _unit_factor);
+            prev.keypoints, prev.depth_image, _intrinsic, _input.unit_factor);
 
         imagepoints_t prev_in_img =
             project_to_other_camera(rel_pose, prev_points, _intrinsic);
@@ -257,14 +257,16 @@ class prec_recall_analysis {
         const imagepoints_t curr_keypoints = keypoint_to_coords(curr.keypoints);
 
         const element_categories classification(
-            curr_keypoints, prev_in_img, matches, _keypoint_distance_threshold);
+            curr_keypoints, prev_in_img, matches,
+            _input.keypoint_distance_threshold);
         // True positives keypoints from this and previous frame in this
         // frames coordinate system.
         auto [t_p_t, t_p_o] = analysis::gather_correspondences(
             classification.true_positives, curr_keypoints, prev_in_img);
 
-        if (_backproject_pattern) {
-            string orig_f_name = fmt::format(*_original_files, idx);
+        if (_output_options.backproject_pattern) {
+            string orig_f_name =
+                fmt::format(*_output_options.original_files, idx);
             optional<math::image<uchar>> orig_img =
                 io::load_as_8bit_gray(orig_f_name);
 
@@ -297,8 +299,9 @@ class prec_recall_analysis {
                 );
 
 
-                const bool write_success =
-                    imwrite(fmt::format(*_backproject_pattern, idx), out_img);
+                const bool write_success = imwrite(
+                    fmt::format(*_output_options.backproject_pattern, idx),
+                    out_img);
 
                 if (!write_success) {
                     auto s = synced();
@@ -325,11 +328,7 @@ class prec_recall_analysis {
         return;
     }
 
-    size_t postprocess(const optional<string>& stat_file,
-                       const optional<string>& backprojection_selected_histo,
-                       const optional<string>& relevant_histo,
-                       const optional<string>& true_positive_histo,
-                       const optional<string>& false_positive_histo) {
+    size_t postprocess() {
         auto [distances, classification, masked_point_count] =
             _accumulated_data.extract();
 
@@ -341,8 +340,8 @@ class prec_recall_analysis {
         analysis::distance distance_stat{distances, dist_bins,
                                          "backprojection error pixels"};
 
-        if (stat_file) {
-            cv::FileStorage recognize_out{*stat_file,
+        if (_output_options.stat_file) {
+            cv::FileStorage recognize_out{*_output_options.stat_file,
                                           cv::FileStorage::WRITE |
                                               cv::FileStorage::FORMAT_YAML};
             write(recognize_out, "classification", classification);
@@ -389,8 +388,9 @@ class prec_recall_analysis {
                  << "Masked pts:   " << masked_point_count << "\n";
         }
 
-        if (backprojection_selected_histo) {
-            ofstream gnuplot_data{*backprojection_selected_histo};
+        if (_output_options.backprojection_selected_histo) {
+            ofstream gnuplot_data{
+                *_output_options.backprojection_selected_histo};
             gnuplot_data << sens_loc::io::to_gnuplot(distance_stat.histogram())
                          << endl;
         } else {
@@ -399,8 +399,8 @@ class prec_recall_analysis {
 
         classification.make_histogram();
 
-        if (relevant_histo) {
-            ofstream gnuplot_data{*relevant_histo};
+        if (_output_options.relevant_histo) {
+            ofstream gnuplot_data{*_output_options.relevant_histo};
             gnuplot_data
                 << sens_loc::io::to_gnuplot(
                        classification.relevant_element_distribution().histo)
@@ -409,8 +409,8 @@ class prec_recall_analysis {
             cout << classification.relevant_element_distribution().histo
                  << "\n";
         }
-        if (true_positive_histo) {
-            ofstream gnuplot_data{*true_positive_histo};
+        if (_output_options.true_positive_histo) {
+            ofstream gnuplot_data{*_output_options.true_positive_histo};
             gnuplot_data
                 << sens_loc::io::to_gnuplot(
                        classification.true_positive_distribution().histo)
@@ -418,8 +418,8 @@ class prec_recall_analysis {
         } else {
             cout << classification.true_positive_distribution().histo << "\n";
         }
-        if (false_positive_histo) {
-            ofstream gnuplot_data{*false_positive_histo};
+        if (_output_options.false_positive_histo) {
+            ofstream gnuplot_data{*_output_options.false_positive_histo};
             gnuplot_data
                 << sens_loc::io::to_gnuplot(
                        classification.false_positive_distribution().histo)
@@ -431,40 +431,23 @@ class prec_recall_analysis {
     }
 
   private:
-    string_view                  _feature_file_pattern;
-    string_view                  _depth_image_pattern;
-    string_view                  _pose_file_pattern;
-    float                        _unit_factor;
-    float                        _keypoint_distance_threshold;
+    std::string_view                                 _feature_file_pattern;
+    const apps::recognition_analysis_input&          _input;
+    const apps::recognition_analysis_output_options& _output_options;
+
     Model<Real>                  _intrinsic;
+    Ptr<rgbd::Odometry>          _icp;
     Ptr<BFMatcher>               _matcher;
     optional<math::image<uchar>> _mask;
-
-    recognition_data& _accumulated_data;
-
-    optional<string_view> _backproject_pattern;
-    optional<string_view> _original_files;
-
-    Ptr<rgbd::Odometry> _icp;
+    recognition_data&            _accumulated_data;
 };
 }  // namespace
 
 namespace sens_loc::apps {
 int analyze_recognition_performance(
-    util::processing_input  in,
-    string_view             depth_image_pattern,
-    string_view             pose_file_pattern,
-    string_view             intrinsic_file,
-    optional<string_view>   mask_file,
-    NormTypes               matching_norm,
-    float                   keypoint_distance_threshold,
-    optional<string_view>   backproject_pattern,
-    optional<string_view>   original_files,
-    const optional<string>& stat_file,
-    const optional<string>& backprojection_selected_histo,
-    const optional<string>& relevant_histo,
-    const optional<string>& true_positive_histo,
-    const optional<string>& false_positive_histo) {
+    util::processing_input                     in,
+    const recognition_analysis_input&          required_data,
+    const recognition_analysis_output_options& output_options) {
     Expects(in.start < in.end &&
             "Precision-Recall calculation requires at least two images");
 
@@ -473,27 +456,17 @@ int analyze_recognition_performance(
     using visitor =
         statistic_visitor<prec_recall_analysis<>, required_data::none>;
 
-    const float      unit_factor = 0.001F;
-    recognition_data data;
-    auto             analysis_v = visitor{in.input_pattern,
-                              in.input_pattern,
-                              depth_image_pattern,
-                              pose_file_pattern,
-                              unit_factor,
-                              intrinsic_file,
-                              mask_file,
-                              matching_norm,
-                              keypoint_distance_threshold,
-                              data,
-                              backproject_pattern,
-                              original_files};
+    recognition_data accumulator;
+    // The odd-looking double arguments comes from the genericity of the
+    // statistic-visitation. The first argument goes to \c statistic_visitor
+    // and the second one to \c prec_recall_analysis
+    auto analysis_v = visitor{in.input_pattern, in.input_pattern, required_data,
+                              output_options, accumulator};
 
     // Consecutive images are matched and analysed, therefore the first
     // index must be skipped.
-    auto   f = parallel_visitation(in.start + 1, in.end, analysis_v);
-    size_t n_elements =
-        f.postprocess(stat_file, backprojection_selected_histo, relevant_histo,
-                      true_positive_histo, false_positive_histo);
+    auto   f          = parallel_visitation(in.start + 1, in.end, analysis_v);
+    size_t n_elements = f.postprocess();
 
     return n_elements > 0L ? 0 : 1;
 }

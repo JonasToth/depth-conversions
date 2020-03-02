@@ -221,13 +221,24 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                                 statistics_file, matched_distance_histo,
                                 match_output, original_images);
 
-    if (*cmd_rec_perf)
-        return analyze_recognition_performance(
-            in, depth_image_path, pose_file_pattern, intrinsic_file, mask_file,
-            str_to_norm(norm_name), keypoint_distance_threshold,
-            backproject_pattern, original_images, statistics_file,
-            backprojection_selected_histo, relevant_histo, true_positive_histo,
-            false_positive_histo);
+    if (*cmd_rec_perf) {
+        recognition_analysis_input rec_in{
+            /*depth_image_pattern=*/depth_image_path,
+            /*pose_file_pattern=*/pose_file_pattern,
+            /*intrinsic_file=*/intrinsic_file,
+            /*mask_file=*/mask_file,
+            /*matching_norm=*/str_to_norm(norm_name),
+            /*keypoint_distance_threshold=*/keypoint_distance_threshold};
+        recognition_analysis_output_options out_opts{
+            /*backproject_pattern=*/backproject_pattern,
+            /*original_files=*/original_images,
+            /*stat_file=*/statistics_file,
+            /*backprojection_selected_histo=*/backprojection_selected_histo,
+            /*relevant_histo=*/relevant_histo,
+            /*true_positive_histo=*/true_positive_histo,
+            /*false_positive_histo=*/false_positive_histo};
+        return analyze_recognition_performance(in, rec_in, out_opts);
+    }
 
     UNREACHABLE("Expected to end program with "  // LCOV_EXCL_LINE
                 "subcommand processing");        // LCOV_EXCL_LINE
