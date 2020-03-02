@@ -117,3 +117,7 @@ endif (${DEPENDENCIES_BUILT})
 
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/scripts/analysis/transformation_step.py"
                "${CMAKE_CURRENT_BINARY_DIR}/src/apps/transformation_step.py" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/scripts/plot/plot_histogram.sh"
+               "${CMAKE_CURRENT_BINARY_DIR}/src/apps/plot_histogram.sh" COPYONLY)
+configure_file("${CMAKE_CURRENT_SOURCE_DIR}/scripts/plot/plot_kp_distribution.sh"
+               "${CMAKE_CURRENT_BINARY_DIR}/src/apps/plot_kp_distribution.sh" COPYONLY)
