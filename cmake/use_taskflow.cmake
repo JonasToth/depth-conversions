@@ -4,8 +4,7 @@ set(TF_BUILD_TESTS OFF CACHE BOOL "Taskflow tests overwritten")
 add_subdirectory("${CMAKE_CURRENT_SOURCE_DIR}/third_party/cpp-taskflow")
 mark_as_advanced(FORCE TF_BUILD_BENCHMARKS 
                        TF_BUILD_EXAMPLES
-                       TF_BUILD_TESTS
-                       TF_ENABLE_CUDA)
+                       TF_BUILD_TESTS)
 add_library(taskflow INTERFACE)
 add_library(taskflow::taskflow ALIAS taskflow)
 target_link_libraries(taskflow INTERFACE Cpp-Taskflow)

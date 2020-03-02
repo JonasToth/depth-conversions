@@ -32,6 +32,5 @@ var searchData=
   ['unordered_5fmultimap',['unordered_multimap',['http://en.cppreference.com/w/cpp/container/unordered_multimap.html',1,'std']]],
   ['unordered_5fmultiset',['unordered_multiset',['http://en.cppreference.com/w/cpp/container/unordered_multiset.html',1,'std']]],
   ['unordered_5fset',['unordered_set',['http://en.cppreference.com/w/cpp/container/unordered_set.html',1,'std']]],
-  ['unordered_5fset_3c_20const_20tf_3a_3ataskflow_20_2a_3e',['unordered_set&lt; const tf::Taskflow *&gt;',['http://en.cppreference.com/w/cpp/container/unordered_set.html',1,'std']]],
   ['uses_5fallocator',['uses_allocator',['http://en.cppreference.com/w/cpp/memory/uses_allocator.html',1,'std']]]
 ];

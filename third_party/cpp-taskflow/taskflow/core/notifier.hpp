@@ -10,6 +10,7 @@
 #include <atomic>
 #include <memory>
 #include <deque>
+#include <optional>
 #include <mutex>
 #include <condition_variable>
 #include <thread>

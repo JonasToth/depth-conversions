@@ -15,7 +15,6 @@
 #include <util/version_printer.h>
 #include <vector>
 
-
 /// \defgroup filter-driver depth-image filtering
 ///
 /// All code that is written to use the library and implement a program

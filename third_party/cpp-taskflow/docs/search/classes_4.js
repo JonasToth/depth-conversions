@@ -4,6 +4,7 @@ var searchData=
   ['enable_5fshared_5ffrom_5fthis',['enable_shared_from_this',['http://en.cppreference.com/w/cpp/memory/enable_shared_from_this.html',1,'std']]],
   ['equal_5fto',['equal_to',['http://en.cppreference.com/w/cpp/utility/functional/equal_to.html',1,'std']]],
   ['errc',['errc',['http://en.cppreference.com/w/cpp/error/errc.html',1,'std']]],
+  ['error',['Error',['../structtf_1_1Error.html',1,'tf']]],
   ['error_5fcategory',['error_category',['http://en.cppreference.com/w/cpp/error/error_category.html',1,'std']]],
   ['error_5fcode',['error_code',['http://en.cppreference.com/w/cpp/error/error_code.html',1,'std']]],
   ['error_5fcondition',['error_condition',['http://en.cppreference.com/w/cpp/error/error_condition.html',1,'std']]],

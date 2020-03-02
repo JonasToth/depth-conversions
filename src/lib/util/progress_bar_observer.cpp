@@ -11,18 +11,18 @@ void progress_bar_observer::on_entry(unsigned /*worker_id*/,
 
 void progress_bar_observer::on_exit(unsigned /*worker_id*/,
                                     tf::TaskView /*task_view*/) {
-    print_bar(/*increment=*/true);
+    _done++;
+    print_bar();
 }
 
-void progress_bar_observer::print_bar(bool increment) noexcept {
-    auto s = synced();
-    if (increment)
-        _done++;
+void progress_bar_observer::print_bar() noexcept {
+    auto  s = synced();
+    float progress =
+        gsl::narrow_cast<float>(_done) / gsl::narrow_cast<float>(_partitions);
     std::cout << "\r" << rang::fg::green << rang::style::bold << std::setw(5)
-              << _done << " ";
+              << gsl::narrow_cast<int>(std::round(_done * _task_increment))
+              << " ";
 
-    auto progress =
-        gsl::narrow_cast<float>(_done) / gsl::narrow_cast<float>(_total_tasks);
     // Progress bar is 30 characters wide.
     int bar_elements =
         gsl::narrow_cast<int>(progress * gsl::narrow_cast<float>(max_bars));
@@ -40,7 +40,7 @@ void progress_bar_observer::print_bar(bool increment) noexcept {
     }
     std::cout << rang::style::reset << std::flush;
 
-    if (_done == _total_tasks)
+    if (_done == _partitions)
         std::cout << std::endl;
 }
 }  // namespace sens_loc::util

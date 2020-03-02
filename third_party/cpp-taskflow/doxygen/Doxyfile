@@ -38,7 +38,7 @@ PROJECT_NAME           = "Cpp-Taskflow"
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         = 2.3.0
+PROJECT_NUMBER         = 2.2.0
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -808,20 +808,17 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../taskflow/core/error.hpp \
+INPUT                  = ../taskflow/taskflow.hpp \
+                         ../taskflow/error/error.hpp \
                          ../taskflow/core/flow_builder.hpp \
                          ../taskflow/core/executor.hpp \
-                         ../taskflow/core/tsq.hpp \
                          ../taskflow/core/task.hpp \
                          ../taskflow/core/taskflow.hpp \
+                         ../taskflow/core/spmc_queue.hpp \
                          ../taskflow/core/observer.hpp \
-                         ../taskflow/cuda/cuda_error.hpp \
-                         ../taskflow/cuda/cuda_task.hpp \
-                         ../taskflow/cuda/cuda_flow_builder.hpp \
                          QuickStart.dox \
                          releases/releases.dox \
                          releases/master-branch.dox \
-                         releases/release-2.3.0.dox \
                          releases/release-2.2.0.dox \
                          releases/release-2.1.0.dox \
                          releases/release-2.0.0.dox \
@@ -832,7 +829,6 @@ INPUT                  = ../taskflow/core/error.hpp \
                          cookbook/Chapter3.dox \
                          cookbook/Chapter4.dox \
                          cookbook/Chapter5.dox \
-                         cookbook/Chapter6.dox \
                          FAQ.dox \
                          reference/reference.dox \
                          header.html

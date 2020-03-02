@@ -17,10 +17,10 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
   public:
     constexpr static int max_bars = 50;
 
-    progress_bar_observer(std::int64_t chunk_size, std::int64_t total_tasks)
-        : _task_increment{gsl::narrow_cast<float>(chunk_size) /
-                          gsl::narrow_cast<float>(total_tasks)}
-        , _total_tasks{total_tasks}
+    progress_bar_observer(std::int64_t partitions, std::int64_t total_tasks)
+        : _partitions{partitions}
+        , _task_increment{gsl::narrow_cast<float>(total_tasks) /
+                          gsl::narrow_cast<float>(partitions)}
         , _done{0} {
         Expects(total_tasks >= 1);
     }
@@ -34,15 +34,13 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
     void set_up(unsigned /*num_workers*/) override {}
     void on_entry(unsigned /*worker_id*/, tf::TaskView /*task_view*/) override;
     void on_exit(unsigned /*worker_id*/, tf::TaskView /*task_view*/) override;
-
   private:
-    /// Print the progress bar and increment the task-counter on request.
-    void print_bar(bool increment = false) noexcept;
+    void print_bar() noexcept;
 
-    float             _task_increment;
-    std::int64_t      _total_tasks;
-    std::int64_t      _done;
-    std::atomic<bool> _inital_output = false;
+    std::int64_t              _partitions;
+    float                     _task_increment;
+    std::atomic<std::int64_t> _done;
+    std::atomic<bool>         _inital_output = false;
 };
 }  // namespace sens_loc::util
 

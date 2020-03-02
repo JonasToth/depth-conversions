@@ -16,6 +16,7 @@
 #include <atomic>
 #include <memory>
 #include <deque>
+#include <optional>
 #include <thread>
 #include <algorithm>
 #include <set>
