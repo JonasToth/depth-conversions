@@ -1,6 +1,6 @@
+#define _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS
 #include "min_dist.h"
 
-#define _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS
 #include <algorithm>
 #include <boost/histogram/ostream.hpp>
 #include <cstdint>
@@ -47,6 +47,27 @@ struct element_access<cv::NormTypes::NORM_HAMMING2> {
     static constexpr int dtype = CV_32S;
 };
 
+struct distance_stat_data {
+    distance_stat_data() = default;
+
+    void insert_distances(gsl::span<float> distances) noexcept {
+        lock_guard l{_process_mutex};
+        _global_min_distances.insert(end(_global_min_distances),
+                                     begin(distances), end(distances));
+    }
+
+    vector<float> extract() noexcept {
+        lock_guard    l{_process_mutex};
+        vector<float> r       = move(_global_min_distances);
+        _global_min_distances = vector<float>();
+        return r;
+    };
+
+  private:
+    mutex                               _process_mutex;
+    vector<float> _global_min_distances GUARDED_BY(_process_mutex);
+};
+
 /// Calculate the minimal distance between descriptors within one image
 /// and save this minimal distance.
 /// This gives an overall idea of the spread of descriptors within an image.
@@ -56,10 +77,8 @@ class min_descriptor_distance {
     static const int data_type = element_access<NT>::dtype;
     using access_type          = typename element_access<NT>::type;
 
-    min_descriptor_distance(gsl::not_null<mutex*>         m,
-                            gsl::not_null<vector<float>*> global_data)
-        : process_mutex{m}
-        , global_min_distances{global_data} {}
+    min_descriptor_distance(distance_stat_data& data)
+        : accumulated_data{data} {}
 
     void operator()(int /*idx*/,
                     optional<vector<cv::KeyPoint>> keypoints,  // NOLINT
@@ -91,31 +110,22 @@ class min_descriptor_distance {
             local_min_distances.push_back(d);
         }
 
-        // Insert the findings into the global list of minimal distances.
-        {
-            lock_guard guard{*process_mutex};
-            global_min_distances->insert(end(*global_min_distances),
-                                         begin(local_min_distances),
-                                         end(local_min_distances));
-        }
+        accumulated_data.insert_distances(local_min_distances);
     }
 
     /// Postprocess the findings of the minimal distances for each image to
     /// a coherent statistical finding. This will overwrite previous analysis
     /// and should only be called once.
-    void postprocess(const optional<string>& stat_file,
-                     const optional<string>& min_dist_histo) noexcept {
+    size_t postprocess(const optional<string>& stat_file,
+                       const optional<string>& min_dist_histo) noexcept {
         // Lock the mutex, just in case. This method is not expected to be
         // run in parallel, but it could.
-        lock_guard guard{*process_mutex};
-        if (global_min_distances->empty())
-            return;
+        vector<float> global_distances = accumulated_data.extract();
 
-        sort(begin(*global_min_distances), end(*global_min_distances));
+        sort(begin(global_distances), end(global_distances));
         const auto                   bins = 25UL;
         sens_loc::analysis::distance distance_stat{
-            *global_min_distances, bins,
-            "Minimal Intra Image Descriptor Distances"};
+            global_distances, bins, "Minimal Intra Image Descriptor Distances"};
 
         if (stat_file) {
             cv::FileStorage stat_out{*stat_file,
@@ -143,12 +153,12 @@ class min_descriptor_distance {
         } else {
             cout << distance_stat.histogram() << "\n";
         }
+        return global_distances.size();
     }
 
   private:
     // Data required for the parallel processing.
-    gsl::not_null<mutex*>         process_mutex;
-    gsl::not_null<vector<float>*> global_min_distances;
+    distance_stat_data& accumulated_data;
 };
 
 template <cv::NormTypes NT>
@@ -156,22 +166,17 @@ int analyze_min_distance_impl(sens_loc::util::processing_input in,
                               const optional<string>&          stat_file,
                               const optional<string>&          min_dist_histo) {
     using namespace sens_loc::apps;
-    /// Guards min_distances in parallel access.
-    mutex process_mutex;
-    /// contains all minimal distances of each descriptor within an image.
-    vector<float> global_min_distances;
 
     using visitor = statistic_visitor<min_descriptor_distance<NT>,
                                       required_data::descriptors>;
 
-    auto f = parallel_visitation(in.start, in.end,
-                                 visitor{in.input_pattern,
-                                         gsl::not_null{&process_mutex},
-                                         gsl::not_null{&global_min_distances}});
+    distance_stat_data data;
+    auto               f =
+        parallel_visitation(in.start, in.end, visitor{in.input_pattern, data});
 
-    f.postprocess(stat_file, min_dist_histo);
+    size_t n_elements = f.postprocess(stat_file, min_dist_histo);
 
-    return !global_min_distances.empty() ? 0 : 1;
+    return n_elements > 0UL ? 0 : 1;
 }
 }  // namespace
 

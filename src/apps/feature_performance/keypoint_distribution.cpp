@@ -39,7 +39,12 @@ struct keypoint_stat_data {
     pair<vector<cv::KeyPoint>, vector<float>> extract() noexcept {
         lock_guard l1{_keypoint_mutex};
         lock_guard l2{_distance_mutex};
-        return {move(_global_keypoints), move(_global_minimal_distances)};
+
+        pair p{move(_global_keypoints), move(_global_minimal_distances)};
+        _global_keypoints         = vector<cv::KeyPoint>();
+        _global_minimal_distances = vector<float>();
+
+        return p;
     }
 
   private:
