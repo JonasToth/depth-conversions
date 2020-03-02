@@ -1,3 +1,4 @@
+#define _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS
 #include "keypoint_distribution.h"
 
 #include <boost/histogram/ostream.hpp>
@@ -11,6 +12,7 @@
 #include <sens_loc/analysis/distance.h>
 #include <sens_loc/analysis/keypoints.h>
 #include <sens_loc/io/histogram.h>
+#include <sens_loc/util/thread_analysis.h>
 #include <util/batch_visitor.h>
 #include <util/common_structures.h>
 #include <util/statistic_visitor.h>
@@ -20,17 +22,39 @@ using namespace gsl;
 
 namespace {
 
+struct keypoint_stat_data {
+    keypoint_stat_data() = default;
+
+    void insert_points(gsl::span<cv::KeyPoint> points) noexcept {
+        lock_guard l{_keypoint_mutex};
+        _global_keypoints.insert(end(_global_keypoints), begin(points),
+                                 end(points));
+    }
+    void insert_distances(gsl::span<float> distances) noexcept {
+        lock_guard l{_distance_mutex};
+        _global_minimal_distances.insert(_global_minimal_distances.end(),
+                                         begin(distances), end(distances));
+    }
+
+    pair<vector<cv::KeyPoint>, vector<float>> extract() noexcept {
+        lock_guard l1{_keypoint_mutex};
+        lock_guard l2{_distance_mutex};
+        return {move(_global_keypoints), move(_global_minimal_distances)};
+    }
+
+  private:
+    mutex                                  _keypoint_mutex;
+    vector<cv::KeyPoint> _global_keypoints GUARDED_BY(_keypoint_mutex);
+
+    mutex                                   _distance_mutex;
+    vector<float> _global_minimal_distances GUARDED_BY(_distance_mutex);
+};
+
 /// Calculate the 2-dimensional distribution of the keypoints for a dataset.
 class keypoint_distribution {
   public:
-    keypoint_distribution(not_null<mutex*>                points_mutex,
-                          not_null<vector<cv::KeyPoint>*> points,
-                          not_null<mutex*>                distance_mutex,
-                          not_null<vector<float>*>        distances) noexcept
-        : keypoint_mutex{points_mutex}
-        , global_keypoints{points}
-        , distance_mutex{distance_mutex}
-        , global_distances{distances} {}
+    keypoint_distribution(keypoint_stat_data& d) noexcept
+        : accumulated_data{d} {}
 
     void operator()(int /*idx*/,
                     optional<vector<cv::KeyPoint>> keypoints,
@@ -38,12 +62,7 @@ class keypoint_distribution {
         if (keypoints->empty())
             return;
 
-        // Simply insert the keypoints in the global keypoint vector.
-        {
-            lock_guard guard{*keypoint_mutex};
-            global_keypoints->insert(end(*global_keypoints), begin(*keypoints),
-                                     end(*keypoints));
-        }
+        accumulated_data.insert_points(*keypoints);
 
         // Calculate the minimal distance of each keypoint to all others
         // and insert that first into a local vector with that information
@@ -88,26 +107,21 @@ class keypoint_distribution {
                 // Ensure that local_distances is only allocated once.
                 local_distances.clear();
             }
-
-            // Insertion
-            {
-                lock_guard guard{*distance_mutex};
-                global_distances->insert(global_distances->end(),
-                                         begin(local_minima),
-                                         end(local_minima));
-            }
+            accumulated_data.insert_distances(local_minima);
         }
     }
 
-    void postprocess(unsigned int            image_width,
-                     unsigned int            image_height,
-                     const optional<string>& stat_file,
-                     const optional<string>& response_histo,
-                     const optional<string>& size_histo,
-                     const optional<string>& kp_distance_histo,
-                     const optional<string>& kp_distribution_histo) {
-        if (global_keypoints->empty() || global_distances->empty())
-            return;
+    size_t postprocess(unsigned int            image_width,
+                       unsigned int            image_height,
+                       const optional<string>& stat_file,
+                       const optional<string>& response_histo,
+                       const optional<string>& size_histo,
+                       const optional<string>& kp_distance_histo,
+                       const optional<string>& kp_distribution_histo) {
+        auto [keypoints, distances] = accumulated_data.extract();
+
+        if (keypoints.empty() || distances.empty())
+            return 0UL;
 
         sens_loc::analysis::keypoints kp{image_width, image_height};
 
@@ -120,11 +134,11 @@ class keypoint_distribution {
 
         const auto size_bins = 50U;
         kp.configure_size(size_bins, "keypoint size");
-        kp.analyze(*global_keypoints);
+        kp.analyze(keypoints);
 
-        sort(begin(*global_distances), end(*global_distances));
+        sort(begin(distances), end(distances));
         const auto                   dist_bins = 50UL;
-        sens_loc::analysis::distance distance_stat{*global_distances, dist_bins,
+        sens_loc::analysis::distance distance_stat{distances, dist_bins,
                                                    "minimal keypoint distance"};
 
         if (stat_file) {
@@ -189,15 +203,11 @@ class keypoint_distribution {
             ofstream gnuplot_data{*kp_distribution_histo};
             gnuplot_data << sens_loc::io::to_gnuplot(kp.distribution()) << endl;
         }
+        return keypoints.size();
     }
 
   private:
-    // Data required for the parallel processing.
-    not_null<mutex*>                keypoint_mutex;
-    not_null<vector<cv::KeyPoint>*> global_keypoints;
-
-    not_null<mutex*>         distance_mutex;
-    not_null<vector<float>*> global_distances;
+    keypoint_stat_data& accumulated_data;
 };
 
 }  // namespace
@@ -215,21 +225,15 @@ int analyze_keypoint_distribution(
     using visitor =
         statistic_visitor<keypoint_distribution, required_data::keypoints>;
 
-    mutex                keypoint_mutex;
-    vector<cv::KeyPoint> global_keypoints;
+    keypoint_stat_data d;
 
-    mutex         distance_mutex;
-    vector<float> global_minimal_distances;
+    auto f =
+        parallel_visitation(in.start, in.end, visitor{in.input_pattern, d});
 
-    auto f = parallel_visitation(
-        in.start, in.end,
-        visitor{in.input_pattern, not_null{&keypoint_mutex},
-                not_null{&global_keypoints}, not_null{&distance_mutex},
-                not_null{&global_minimal_distances}});
+    size_t n_elements =
+        f.postprocess(image_width, image_height, stat_file, response_histo,
+                      size_histo, kp_distance_histo, kp_distribution_histo);
 
-    f.postprocess(image_width, image_height, stat_file, response_histo,
-                  size_histo, kp_distance_histo, kp_distribution_histo);
-
-    return !global_minimal_distances.empty() ? 0 : 1;
+    return n_elements > 0UL ? 0 : 1;
 }
 }  // namespace sens_loc::apps

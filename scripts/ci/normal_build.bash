@@ -55,6 +55,9 @@ fi
 if [[ -z "$WITH_TSAN" ]]; then
     WITH_TSAN=OFF
 fi
+if [[ -z "$WITH_THREAD_SAFETY_ANALYSIS" ]]; then
+    WITH_THREAD_SAFETY_ANALYSIS=OFF
+fi
 if [[ -z "$WITH_IPO" ]]; then
     WITH_IPO=OFF
 fi
@@ -116,7 +119,8 @@ cmake .. \
  -DWITH_UBSAN=${WITH_UBSAN} \
  -DWITH_MSAN=${WITH_MSAN} \
  -DWITH_ASAN=${WITH_ASAN} \
- -DWITH_TSAN=${WITH_TSAN} || cat CMakeFiles/*.log
+ -DWITH_TSAN=${WITH_TSAN} \
+ -DWITH_THREAD_SAFETY_ANALYSIS=${WITH_THREAD_SAFETY_ANALYSIS} || cat CMakeFiles/*.log
 
 print_info "Building project"
 ninja dependencies
