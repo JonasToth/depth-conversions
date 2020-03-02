@@ -49,6 +49,7 @@ target_sources(sens_loc PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}/lib/plot/backprojection.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/util/console.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/lib/util/correctness_util.cpp"
+    "${CMAKE_CURRENT_LIST_DIR}/lib/util/progress_bar_observer.cpp"
     )
 common_target_properties(sens_loc)
 

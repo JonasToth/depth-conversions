@@ -32,44 +32,10 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
     ~progress_bar_observer() override                         = default;
 
     void set_up(unsigned /*num_workers*/) override {}
-    void on_entry(unsigned /*worker_id*/, tf::TaskView /*task_view*/) override {
-        if (!_inital_output) {
-            _inital_output = true;
-            print_bar();
-        }
-    }
-    void on_exit(unsigned /*worker_id*/, tf::TaskView /*task_view*/) override {
-        _done++;
-        print_bar();
-    }
-
+    void on_entry(unsigned /*worker_id*/, tf::TaskView /*task_view*/) override;
+    void on_exit(unsigned /*worker_id*/, tf::TaskView /*task_view*/) override;
   private:
-    void print_bar() {
-        auto  s        = synced();
-        float progress = gsl::narrow_cast<float>(_done) /
-                         gsl::narrow_cast<float>(_partitions);
-        std::cout << "\r" << rang::fg::green << rang::style::bold
-                  << std::setw(5)
-                  << gsl::narrow_cast<int>(std::round(_done * _task_increment))
-                  << " ";
-
-        // Progress bar is 30 characters wide.
-        int bar_elements =
-            gsl::narrow_cast<int>(progress * gsl::narrow_cast<float>(max_bars));
-        Ensures(bar_elements <= max_bars);
-        Ensures(bar_elements >= 0);
-        int empty_elements = max_bars - bar_elements;
-
-        std::cout << rang::style::reset << rang::bg::green << rang::fg::green;
-        for (int i = 0; i < bar_elements; ++i) {
-            std::cout << "#";
-        }
-        std::cout << rang::bg::blue << rang::fg::blue;
-        for (int i = 0; i < empty_elements; ++i) {
-            std::cout << ".";
-        }
-        std::cout << rang::style::reset << std::flush;
-    }
+    void print_bar() noexcept;
 
     std::int64_t              _partitions;
     float                     _task_increment;
