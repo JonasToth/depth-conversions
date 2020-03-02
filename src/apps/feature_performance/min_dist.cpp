@@ -1,7 +1,5 @@
 #include "min_dist.h"
 
-#include "util/common_structures.h"
-
 #define _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS
 #include <algorithm>
 #include <boost/histogram/ostream.hpp>
@@ -26,6 +24,7 @@
 #include <stdexcept>
 #include <string_view>
 #include <util/batch_visitor.h>
+#include <util/common_structures.h>
 #include <util/statistic_visitor.h>
 
 using namespace std;

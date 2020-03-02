@@ -69,15 +69,17 @@ class matching {
                 (*total_descriptors) += descriptors->rows;
             }
 
+            // Plot the matching between the descriptors of the previous and the
+            // current frame.
             if (output_pattern) {
+                const vector<KeyPoint> previous_keypoints =
+                    sens_loc::io::load_keypoints(previous_img);
+
                 const FileStorage this_feature =
                     sens_loc::io::open_feature_file(
                         fmt::format(input_pattern, idx));
-                const vector<KeyPoint> previous_keypoints =
-                    sens_loc::io::load_keypoints(this_feature);
-
                 const vector<KeyPoint> this_keypoints =
-                    sens_loc::io::load_keypoints(previous_img);
+                    sens_loc::io::load_keypoints(this_feature);
 
                 const string img_p1 = fmt::format(*original_images, idx - 1);
                 const string img_p2 = fmt::format(*original_images, idx);
@@ -88,16 +90,17 @@ class matching {
                     return;
 
                 Mat out_img;
-                drawMatches(img1->data(), previous_keypoints, img2->data(),
-                            this_keypoints, matches, out_img, Scalar(0, 0, 255),
-                            Scalar(255, 0, 0));
+                drawMatches(img2->data(), this_keypoints, img1->data(),
+                            previous_keypoints, matches, out_img,
+                            Scalar(0, 0, 255), Scalar(255, 0, 0));
 
                 const string output = fmt::format(*output_pattern, idx);
                 imwrite(output, out_img);
             }
-        } catch (...) {
+        } catch (const std::exception& e) {
             std::cerr << sens_loc::util::err{}
-                      << "Could not initialize data for idx: " << idx << "\n";
+                      << "Could not initialize data for idx: " << idx << "\n"
+                      << e.what() << "\n";
             return;
         }
     }
@@ -127,8 +130,8 @@ class matching {
                  << "total count:    " << *total_descriptors << "\n"
                  << "matched count:  " << distances->size() << "\n"
                  << "matched/total:  "
-                 << static_cast<double>(distances->size()) /
-                        static_cast<double>(*total_descriptors)
+                 << narrow_cast<double>(distances->size()) /
+                        narrow_cast<double>(*total_descriptors)
                  << "\n"
                  << "min:            " << distance_stat.min() << "\n"
                  << "max:            " << distance_stat.max() << "\n"
