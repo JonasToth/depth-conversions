@@ -4,6 +4,7 @@
 
 DOCTEST_MAKE_STD_HEADERS_CLEAN_FROM_WARNINGS_ON_WALL_BEGIN
 #include <iostream>
+#include <string>
 #include <vector>
 using namespace std;
 DOCTEST_MAKE_STD_HEADERS_CLEAN_FROM_WARNINGS_ON_WALL_END
@@ -135,5 +136,25 @@ TEST_CASE("Nested - related to https://github.com/onqtam/doctest/issues/282")
         
         // checks (identical in both variants)
         checks(data);
+    }
+}
+
+DOCTEST_MSVC_SUPPRESS_WARNING(5045) // Spectre mitigation stuff
+DOCTEST_GCC_SUPPRESS_WARNING("-Wuseless-cast") // for the std::string() cast
+#undef SUBCASE
+#define SUBCASE(...) DOCTEST_SUBCASE(std::string(__VA_ARGS__).c_str())
+
+TEST_CASE("subcases with changing names") {
+    for(int i = 0; i < 2; ++i) {
+        SUBCASE("outer " + std::to_string(i)) {
+            for(int k = 0; k < 2; ++k) {
+                SUBCASE("inner " + std::to_string(k)) {
+                    MESSAGE("msg!");
+                }
+            }
+        }
+    }
+    SUBCASE("separate") {
+        MESSAGE("separate msg!");
     }
 }
