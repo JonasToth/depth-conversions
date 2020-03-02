@@ -2,6 +2,7 @@ add_library(batch_processing
     "${CMAKE_CURRENT_LIST_DIR}/util/batch_converter.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/batch_converter.cpp"
     "${CMAKE_CURRENT_LIST_DIR}/util/batch_visitor.h"
+    "${CMAKE_CURRENT_LIST_DIR}/util/common_structures.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/colored_parse.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/parallel_processing.h"
     "${CMAKE_CURRENT_LIST_DIR}/util/statistic_visitor.h"

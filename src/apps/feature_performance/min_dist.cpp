@@ -1,5 +1,7 @@
 #include "min_dist.h"
 
+#include "util/common_structures.h"
+
 #define _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS
 #include <algorithm>
 #include <boost/histogram/ostream.hpp>
@@ -151,11 +153,9 @@ class min_descriptor_distance {
 };
 
 template <cv::NormTypes NT>
-int analyze_min_distance_impl(string_view             input_pattern,
-                              int                     start_idx,
-                              int                     end_idx,
-                              const optional<string>& stat_file,
-                              const optional<string>& min_dist_histo) {
+int analyze_min_distance_impl(sens_loc::util::processing_input in,
+                              const optional<string>&          stat_file,
+                              const optional<string>&          min_dist_histo) {
     using namespace sens_loc::apps;
     /// Guards min_distances in parallel access.
     mutex process_mutex;
@@ -165,8 +165,8 @@ int analyze_min_distance_impl(string_view             input_pattern,
     using visitor = statistic_visitor<min_descriptor_distance<NT>,
                                       required_data::descriptors>;
 
-    auto f = parallel_visitation(start_idx, end_idx,
-                                 visitor{input_pattern,
+    auto f = parallel_visitation(in.start, in.end,
+                                 visitor{in.input_pattern,
                                          gsl::not_null{&process_mutex},
                                          gsl::not_null{&global_min_distances}});
 
@@ -177,9 +177,7 @@ int analyze_min_distance_impl(string_view             input_pattern,
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_min_distance(string_view             input_pattern,
-                         int                     start_idx,
-                         int                     end_idx,
+int analyze_min_distance(util::processing_input  in,
                          cv::NormTypes           norm_to_use,
                          const optional<string>& stat_file,
                          const optional<string>& min_dist_histo) {
@@ -187,7 +185,7 @@ int analyze_min_distance(string_view             input_pattern,
 #define SWITCH_CV_NORM(NORM_NAME)                                              \
     if (norm_to_use == cv::NormTypes::NORM_##NORM_NAME)                        \
         return analyze_min_distance_impl<cv::NormTypes::NORM_##NORM_NAME>(     \
-            input_pattern, start_idx, end_idx, stat_file, min_dist_histo);
+            in, stat_file, min_dist_histo);
     SWITCH_CV_NORM(L1)
     SWITCH_CV_NORM(L2)
     SWITCH_CV_NORM(L2SQR)

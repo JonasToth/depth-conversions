@@ -3,13 +3,12 @@
 
 #include <optional>
 #include <string_view>
+#include <util/common_structures.h>
 
 namespace sens_loc::apps {
 
 int analyze_keypoint_distribution(
-    std::string_view                  input_pattern,
-    int                               start_idx,
-    int                               end_idx,
+    util::processing_input            in,
     unsigned int                      image_width,
     unsigned int                      image_height,
     const std::optional<std::string>& stat_file,

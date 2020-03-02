@@ -12,6 +12,7 @@
 #include <sens_loc/analysis/keypoints.h>
 #include <sens_loc/io/histogram.h>
 #include <util/batch_visitor.h>
+#include <util/common_structures.h>
 #include <util/statistic_visitor.h>
 
 using namespace std;
@@ -203,9 +204,7 @@ class keypoint_distribution {
 
 namespace sens_loc::apps {
 int analyze_keypoint_distribution(
-    string_view             input_pattern,
-    int                     start_idx,
-    int                     end_idx,
+    util::processing_input  in,
     unsigned int            image_width,
     unsigned int            image_height,
     const optional<string>& stat_file,
@@ -223,8 +222,8 @@ int analyze_keypoint_distribution(
     vector<float> global_minimal_distances;
 
     auto f = parallel_visitation(
-        start_idx, end_idx,
-        visitor{input_pattern, not_null{&keypoint_mutex},
+        in.start, in.end,
+        visitor{in.input_pattern, not_null{&keypoint_mutex},
                 not_null{&global_keypoints}, not_null{&distance_mutex},
                 not_null{&global_minimal_distances}});
 

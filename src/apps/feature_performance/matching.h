@@ -4,11 +4,10 @@
 #include <opencv2/core/base.hpp>
 #include <optional>
 #include <string_view>
+#include <util/common_structures.h>
 
 namespace sens_loc::apps {
-int analyze_matching(std::string_view                  input_pattern,
-                     int                               start_idx,
-                     int                               end_idx,
+int analyze_matching(util::processing_input            in,
                      cv::NormTypes                     norm_to_use,
                      bool                              crosscheck,
                      const std::optional<std::string>& stat_file,

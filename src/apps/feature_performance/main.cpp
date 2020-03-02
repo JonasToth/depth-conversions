@@ -12,6 +12,7 @@
 #include <string>
 #include <util/batch_visitor.h>
 #include <util/colored_parse.h>
+#include <util/common_structures.h>
 #include <util/tool_macro.h>
 #include <util/version_printer.h>
 
@@ -203,28 +204,26 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
 
     COLORED_APP_PARSE(app, argc, argv);
 
+    util::processing_input in{feature_file_input_pattern, start_idx, end_idx};
+
     if (*cmd_min_dist) {
-        return analyze_min_distance(feature_file_input_pattern, start_idx,
-                                    end_idx, str_to_norm(norm_name),
-                                    statistics_file, min_distance_histo);
+        return analyze_min_distance(in, str_to_norm(norm_name), statistics_file,
+                                    min_distance_histo);
     }
 
     if (*cmd_keypoint_dist)
         return analyze_keypoint_distribution(
-            feature_file_input_pattern, start_idx, end_idx, image_width,
-            image_height, statistics_file, response_histo, size_histo,
-            kp_distance_histo, kp_distribution_histo);
+            in, image_width, image_height, statistics_file, response_histo,
+            size_histo, kp_distance_histo, kp_distribution_histo);
 
     if (*cmd_matcher)
-        return analyze_matching(feature_file_input_pattern, start_idx, end_idx,
-                                str_to_norm(norm_name), !no_crosscheck,
+        return analyze_matching(in, str_to_norm(norm_name), !no_crosscheck,
                                 statistics_file, matched_distance_histo,
                                 match_output, original_images);
 
     if (*cmd_rec_perf)
         return analyze_recognition_performance(
-            feature_file_input_pattern, start_idx, end_idx, depth_image_path,
-            pose_file_pattern, intrinsic_file, mask_file,
+            in, depth_image_path, pose_file_pattern, intrinsic_file, mask_file,
             str_to_norm(norm_name), keypoint_distance_threshold,
             backproject_pattern, original_images, statistics_file,
             backprojection_selected_histo, relevant_histo, true_positive_histo,

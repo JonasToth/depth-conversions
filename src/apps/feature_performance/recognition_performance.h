@@ -4,13 +4,12 @@
 #include <opencv2/core/base.hpp>
 #include <optional>
 #include <string_view>
+#include <util/common_structures.h>
 
 namespace sens_loc::apps {
 
 int analyze_recognition_performance(
-    std::string_view                  feature_file_pattern,
-    int                               start_idx,
-    int                               end_idx,
+    util::processing_input            in,
     std::string_view                  depth_image_pattern,
     std::string_view                  pose_file_pattern,
     std::string_view                  intrinsic_file,
@@ -23,8 +22,7 @@ int analyze_recognition_performance(
     const std::optional<std::string>& backprojection_selected_histo,
     const std::optional<std::string>& relevant_histo,
     const std::optional<std::string>& true_positive_histo,
-    const std::optional<std::string>& false_positive_histo
-    );
+    const std::optional<std::string>& false_positive_histo);
 
 }  // namespace sens_loc::apps
 

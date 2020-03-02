@@ -424,9 +424,7 @@ class prec_recall_analysis {
 
 namespace sens_loc::apps {
 int analyze_recognition_performance(
-    string_view             feature_file_pattern,
-    int                     start_idx,
-    int                     end_idx,
+    util::processing_input  in,
     string_view             depth_image_pattern,
     string_view             pose_file_pattern,
     string_view             intrinsic_file,
@@ -440,7 +438,7 @@ int analyze_recognition_performance(
     const optional<string>& relevant_histo,
     const optional<string>& true_positive_histo,
     const optional<string>& false_positive_histo) {
-    Expects(start_idx < end_idx &&
+    Expects(in.start < in.end &&
             "Precision-Recall calculation requires at least two images");
 
     // The code will load all data directly and does not rely on loading through
@@ -454,8 +452,8 @@ int analyze_recognition_performance(
     size_t                          totally_masked = 0UL;
 
     const float unit_factor = 0.001F;
-    auto        analysis_v  = visitor{feature_file_pattern,
-                              feature_file_pattern,
+    auto        analysis_v  = visitor{in.input_pattern,
+                              in.input_pattern,
                               depth_image_pattern,
                               pose_file_pattern,
                               unit_factor,
@@ -472,7 +470,7 @@ int analyze_recognition_performance(
 
     // Consecutive images are matched and analysed, therefore the first
     // index must be skipped.
-    auto f = parallel_visitation(start_idx + 1, end_idx, analysis_v);
+    auto f = parallel_visitation(in.start + 1, in.end, analysis_v);
     f.postprocess(stat_file, backprojection_selected_histo, relevant_histo,
                   true_positive_histo, false_positive_histo);
 

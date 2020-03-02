@@ -159,36 +159,34 @@ class matching {
 }  // namespace
 
 namespace sens_loc::apps {
-int analyze_matching(string_view                  input_pattern,
-                     int                          start_idx,
-                     int                          end_idx,
+int analyze_matching(util::processing_input       in,
                      NormTypes                    norm_to_use,
                      bool                         crosscheck,
                      const optional<string>&      stat_file,
                      const optional<string>&      matched_distance_histo,
                      const optional<string_view>& output_pattern,
                      const optional<string_view>& original_files) {
-    Expects(start_idx < end_idx && "Matching requires at least 2 images");
+    Expects(in.start < in.end && "Matching requires at least 2 images");
 
     mutex         distance_mutex;
     vector<float> global_minimal_distances;
     uint64_t      total_descriptors;
 
     using visitor   = statistic_visitor<matching, required_data::descriptors>;
-    auto analysis_v = visitor{/*input_pattern=*/input_pattern,
+    auto analysis_v = visitor{/*input_pattern=*/in.input_pattern,
                               /*distance_mutex=*/not_null{&distance_mutex},
                               /*distances=*/not_null{&global_minimal_distances},
                               /*descriptor_count=*/not_null{&total_descriptors},
                               /*norm_to_use=*/norm_to_use,
                               /*crosscheck=*/crosscheck,
-                              /*input_pattern=*/input_pattern,
+                              /*input_pattern=*/in.input_pattern,
                               /*output_pattern=*/output_pattern,
                               /*original_files=*/original_files};
 
     auto f = parallel_visitation(
-        start_idx + 1,  // Because two consecutive images are matched, the first
-                        // index is skipped. This requires "backwards" matching.
-        end_idx, analysis_v);
+        in.start + 1,  // Because two consecutive images are matched, the first
+                       // index is skipped. This requires "backwards" matching.
+        in.end, analysis_v);
 
     f.postprocess(stat_file, matched_distance_histo);
 
