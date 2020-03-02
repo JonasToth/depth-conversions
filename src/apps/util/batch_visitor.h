@@ -27,12 +27,10 @@ Functor parallel_visitation(int start, int end, Functor&& f) noexcept {
     tf::Executor executor;
 
     int total_tasks = end - start + 1;
-    int partitions =
-        std::min(util::progress_bar_observer::max_bars, total_tasks);
-    executor.make_observer<util::progress_bar_observer>(partitions,
+    executor.make_observer<util::progress_bar_observer>(/*chunk_size=*/1L,
                                                         total_tasks);
     tf::Taskflow tf;
-    tf.parallel_for(start, end + 1, 1, std::forward<Functor>(f), partitions);
+    tf.parallel_for(start, end + 1, 1, std::forward<Functor>(f));
     const auto before = std::chrono::steady_clock::now();
     executor.run(tf).wait();
     const auto after = std::chrono::steady_clock::now();

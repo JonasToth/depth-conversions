@@ -32,11 +32,9 @@ bool parallel_indexed_file_processing(int          start,
             std::swap(start, end);
 
         int total_tasks = end - start + 1;
-        int partitions =
-            std::min(util::progress_bar_observer::max_bars, total_tasks);
 
         tf::Executor executor;
-        executor.make_observer<util::progress_bar_observer>(partitions,
+        executor.make_observer<util::progress_bar_observer>(/*chunk_size=*/1L,
                                                             total_tasks);
         tf::Taskflow tf;
 
@@ -44,8 +42,7 @@ bool parallel_indexed_file_processing(int          start,
         int  fails         = 0;
 
         tf.parallel_for(
-            start, end + 1, 1,
-            [&batch_success, &fails, &f](int idx) {
+            start, end + 1, 1, [&batch_success, &fails, &f](int idx) {
                 const bool success = f(idx);
                 if (!success) {
                     auto s = synced();
@@ -56,11 +53,7 @@ bool parallel_indexed_file_processing(int          start,
                               << rang::style::reset << "!" << std::endl;
                     batch_success = false;
                 }
-            },
-            // This defines the NUMBER OF PARTITIONS the algorithm
-            // creates. A higher number means more tasks that are
-            // processed.
-            partitions);
+            });
 
         const auto before = std::chrono::steady_clock::now();
         executor.run(tf).wait();
@@ -78,8 +71,7 @@ bool parallel_indexed_file_processing(int          start,
             std::cerr << util::info{};
             std::cerr << "Processing " << rang::style::bold
                       << std::abs(end - start) + 1 - fails << rang::style::reset
-                      << " images took " << rang::style::bold
-                      << std::fixed
+                      << " images took " << rang::style::bold << std::fixed
                       << std::setprecision(2)
                       << (dur_deci_seconds.count() / 100.) << rang::style::reset
                       << " seconds!\n";
