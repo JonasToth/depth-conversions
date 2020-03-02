@@ -200,7 +200,16 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     cmd_rec_perf->add_option(
         "--false-positive-histo", false_positive_histo,
         "File for the histogram for the number of false postives per frame.");
-
+    optional<string> true_positive_distance_histo;
+    cmd_rec_perf->add_option("--true-positive-distance-histo",
+                             true_positive_distance_histo,
+                             "File for the histogram of the descriptor "
+                             "distance for true positives.");
+    optional<string> false_positive_distance_histo;
+    cmd_rec_perf->add_option("--false-positive-distance-histo",
+                             false_positive_distance_histo,
+                             "File for the histogram of the descriptor "
+                             "distance for false positives.");
 
     COLORED_APP_PARSE(app, argc, argv);
 
@@ -236,7 +245,9 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
             /*backprojection_selected_histo=*/backprojection_selected_histo,
             /*relevant_histo=*/relevant_histo,
             /*true_positive_histo=*/true_positive_histo,
-            /*false_positive_histo=*/false_positive_histo};
+            /*false_positive_histo=*/false_positive_histo,
+            /*true_positive_distance_histo=*/true_positive_distance_histo,
+            /*false_positive_distance_histo=*/false_positive_distance_histo};
         return analyze_recognition_performance(in, rec_in, out_opts);
     }
 

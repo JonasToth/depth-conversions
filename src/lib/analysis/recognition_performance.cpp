@@ -1,3 +1,4 @@
+#include <algorithm>
 #include <fstream>
 #include <limits>
 #include <sens_loc/analysis/recognition_performance.h>
@@ -56,7 +57,7 @@ element_categories::element_categories(const math::imagepoints_t& query_data,
     // 1. Matches need to be classified in either true or false positives.
     // True positives remove the corresonding train-point from further
     // matching. This ensures, that the "false-negative" stage does not
-    // "reuse" such a keypoint for a correspondence.
+    // reuse such a keypoint for a correspondence.
     for (const auto& m : matches) {
         const float px_dist =
             (query_data.at(m.queryIdx) - train_data.at(m.trainIdx)).norm();
@@ -64,16 +65,18 @@ element_categories::element_categories(const math::imagepoints_t& query_data,
         // This match is a true positive
         if (px_dist <= threshold) {
             // Save a true positive.
-            true_positives.emplace_back(m.queryIdx, m.trainIdx);
+            true_positives.emplace_back(m.queryIdx, m.trainIdx, m.distance);
 
             // Disallow the train-pt to be reused by other classifications.
             size_t removed = remaining_train_indices.erase(m.trainIdx);
+            // The point could not exist in the remaining_train_indidces.
+            // This is due to masking or prior removal.
             Ensures(removed == 1UL || removed == 0UL);
         }
         // This match is a false postive. Allow the 'train-pt' to be reused
         // for false negative calculation.
         else
-            false_positives.emplace_back(m.queryIdx, m.trainIdx);
+            false_positives.emplace_back(m.queryIdx, m.trainIdx, m.distance);
 
         // Remove this index from 'all_query_indices' to know which
         // points still need classification.
@@ -179,6 +182,14 @@ void recognition_statistic::account(
         narrow_cast<int64_t>(classification.true_positives.size()));
     _false_positives.stat(
         narrow_cast<int64_t>(classification.false_positives.size()));
+
+    // Keep track of the descriptor distances.
+    transform(classification.true_positives.begin(),
+              classification.true_positives.end(), back_inserter(tp_distance),
+              [](const keypoint_correspondence& c) { return c.distance; });
+    transform(classification.false_positives.begin(),
+              classification.false_positives.end(), back_inserter(fp_distance),
+              [](const keypoint_correspondence& c) { return c.distance; });
 }
 
 void recognition_statistic::make_histogram() {
@@ -196,11 +207,19 @@ void recognition_statistic::make_histogram() {
             "True Positives per Frame"));
     _true_positives.histo.fill(t_p_per_image);
 
+    sort(begin(tp_distance), end(tp_distance));
+    _tp_descriptor_distance =
+        distance(tp_distance, 50, "True Positive Descriptor Distances");
+
     _false_positives.histo =
         boost::histogram::make_histogram(category_statistic::axis_t(
             0, boost::accumulators::max(_false_positives.stat) + 1,
             "False Positives per Frame"));
     _false_positives.histo.fill(f_p_per_image);
+
+    sort(begin(fp_distance), end(fp_distance));
+    _fp_descriptor_distance =
+        distance(fp_distance, 50, "False Positives Descriptor Distances");
 
     _relevant_elements.histo =
         boost::histogram::make_histogram(category_statistic::axis_t(

@@ -29,6 +29,8 @@ struct recognition_analysis_output_options {
     std::optional<std::string> relevant_histo;
     std::optional<std::string> true_positive_histo;
     std::optional<std::string> false_positive_histo;
+    std::optional<std::string> true_positive_distance_histo;
+    std::optional<std::string> false_positive_distance_histo;
 };
 
 int analyze_recognition_performance(

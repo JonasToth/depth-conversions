@@ -409,6 +409,7 @@ class prec_recall_analysis {
             cout << classification.relevant_element_distribution().histo
                  << "\n";
         }
+
         if (_output_options.true_positive_histo) {
             ofstream gnuplot_data{*_output_options.true_positive_histo};
             gnuplot_data
@@ -418,6 +419,7 @@ class prec_recall_analysis {
         } else {
             cout << classification.true_positive_distribution().histo << "\n";
         }
+
         if (_output_options.false_positive_histo) {
             ofstream gnuplot_data{*_output_options.false_positive_histo};
             gnuplot_data
@@ -427,6 +429,30 @@ class prec_recall_analysis {
         } else {
             cout << classification.false_positive_distribution().histo << "\n";
         }
+
+        if (_output_options.true_positive_distance_histo) {
+            ofstream gnuplot_data{
+                *_output_options.true_positive_distance_histo};
+            gnuplot_data
+                << sens_loc::io::to_gnuplot(
+                       classification.true_positive_distance().histogram())
+                << endl;
+        } else {
+            cout << classification.true_positive_distance().histogram() << "\n";
+        }
+
+        if (_output_options.false_positive_distance_histo) {
+            ofstream gnuplot_data{
+                *_output_options.false_positive_distance_histo};
+            gnuplot_data
+                << sens_loc::io::to_gnuplot(
+                       classification.false_positive_distance().histogram())
+                << endl;
+        } else {
+            cout << classification.false_positive_distance().histogram()
+                 << "\n";
+        }
+
         return classification.total_elements();
     }
 
@@ -449,7 +475,7 @@ int analyze_recognition_performance(
     const recognition_analysis_input&          required_data,
     const recognition_analysis_output_options& output_options) {
     Expects(in.start < in.end &&
-            "Precision-Recall calculation requires at least two images");
+            "Recognition Performance calculation requires at least two images");
 
     // The code will load all data directly and does not rely on loading through
     // the statistics code.

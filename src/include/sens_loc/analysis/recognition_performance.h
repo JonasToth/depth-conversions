@@ -12,6 +12,7 @@
 #include <cstdint>
 #include <opencv2/core/persistence.hpp>
 #include <opencv2/features2d.hpp>
+#include <sens_loc/analysis/distance.h>
 #include <sens_loc/math/pointcloud.h>
 #include <string>
 #include <vector>
@@ -22,10 +23,16 @@ namespace sens_loc::analysis {
 struct keypoint_correspondence {
     int query_idx;
     int train_idx;
+    /// descriptor distance if known, negative otherwise
+    float distance = -1.0F;
 
     keypoint_correspondence(int query, int train) noexcept
         : query_idx{query}
         , train_idx{train} {}
+    keypoint_correspondence(int query, int train, float distance) noexcept
+        : query_idx{query}
+        , train_idx{train}
+        , distance{distance} {}
 };
 
 /// Store the classification of keypoints in either:
@@ -261,12 +268,30 @@ class recognition_statistic {
         return _false_positives;
     }
 
+    /// Return the distribution and statistical insight for the descriptor
+    /// distance of true positives.
+    const distance& true_positive_distance() const noexcept {
+        return _tp_descriptor_distance;
+    }
+
+    /// Return the distribution and statistical insight for the descriptor
+    /// distance of false positives.
+    const distance& false_positive_distance() const noexcept {
+        return _fp_descriptor_distance;
+    }
+
   private:
     // Keep track on the true/false positives/negatives per image.
     std::vector<std::int64_t> t_p_per_image;
     std::vector<std::int64_t> f_p_per_image;
     std::vector<std::int64_t> t_n_per_image;
     std::vector<std::int64_t> f_n_per_image;
+
+    // Keep track of the true/false-positive descriptor distances.
+    // This gives some insight into what distance is expected for good matches
+    // and where to draw the border.
+    std::vector<float> tp_distance;
+    std::vector<float> fp_distance;
 
     // Keep track of the global count of elements.
     std::int64_t n_true_pos  = 0L;
@@ -279,7 +304,9 @@ class recognition_statistic {
     // least in an image". This helps ruling out different kinds of algorithms.
     category_statistic _relevant_elements;
     category_statistic _true_positives;
+    distance           _tp_descriptor_distance;
     category_statistic _false_positives;
+    distance           _fp_descriptor_distance;
 };
 
 /// Write statistical information to file.

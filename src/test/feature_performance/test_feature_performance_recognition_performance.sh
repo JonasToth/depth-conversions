@@ -55,14 +55,18 @@ if ! ${exe} \
     --backprojection-selected-histo backprojection_error.dat \
     --relevant-elements-histo relevant_histo.dat \
     --true-positive-histo tp_histo.dat \
-    --false-positive-histo fp_histo.dat ; then
+    --false-positive-histo fp_histo.dat \
+    --true-positive-distance-histo tp_distance_histo.dat \
+    --false-positive-distance-histo fp_distance_histo.dat ; then
     print_error "Could not evaluate classification performance and write histograms"
     exit 1
 fi
 if [ ! -f backprojection_error.dat ] ||
    [ ! -f relevant_histo.dat ] ||
    [ ! -f tp_histo.dat ] ||
-   [ ! -f fp_histo.dat ] ; then
+   [ ! -f fp_histo.dat ] ||
+   [ ! -f tp_distance_histo.dat ] ||
+   [ ! -f fp_distance_histo.dat ] ; then
     print_error "Did not create histogram file with recognition performance"
     exit 1
 fi
