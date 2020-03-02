@@ -1,3 +1,4 @@
+#define _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS
 #include "recognition_performance.h"
 
 #include "icp.h"
@@ -27,6 +28,7 @@
 #include <sens_loc/math/pointcloud.h>
 #include <sens_loc/plot/backprojection.h>
 #include <sens_loc/util/console.h>
+#include <sens_loc/util/thread_analysis.h>
 #include <util/batch_visitor.h>
 #include <util/statistic_visitor.h>
 
@@ -86,35 +88,61 @@ size_t mask_backprojection(const math::image<uchar>& mask,
     return counter;
 }
 
+struct recognition_data {
+    recognition_data() = default;
+
+    void insert_recognition(span<float>                         distances,
+                            const analysis::element_categories& classification,
+                            size_t masked_points) noexcept {
+        lock_guard l{_mutex};
+
+        _selected_elements_distance.insert(_selected_elements_distance.end(),
+                                           begin(distances), end(distances));
+        _stats.account(classification);
+        _totally_masked += narrow<int>(masked_points);
+    }
+
+    tuple<vector<float>, analysis::recognition_statistic, int64_t>
+    extract() noexcept {
+        lock_guard l{_mutex};
+        tuple<vector<float>, analysis::recognition_statistic, int64_t> t{
+            move(_selected_elements_distance), move(_stats), _totally_masked};
+
+        _selected_elements_distance = vector<float>();
+        _stats                      = analysis::recognition_statistic();
+        _totally_masked             = 0L;
+        return t;
+    }
+
+  private:
+    mutex                                     _mutex;
+    vector<float> _selected_elements_distance GUARDED_BY(_mutex);
+    analysis::recognition_statistic _stats    GUARDED_BY(_mutex);
+    int64_t _totally_masked                   GUARDED_BY(_mutex) = 0L;
+};
+
 template <template <typename> typename Model = sens_loc::camera_models::pinhole,
           typename Real                      = float>
 class prec_recall_analysis {
   public:
-    prec_recall_analysis(
-        string_view                                feature_file_pattern,
-        string_view                                depth_image_pattern,
-        string_view                                pose_file_pattern,
-        float                                      unit_factor,
-        string_view                                intrinsic_file,
-        optional<string_view>                      mask_file,
-        NormTypes                                  matching_norm,
-        float                                      keypoint_distances_threshold,
-        not_null<mutex*>                           inserter_mutex,
-        not_null<vector<float>*>                   selected_elements_distance,
-        not_null<analysis::recognition_statistic*> prec_recall_stat,
-        not_null<size_t*>                          totally_masked,
-        optional<string_view>                      backproject_pattern,
-        optional<string_view>                      original_files) noexcept
+    prec_recall_analysis(string_view           feature_file_pattern,
+                         string_view           depth_image_pattern,
+                         string_view           pose_file_pattern,
+                         float                 unit_factor,
+                         string_view           intrinsic_file,
+                         optional<string_view> mask_file,
+                         NormTypes             matching_norm,
+                         float                 keypoint_distances_threshold,
+                         recognition_data&     accumulated_data,
+                         optional<string_view> backproject_pattern,
+                         optional<string_view> original_files) noexcept
         : _feature_file_pattern{feature_file_pattern}
         , _depth_image_pattern{depth_image_pattern}
         , _pose_file_pattern{pose_file_pattern}
         , _unit_factor{unit_factor}
         , _keypoint_distance_threshold{keypoint_distances_threshold}
         , _matcher{cv::BFMatcher::create(matching_norm, /*crosscheck=*/true)}
-        , _inserter_mutex{inserter_mutex}
-        , _selected_elements_dist{selected_elements_distance}
-        , _stats{prec_recall_stat}
-        , _totally_masked{totally_masked}
+        , _accumulated_data{accumulated_data}
         , _backproject_pattern{backproject_pattern}
         , _original_files{original_files} {
         Expects(!_feature_file_pattern.empty());
@@ -215,7 +243,7 @@ class prec_recall_analysis {
         // image). This can be detected with using a mask.
         // Such points are set to {-1, -1} to be recognizable invalid.
         const size_t masked_points =
-            _mask ? mask_backprojection(*_mask, prev_in_img) : 0;
+            _mask ? mask_backprojection(*_mask, prev_in_img) : 0UL;
         Expects(prev_in_img.size() == prev.keypoints.size());
 
         // == Match the keypoints with cross-checking.
@@ -288,14 +316,8 @@ class prec_recall_analysis {
         }
 
         auto distances = pointwise_distance(t_p_t, t_p_o);
-
-        {
-            lock_guard guard{*_inserter_mutex};
-            _selected_elements_dist->insert(_selected_elements_dist->end(),
-                                            distances.begin(), distances.end());
-            _stats->account(classification);
-            *_totally_masked += masked_points;
-        }
+        _accumulated_data.insert_recognition(distances, classification,
+                                             masked_points);
     } catch (const exception& e) {
         auto s = synced();
         cerr << util::err{} << "Could not analyze data for " << idx << "!\n"
@@ -303,27 +325,29 @@ class prec_recall_analysis {
         return;
     }
 
-    void postprocess(const optional<string>& stat_file,
-                     const optional<string>& backprojection_selected_histo,
-                     const optional<string>& relevant_histo,
-                     const optional<string>& true_positive_histo,
-                     const optional<string>& false_positive_histo) {
-        lock_guard guard{*_inserter_mutex};
-        if (_stats->total_elements() == 0L)
-            return;
+    size_t postprocess(const optional<string>& stat_file,
+                       const optional<string>& backprojection_selected_histo,
+                       const optional<string>& relevant_histo,
+                       const optional<string>& true_positive_histo,
+                       const optional<string>& false_positive_histo) {
+        auto [distances, classification, masked_point_count] =
+            _accumulated_data.extract();
 
-        sort(begin(*_selected_elements_dist), end(*_selected_elements_dist));
+        if (classification.total_elements() == 0L)
+            return 0UL;
+
+        sort(begin(distances), end(distances));
         const auto         dist_bins = 20;
-        analysis::distance distance_stat{*_selected_elements_dist, dist_bins,
+        analysis::distance distance_stat{distances, dist_bins,
                                          "backprojection error pixels"};
 
         if (stat_file) {
             cv::FileStorage recognize_out{*stat_file,
                                           cv::FileStorage::WRITE |
                                               cv::FileStorage::FORMAT_YAML};
-            write(recognize_out, "classification", *_stats);
+            write(recognize_out, "classification", classification);
             write(recognize_out, "masked_points",
-                  gsl::narrow<int>(*_totally_masked));
+                  narrow<int>(masked_point_count));
             recognize_out.release();
         } else {
             using namespace boost;
@@ -335,33 +359,34 @@ class prec_recall_analysis {
                  << "Variance:     " << distance_stat.variance() << "\n"
                  << "StdDev:       " << distance_stat.stddev() << "\n"
                  << "Skewness:     " << distance_stat.skewness() << "\n"
-                 << "Precision     " << _stats->precision() << "\n"
-                 << "Recall:       " << _stats->recall() << "\n"
-                 << "Sensitivity:  " << _stats->sensitivity() << "\n"
-                 << "Specificity:  " << _stats->specificity() << "\n"
-                 << "Fallout:      " << _stats->fallout() << "\n"
-                 << "Rand-Index:   " << _stats->rand_index() << "\n"
-                 << "Youden-Index: " << _stats->youden_index() << "\n"
+                 << "Precision     " << classification.precision() << "\n"
+                 << "Recall:       " << classification.recall() << "\n"
+                 << "Sensitivity:  " << classification.sensitivity() << "\n"
+                 << "Specificity:  " << classification.specificity() << "\n"
+                 << "Fallout:      " << classification.fallout() << "\n"
+                 << "Rand-Index:   " << classification.rand_index() << "\n"
+                 << "Youden-Index: " << classification.youden_index() << "\n"
                  << "Min-TruePos:  "
-                 << accumulators::min(_stats->true_positive_distribution().stat)
+                 << accumulators::min(
+                        classification.true_positive_distribution().stat)
                  << "\n"
                  << "Avg-TruePos:  "
                  << accumulators::mean(
-                        _stats->true_positive_distribution().stat)
+                        classification.true_positive_distribution().stat)
                  << "\n"
                  << "Min-Relevant: "
                  << accumulators::min(
-                        _stats->relevant_element_distribution().stat)
+                        classification.relevant_element_distribution().stat)
                  << "\n"
                  << "Avg-Relevant: "
                  << accumulators::mean(
-                        _stats->relevant_element_distribution().stat)
+                        classification.relevant_element_distribution().stat)
                  << "\n"
                  << "Avg-FalsePos: "
                  << accumulators::mean(
-                        _stats->false_positive_distribution().stat)
+                        classification.false_positive_distribution().stat)
                  << "\n"
-                 << "Masked pts:   " << *_totally_masked << "\n";
+                 << "Masked pts:   " << masked_point_count << "\n";
         }
 
         if (backprojection_selected_histo) {
@@ -372,32 +397,37 @@ class prec_recall_analysis {
             cout << distance_stat.histogram() << "\n";
         }
 
-        _stats->make_histogram();
+        classification.make_histogram();
 
         if (relevant_histo) {
             ofstream gnuplot_data{*relevant_histo};
-            gnuplot_data << sens_loc::io::to_gnuplot(
-                                _stats->relevant_element_distribution().histo)
-                         << endl;
+            gnuplot_data
+                << sens_loc::io::to_gnuplot(
+                       classification.relevant_element_distribution().histo)
+                << endl;
         } else {
-            cout << _stats->relevant_element_distribution().histo << "\n";
+            cout << classification.relevant_element_distribution().histo
+                 << "\n";
         }
         if (true_positive_histo) {
             ofstream gnuplot_data{*true_positive_histo};
-            gnuplot_data << sens_loc::io::to_gnuplot(
-                                _stats->true_positive_distribution().histo)
-                         << endl;
+            gnuplot_data
+                << sens_loc::io::to_gnuplot(
+                       classification.true_positive_distribution().histo)
+                << endl;
         } else {
-            cout << _stats->true_positive_distribution().histo << "\n";
+            cout << classification.true_positive_distribution().histo << "\n";
         }
         if (false_positive_histo) {
             ofstream gnuplot_data{*false_positive_histo};
-            gnuplot_data << sens_loc::io::to_gnuplot(
-                                _stats->false_positive_distribution().histo)
-                         << endl;
+            gnuplot_data
+                << sens_loc::io::to_gnuplot(
+                       classification.false_positive_distribution().histo)
+                << endl;
         } else {
-            cout << _stats->false_positive_distribution().histo << "\n";
+            cout << classification.false_positive_distribution().histo << "\n";
         }
+        return classification.total_elements();
     }
 
   private:
@@ -410,10 +440,7 @@ class prec_recall_analysis {
     Ptr<BFMatcher>               _matcher;
     optional<math::image<uchar>> _mask;
 
-    not_null<mutex*>                           _inserter_mutex;
-    not_null<vector<float>*>                   _selected_elements_dist;
-    not_null<analysis::recognition_statistic*> _stats;
-    not_null<size_t*>                          _totally_masked;
+    recognition_data& _accumulated_data;
 
     optional<string_view> _backproject_pattern;
     optional<string_view> _original_files;
@@ -446,13 +473,9 @@ int analyze_recognition_performance(
     using visitor =
         statistic_visitor<prec_recall_analysis<>, required_data::none>;
 
-    mutex                           inserter_mutex;
-    vector<float>                   selected_elements_distance;
-    analysis::recognition_statistic stats;
-    size_t                          totally_masked = 0UL;
-
-    const float unit_factor = 0.001F;
-    auto        analysis_v  = visitor{in.input_pattern,
+    const float      unit_factor = 0.001F;
+    recognition_data data;
+    auto             analysis_v = visitor{in.input_pattern,
                               in.input_pattern,
                               depth_image_pattern,
                               pose_file_pattern,
@@ -461,20 +484,18 @@ int analyze_recognition_performance(
                               mask_file,
                               matching_norm,
                               keypoint_distance_threshold,
-                              not_null{&inserter_mutex},
-                              not_null{&selected_elements_distance},
-                              not_null{&stats},
-                              not_null{&totally_masked},
+                              data,
                               backproject_pattern,
                               original_files};
 
     // Consecutive images are matched and analysed, therefore the first
     // index must be skipped.
-    auto f = parallel_visitation(in.start + 1, in.end, analysis_v);
-    f.postprocess(stat_file, backprojection_selected_histo, relevant_histo,
-                  true_positive_histo, false_positive_histo);
+    auto   f = parallel_visitation(in.start + 1, in.end, analysis_v);
+    size_t n_elements =
+        f.postprocess(stat_file, backprojection_selected_histo, relevant_histo,
+                      true_positive_histo, false_positive_histo);
 
-    return stats.total_elements() > 0L ? 0 : 1;
+    return n_elements > 0L ? 0 : 1;
 }
 
 }  // namespace sens_loc::apps
