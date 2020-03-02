@@ -220,6 +220,10 @@ def run_recognition(config_args, source_info):
                        config_args['true_positive_histo']])
     invocation.extend(['--false-positive-histo',
                        config_args['false_positive_histo']])
+    invocation.extend(['--true-positive-distance-histo',
+                       config_args['true_positive_distance_histo']])
+    invocation.extend(['--false-positive-distance-histo',
+                       config_args['false_positive_distance_histo']])
 
     command_invocer(invocation, config_args, source_info)
 
@@ -339,7 +343,9 @@ def main():
                         ['depth_images', 'backprojection', 'original_images',
                          'backprojection_selected_histo',
                          'relevant_elements_histo', 'true_positive_histo',
-                         'false_positive_histo'],
+                         'false_positive_histo',
+                         'true_positive_distance_histo',
+                         'false_positive_distance_histo'],
                         args.config)
         depth_image_cfg = configparser.ConfigParser()
         depth_image_cfg.read(toplevel_cfg['recognition']['depth_images'],
