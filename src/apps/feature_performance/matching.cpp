@@ -1,3 +1,4 @@
+#define _LIBCPP_ENABLE_THREAD_SAFETY_ANNOTATIONS
 #include "matching.h"
 
 #include <boost/histogram/ostream.hpp>
@@ -15,6 +16,7 @@
 #include <sens_loc/io/histogram.h>
 #include <sens_loc/io/image.h>
 #include <sens_loc/util/console.h>
+#include <sens_loc/util/thread_analysis.h>
 #include <util/batch_visitor.h>
 #include <util/statistic_visitor.h>
 
@@ -23,19 +25,43 @@ using namespace std;
 using namespace gsl;
 
 namespace {
+
+struct descriptor_stat_data {
+    descriptor_stat_data() = default;
+
+    void insert_matches(gsl::span<DMatch> matches,
+                        int               descriptor_count) noexcept {
+        lock_guard l{_mutex};
+        transform(begin(matches), end(matches),
+                  back_inserter(_global_minimal_distances),
+                  [](const DMatch& m) { return m.distance; });
+        _total_descriptors += descriptor_count;
+    }
+
+    pair<vector<float>, int64_t> extract() noexcept {
+        lock_guard                   l{_mutex};
+        pair<vector<float>, int64_t> p{move(_global_minimal_distances),
+                                       _total_descriptors};
+        _global_minimal_distances = vector<float>();
+        _total_descriptors        = 0UL;
+        return p;
+    }
+
+  private:
+    mutex                                   _mutex;
+    vector<float> _global_minimal_distances GUARDED_BY(_mutex);
+    int64_t _total_descriptors              GUARDED_BY(_mutex) = 0L;
+};
+
 class matching {
   public:
-    matching(not_null<mutex*>         distance_mutex,
-             not_null<vector<float>*> distances,
-             not_null<uint64_t*>      descriptor_count,
-             NormTypes                norm_to_use,
-             bool                     crosscheck,
-             string_view              input_pattern,
-             optional<string_view>    output_pattern,
-             optional<string_view>    original_files) noexcept
-        : distance_mutex{distance_mutex}
-        , distances{distances}
-        , total_descriptors{descriptor_count}
+    matching(descriptor_stat_data& accumulated_data,
+             NormTypes             norm_to_use,
+             bool                  crosscheck,
+             string_view           input_pattern,
+             optional<string_view> output_pattern,
+             optional<string_view> original_files) noexcept
+        : accumulated_data{accumulated_data}
         , matcher{BFMatcher::create(norm_to_use, crosscheck)}
         , input_pattern{input_pattern}
         , output_pattern{output_pattern}
@@ -48,8 +74,10 @@ class matching {
     void operator()(int idx,
                     optional<vector<KeyPoint>> /*keypoints*/,  // NOLINT
                     optional<Mat> descriptors) noexcept {
-        if (!descriptors || (descriptors->rows == 0))
+        Expects(descriptors.has_value());
+        if (descriptors->rows == 0)
             return;
+
         try {
             const int         previous_idx = idx - 1;
             const FileStorage previous_img = sens_loc::io::open_feature_file(
@@ -59,15 +87,7 @@ class matching {
 
             vector<DMatch> matches;
             matcher->match(*descriptors, previous_descriptors, matches);
-
-            {
-                lock_guard guard{*distance_mutex};
-                // Insert all the distances into the global distances vector.
-                transform(begin(matches), end(matches),
-                          back_inserter(*distances),
-                          [](const DMatch& m) { return m.distance; });
-                (*total_descriptors) += descriptors->rows;
-            }
+            accumulated_data.insert_matches(matches, descriptors->rows);
 
             // Plot the matching between the descriptors of the previous and the
             // current frame.
@@ -97,23 +117,22 @@ class matching {
                 const string output = fmt::format(*output_pattern, idx);
                 imwrite(output, out_img);
             }
-        } catch (const std::exception& e) {
+        } catch (...) {
             std::cerr << sens_loc::util::err{}
-                      << "Could not initialize data for idx: " << idx << "\n"
-                      << e.what() << "\n";
+                      << "Could not initialize data for idx: " << idx << "\n";
             return;
         }
     }
 
-    void postprocess(const optional<string>& stat_file,
-                     const optional<string>& matched_distance_histo) {
-        lock_guard guard{*distance_mutex};
-        if (distances->empty())
-            return;
+    size_t postprocess(const optional<string>& stat_file,
+                       const optional<string>& matched_distance_histo) {
+        auto [distances, total_descriptors] = accumulated_data.extract();
+        if (distances.empty())
+            return 0UL;
 
-        sort(begin(*distances), end(*distances));
+        sort(begin(distances), end(distances));
         const auto                   dist_bins = 25;
-        sens_loc::analysis::distance distance_stat{*distances, dist_bins};
+        sens_loc::analysis::distance distance_stat{distances, dist_bins};
 
         if (stat_file) {
             cv::FileStorage stat_out{*stat_file,
@@ -127,11 +146,11 @@ class matching {
             stat_out.release();
         } else {
             cout << "==== Match Distances\n"
-                 << "total count:    " << *total_descriptors << "\n"
-                 << "matched count:  " << distances->size() << "\n"
+                 << "total count:    " << total_descriptors << "\n"
+                 << "matched count:  " << distances.size() << "\n"
                  << "matched/total:  "
-                 << narrow_cast<double>(distances->size()) /
-                        narrow_cast<double>(*total_descriptors)
+                 << narrow_cast<double>(distances.size()) /
+                        narrow_cast<double>(total_descriptors)
                  << "\n"
                  << "min:            " << distance_stat.min() << "\n"
                  << "max:            " << distance_stat.max() << "\n"
@@ -148,16 +167,16 @@ class matching {
         } else {
             cout << distance_stat.histogram() << "\n";
         }
+        return distances.size();
     }
 
   private:
-    not_null<mutex*>         distance_mutex;
-    not_null<vector<float>*> distances;
-    not_null<uint64_t*>      total_descriptors;
-    Ptr<BFMatcher>           matcher;
-    string_view              input_pattern;
-    optional<string_view>    output_pattern;
-    optional<string_view>    original_images;
+    descriptor_stat_data& accumulated_data;
+
+    Ptr<BFMatcher>        matcher;
+    string_view           input_pattern;
+    optional<string_view> output_pattern;
+    optional<string_view> original_images;
 };
 }  // namespace
 
@@ -170,16 +189,10 @@ int analyze_matching(util::processing_input       in,
                      const optional<string_view>& output_pattern,
                      const optional<string_view>& original_files) {
     Expects(in.start < in.end && "Matching requires at least 2 images");
-
-    mutex         distance_mutex;
-    vector<float> global_minimal_distances;
-    uint64_t      total_descriptors;
-
-    using visitor   = statistic_visitor<matching, required_data::descriptors>;
+    using visitor = statistic_visitor<matching, required_data::descriptors>;
+    descriptor_stat_data data;
     auto analysis_v = visitor{/*input_pattern=*/in.input_pattern,
-                              /*distance_mutex=*/not_null{&distance_mutex},
-                              /*distances=*/not_null{&global_minimal_distances},
-                              /*descriptor_count=*/not_null{&total_descriptors},
+                              /*accumulated_data=*/data,
                               /*norm_to_use=*/norm_to_use,
                               /*crosscheck=*/crosscheck,
                               /*input_pattern=*/in.input_pattern,
@@ -190,9 +203,8 @@ int analyze_matching(util::processing_input       in,
         in.start + 1,  // Because two consecutive images are matched, the first
                        // index is skipped. This requires "backwards" matching.
         in.end, analysis_v);
+    size_t n_elements = f.postprocess(stat_file, matched_distance_histo);
 
-    f.postprocess(stat_file, matched_distance_histo);
-
-    return !global_minimal_distances.empty() ? 0 : 1;
+    return n_elements > 0UL ? 0 : 1;
 }
 }  // namespace sens_loc::apps
