@@ -36,12 +36,13 @@ class progress_bar_observer : public tf::ExecutorObserverInterface {
     void on_exit(unsigned /*worker_id*/, tf::TaskView /*task_view*/) override;
 
   private:
-    void print_bar() noexcept;
+    /// Print the progress bar and increment the task-counter on request.
+    void print_bar(bool increment = false) noexcept;
 
-    float                     _task_increment;
-    std::int64_t              _total_tasks;
-    std::atomic<std::int64_t> _done;
-    std::atomic<bool>         _inital_output = false;
+    float             _task_increment;
+    std::int64_t      _total_tasks;
+    std::int64_t      _done;
+    std::atomic<bool> _inital_output = false;
 };
 }  // namespace sens_loc::util
 

@@ -11,12 +11,13 @@ void progress_bar_observer::on_entry(unsigned /*worker_id*/,
 
 void progress_bar_observer::on_exit(unsigned /*worker_id*/,
                                     tf::TaskView /*task_view*/) {
-    _done++;
-    print_bar();
+    print_bar(/*increment=*/true);
 }
 
-void progress_bar_observer::print_bar() noexcept {
+void progress_bar_observer::print_bar(bool increment) noexcept {
     auto s = synced();
+    if (increment)
+        _done++;
     std::cout << "\r" << rang::fg::green << rang::style::bold << std::setw(5)
               << _done << " ";
 
