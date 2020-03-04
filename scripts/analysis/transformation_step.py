@@ -54,8 +54,8 @@ def command_invocer(invocation, config_args, source_info):
                   -return_code.returncode)
         __l.error("Invocation:\n%s" % '\n'.join(filtered))
     elif return_code.returncode > 0:
-        __l.warn("Command terminated with error code!")
-        __l.warn("Invocation:\n%s" % '\n'.join(filtered))
+        __l.warning("Command terminated with error code!")
+        __l.warning("Invocation:\n%s" % '\n'.join(filtered))
 
     # Because filtering is a way to create a new base-dataset, a configuration
     # file must be written for the new dataset.
