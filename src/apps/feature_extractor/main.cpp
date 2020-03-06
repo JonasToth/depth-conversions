@@ -1,6 +1,7 @@
 #include "batch_extractor.h"
 
 #include <CLI/CLI.hpp>
+#include <memory>
 #include <opencv2/core/types.hpp>
 #include <opencv2/features2d.hpp>
 #include <opencv2/xfeatures2d.hpp>
@@ -336,8 +337,10 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
         "descriptor", "Configure the descriptor used for the keypoints");
     descriptor_cmd->require_subcommand(1);
 
-    using feature_args = variant<SURFArgs, SIFTArgs, AKAZEArgs, ORBArgs,
-                                 AGASTArgs, BRISKArgs, NULLArgs>;
+    using feature_args = variant<unique_ptr<SURFArgs>, unique_ptr<SIFTArgs>,
+                                 unique_ptr<AKAZEArgs>, unique_ptr<ORBArgs>,
+                                 unique_ptr<AGASTArgs>, unique_ptr<BRISKArgs>,
+                                 unique_ptr<NULLArgs>>;
     unordered_map<CLI::App*, feature_args> detector_params;
     unordered_map<CLI::App*, feature_args> descriptor_params;
 
@@ -361,19 +364,19 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
         auto cmd_to_args = [&](string_view name,
                                CLI::App*   cmd) -> feature_args {
             if (name == "sift")
-                return SIFTArgs{cmd};
+                return {make_unique<SIFTArgs>(cmd)};
             if (name == "surf")
-                return SURFArgs{cmd};
+                return {make_unique<SURFArgs>(cmd)};
             if (name == "orb")
-                return ORBArgs{cmd};
+                return {make_unique<ORBArgs>(cmd)};
             if (name == "akaze")
-                return AKAZEArgs{cmd};
+                return {make_unique<AKAZEArgs>(cmd)};
             if (name == "brisk")
-                return BRISKArgs{cmd};
+                return {make_unique<BRISKArgs>(cmd)};
             if (name == "agast")
-                return AGASTArgs{cmd};
+                return {make_unique<AGASTArgs>(cmd)};
             if (name == "null")
-                return NULLArgs{cmd};
+                return {make_unique<NULLArgs>(cmd)};
             UNREACHABLE(                                      // LCOV_EXCL_LINE
                 "Unexpected detector/descriptor provided!");  // LCOV_EXCL_LINE
         };
@@ -406,38 +409,40 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     using cv::xfeatures2d::SURF;
 
     auto argument_visitor = overloaded{
-        [](const SIFTArgs& sift) -> cv::Ptr<cv::Feature2D> {
-            return SIFT::create(sift.feature_count, sift.octave_layers,
-                                sift.contrast_threshold, sift.edge_threshold,
-                                sift.sigma);
+        [](const unique_ptr<SIFTArgs>& sift) -> cv::Ptr<cv::Feature2D> {
+            return SIFT::create(sift->feature_count, sift->octave_layers,
+                                sift->contrast_threshold, sift->edge_threshold,
+                                sift->sigma);
         },
-        [](const SURFArgs& surf) -> cv::Ptr<cv::Feature2D> {
-            return SURF::create(surf.hessian_threshold, surf.n_octaves,
-                                surf.octave_layers, surf.extended,
-                                surf.upright);
+        [](const unique_ptr<SURFArgs>& surf) -> cv::Ptr<cv::Feature2D> {
+            return SURF::create(surf->hessian_threshold, surf->n_octaves,
+                                surf->octave_layers, surf->extended,
+                                surf->upright);
         },
-        [](const ORBArgs& orb) -> cv::Ptr<cv::Feature2D> {
-            return ORB::create(orb.feature_count, orb.scale_factor,
-                               orb.n_levels, orb.edge_threshold,
-                               orb.first_level, orb.WTA_K,
-                               ORBArgs::string_to_score_type(orb.score_type),
-                               orb.path_size, orb.fast_threshold);
+        [](const unique_ptr<ORBArgs>& orb) -> cv::Ptr<cv::Feature2D> {
+            return ORB::create(orb->feature_count, orb->scale_factor,
+                               orb->n_levels, orb->edge_threshold,
+                               orb->first_level, orb->WTA_K,
+                               ORBArgs::string_to_score_type(orb->score_type),
+                               orb->path_size, orb->fast_threshold);
         },
-        [](const AKAZEArgs& akaze) -> cv::Ptr<cv::Feature2D> {
+        [](const unique_ptr<AKAZEArgs>& akaze) -> cv::Ptr<cv::Feature2D> {
             return AKAZE::create(
-                AKAZEArgs::string_to_descriptor(akaze.descriptor_type),
-                akaze.descriptor_size, akaze.descriptor_channels,
-                akaze.threshold, akaze.n_octaves, akaze.n_octave_layers,
-                AKAZEArgs::string_to_diffusivity(akaze.diffusivity));
+                AKAZEArgs::string_to_descriptor(akaze->descriptor_type),
+                akaze->descriptor_size, akaze->descriptor_channels,
+                akaze->threshold, akaze->n_octaves, akaze->n_octave_layers,
+                AKAZEArgs::string_to_diffusivity(akaze->diffusivity));
         },
-        [](const BRISKArgs& brisk) -> cv::Ptr<cv::Feature2D> {
-            return BRISK::create(brisk.threshold, brisk.n_octaves,
-                                 brisk.pattern_scale);
+        [](const unique_ptr<BRISKArgs>& brisk) -> cv::Ptr<cv::Feature2D> {
+            return BRISK::create(brisk->threshold, brisk->n_octaves,
+                                 brisk->pattern_scale);
         },
-        [](const AGASTArgs& agast) -> cv::Ptr<cv::Feature2D> {
-            return AgastFeatureDetector::create(agast.threshold);
+        [](const unique_ptr<AGASTArgs>& agast) -> cv::Ptr<cv::Feature2D> {
+            return AgastFeatureDetector::create(agast->threshold);
         },
-        [](const NULLArgs & /*null*/) -> cv::Ptr<cv::Feature2D> { return {}; }};
+        [](const unique_ptr<NULLArgs> & /*null*/) -> cv::Ptr<cv::Feature2D> {
+            return {};
+        }};
 
     CLI::App* provided_detector_cmd = detector_cmd->get_subcommands()[0];
     Ensures(detector_params.count(provided_detector_cmd) == 1);
