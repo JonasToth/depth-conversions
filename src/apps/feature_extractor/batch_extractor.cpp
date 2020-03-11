@@ -44,12 +44,11 @@ bool batch_extractor::process_detector(const math::image<uchar>& image,
     try {
         using cv::FileNode;
         using cv::FileStorage;
-        using cv::write;
 
         FileStorage fs{out_file, FileStorage::WRITE | FileStorage::FORMAT_YAML};
-        write(fs, "source_path", in_file);
-        write(fs, "keypoints", keypoints);
-        write(fs, "descriptors", descriptors);
+        cv::write(fs, "source_path", in_file);
+        cv::write(fs, "keypoints", keypoints);
+        cv::write(fs, "descriptors", descriptors);
 
         return true;
     } catch (...) {

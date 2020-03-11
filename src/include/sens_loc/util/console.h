@@ -1,6 +1,11 @@
 #ifndef CONSOLE_H_MZIDGR2K
 #define CONSOLE_H_MZIDGR2K
 
+// Alpine-Linux builds do fail. Maybe this mitigates the problem.
+#if defined __linux__ || defined __APPLE__ || defined __HAIKU__
+#include <unistd.h>  // -D_FORTIFY_SOURCE=2 workaround: https://github.com/opencv/opencv/issues/15020
+#endif
+
 #include <mutex>
 #include <ostream>
 #include <rang.hpp>
