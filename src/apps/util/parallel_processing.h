@@ -34,8 +34,7 @@ bool parallel_indexed_file_processing(int          start,
         int total_tasks = end - start + 1;
 
         tf::Executor executor;
-        executor.make_observer<util::progress_bar_observer>(/*chunk_size=*/1L,
-                                                            total_tasks);
+        executor.make_observer<util::progress_bar_observer>(total_tasks);
         tf::Taskflow tf;
 
         bool batch_success = true;

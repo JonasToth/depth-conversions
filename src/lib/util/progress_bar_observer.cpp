@@ -5,24 +5,27 @@ void progress_bar_observer::on_entry(unsigned /*worker_id*/,
                                      tf::TaskView /*task_view*/) {
     if (!_inital_output) {
         _inital_output = true;
-        print_bar();
+        print_bar(/*increment=*/false);
     }
 }
 
 void progress_bar_observer::on_exit(unsigned /*worker_id*/,
                                     tf::TaskView /*task_view*/) {
-    _done++;
-    print_bar();
+    print_bar(/*increment=*/true);
 }
 
-void progress_bar_observer::print_bar() noexcept {
+void progress_bar_observer::print_bar(bool increment) noexcept {
     auto s = synced();
+
+    if (increment)
+        _done++;
+
     std::cout << "\r" << rang::fg::green << rang::style::bold << std::setw(5)
               << _done << " ";
 
     auto progress =
         gsl::narrow_cast<float>(_done) / gsl::narrow_cast<float>(_total_tasks);
-    // Progress bar is 30 characters wide.
+
     int bar_elements =
         gsl::narrow_cast<int>(progress * gsl::narrow_cast<float>(max_bars));
     Ensures(bar_elements <= max_bars);

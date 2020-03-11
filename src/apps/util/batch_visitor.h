@@ -27,8 +27,7 @@ Functor parallel_visitation(int start, int end, Functor&& f) noexcept {
     tf::Executor executor;
 
     int total_tasks = end - start + 1;
-    executor.make_observer<util::progress_bar_observer>(/*chunk_size=*/1L,
-                                                        total_tasks);
+    executor.make_observer<util::progress_bar_observer>(total_tasks);
     tf::Taskflow tf;
     tf.parallel_for(start, end + 1, 1, std::forward<Functor>(f));
     const auto before = std::chrono::steady_clock::now();
@@ -37,6 +36,7 @@ Functor parallel_visitation(int start, int end, Functor&& f) noexcept {
     const auto dur_deci_seconds =
         std::chrono::duration_cast<std::chrono::duration<long, std::centi>>(
             after - before);
+
     std::cout << std::endl;
     {
         auto s = synced();
