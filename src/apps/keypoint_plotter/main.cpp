@@ -42,10 +42,10 @@ MAIN_HEAD("Batch-processing tool to plot keypoints and matches") {
                    "NOTE: These are 8bit-RGB images!")
         ->required();
 
-    int start_idx;
+    int start_idx = 0;
     app.add_option("-s,--start", start_idx, "Start index for processing.")
         ->required();
-    int end_idx;
+    int end_idx = 0;
     app.add_option("-e,--end", end_idx, "End index for processing.")
         ->required();
 

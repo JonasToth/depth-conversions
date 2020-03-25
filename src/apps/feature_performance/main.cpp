@@ -46,10 +46,10 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     app.add_option("-i,--input", feature_file_input_pattern,
                    "Define file-pattern for the feature files to be plotted")
         ->required();
-    int start_idx;
+    int start_idx = 0;
     app.add_option("-s,--start", start_idx, "Start index for processing.")
         ->required();
-    int end_idx;
+    int end_idx = 0;
     app.add_option("-e,--end", end_idx, "End index for processing.")
         ->required();
     optional<string> statistics_file;
@@ -60,14 +60,14 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
     CLI::App* cmd_keypoint_dist = app.add_subcommand(
         "keypoint-distribution",
         "Determine the keypoint distribution over all images");
-    unsigned int image_width;
+    unsigned int image_width = 0;
     cmd_keypoint_dist
         ->add_option("--image-width", image_width,
                      "The width of the original input images in pixel (check "
                      "the intrinsic!")
         ->required()
         ->check(CLI::Range(65'535));
-    unsigned int image_height;
+    unsigned int image_height = 0;
     cmd_keypoint_dist
         ->add_option("--image-height", image_height,
                      "The height of the original input images in pixel (check "

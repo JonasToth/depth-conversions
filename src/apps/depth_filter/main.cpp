@@ -2,6 +2,7 @@
 #include "filter_functor.h"
 
 #include <CLI/CLI.hpp>
+#include <cmath>
 #include <memory>
 #include <rang.hpp>
 #include <sens_loc/preprocess/filter.h>
@@ -58,10 +59,10 @@ MAIN_HEAD("Batch-processing tool to filter depth images and maps") {
            "-o,--output", files.output,
            "Output pattern for filtered images; e.g. \"filtered-{}.png\"")
         ->required();
-    int start_idx;
+    int start_idx = 0;
     app.add_option("-s,--start", start_idx, "Start index of batch, inclusive")
         ->required();
-    int end_idx;
+    int end_idx = 0;
     app.add_option("-e,--end", end_idx, "End index of batch, inclusive")
         ->required();
 
@@ -81,14 +82,14 @@ MAIN_HEAD("Batch-processing tool to filter depth images and maps") {
         "This will read 'depth_0000.png ...' and filter them with the "
         "bilateral filter, producing the files 'filtered_0000.png ...'\n"
         " in the working directory");
-    double sigma_color;
+    double sigma_color = NAN;
     bilateral_cmd->add_option("-c,--sigma-color", sigma_color,
                               "Defines threshold for color similarity.");
-    int          distance;
+    int          distance        = 0;
     CLI::Option* distance_option = bilateral_cmd->add_option(
         "-d,--distance", distance,
         "One option to define the relevant neighbourhood, diameter in pixel");
-    double       sigma_space;
+    double       sigma_space = NAN;
     CLI::Option* sigma_space_option =
         bilateral_cmd->add_option("-s,--sigma-space", sigma_space,
                                   "Other option to define proximity relation, "

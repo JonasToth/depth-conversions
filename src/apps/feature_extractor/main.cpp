@@ -309,10 +309,10 @@ MAIN_HEAD("Batch-processing tool to extract visual features") {
     app.add_option("-o,--output", arg_out_path,
                    "Output file-pattern for the feature information")
         ->required();
-    int start_idx;
+    int start_idx = 0;
     app.add_option("-s,--start", start_idx, "Start index of batch, inclusive")
         ->required();
-    int end_idx;
+    int end_idx = 0;
     app.add_option("-e,--end", end_idx, "End index of batch, inclusive")
         ->required();
 

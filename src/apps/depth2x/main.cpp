@@ -122,10 +122,10 @@ MAIN_HEAD("Batch-conversion of depth images to various derived image-types.") {
                 "(pinhole-range) or orthographic depths (pinhole-depth)",
                 /*defaulted=*/true);
 
-    int start_idx;
+    int start_idx = 0;
     app.add_option("-s,--start", start_idx, "Start index of batch, inclusive")
         ->required();
-    int end_idx;
+    int end_idx = 0;
     app.add_option("-e,--end", end_idx, "End index of batch, inclusive")
         ->required();
 
