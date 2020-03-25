@@ -12,7 +12,7 @@ RUN apt-get update \
     build-essential \
     git \
     ninja-build \
-    clang-9 \
+    clang-10 \
     unzip \
     rsync \
  && mkdir /cmake && cd /cmake \
