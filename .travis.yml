@@ -108,10 +108,7 @@ matrix:
     
     ## OSX
     #- os: osx
-    #  osx_image: xcode10
-    #  compiler: clang
-    #  env:
-    #    - CXX=clang++
+    #  osx_image: xcode8
 
 # install cmake 3.10
 before_install:

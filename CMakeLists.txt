@@ -6,7 +6,7 @@ MESSAGE(STATUS "CMAKE_ROOT: " ${CMAKE_ROOT})
 set(CMAKE_VERBOSE_MAKEFILE ON)
 
 # Project name
-project(Cpp-Taskflow VERSION 2.3.0 LANGUAGES CXX)
+project(Cpp-Taskflow VERSION 2.3.1 LANGUAGES CXX)
 
 # build options
 option(TF_BUILD_EXAMPLES "Enables build of examples" ON)
@@ -16,18 +16,6 @@ option(TF_BUILD_BENCHMARKS "Enables build of benchmarks" OFF)
 
 # Include additional language check
 include(CheckLanguage)
-
-
-include(CheckLanguage)
-
-# check cuda
-check_language(CUDA)
-
-if(CMAKE_CUDA_COMPILER)
-  enable_language(CUDA)
-else()
-  message(STATUS "No CUDA support")
-endif()
 
 # Compiler vendors
 ## g++
@@ -43,10 +31,10 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
     message(FATAL_ERROR "\nCpp-Taskflow requires clang++ at least v4.0")
   endif() 
 ## AppleClang
-##elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
-##  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0")
-##    message(FATAL_ERROR "\nCpp-Taskflow requires AppleClang at least v8.0")
-##  endif()
+elseif (CMAKE_CXX_COMPILER_ID STREQUAL "AppleClang")
+  if(CMAKE_CXX_COMPILER_VERSION VERSION_LESS "8.0")
+    message(FATAL_ERROR "\nCpp-Taskflow requires AppleClang at least v8.0")
+  endif()
 ## microsoft visual c++
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   if(NOT MSVC_VERSION GREATER_EQUAL 1914)
@@ -59,6 +47,7 @@ Cpp-Taskflow currently supports the following compilers:\n\
 - g++ v5.0 or above\n\
 - clang++ v4.0 or above\n\
 - MSVC++ v19.14 or above\n\
+- AppleClang v8 or above\n\
 ")
 endif()
 
@@ -106,7 +95,7 @@ add_library(tf::error_settings ALIAS error_settings)
 target_compile_options(
   error_settings
   INTERFACE
-  #$<$<CXX_COMPILER_ID:AppleClang>:-Wall -Wextra -Wfatal-errors>
+  $<$<CXX_COMPILER_ID:AppleClang>:-Wall -Wextra -Wfatal-errors>
   $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:Clang>>:-Wall -Wextra -Wfatal-errors>
   $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:GNU>>:-Wall -Wextra -Wfatal-errors>
   $<$<AND:$<COMPILE_LANGUAGE:CXX>,$<CXX_COMPILER_ID:MSVC>>:/W3 /permissive->
@@ -311,23 +300,23 @@ target_link_libraries(utility ${PROJECT_NAME} Threads::Threads tf::default_setti
 target_include_directories(utility PRIVATE ${TF_3RD_PARTY_DIR}/doctest)
 add_test(passive_vector  ${TF_UTEST_DIR}/utility -tc=PassiveVector)
 add_test(function_traits ${TF_UTEST_DIR}/utility -tc=FunctionTraits)
-add_test(object_pool.sequential ${TF_UTEST_DIR}/utility -tc=ObjectPool.Sequential)
-add_test(object_pool.1thread ${TF_UTEST_DIR}/utility -tc=ObjectPool.1thread)
-add_test(object_pool.2threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.2threads)
-add_test(object_pool.3threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.3threads)
-add_test(object_pool.4threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.4threads)
-add_test(object_pool.5threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.5threads)
-add_test(object_pool.6threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.6threads)
-add_test(object_pool.7threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.7threads)
-add_test(object_pool.8threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.8threads)
-add_test(object_pool.9threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.9threads)
-add_test(object_pool.10threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.10threads)
-add_test(object_pool.11threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.11threads)
-add_test(object_pool.12threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.12threads)
-add_test(object_pool.13threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.13threads)
-add_test(object_pool.14threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.14threads)
-add_test(object_pool.15threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.15threads)
-add_test(object_pool.16threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.16threads)
+#add_test(object_pool.sequential ${TF_UTEST_DIR}/utility -tc=ObjectPool.Sequential)
+#add_test(object_pool.1thread ${TF_UTEST_DIR}/utility -tc=ObjectPool.1thread)
+#add_test(object_pool.2threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.2threads)
+#add_test(object_pool.3threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.3threads)
+#add_test(object_pool.4threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.4threads)
+#add_test(object_pool.5threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.5threads)
+#add_test(object_pool.6threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.6threads)
+#add_test(object_pool.7threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.7threads)
+#add_test(object_pool.8threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.8threads)
+#add_test(object_pool.9threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.9threads)
+#add_test(object_pool.10threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.10threads)
+#add_test(object_pool.11threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.11threads)
+#add_test(object_pool.12threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.12threads)
+#add_test(object_pool.13threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.13threads)
+#add_test(object_pool.14threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.14threads)
+#add_test(object_pool.15threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.15threads)
+#add_test(object_pool.16threads ${TF_UTEST_DIR}/utility -tc=ObjectPool.16threads)
 
 # unittest for WorkStealingQueue 
 add_executable(tsq ${TF_UTEST_DIR}/tsq.cpp)
@@ -501,6 +490,7 @@ add_test(cuda_basics.add.i32 ${TF_UTEST_DIR}/cuda/cuda_basics -tc=Add.i32)
 add_test(cuda_basics.barrier.i8 ${TF_UTEST_DIR}/cuda/cuda_basics -tc=Barrier.i8)
 add_test(cuda_basics.barrier.i16 ${TF_UTEST_DIR}/cuda/cuda_basics -tc=Barrier.i16)
 add_test(cuda_basics.barrier.i32 ${TF_UTEST_DIR}/cuda/cuda_basics -tc=Barrier.i32)
+add_test(cuda_basics.loop ${TF_UTEST_DIR}/cuda/cuda_basics -tc=Loop)
 
 # matrix operation tests
 add_executable(cuda_matrix ${TF_UTEST_DIR}/cuda/cuda_matrix.cu)
