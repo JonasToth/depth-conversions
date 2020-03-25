@@ -1,0 +1,155 @@
+namespace tf {
+
+/** @mainpage Quick Start
+
+@section ModernCppParallelTaskProgrammingLibrary Modern C++ Parallel Task Programming Library
+
+Cpp-Taskflow is a fast C++ @em header-only library to help you quickly 
+write parallel programs with complex task dependencies.
+Cpp-Taskflow is by far faster, more expressive, fewer lines of code, and easier for drop-in integration
+than existing parallel task programming libraries such as <a href="https://www.openmp.org/spec-html/5.0/openmpsu99.html">OpenMP Tasking</a> and Intel <a href="https://www.threadingbuildingblocks.org/tutorial-intel-tbb-flow-graph">Thread Building Block (TBB) FlowGraph</a>.
+
+@image html images/performance.jpg width=95%
+
+
+@subsection StaticDynamicTasking Static and Dynamic Tasking
+
+Cpp-Taskflow has a unified interface for both @em static tasking and @em dynamic tasking,
+allowing users to quickly master our parallel task programming model in a natural idiom.
+
+<table width="100%">
+<tr>
+  <td align="center">Static Tasking</td>
+  <td align="center">Dynamic Tasking</td>
+</tr>
+<tr>
+  <td>@image html images/static_graph.svg width=100%</td>
+  <td>@image html images/dynamic_graph.svg width=100%</td>
+</tr>
+</table>
+
+@subsection ConditionalTasking Conditional Tasking
+
+Cpp-Taskflow supports conditional tasking for you to implement cyclic and 
+dynamic control flows that are otherwise difficult to do 
+with existing task programming frameworks.
+
+@image html images/condition.svg width=100%
+
+@subsection ComposableTasking Composable Tasking
+
+Cpp-Taskflow is composable. You can create large parallel graphs through
+composition of modular and reusable blocks that are easier to optimize
+at an individual scope.
+
+@image html images/framework.svg width=100%
+
+@subsection HeterogeneousTasking Concurrent CPU-GPU Tasking
+
+Cpp-Taskflow supports heterogeneous tasking for you to 
+accelerate a wide range of scientific computing applications
+by harnessing the power of CPU-GPU collaborative computing.
+
+@image html images/cudaflow.svg width=100%
+
+@subsection Testimonial Testimonial
+
+Cpp-Taskflow is committed to support both academic and industry research projects,
+making it reliable and cost-effective for long-term and large-scale developments.
+Our users say:
+
+@li \"<em>Cpp-Taskflow has the cleanest task API I've ever seen.</em>\" <a href="https://github.com/damienhocking">Damien Hocking</a>
+@li \"<em>Cpp-Taskflow has a very simple and elegant tasking interface. The performance also scales very well.</em>\" <a href="https://github.com/totalgee">Glen Fraser</a>
+@li \"<em>Cpp-Taskflow lets me handle parallel processing in a smart way.</em>\" <a href="https://cpp-learning.com/cpp-taskflow/">Hayabusa</a>
+@li \"<em>Best poster award for the open-source parallel programming library.</em>\" <a href="https://github.com/CppCon/CppCon2018">2018 Cpp Conference</a>
+@li \"<em>Second Place in Open Source Software Competition.</em>\" 2019 ACM Multimedia Conference</a>
+
+See a quick <a href="https://cpp-taskflow.github.io/">presentation</a> and visit our <a href="https://github.com/cpp-taskflow/cpp-taskflow">GitHub</a> to learn more about Cpp-Taskflow.
+
+@section HowToInstallCppTaskflow How to Install Cpp-Taskflow?
+
+Cpp-Taskflow is *header-only* and there is no need for installation.
+Simply download the source and copy the headers under the @c taskflow subdirectory to your project.
+
+@code{.sh}
+~$ git clone https://github.com/cpp-taskflow/cpp-taskflow.git
+~$ cd cpp-taskflow/
+~$ cp -r taskflow myproject/include/
+@endcode
+
+@section ASimpleFirstProgram A Simple First Program
+
+Here is a rather simple program to get you started.
+
+@code{.cpp}
+#include <taskflow/taskflow.hpp>  // Cpp-Taskflow is header-only
+
+int main(){
+  
+  tf::Executor executor;
+  tf::Taskflow taskflow;
+
+  auto [A, B, C, D] = taskflow.emplace(
+    [] () { std::cout << "TaskA\n"; },               //  task dependency graph
+    [] () { std::cout << "TaskB\n"; },               // 
+    [] () { std::cout << "TaskC\n"; },               //          +---+          
+    [] () { std::cout << "TaskD\n"; }                //    +---->| B |-----+   
+  );                                                 //    |     +---+     |
+                                                     //  +---+           +-v-+ 
+  A.precede(B);  // A runs before B                  //  | A |           | D | 
+  A.precede(C);  // A runs before C                  //  +---+           +-^-+ 
+  B.precede(D);  // B runs before D                  //    |     +---+     |    
+  C.precede(D);  // C runs before D                  //    +---->| C |-----+    
+                                                     //          +---+          
+  executor.run(taskflow).wait();
+
+  return 0;
+}
+@endcode
+
+
+
+The program creates four tasks A, B, C, and D.
+The dependency constraints force A to run before B and C, and D to run after B and C.
+The maximum concurrency is this example is two, where B and C can run at the same time.
+
+@image html images/simple.svg width=35%
+
+@section CompileAndRunYourFirstProgram Compile and Run Your First Program
+
+Cpp-Taskflow is written in C++14 and is built on top of 
+C++ standardized threading libraries.
+To compile the above program, you need to tell the compiler
+where to find the Cpp-Taskflow header files.
+For example, with gcc you need the `-I` option.
+
+@code{.sh}
+~$ g++ simple.cpp -I myproject/include/ -O2 -pthread -o simple
+~$ ./simple
+TaskA
+TaskC 
+TaskB 
+TaskD
+@endcode
+
+The execution order of B and C might differ as they can run concurrently.
+
+@section SupportedCompilers Supported Compilers
+
+To use Cpp-Taskflow, you only need a compiler that supports C++14:
+
+@li GNU C++ Compiler at least v5.0 with -std=c++14
+@li Clang C++ Compiler at least v4.0 with -std=c++14
+@li Microsoft Visual Studio at least v15.7 (MSVC++ 19.14)
+@li AppleClang Xode Version at least v8
+@li Nvidia CUDA Toolkit and Compiler (nvcc) at least v10.0 with -std=c++14
+
+Cpp-Taskflow works on Linux, Windows, and OSX.
+
+@section License License
+
+Cpp-Taskflow is open-source under permissive MIT license.
+
+*/
+
+}
