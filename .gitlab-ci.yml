@@ -81,13 +81,30 @@ ubuntu-1804-clang-9:
       - merge_requests
     <<: *code_change_filter_definition
 
-ubuntu-1804-clang-9-libcxx:
+ubuntu-1804-clang-10:
   image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   variables:
-    CC: "clang-9"
-    CXX: "clang++-9"
-    LD: "lld-9"
+    CC: "clang-10"
+    CXX: "clang++-10"
+    LD: "lld-10"
+    USE_LIBCXX: "OFF"
+    WITH_BENCHMARK: "ON"
+    WITH_BENCHMARK_JUNIT_REPORT: "OFF"
+  script:
+    - ./scripts/ci/normal_build.bash
+  only:
+    refs:
+      - merge_requests
+    <<: *code_change_filter_definition
+
+ubuntu-1804-clang-10-libcxx:
+  image: $CI_REGISTRY_IMAGE/base-image-tools
+  stage: compilers
+  variables:
+    CC: "clang-10"
+    CXX: "clang++-10"
+    LD: "lld-10"
     USE_LIBCXX: "ON"
     FORCE_BUNDLED_CV: "ON"
     CUSTOM_OPENCV_SOURCE: "/opencv/opencv"
@@ -106,13 +123,13 @@ ubuntu-1804-clang-9-libcxx:
       - master
     <<: *code_change_filter_definition
 
-ubuntu-1804-clang-9-static-libcxx-lto:
+ubuntu-1804-clang-10-static-libcxx-lto:
   image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: compilers
   variables:
-    CC: "clang-9"
-    CXX: "clang++-9"
-    LD: "lld-9"
+    CC: "clang-10"
+    CXX: "clang++-10"
+    LD: "lld-10"
     USE_LIBCXX: "ON"
     FORCE_BUNDLED_CV: "ON"
     CUSTOM_OPENCV_SOURCE: "/opencv/opencv"
@@ -221,9 +238,9 @@ ubuntu-1804-asan:
   image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: sanitizers
   variables:
-    CC: "clang-9"
-    CXX: "clang++-9"
-    LD: "clang++-9"
+    CC: "clang-10"
+    CXX: "clang++-10"
+    LD: "clang++-10"
     BUILD_TYPE: "Debug"
     WITH_ASAN: "ON"
   <<: *wide_test_filter_definition
@@ -233,9 +250,9 @@ ubuntu-1804-msan:
   image: $CI_REGISTRY_IMAGE/base-image-msan
   stage: sanitizers
   variables:
-    CC: "clang-9"
-    CXX: "clang++-9"
-    LD: "clang++-9"
+    CC: "clang-10"
+    CXX: "clang++-10"
+    LD: "clang++-10"
     USE_LIBCXX: "ON"
     BUILD_TYPE: "RelWithDebInfo"
     WITH_MSAN: "ON"
@@ -246,9 +263,9 @@ ubuntu-1804-ubsan:
   image: $CI_REGISTRY_IMAGE/base-image-tools
   stage: sanitizers
   variables:
-    CC: "clang-9"
-    CXX: "clang++-9"
-    LD: "clang++-9"
+    CC: "clang-10"
+    CXX: "clang++-10"
+    LD: "clang++-10"
     BUILD_TYPE: "Debug"
     WITH_UBSAN: "ON"
   <<: *wide_test_filter_definition
@@ -259,9 +276,9 @@ ubuntu-1804-tsan:
   allow_failure: true
   stage: sanitizers
   variables:
-    CC: "clang-9"
-    CXX: "clang++-9"
-    LD: "clang++-9"
+    CC: "clang-10"
+    CXX: "clang++-10"
+    LD: "clang++-10"
     BUILD_TYPE: "RelWithDebInfo"
     WITH_TSAN: "ON"
     TSAN_OPTIONS: "suppressions=/builds/jtoth/master-thesis/scripts/tsan_suppressions"
