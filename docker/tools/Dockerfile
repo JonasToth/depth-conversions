@@ -4,8 +4,8 @@ LABEL maintainer="jonas.toth@student.tu-freiberg.de"
 RUN apt-get update \
  && apt-get install -y wget gnupg2 \
  && wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
- && echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-8 main" >> /etc/apt/sources.list \
  && echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main" >> /etc/apt/sources.list \
+ && echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main" >> /etc/apt/sources.list \
  && apt-get update \
  && apt-get dist-upgrade -y \
  && apt-get install -y \
@@ -23,9 +23,10 @@ RUN apt-get update \
  && add-apt-repository ppa:ubuntu-toolchain-r/test \
  && apt-get update \
  && apt-get install -y  \
-    clang-8 lld-8  \
-    clang-9 clang-tools-9 lld-9 clang-tidy-9 \
-    libc++1-9 libc++-9-dev libc++abi1-9 libc++abi-9-dev \
+    clang-8 lld-8 \
+    clang-9 lld-9 \
+    clang-10 clang-tools-10 lld-10 clang-tidy-10 \
+    libc++1-10 libc++-10-dev libc++abi1-10 libc++abi-10-dev \
     gcc-7 g++-7 \
     gcc-8 g++-8 \
     gcc-9 g++-9 \

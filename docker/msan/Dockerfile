@@ -5,7 +5,7 @@ ARG cmake_version="3.16.2"
 RUN apt-get update \
  && apt-get install -y wget gnupg2 \
  && wget -O - https://apt.llvm.org/llvm-snapshot.gpg.key | apt-key add - \
- && echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-9 main" >> /etc/apt/sources.list \
+ && echo "deb http://apt.llvm.org/bionic/ llvm-toolchain-bionic-10 main" >> /etc/apt/sources.list \
  && apt-get update \
  && apt-get dist-upgrade -y \
  && apt-get install -y \
@@ -22,7 +22,7 @@ RUN apt-get update \
  && rm -rf * && cd /
 
 WORKDIR /llvm
-RUN git clone --depth=1 https://github.com/llvm/llvm-project.git --branch="release/9.x"
+RUN git clone --depth=1 https://github.com/llvm/llvm-project.git --branch="release/10.x"
 
 WORKDIR /llvm/build
 RUN cmake ../llvm-project/llvm \
@@ -31,9 +31,9 @@ RUN cmake ../llvm-project/llvm \
         -DLLVM_USE_SANITIZER=Memory \
         -DLLVM_ENABLE_PROJECTS="libcxx;libcxxabi" \
         -DLLVM_TARGETS_TO_BUILD="X86" \
-        -DLLVM_TABLEGEN=/usr/bin/llvm-tblgen-9 \
-        -DCMAKE_C_COMPILER=clang-9 \
-        -DCMAKE_CXX_COMPILER=clang++-9
+        -DLLVM_TABLEGEN=/usr/bin/llvm-tblgen-10 \
+        -DCMAKE_C_COMPILER=clang-10 \
+        -DCMAKE_CXX_COMPILER=clang++-10
 RUN ninja cxx \
  && ninja install-cxx install-cxxabi \
  && cd /llvm \
@@ -49,7 +49,7 @@ RUN mkdir -p build_cv \
  && wget --quiet https://github.com/opencv/opencv_contrib/archive/$cv_version.zip \
  && unzip $cv_version.zip && mv opencv_contrib-$cv_version opencv_contrib && rm $cv_version.zip \
  && cd /opencv/build_cv \
- && CC=clang-9 CXX=clang++-9 \
+ && CC=clang-10 CXX=clang++-10 \
     CFLAGS="-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer" \
     CXXFLAGS="-stdlib=libc++ -fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer" \
     LDFLAGS="-lc++abi -stdlib=libc++" \
@@ -99,8 +99,8 @@ RUN mkdir -p /eigen3 && cd /eigen3 \
  && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
  && ninja install
 
-RUN update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-9/bin/clang 10 \
- && update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-9/bin/clang++ 10 \
+RUN update-alternatives --install /usr/bin/clang clang /usr/lib/llvm-10/bin/clang 10 \
+ && update-alternatives --install /usr/bin/clang++ clang++ /usr/lib/llvm-10/bin/clang++ 10 \
  && update-alternatives --install /usr/bin/cc cc /usr/bin/clang 20 \
  && update-alternatives --set cc /usr/bin/clang \
  && update-alternatives --install /usr/bin/c++ c++ /usr/bin/clang++ 20 \
@@ -110,7 +110,7 @@ ARG boost_version_string="1_72_0"
 RUN mkdir -p /boost && cd /boost \
  && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
  && tar xf boost_$boost_version_string.tar.gz && cd boost_$boost_version_string \
- && CC=clang-9 CXX=clang++-9 \
+ && CC=clang-10 CXX=clang++-10 \
     ./bootstrap.sh --prefix=/usr --with-toolset=clang \
  && ./b2 install link=static variant=release \
     cxxflags="-stdlib=libc++ -fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer" \
@@ -128,7 +128,7 @@ RUN mkdir -p /fmtlib && cd /fmtlib \
  && tar xf $fmt_version.tar.gz && mv fmt-${fmt_version} fmt \
  && mkdir build && cd build \
  && cd /fmtlib/build \
- && CC=clang-9 CXX=clang++-9 \
+ && CC=clang-10 CXX=clang++-10 \
     CFLAGS="-fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer" \
     CXXFLAGS="-stdlib=libc++ -fsanitize=memory -fsanitize-memory-track-origins -fno-omit-frame-pointer" \
     LDFLAGS="-lc++abi -stdlib=libc++" \
