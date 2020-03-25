@@ -121,6 +121,7 @@ ubuntu-1804-clang-10-libcxx:
   only:
     refs:
       - master
+      - merge_requests
     <<: *code_change_filter_definition
 
 ubuntu-1804-clang-10-static-libcxx-lto:
