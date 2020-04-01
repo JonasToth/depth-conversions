@@ -48,7 +48,7 @@ inline Real orthografic_to_euclidian(
     const Real                    y        = p_i.y();
     const Real                    z_helper = x * x + y * y + 1.;
 
-    const Real euclid_distance = Real(d) * (z_helper) / std::sqrt(z_helper);
+    const Real euclid_distance = Real(d) * std::sqrt(z_helper);
     Ensures(euclid_distance >= Real(d));
 
     return euclid_distance;
