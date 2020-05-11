@@ -140,7 +140,7 @@ struct ORBArgs {
         UNREACHABLE("Invalid choice for ScoreType!");  // LCOV_EXCL_LINE
     }
 
-    int    feature_count  = 0;
+    int    feature_count  = 1000;
     float  scale_factor   = 1.2F;
     int    n_levels       = 8;
     int    edge_threshold = 31;
