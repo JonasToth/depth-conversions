@@ -212,6 +212,16 @@ def run_recognition(config_args, source_info):
         invocation.extend(['--backprojection', config_args['backprojection']])
         invocation.extend(['--orig-images', config_args['original_images']])
 
+        if 'true_positive_strength' in config_args:
+            invocation.extend(['--true-positive-strength',
+                               config_args['true_positive_strength']])
+        if 'false_negative_strength' in config_args:
+            invocation.extend(['--false-negative-strength',
+                               config_args['false_negative_strength']])
+        if 'false_positive_strength' in config_args:
+            invocation.extend(['--false-positive-strength',
+                               config_args['false_positive_strength']])
+
     invocation.extend(['--backprojection-selected-histo',
                        config_args['backprojection_selected_histo']])
     invocation.extend(['--relevant-elements-histo',
