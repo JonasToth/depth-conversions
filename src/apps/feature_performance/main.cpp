@@ -190,7 +190,7 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                      "Line strength to connect two true positive keypoints",
                      /*defaulted=*/true)
         ->needs(backproject_opt);
-    std::vector<unsigned short> tp_rgb{65U, 117U, 5U};
+    std::vector<unsigned char> tp_rgb{65U, 117U, 5U};
     cmd_rec_perf
         ->add_option("--true-positive-rgb", tp_rgb,
                      "RGB values [0-255] for true positive line color",
@@ -204,7 +204,7 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                      "Line strength to connect two false negative keypoints",
                      /*defaulted=*/true)
         ->needs(backproject_opt);
-    std::vector<unsigned short> fn_rgb{74U, 144U, 226U};
+    std::vector<unsigned char> fn_rgb{74U, 144U, 226U};
     cmd_rec_perf
         ->add_option("--false-negative-rgb", fn_rgb,
                      "RGB values [0-255] for false negative line color",
@@ -218,7 +218,7 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                      "Line strength to connect two false positive keypoints",
                      /*defaulted=*/true)
         ->needs(backproject_opt);
-    std::vector<unsigned short> fp_rgb{208U, 2U, 27U};
+    std::vector<unsigned char> fp_rgb{208U, 2U, 27U};
     cmd_rec_perf
         ->add_option("--false-positive-rgb", fp_rgb,
                      "RGB values [0-255] for false positive line color",
