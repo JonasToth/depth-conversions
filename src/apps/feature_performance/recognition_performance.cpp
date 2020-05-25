@@ -129,14 +129,16 @@ class prec_recall_analysis {
         string_view                                      feature_file_pattern,
         const apps::recognition_analysis_input&          input,
         const apps::recognition_analysis_output_options& output_options,
-        recognition_data&                                accumulated_data)
+        recognition_data&                                accumulated_data,
+        const apps::backproject_config&                  backproject_config)
         : _feature_file_pattern{feature_file_pattern}
         , _input{input}
         , _output_options{output_options}
         , _matcher{cv::BFMatcher::create(_input.matching_norm,
                                          /*crosscheck=*/true)}
         , _mask{nullopt}
-        , _accumulated_data{accumulated_data} {
+        , _accumulated_data{accumulated_data}
+        , _backprojection_config{backproject_config} {
         Expects(!_feature_file_pattern.empty());
         Expects(!_input.depth_image_pattern.empty());
         Expects(!_input.pose_file_pattern.empty());
@@ -274,9 +276,8 @@ class prec_recall_analysis {
                 // Plot true positives.
                 Mat out_img = plot::backprojection_correspondence(
                     orig_img->data(), t_p_t, t_p_o,  // Keypoints
-                    CV_RGB(0, 120, 0),               // Dark Green
-                    6                                // Thickness
-                );
+                    _backprojection_config.true_positive.color,
+                    _backprojection_config.true_positive.strength);
 
                 // Plot false negatives with purple line
                 auto [f_n_t, f_n_o] = analysis::gather_correspondences(
@@ -284,9 +285,8 @@ class prec_recall_analysis {
                     prev_in_img);
                 out_img = plot::backprojection_correspondence(
                     out_img, f_n_t, f_n_o,  // Base image and keypoints
-                    CV_RGB(30, 39, 140),    // Dark Blueish
-                    6                       // Thickness
-                );
+                    _backprojection_config.false_negative.color,
+                    _backprojection_config.false_negative.strength);
 
                 // Plot false positives with orange distance line
                 auto [f_p_t, f_p_o] = analysis::gather_correspondences(
@@ -294,10 +294,8 @@ class prec_recall_analysis {
                     prev_in_img);
                 out_img = plot::backprojection_correspondence(
                     out_img, f_p_t, f_p_o,  // Base image and keypoints
-                    CV_RGB(245, 130, 50),   // ocre orange
-                    1                       // Thickness
-                );
-
+                    _backprojection_config.false_positive.color,
+                    _backprojection_config.false_positive.strength);
 
                 const bool write_success = imwrite(
                     fmt::format(*_output_options.backproject_pattern, idx),
@@ -466,6 +464,8 @@ class prec_recall_analysis {
     Ptr<BFMatcher>               _matcher;
     optional<math::image<uchar>> _mask;
     recognition_data&            _accumulated_data;
+
+    const apps::backproject_config& _backprojection_config;
 };
 }  // namespace
 
@@ -473,7 +473,8 @@ namespace sens_loc::apps {
 int analyze_recognition_performance(
     util::processing_input                     in,
     const recognition_analysis_input&          required_data,
-    const recognition_analysis_output_options& output_options) {
+    const recognition_analysis_output_options& output_options,
+    const backproject_config&                  backproject_config) {
     Expects(in.start < in.end &&
             "Recognition Performance calculation requires at least two images");
 
@@ -486,8 +487,9 @@ int analyze_recognition_performance(
     // The odd-looking double arguments comes from the genericity of the
     // statistic-visitation. The first argument goes to \c statistic_visitor
     // and the second one to \c prec_recall_analysis
-    auto analysis_v = visitor{in.input_pattern, in.input_pattern, required_data,
-                              output_options, accumulator};
+    auto analysis_v =
+        visitor{in.input_pattern, in.input_pattern, required_data,
+                output_options,   accumulator,      backproject_config};
 
     // Consecutive images are matched and analysed, therefore the first
     // index must be skipped.

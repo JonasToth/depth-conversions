@@ -2,11 +2,32 @@
 #define PRECISION_RECALL_H_G2FJDYVV
 
 #include <opencv2/core/base.hpp>
+#include <opencv2/core/types.hpp>
+#include <opencv2/imgproc.hpp>
 #include <optional>
 #include <string_view>
 #include <util/common_structures.h>
 
 namespace sens_loc::apps {
+
+/// Defines the color and line strength used for backprojection.
+struct backproject_style {
+    backproject_style() = default;
+    backproject_style(int r, int g, int b, int strength)
+        : color{CV_RGB(r, g, b)}
+        , strength{strength} {}
+
+    cv::Scalar color    = CV_RGB(0, 0, 0);
+    int        strength = 1;
+};
+
+/// Composition of styles on how the backprojections are plotted.
+/// \sa backproject_style
+struct backproject_config {
+    backproject_style true_positive;
+    backproject_style false_negative;
+    backproject_style false_positive;
+};
 
 struct recognition_analysis_input {
     std::string_view                depth_image_pattern;
@@ -36,7 +57,8 @@ struct recognition_analysis_output_options {
 int analyze_recognition_performance(
     util::processing_input                     in,
     const recognition_analysis_input&          required_data,
-    const recognition_analysis_output_options& output_options);
+    const recognition_analysis_output_options& output_options,
+    const backproject_config&                  backproject_config);
 
 }  // namespace sens_loc::apps
 

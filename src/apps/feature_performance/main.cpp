@@ -183,11 +183,17 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                          "for plotting.")
             ->needs(backproject_opt);
     backproject_opt->needs(orig_imgs);
+    backproject_style tp_style(0, 120, 0, 6);
+    backproject_style fn_style(30, 39, 140, 6);
+    backproject_style fp_style(245, 130, 50, 1);
+
     optional<string> backprojection_selected_histo;
     cmd_rec_perf->add_option("--backprojection-selected-histo",
                              backprojection_selected_histo,
                              "File for the histogram of the backprojection "
                              "error of the selected elements");
+
+
     optional<string> relevant_histo;
     cmd_rec_perf->add_option(
         "--relevant-elements-histo", relevant_histo,
@@ -248,7 +254,8 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
             /*false_positive_histo=*/false_positive_histo,
             /*true_positive_distance_histo=*/true_positive_distance_histo,
             /*false_positive_distance_histo=*/false_positive_distance_histo};
-        return analyze_recognition_performance(in, rec_in, out_opts);
+        return analyze_recognition_performance(in, rec_in, out_opts,
+                                               {tp_style, fn_style, fp_style});
     }
 
     UNREACHABLE("Expected to end program with "  // LCOV_EXCL_LINE
