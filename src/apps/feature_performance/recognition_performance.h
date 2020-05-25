@@ -1,6 +1,8 @@
 #ifndef PRECISION_RECALL_H_G2FJDYVV
 #define PRECISION_RECALL_H_G2FJDYVV
 
+#include "gsl/gsl_assert"
+
 #include <opencv2/core/base.hpp>
 #include <opencv2/core/types.hpp>
 #include <opencv2/imgproc.hpp>
@@ -15,7 +17,15 @@ struct backproject_style {
     backproject_style() = default;
     backproject_style(int r, int g, int b, int strength)
         : color{CV_RGB(r, g, b)}
-        , strength{strength} {}
+        , strength{strength} {
+        Expects(strength > 0);
+        Expects(r >= 0);
+        Expects(g >= 0);
+        Expects(b >= 0);
+        Expects(r < 256);
+        Expects(g < 256);
+        Expects(b < 256);
+    }
 
     cv::Scalar color    = CV_RGB(0, 0, 0);
     int        strength = 1;

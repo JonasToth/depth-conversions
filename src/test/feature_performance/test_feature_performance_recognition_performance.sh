@@ -90,6 +90,31 @@ if [ ! -f backprojected-1.png ] ; then
     print_error "Did not create expected unmasked output files."
     exit 1
 fi
+print_info "Testing Plotting the backprojections of keypoints with different config"
+rm -f backprojected-styled-1.png
+if ! ${exe} \
+    --input "surf-1-octave-{}.feature.gz" \
+    --start 0 --end 1 \
+    recognition-performance \
+    --depth-image "filtered-{}.png" \
+    --pose-file "pose-{}.pose" \
+    --intrinsic "kinect_intrinsic.txt" \
+    --match-norm "L2" \
+    --backprojection "backprojected-styled-{}.png" \
+    --true-positive-strength 20 \
+    --true-positive-rgb 0 255 0 \
+    --false-negative-strength 20 \
+    --false-negative-rgb 0 0 255 \
+    --false-positive-strength 5 \
+    --false-positive-rgb 255 0 0 \
+    --orig-images "flexion-{}.png" ; then
+    print_error "Could not calculate precision and recall and plot the reprojection with custom style"
+    exit 1
+fi
+if [ ! -f backprojected-styled-1.png ] ; then
+    print_error "Did not create expected styled backprojection."
+    exit 1
+fi
 
 print_info "Testing masks for the field of view"
 rm -f masked-backprojected-1.png

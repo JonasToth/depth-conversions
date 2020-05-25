@@ -183,9 +183,48 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                          "for plotting.")
             ->needs(backproject_opt);
     backproject_opt->needs(orig_imgs);
-    backproject_style tp_style(0, 120, 0, 6);
-    backproject_style fn_style(30, 39, 140, 6);
-    backproject_style fp_style(245, 130, 50, 1);
+
+    unsigned int tp_strength = 6;
+    cmd_rec_perf
+        ->add_option("--true-positive-strength", tp_strength,
+                     "Line strength to connect two true positive keypoints",
+                     /*defaulted=*/true)
+        ->needs(backproject_opt);
+    std::vector<unsigned short> tp_rgb{65U, 117U, 5U};
+    cmd_rec_perf
+        ->add_option("--true-positive-rgb", tp_rgb,
+                     "RGB values [0-255] for true positive line color",
+                     /*defaulted=*/true)
+        ->expected(3)
+        ->needs(backproject_opt);
+
+    unsigned int fn_strength = 6;
+    cmd_rec_perf
+        ->add_option("--false-negative-strength", fn_strength,
+                     "Line strength to connect two false negative keypoints",
+                     /*defaulted=*/true)
+        ->needs(backproject_opt);
+    std::vector<unsigned short> fn_rgb{74U, 144U, 226U};
+    cmd_rec_perf
+        ->add_option("--false-negative-rgb", fn_rgb,
+                     "RGB values [0-255] for false negative line color",
+                     /*defaulted=*/true)
+        ->expected(3)
+        ->needs(backproject_opt);
+
+    unsigned int fp_strength = 1;
+    cmd_rec_perf
+        ->add_option("--false-positive-strength", fn_strength,
+                     "Line strength to connect two false positive keypoints",
+                     /*defaulted=*/true)
+        ->needs(backproject_opt);
+    std::vector<unsigned short> fp_rgb{208U, 2U, 27U};
+    cmd_rec_perf
+        ->add_option("--false-positive-rgb", fp_rgb,
+                     "RGB values [0-255] for false positive line color",
+                     /*defaulted=*/true)
+        ->expected(3)
+        ->needs(backproject_opt);
 
     optional<string> backprojection_selected_histo;
     cmd_rec_perf->add_option("--backprojection-selected-histo",
@@ -254,6 +293,12 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
             /*false_positive_histo=*/false_positive_histo,
             /*true_positive_distance_histo=*/true_positive_distance_histo,
             /*false_positive_distance_histo=*/false_positive_distance_histo};
+        backproject_style tp_style(tp_rgb[0], tp_rgb[1], tp_rgb[2],
+                                   gsl::narrow<int>(tp_strength));
+        backproject_style fn_style(fn_rgb[0], fn_rgb[1], fn_rgb[2],
+                                   gsl::narrow<int>(fn_strength));
+        backproject_style fp_style(fp_rgb[0], fp_rgb[1], fp_rgb[2],
+                                   gsl::narrow<int>(fp_strength));
         return analyze_recognition_performance(in, rec_in, out_opts,
                                                {tp_style, fn_style, fp_style});
     }
