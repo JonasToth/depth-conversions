@@ -273,11 +273,14 @@ class prec_recall_analysis {
                 io::load_as_8bit_gray(orig_f_name);
 
             if (orig_img) {
-                // Plot true positives.
+                // Plot false positives with orange distance line
+                auto [f_p_t, f_p_o] = analysis::gather_correspondences(
+                    classification.false_positives, curr_keypoints,
+                    prev_in_img);
                 Mat out_img = plot::backprojection_correspondence(
-                    orig_img->data(), t_p_t, t_p_o,  // Keypoints
-                    _backprojection_config.true_positive.color,
-                    _backprojection_config.true_positive.strength);
+                     orig_img->data(), f_p_t, f_p_o,  // Base image and keypoints
+                    _backprojection_config.false_positive.color,
+                    _backprojection_config.false_positive.strength);
 
                 // Plot false negatives with purple line
                 auto [f_n_t, f_n_o] = analysis::gather_correspondences(
@@ -288,14 +291,12 @@ class prec_recall_analysis {
                     _backprojection_config.false_negative.color,
                     _backprojection_config.false_negative.strength);
 
-                // Plot false positives with orange distance line
-                auto [f_p_t, f_p_o] = analysis::gather_correspondences(
-                    classification.false_positives, curr_keypoints,
-                    prev_in_img);
+                // Plot true positives with green line.
                 out_img = plot::backprojection_correspondence(
-                    out_img, f_p_t, f_p_o,  // Base image and keypoints
-                    _backprojection_config.false_positive.color,
-                    _backprojection_config.false_positive.strength);
+                    out_img, t_p_t, t_p_o,  // Keypoints
+                    _backprojection_config.true_positive.color,
+                    _backprojection_config.true_positive.strength);
+
 
                 const bool write_success = imwrite(
                     fmt::format(*_output_options.backproject_pattern, idx),

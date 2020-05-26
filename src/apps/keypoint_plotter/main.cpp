@@ -49,7 +49,7 @@ MAIN_HEAD("Batch-processing tool to plot keypoints and matches") {
     app.add_option("-e,--end", end_idx, "End index for processing.")
         ->required();
 
-    string color = "blue";
+    string color = "purple";
     app.add_set("-c,--color", color,
                 {"green", "blue", "red", "orange", "purple", "all"},
                 "Define the color that shall be used for keypoint plotting",

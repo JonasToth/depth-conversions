@@ -204,7 +204,7 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                      "Line strength to connect two false negative keypoints",
                      /*defaulted=*/true)
         ->needs(backproject_opt);
-    std::vector<unsigned char> fn_rgb{74U, 144U, 226U};
+    std::vector<unsigned char> fn_rgb{144U, 19U, 254U};
     cmd_rec_perf
         ->add_option("--false-negative-rgb", fn_rgb,
                      "RGB values [0-255] for false negative line color",
@@ -218,7 +218,7 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                      "Line strength to connect two false positive keypoints",
                      /*defaulted=*/true)
         ->needs(backproject_opt);
-    std::vector<unsigned char> fp_rgb{208U, 2U, 27U};
+    std::vector<unsigned char> fp_rgb{245U, 166U, 35U};
     cmd_rec_perf
         ->add_option("--false-positive-rgb", fp_rgb,
                      "RGB values [0-255] for false positive line color",
@@ -231,8 +231,6 @@ MAIN_HEAD("Determine Statistical Characteristica of the Descriptors") {
                              backprojection_selected_histo,
                              "File for the histogram of the backprojection "
                              "error of the selected elements");
-
-
     optional<string> relevant_histo;
     cmd_rec_perf->add_option(
         "--relevant-elements-histo", relevant_histo,
