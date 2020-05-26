@@ -7,12 +7,13 @@
 #include <stdexcept>
 #include <tuple>
 
-inline std::tuple<sens_loc::math::image<ushort>, sens_loc::math::image<float>,
+inline std::tuple<sens_loc::math::image<ushort>,
+                  sens_loc::math::image<float>,
                   sens_loc::camera_models::pinhole<float>>
 get_data() {
     const sens_loc::camera_models::pinhole<float> p = {
-        /*w=*/960,      /*h=*/540,     /*fx=*/519.226,
-        /*fy=*/479.462, /*cx=*/522.23, /*cy=*/272.737,
+        /*w=*/960,       /*h=*/540,      /*fx=*/519.226F,
+        /*fy=*/479.462F, /*cx=*/522.23F, /*cy=*/272.737F,
     };
     const std::optional<sens_loc::math::image<ushort>> img =
         sens_loc::io::load_image<ushort>("conversion/data0-depth.png",
@@ -30,13 +31,13 @@ inline std::tuple<sens_loc::math::image<float>,
 get_data_laserscan() {
     using namespace sens_loc;
     const camera_models::equirectangular<float> e_float{
-        /*width=*/1799,
-        /*height=*/397,
+        /*width=*/3600,
+        /*height=*/800,
         /*theta_range=*/
-        {math::deg_to_rad(50.f), math::deg_to_rad(130.f)}};
+        {math::deg_to_rad(50.F), math::deg_to_rad(130.F)}};
 
     const std::optional<math::image<ushort>> img = io::load_image<ushort>(
-        "conversion/laserscan-depth-half.png", cv::IMREAD_UNCHANGED);
+        "conversion/laserscan-depth.png", cv::IMREAD_UNCHANGED);
     if (!img)
         throw std::runtime_error{"No Data Found!"};
 
