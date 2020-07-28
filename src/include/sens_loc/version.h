@@ -7,8 +7,8 @@
 /// image conversion.
 namespace sens_loc {
 
-#define SENS_LOC_MAJOR 0
-#define SENS_LOC_MINOR 5
+#define SENS_LOC_MAJOR 1
+#define SENS_LOC_MINOR 0
 #define SENS_LOC_PATCH 0
 
 /// \returns the string concatenation of the version numbers, following
