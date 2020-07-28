@@ -1,7 +1,7 @@
 FROM ubuntu:12.04
 LABEL maintainer="jonas.toth@student.tu-freiberg.de"
 
-ARG cmake_version="3.16.2"
+ARG cmake_version="3.18.0"
 RUN apt-get update \
  && apt-get install -y wget python-software-properties rsync unzip \
  && wget --quiet https://github.com/Kitware/CMake/releases/download/v$cmake_version/cmake-$cmake_version-Linux-x86_64.sh \
@@ -28,7 +28,7 @@ RUN wget --quiet https://github.com/ninja-build/ninja/archive/v$ninja_version.ta
  && cd / \
  && rm -rf /ninja
 
-ARG cv_version="4.2.0"
+ARG cv_version="4.3.0"
 RUN mkdir -p /opencv/build_cv && cd /opencv \
  && wget --quiet https://github.com/opencv/opencv/archive/$cv_version.zip \
  && unzip $cv_version.zip && rm $cv_version.zip \
@@ -66,8 +66,8 @@ RUN mkdir -p /eigen3 && cd /eigen3 \
  && ninja install \
  && cd / && rm -rf /eigen3
 
-ARG boost_version="1.72.0"
-ARG boost_version_string="1_72_0"
+ARG boost_version="1.73.0"
+ARG boost_version_string="1_73_0"
 RUN mkdir -p /boost cd /boost \
  && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
  && tar xf boost_$boost_version_string.tar.gz && cd boost_${boost_version_string} \

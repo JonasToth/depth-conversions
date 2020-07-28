@@ -14,7 +14,7 @@ RUN apk update \
             boost boost-dev \
             eigen
 
-ARG cv_version="4.2.0"
+ARG cv_version="4.3.0"
 RUN mkdir -p /opencv/build_cv && cd /opencv \
  && wget --quiet https://github.com/opencv/opencv/archive/$cv_version.zip \
  && unzip $cv_version.zip && rm $cv_version.zip \

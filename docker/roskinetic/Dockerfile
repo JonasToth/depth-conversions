@@ -16,7 +16,7 @@ RUN apt-get update \
  && pip3 install --upgrade pip \
  && pip install cmake
 
-ARG cv_version="4.2.0"
+ARG cv_version="4.3.0"
 RUN mkdir -p /opencv/build_cv && cd /opencv \
  && wget --quiet https://github.com/opencv/opencv/archive/$cv_version.zip \
  && unzip $cv_version.zip && rm $cv_version.zip \
@@ -52,8 +52,8 @@ RUN mkdir -p /eigen3 && cd /eigen3 \
  && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
  && ninja install
 
-ARG boost_version="1.72.0"
-ARG boost_version_string="1_72_0"
+ARG boost_version="1.73.0"
+ARG boost_version_string="1_73_0"
 RUN mkdir -p /boost cd /boost \
  && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
  && tar xf boost_$boost_version_string.tar.gz && cd boost_$boost_version_string \
