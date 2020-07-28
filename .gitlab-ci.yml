@@ -328,6 +328,14 @@ rosmelodic-image:
   <<: *binary_artifact_paths
   dependencies: []
 
+ubuntu-2004-image:
+  image: $CI_REGISTRY_IMAGE/base-image-ubuntu-2004
+  stage: platforms
+  <<: *platform_build_option_variables
+  <<: *wide_test_filter_definition
+  <<: *binary_artifact_paths
+  dependencies: []
+
 ubuntu-rolling-image:
   image: $CI_REGISTRY_IMAGE/base-image-ubuntu-rolling
   stage: platforms
