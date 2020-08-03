@@ -1,9 +1,3 @@
-[![pipeline status](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/badges/master/pipeline.svg?style=flat-square)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/commits/master)
-[![coverage report](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/badges/master/coverage.svg?style=flat-square)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/commits/master)
-[![standard](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/raw/master/docs/cxx17.svg)](https://en.wikipedia.org/wiki/C%2B%2B#Standardization)
-[![download](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/raw/master/docs/download.svg)](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/-/archive/master/master-thesis-master.tar.gz)
-[![troll quality](https://git.informatik.tu-freiberg.de/jtoth/master-thesis/raw/master/docs/troll_quality.svg)](https://i.kym-cdn.com/entries/icons/original/000/000/091/TrollFace.jpg)
-
 # master-thesis
 
 ![Feature Images from Depth Images](docs/all-types-labeled.gif)
@@ -17,8 +11,8 @@ Goal of this project is to localize depth image in a known 3D model.
 This model can either be a laserscan, a reconstructed mesh or a dense
 pointcloud.
 
-All the science for that is written in my [master thesis](docs/master-thesis-jonas-toth-compressed.pdf).
-The colloquium was done with these [slides](https://docs.google.com/presentation/d/1AgL29JgIPFa-JzBv1tCFNl6jaYqtM5NkOHd3LxAx9p4/edit?usp=sharing).
+All the science for that is written in my [master thesis (english)](docs/master-thesis-jonas-toth-compressed.pdf).
+The colloquium was done with these [slides (german)](https://docs.google.com/presentation/d/1AgL29JgIPFa-JzBv1tCFNl6jaYqtM5NkOHd3LxAx9p4/edit?usp=sharing).
 
 ## Examples
 
