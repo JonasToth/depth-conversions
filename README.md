@@ -17,7 +17,8 @@ Goal of this project is to localize depth image in a known 3D model.
 This model can either be a laserscan, a reconstructed mesh or a dense
 pointcloud.
 
-All the science for that will be written in my master thesis.
+All the science for that is written in my [master thesis](docs/master-thesis-jonas-toth-compressed.pdf).
+The colloquium was done with these [slides](https://docs.google.com/presentation/d/1AgL29JgIPFa-JzBv1tCFNl6jaYqtM5NkOHd3LxAx9p4/edit?usp=sharing).
 
 ## Examples
 
