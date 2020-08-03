@@ -7,9 +7,13 @@ For more specific documentation check the `docs/` directory.
 
 ## What is this
 
-Goal of this project is to localize depth image in a known 3D model.
-This model can either be a laserscan, a reconstructed mesh or a dense
-pointcloud.
+The ultimate goal of this project is to localize depth images in a known 3D model.
+To achieve this the depth images are converted into a derived feature image
+that allows classical computer vision algorithm to detect features, like with
+classical camera images.
+From this point on, all algorithms for optical localization are applicable to
+depth images.
+This model can either be a laserscan, a reconstructed mesh or a dense pointcloud.
 
 All the science for that is written in my [master thesis (english)](docs/master-thesis-jonas-toth-compressed.pdf).
 The colloquium was done with these [slides (german)](https://docs.google.com/presentation/d/1AgL29JgIPFa-JzBv1tCFNl6jaYqtM5NkOHd3LxAx9p4/edit?usp=sharing).
