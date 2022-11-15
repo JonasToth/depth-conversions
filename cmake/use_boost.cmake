@@ -1,6 +1,6 @@
 set(BOOST_VERSION "1.73.0")
 set(BOOST_VERSION_STRING "1_73_0")
-find_package(Boost ${BOOST_VERSION} EXACT QUIET)
+find_package(Boost ${BOOST_VERSION} QUIET)
 
 if (NOT Boost_FOUND)
     include(ExternalProject)
