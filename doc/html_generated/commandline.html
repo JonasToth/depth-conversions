@@ -13,8 +13,10 @@
 
 **Bool options** - they expect ```1```/```yes```/```on```/```true``` or ```0```/```no```/```off```/```false``` after the ```=``` sign - but they can also be used like flags and the ```=value``` part can be skipped - then ```true``` is assumed.  
 
-**Filters** use wildcards for matching values - where ```*``` means "match any sequence" and ```?``` means "match any one character".
-To pass a pattern with an interval use ```""``` like this:  ```--test-case="*no sound*,vaguely named test number ?"```.
+**Filters** - a comma-separated list of wildcards for matching values - where ```*``` means "match any sequence" and ```?``` means "match any one character".
+To pass patterns with intervals use ```""``` like this:  ```--test-case="*no sound*,vaguely named test number ?"```. Patterns that contain a comma or a backslash can be escaped with ```\``` (example: ```--test-case=this\,test\,has\,commas\,and\,a\\\,backslash\,followed\,by\,a\,comma```).
+If a backslash is followed by neither ```\``` nor ```,``` it's left as is, e.g. ```--test-case="Test that \ works correctly"```.
+Be careful: your shell may use ```\``` for escaping as well, so `\` may actually get consumed by the shell instead of doctest.
 
 All the options can also be set with code (defaults/overrides) if the user [**supplies the ```main()``` function**](main.html).
 
@@ -33,11 +35,11 @@ All the options can also be set with code (defaults/overrides) if the user [**su
 | ```-sfe``` ```--source-file-exclude=<filters>``` | Same as ```--test-case-exclude=<filters>``` but filters based on the file in which test cases are written |
 | ```-ts``` &nbsp; ```--test-suite=<filters>``` | Same as ```--test-case=<filters>``` but filters based on the test suite in which test cases are in |
 | ```-tse``` ```--test-suite-exclude=<filters>``` | Same as ```--test-case-exclude=<filters>``` but filters based on the test suite in which test cases are in |
-| ```-sc``` &nbsp; ```--subcase=<filters>``` | Same as ```--test-case=<filters>``` but filters subcases based on their names |
+| ```-sc``` &nbsp; ```--subcase=<filters>``` | Same as ```--test-case=<filters>``` but filters subcases based on their names. Does not filter test cases (they have to be executed for subcases to be discovered) so you might want to use this together with ```--test-case=<filters>```. |
 | ```-sce``` ```--subcase-exclude=<filters>``` | Same as ```--test-case-exclude=<filters>``` but filters based on subcase names |
 | ```-r``` ```--reporters=<filters>``` | List of [**reporters**](reporters.html) to use (default is ```console```) |
 | ```-o``` &nbsp; ```--out=<string>``` | Output filename |
-| ```-ob``` &nbsp; ```--order-by=<string>``` | Test cases will be sorted before being executed either by **the file in which they are** / **the test suite they are in** / **their name** / **random**. The possible values of ```<string>``` are ```file```/```suite```/```name```/```rand```. The default is ```file```. **NOTE: the order produced by the ```file```, ```suite``` and ```name``` options is compiler-dependent and might differ depending on the compiler used.** |
+| ```-ob``` &nbsp; ```--order-by=<string>``` | Test cases will be sorted before being executed either by **the file in which they are** / **the test suite they are in** / **their name** / **random**. The possible values of ```<string>``` are ```file```/```suite```/```name```/```rand```/```none```. The default is ```file```. **NOTE: the order produced by the ```file```, ```suite``` and ```name``` options is compiler-dependent and might differ depending on the compiler used.** |
 | ```-rs``` &nbsp; ```--rand-seed=<int>``` | The seed for random ordering |
 | ```-f``` &nbsp;&nbsp;&nbsp; ```--first=<int>``` | The **first** test case to execute which passes the current filters - for range-based execution - see [**the example python script**](../../examples/range_based_execution.py) |
 | ```-l``` &nbsp;&nbsp;&nbsp; ```--last=<int>``` | The **last** test case to execute which passes the current filters - for range-based execution - see [**the example python script**](../../examples/range_based_execution.py) |
@@ -48,9 +50,12 @@ All the options can also be set with code (defaults/overrides) if the user [**su
 | ```-cs``` &nbsp; ```--case-sensitive=<bool>``` | Filters being treated as case sensitive |
 | ```-e``` &nbsp;&nbsp;&nbsp; ```--exit=<bool>``` | Exits after the tests finish - this is meaningful only when the client has [**provided the ```main()``` entry point**](main.html)  - the program should check the ```shouldExit()``` method after calling ```run()``` on a ```doctest::Context``` object and should exit - this is left up to the user. The idea is to be able to execute just the tests in a client program and to not continue with it's execution |
 | ```-d``` &nbsp; ```--duration=<bool>``` | Prints the time each test case took in seconds |
+| ```-m``` &nbsp; ```--minimal=<bool>``` | Only prints failing tests |
+| ```-q``` &nbsp; ```--quiet=<bool>``` | Does not print any output |
 | ```-nt``` &nbsp; ```--no-throw=<bool>``` | Skips [**exceptions-related assertion**](assertions.html#exceptions) checks |
 | ```-ne``` &nbsp; ```--no-exitcode=<bool>``` | Always returns a successful exit code - even if a test case has failed |
 | ```-nr``` &nbsp; ```--no-run=<bool>``` | Skips all runtime **doctest** operations (except the test registering which happens before the program enters ```main()```). This is useful if the testing framework is integrated into a client codebase which has [**provided the ```main()``` entry point**](main.html) and the user wants to skip running the tests and just use the program |
+| ```-ni``` &nbsp; ```--no-intro=<bool>``` | Omits the framework intro in the output |
 | ```-nv``` &nbsp; ```--no-version=<bool>``` | Omits the framework version in the output |
 | ```-nc``` &nbsp; ```--no-colors=<bool>``` | Disables colors in the output |
 | ```-fc``` &nbsp; ```--force-colors=<bool>``` | Forces the use of colors even when a tty cannot be detected |
@@ -59,6 +64,7 @@ All the options can also be set with code (defaults/overrides) if the user [**su
 | ```-gfl``` ```--gnu-file-line=<bool>``` | ```:n:``` vs ```(n):``` for line numbers in output (gnu mode is usually for linux tools/IDEs and is with the ```:``` separator) |
 | ```-npf``` ```--no-path-filenames=<bool>``` | Paths are removed from the output when a filename is printed - useful if you want the same output from the testing framework on different environments |
 | ```-nln``` ```--no-line-numbers=<bool>``` | Line numbers are replaced with ```0``` in the output when a source location is printed - useful if you want the same output from the testing framework even when test positions change within a source file |
+| ```-ndo``` ```--no-debug-output=<bool>``` | Disables output in the debug console when a debugger is attached |
 | &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;| |
 
 All the flags/options also come with a prefixed version (with ```--dt-``` at the front by default) - for example ```--version``` can be used also with ```--dt-version``` or ```--dt-v```.

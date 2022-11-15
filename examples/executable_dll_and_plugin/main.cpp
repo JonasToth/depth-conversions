@@ -2,14 +2,14 @@
 #include <doctest/doctest.h>
 
 DOCTEST_MAKE_STD_HEADERS_CLEAN_FROM_WARNINGS_ON_WALL_BEGIN
-#include <cstdio>
+#include <iostream>
 DOCTEST_MAKE_STD_HEADERS_CLEAN_FROM_WARNINGS_ON_WALL_END
 
 template<typename T>
 static int conditional_throw(bool in, const T& ex) {
     if(in)
 #ifndef DOCTEST_CONFIG_NO_EXCEPTIONS
-        throw ex;
+        throw ex; // NOLINT
 #else // DOCTEST_CONFIG_NO_EXCEPTIONS
         ((void)ex);
 #endif // DOCTEST_CONFIG_NO_EXCEPTIONS
@@ -17,14 +17,15 @@ static int conditional_throw(bool in, const T& ex) {
 }
 
 TEST_CASE("executable") {
-    printf("I am a test from the executable!\n");
+    std::cout << "I am a test from the executable!" << std::endl;
     conditional_throw(true, 'a');
 }
 
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 DOCTEST_MAKE_STD_HEADERS_CLEAN_FROM_WARNINGS_ON_WALL_BEGIN
-#include <Windows.h>
+DOCTEST_CLANG_SUPPRESS_WARNING("-Wnonportable-system-include-path")
+#include <windows.h>
 DOCTEST_MAKE_STD_HEADERS_CLEAN_FROM_WARNINGS_ON_WALL_END
 #ifdef _MSC_VER
 #define LoadDynamicLib(lib) LoadLibrary(lib ".dll")

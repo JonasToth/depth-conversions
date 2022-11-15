@@ -87,7 +87,7 @@ Failed exactly 1 times as expected so marking it as not failed!
 test_cases_and_suites.cpp(0):
 DESCRIPTION: regarding failures
 TEST SUITE: test suite with a description
-TEST CASE:  fails more times as it should
+TEST CASE:  fails more times than it should
 
 test_cases_and_suites.cpp(0): ERROR: 
 
@@ -95,7 +95,7 @@ test_cases_and_suites.cpp(0): ERROR:
 
 Didn't fail exactly 1 times so marking it as failed!
 ===============================================================================
-[doctest] test cases:     14 |      5 passed |      9 failed | 
-[doctest] assertions:     11 |      1 passed |     10 failed |
+[doctest] test cases: 15 | 6 passed |  9 failed |
+[doctest] assertions: 12 | 1 passed | 11 failed |
 [doctest] Status: FAILURE!
 Program code.

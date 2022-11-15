@@ -73,15 +73,18 @@
           i := 4
         </Info>
       </Expression>
-      <OverallResultsAsserts successes="0" failures="5"/>
+      <OverallResultsAsserts successes="0" failures="5" test_case_success="false"/>
     </TestCase>
     <TestCase name="a test case that will end from an exception" filename="logging.cpp" line="0">
       <Message type="ERROR" filename="logging.cpp" line="0">
         <Text>
-          forcing the many captures (including those on the heap) to be stringified
+          forcing the many captures to be stringified
         </Text>
         <Info>
-          lots of captures - some on heap: 42 42 42;
+          lots of captures: 42 42 42;
+        </Info>
+        <Info>
+          old way of capturing - using the streaming operator: 42 42
         </Info>
       </Message>
       <Expression success="false" type="CHECK" filename="logging.cpp" line="0">
@@ -107,13 +110,13 @@
       <Exception crash="false">
         0
       </Exception>
-      <OverallResultsAsserts successes="0" failures="2"/>
+      <OverallResultsAsserts successes="0" failures="2" test_case_success="false"/>
     </TestCase>
     <TestCase name="a test case that will end from an exception and should print the unprinted context" filename="logging.cpp" line="0">
       <Exception crash="false">
         0
       </Exception>
-      <OverallResultsAsserts successes="0" failures="0"/>
+      <OverallResultsAsserts successes="0" failures="0" test_case_success="false"/>
     </TestCase>
     <TestCase name="third party asserts can report failures to doctest" filename="logging.cpp" line="0">
       <Message type="ERROR" filename="logging.cpp" line="0">
@@ -126,7 +129,7 @@
           MY_ASSERT_FATAL(false)
         </Text>
       </Message>
-      <OverallResultsAsserts successes="0" failures="2"/>
+      <OverallResultsAsserts successes="0" failures="2" test_case_success="false"/>
     </TestCase>
     <TestCase name="explicit failures 1" filename="logging.cpp" line="0">
       <Message type="ERROR" filename="logging.cpp" line="0">
@@ -139,7 +142,7 @@
           reached!
         </Text>
       </Message>
-      <OverallResultsAsserts successes="0" failures="1"/>
+      <OverallResultsAsserts successes="0" failures="1" test_case_success="false"/>
     </TestCase>
     <TestCase name="explicit failures 2" filename="logging.cpp" line="0">
       <Message type="FATAL ERROR" filename="logging.cpp" line="0">
@@ -147,7 +150,7 @@
           fail the test case and also end it
         </Text>
       </Message>
-      <OverallResultsAsserts successes="0" failures="1"/>
+      <OverallResultsAsserts successes="0" failures="1" test_case_success="false"/>
     </TestCase>
   </TestSuite>
   <OverallResultsAsserts successes="0" failures="11"/>
