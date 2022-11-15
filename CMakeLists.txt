@@ -3,6 +3,8 @@
 
 cmake_minimum_required(VERSION 3.13 FATAL_ERROR)
 
+cmake_policy(SET CMP0127 OLD)
+
 # Assuming the canonical version is listed in a single line
 # This would be in several parts if picking up from MAJOR, MINOR, etc.
 set(MAJOR_VERSION_REGEX "#define SENS_LOC_MAJOR[ \t]+(.+)")

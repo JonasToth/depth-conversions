@@ -14,7 +14,7 @@ if (NOT Eigen3_FOUND)
         message(STATUS "Using bundled Eigen3 - Version ${EIGEN_VERSION}")
         set(EIGEN_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/third_party/eigen3/src")
         set(EIGEN_URL
-            "http://bitbucket.org/eigen/eigen/get/${EIGEN_VERSION}.tar.gz")
+            "https://gitlab.com/libeigen/eigen/-/archive/${EIGEN_VERSION}/eigen-${EIGEN_VERSION}.tar.gz")
     endif (CUSTOM_EIGEN_SOURCE)
 
     include(ExternalProject)

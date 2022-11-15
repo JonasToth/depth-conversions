@@ -8,7 +8,7 @@ if (NOT Boost_FOUND)
     message(STATUS "Using bundled boost - Version ${BOOST_VERSION}")
     set(BOOST_SOURCE "${CMAKE_CURRENT_BINARY_DIR}/third_party/boost/src")
     set(BOOST_URL
-        "https://dl.bintray.com/boostorg/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION_STRING}.tar.gz")
+        "https://boostorg.jfrog.io/artifactory/main/release/${BOOST_VERSION}/source/boost_${BOOST_VERSION_STRING}.tar.gz")
 
     ExternalProject_Add(boost
       PREFIX "${CMAKE_CURRENT_BINARY_DIR}/third_party/boost"
