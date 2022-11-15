@@ -6,7 +6,7 @@
 - `cli11` `v1.9.0` `dd0d8e4fe729e5b1110232c7a5c9566dad884686` command line
   interface
 - `rang` `v3.1.0` `49505595c6941ad58788ade0ecdff26aeb5b7a9a` terminal colors
-- `doctest` `v2.3.7` `932a2ca50666138256dae56fbb16db3b1cae133a` unit testing
+- `doctest` `v2.4.9` `b7c21ec5ceeadb4951b00396fc1e4642dd347e5f` unit testing
 - `cpp-taskflow` `v2.3.1` `ed520c237490bf3470d327b6fd2071a6502efd9a` parallelization
 - `fmt-lib` `v6.1.2` `f94b7364b9409f05207c3af3fa4666730e11a854` string
   formatting
