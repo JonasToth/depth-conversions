@@ -6,7 +6,7 @@ RUN apt-get update \
  && apt-get dist-upgrade -y \
  && apt-get install -y \
     build-essential \
-    g++-9 gcc-9 \
+    g++ gcc \
     git \
     ninja-build \
     wget \
@@ -26,7 +26,7 @@ RUN mkdir -p /opencv/build_cv && cd /opencv \
  && wget --quiet https://github.com/opencv/opencv_contrib/archive/$cv_version.zip \
  && unzip $cv_version.zip && mv opencv_contrib-$cv_version opencv_contrib && rm $cv_version.zip \
  && cd /opencv/build_cv \
- && CC=gcc-9 CXX=g++-9 cmake /opencv/opencv \
+ && CC=gcc CXX=g++ cmake /opencv/opencv \
     -G Ninja \
     -DCMAKE_BUILD_TYPE=Release \
     -DOPENCV_EXTRA_MODULES_PATH="/opencv/opencv_contrib/modules/" \
@@ -44,20 +44,3 @@ RUN mkdir -p /opencv/build_cv && cd /opencv \
  && ninja \
  && ninja install \
  && cd /opencv && rm -rf build_cv
-
-ARG eigen_version="3.3.7"
-RUN mkdir -p /eigen3 && cd /eigen3 \
- && wget --quiet http://bitbucket.org/eigen/eigen/get/$eigen_version.tar.gz \
- && tar xf $eigen_version.tar.gz && mv eigen* eigen && cd eigen \
- && mkdir build && cd build \
- && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
- && ninja install
-
-ARG boost_version="1.73.0"
-ARG boost_version_string="1_73_0"
-RUN mkdir -p /boost cd /boost \
- && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
- && tar xf boost_$boost_version_string.tar.gz && cd boost_$boost_version_string \
- && ./bootstrap.sh --prefix=/usr \
- && ./b2 install link=static variant=release --without-python \
- && cd / && rm -rf /boost

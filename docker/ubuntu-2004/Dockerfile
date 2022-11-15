@@ -43,20 +43,3 @@ RUN mkdir -p /opencv/build_cv && cd /opencv \
  && ninja \
  && ninja install \
  && cd /opencv && rm -rf build_cv
-
-ARG eigen_version="3.3.7"
-RUN mkdir -p /eigen3 && cd /eigen3 \
- && wget --quiet http://bitbucket.org/eigen/eigen/get/$eigen_version.tar.gz \
- && tar xf $eigen_version.tar.gz && mv eigen* eigen && cd eigen \
- && mkdir build && cd build \
- && cmake .. -G Ninja -DCMAKE_INSTALL_PREFIX=/usr \
- && ninja install
-
-ARG boost_version="1.73.0"
-ARG boost_version_string="1_73_0"
-RUN mkdir -p /boost cd /boost \
- && wget --quiet https://dl.bintray.com/boostorg/release/${boost_version}/source/boost_${boost_version_string}.tar.gz \
- && tar xf boost_$boost_version_string.tar.gz && cd boost_$boost_version_string \
- && ./bootstrap.sh --prefix=/usr \
- && ./b2 install link=static variant=release --without-python \
- && cd / && rm -rf /boost
