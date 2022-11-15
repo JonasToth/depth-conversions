@@ -51,5 +51,10 @@ ENV WITH_TESTING=ON
 RUN ./scripts/ci/normal_build.bash
 
 FROM ubuntu:22.04 AS final
+RUN apt-get update \
+ && apt-get install -y \
+    libpng16-16 \
+    libjpeg-turbo8 \
+ && apt-get clean
 COPY --from=project /project/build/src/apps/depth2x /usr/bin/depth2x
 COPY --from=project /project/build/src/apps/depth_filter /usr/bin/depth_filter
