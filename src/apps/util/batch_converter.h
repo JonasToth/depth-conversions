@@ -1,6 +1,7 @@
 #ifndef BATCH_CONVERTER_H_XDIRBPHG
 #define BATCH_CONVERTER_H_XDIRBPHG
 
+#include <optional>
 #include <sens_loc/camera_models/concepts.h>
 #include <sens_loc/conversion/depth_to_laserscan.h>
 #include <sens_loc/math/image.h>
@@ -71,10 +72,10 @@ class batch_converter {
         Expects(!_files.input.empty());
     }
 
-    batch_converter(const batch_converter&) = default;
-    batch_converter(batch_converter&&)      = default;
+    batch_converter(const batch_converter&)            = default;
+    batch_converter(batch_converter&&)                 = default;
     batch_converter& operator=(const batch_converter&) = default;
-    batch_converter& operator=(batch_converter&&) = default;
+    batch_converter& operator=(batch_converter&&)      = default;
 
     /// Process the whole batch calling 'process_file' for each index.
     /// \note This function does parallel batch processing.
@@ -113,8 +114,8 @@ class batch_converter {
     /// no sideeffects and is called in parallel.
     /// \returns \c true on success, otherwise \c false.
     [[nodiscard]] virtual bool
-    process_file(const math::image<float>& depth_image, int idx) const
-        noexcept = 0;
+    process_file(const math::image<float>& depth_image,
+                 int                       idx) const noexcept = 0;
 };
 
 /// This class provides common data and depth-image conversion for all
@@ -129,11 +130,11 @@ class batch_sensor_converter : public batch_converter {
         , intrinsic{std::move(intrinsic)}
         , _input_depth_type{t} {}
 
-    batch_sensor_converter(const batch_sensor_converter&) = default;
-    batch_sensor_converter(batch_sensor_converter&&)      = default;
+    batch_sensor_converter(const batch_sensor_converter&)            = default;
+    batch_sensor_converter(batch_sensor_converter&&)                 = default;
     batch_sensor_converter& operator=(const batch_sensor_converter&) = default;
-    batch_sensor_converter& operator=(batch_sensor_converter&&) = default;
-    ~batch_sensor_converter() override                          = default;
+    batch_sensor_converter& operator=(batch_sensor_converter&&)      = default;
+    ~batch_sensor_converter() override                               = default;
 
   protected:
     /// pinhole-camera-model parameters used in the whole conversion.
@@ -146,9 +147,8 @@ class batch_sensor_converter : public batch_converter {
     /// model.
     /// \sa conversion::depth_to_laserscan
     /// \returns \c cv::Mat with one channel and double as data type.
-    [[nodiscard]] std::optional<math::image<float>>
-    preprocess_depth(const math::image<ushort>& depth_image) const
-        noexcept override {
+    [[nodiscard]] std::optional<math::image<float>> preprocess_depth(
+        const math::image<ushort>& depth_image) const noexcept override {
         if ((depth_image.w() != intrinsic.w()) ||
             depth_image.h() != intrinsic.h())
             return std::nullopt;
