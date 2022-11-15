@@ -16,6 +16,69 @@ TEST CASE:  lots of nested subcases
 
 subcases.cpp(0): FATAL ERROR: 
 
+
+root
+outside of subcase
+inside subcase 0
+outside of subcase
+inside subcase 1
+outside of subcase
+inside subcase 2
+
+root
+outside of subcase
+also inside 0
+outside of subcase
+also inside 1
+outside of subcase
+also inside 2
+
+root
+outside of subcase
+fail inside 0
+outside of subcase
+===============================================================================
+subcases.cpp(0):
+TEST CASE:  reentering subcase via regular control flow
+
+DEEPEST SUBCASE STACK REACHED (DIFFERENT FROM THE CURRENT ONE):
+
+subcases.cpp(0): FATAL ERROR: 1
+
+
+root
+outside of subcase
+inside outside
+nested twice 0, 0
+nested twice 0, 1
+nested twice 0, 2
+outside of subcase
+inside outside
+nested twice 1, 0
+nested twice 1, 1
+nested twice 1, 2
+outside of subcase
+inside outside
+nested twice 2, 0
+nested twice 2, 1
+nested twice 2, 2
+
+root
+outside of subcase
+inside outside
+also twice 0, 0
+also twice 0, 1
+also twice 0, 2
+outside of subcase
+inside outside
+also twice 1, 0
+also twice 1, 1
+also twice 1, 2
+outside of subcase
+inside outside
+also twice 2, 0
+also twice 2, 1
+also twice 2, 2
 ===============================================================================
 subcases.cpp(0):
 TEST CASE:  subcases can be used in a separate function as well
@@ -34,6 +97,10 @@ subcases.cpp(0): MESSAGE: hello! from sc1
 ===============================================================================
 subcases.cpp(0):
 TEST CASE:  subcases can be used in a separate function as well
+
+DEEPEST SUBCASE STACK REACHED (DIFFERENT FROM THE CURRENT ONE):
+  from function...
+  sc1
 
 subcases.cpp(0): MESSAGE: lala
 
@@ -55,6 +122,10 @@ subcases.cpp(0): MESSAGE: hello! from sc2
 ===============================================================================
 subcases.cpp(0):
 TEST CASE:  subcases can be used in a separate function as well
+
+DEEPEST SUBCASE STACK REACHED (DIFFERENT FROM THE CURRENT ONE):
+  from function...
+  sc2
 
 subcases.cpp(0): MESSAGE: lala
 
@@ -100,11 +171,19 @@ subcases.cpp(0):
 TEST CASE:  fails from an exception but gets re-entered to traverse all subcases
   level zero
 
+DEEPEST SUBCASE STACK REACHED (DIFFERENT FROM THE CURRENT ONE):
+  level zero
+  one
+
 subcases.cpp(0): ERROR: test case THREW exception: exception thrown in subcase - will translate later when the whole test case has been exited (cannot translate while there is an active exception)
 
 ===============================================================================
 subcases.cpp(0):
 TEST CASE:  fails from an exception but gets re-entered to traverse all subcases
+
+DEEPEST SUBCASE STACK REACHED (DIFFERENT FROM THE CURRENT ONE):
+  level zero
+  one
 
 subcases.cpp(0): ERROR: test case THREW exception: failure... but the show must go on!
 
@@ -122,11 +201,19 @@ subcases.cpp(0):
 TEST CASE:  fails from an exception but gets re-entered to traverse all subcases
   level zero
 
+DEEPEST SUBCASE STACK REACHED (DIFFERENT FROM THE CURRENT ONE):
+  level zero
+  two
+
 subcases.cpp(0): ERROR: test case THREW exception: exception thrown in subcase - will translate later when the whole test case has been exited (cannot translate while there is an active exception)
 
 ===============================================================================
 subcases.cpp(0):
 TEST CASE:  fails from an exception but gets re-entered to traverse all subcases
+
+DEEPEST SUBCASE STACK REACHED (DIFFERENT FROM THE CURRENT ONE):
+  level zero
+  two
 
 subcases.cpp(0): ERROR: test case THREW exception: failure... but the show must go on!
 
@@ -170,7 +257,38 @@ TEST CASE:  subcases with changing names
 subcases.cpp(0): MESSAGE: separate msg!
 
 ===============================================================================
-[doctest] test cases:      7 |      3 passed |      4 failed | 
-[doctest] assertions:     25 |     19 passed |      6 failed |
+subcases.cpp(0):
+TEST SUITE: with a funny name,
+TEST CASE:  with a funnier name\:
+  with the funniest name\,
+
+subcases.cpp(0): MESSAGE: Yes!
+
+===============================================================================
+subcases.cpp(0):
+TEST SUITE: with a funny name,
+TEST CASE:  with a funnier name\:
+  with a slightly funny name :
+
+subcases.cpp(0): MESSAGE: Yep!
+
+===============================================================================
+subcases.cpp(0):
+TEST SUITE: with a funny name,
+TEST CASE:  with a funnier name\:
+  without a funny name
+
+subcases.cpp(0): MESSAGE: NO!
+
+===============================================================================
+subcases.cpp(0):
+TEST SUITE: with a funny name,
+TEST CASE:  without a funny name:
+
+subcases.cpp(0): MESSAGE: Nooo
+
+===============================================================================
+[doctest] test cases: 10 |  5 passed | 5 failed |
+[doctest] assertions: 26 | 19 passed | 7 failed |
 [doctest] Status: FAILURE!
 Program code.

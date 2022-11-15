@@ -23,17 +23,18 @@ TEST_CASE("logging the counter of a loop") {
 
 static int someTests() {
     int some_var = 42;
-    INFO("lots of captures - some on heap: " << some_var << " " << some_var << " " << some_var << ";");
-    FAIL_CHECK("forcing the many captures (including those on the heap) to be stringified");
+    INFO("lots of captures: ", some_var, " ", some_var, " ", some_var, ";");
+    INFO("old way of capturing - using the streaming operator: " << some_var << " " << some_var);
+    FAIL_CHECK("forcing the many captures to be stringified");
     return some_var;
 }
 
 TEST_CASE("a test case that will end from an exception") {
     int some_var = someTests();
-    INFO("someTests() returned: " << some_var); // note that we have to use a local variable - cannot pass a temporary
-    INFO("this should be printed if an exception is thrown even if no assert has failed: " << some_var);
+    INFO("someTests() returned: ", some_var); // note that we have to use a local variable - cannot pass a temporary
+    INFO("this should be printed if an exception is thrown even if no assert has failed: ", some_var);
     {
-        INFO("in a nested scope this should be printed as well: " << some_var);
+        INFO("in a nested scope this should be printed as well: ", some_var);
         {
             INFO("this should not be printed");
             CAPTURE(some_var);
@@ -50,9 +51,11 @@ TEST_CASE("a test case that will end from an exception and should print the unpr
     throw_if(true, 0);
 }
 
+// TODO: Also remove
+// NOLINTNEXTLINE(misc-unused-parameters)
 static void thirdPartyAssert(bool result, bool is_fatal, const char* file, int line) {
-    if(result == false) {
-        if(is_fatal)
+    if(!result) {
+        if(is_fatal) // NOLINT(bugprone-branch-clone)
             ADD_FAIL_AT(file, line, "MY_ASSERT_FATAL(" << result << ")");
         else
             ADD_FAIL_CHECK_AT(file, line, "MY_ASSERT(" << result << ")");
