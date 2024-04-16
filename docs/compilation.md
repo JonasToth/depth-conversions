@@ -27,6 +27,8 @@ This script is controlled via environment variables and fairly easy to
 understand (if you are familiar with bash scripts).
 It is the workhorse for the CI of this project.
 
+The resulting binaries are in the directory `build/src/apps`.
+
 ## Minimum required versions
 
 The following tools are required for building:
